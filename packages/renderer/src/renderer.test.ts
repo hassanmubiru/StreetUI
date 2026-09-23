@@ -500,6 +500,83 @@ describe('reactive list — listOf', () => {
   });
 });
 
+// ── Reactive list — graph handler registry cleanup (TASK 4) ─────────────────────
+
+describe('reactive list — graph handler registry cleanup', () => {
+  function mountButtonList(items: Signal<{ id: number; name: string }[]>) {
+    resetIdCounter();
+    const app = streetui.app({ name: 'test' });
+    app.page('home', page => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (page as any).listOf(
+        'items',
+        items,
+        (item: { id: number; name: string }, _i: number, c: {
+          text: (t: string) => void;
+          button: (l: string, o?: { onClick?: () => void }) => void;
+        }) => {
+          c.text(item.name);
+          c.button('x', { onClick: () => {} });
+        },
+      );
+    });
+    const compiled = compile(app);
+    const container = makeContainer();
+    const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+    const handle = renderer.mount(compiled, container);
+    return { container, handle, graph: compiled.graph };
+  }
+
+  const clickHandlerCount = (graph: { handlers: Map<string, unknown> }): number =>
+    [...graph.handlers.keys()].filter(k => k.startsWith('click:')).length;
+
+  it('registers exactly one click handler per live item at mount', () => {
+    const items = signal([{ id: 1, name: 'a' }, { id: 2, name: 'b' }, { id: 3, name: 'c' }]);
+    const { graph } = mountButtonList(items);
+    expect(clickHandlerCount(graph)).toBe(3);
+  });
+
+  it('prunes the removed item\'s handler and leaks nothing on rebuild', () => {
+    const items = signal([{ id: 1, name: 'a' }, { id: 2, name: 'b' }, { id: 3, name: 'c' }]);
+    const { graph } = mountButtonList(items);
+    expect(clickHandlerCount(graph)).toBe(3);
+
+    items.set([{ id: 1, name: 'a' }, { id: 2, name: 'b' }]); // remove id 3
+    // No stale entry for the removed item, and no accumulation from the
+    // freshly-built-but-unadopted duplicates of the reused items.
+    expect(clickHandlerCount(graph)).toBe(2);
+
+    items.set([{ id: 2, name: 'b' }]); // remove id 1
+    expect(clickHandlerCount(graph)).toBe(1);
+
+    items.set([]); // clear
+    expect(clickHandlerCount(graph)).toBe(0);
+  });
+
+  it('handler count stays bounded across many reorders and data changes', () => {
+    const items = signal([{ id: 1, name: 'a' }, { id: 2, name: 'b' }, { id: 3, name: 'c' }]);
+    const { graph } = mountButtonList(items);
+
+    items.set([{ id: 3, name: 'c' }, { id: 1, name: 'a' }, { id: 2, name: 'b' }]); // reorder
+    items.set([{ id: 3, name: 'C' }, { id: 1, name: 'A' }, { id: 2, name: 'B' }]); // data change
+    items.set([{ id: 1, name: 'A' }, { id: 2, name: 'B' }, { id: 3, name: 'C' }]); // reorder back
+
+    // Still exactly one handler per live item — no growth despite rebuilding all.
+    expect(clickHandlerCount(graph)).toBe(3);
+  });
+
+  it('unmount tears down all list handlers registrations for removed items', () => {
+    const items = signal([{ id: 1, name: 'a' }, { id: 2, name: 'b' }]);
+    const { graph, handle } = mountButtonList(items);
+    expect(clickHandlerCount(graph)).toBe(2);
+    items.set([{ id: 1, name: 'a' }]); // remove id 2 → its click handler pruned
+    expect(clickHandlerCount(graph)).toBe(1);
+    handle.unmount();
+    // Post-unmount signal updates are safe no-ops and register nothing.
+    expect(() => items.set([{ id: 1, name: 'a' }, { id: 9, name: 'z' }])).not.toThrow();
+  });
+});
+
 // ── Unmount / cleanup ─────────────────────────────────────────────────────────
 
 describe('StreetRenderer unmount', () => {
