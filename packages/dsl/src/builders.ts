@@ -27,6 +27,8 @@ import type {
   FormOptions,
   ListOptions,
   Bindable,
+  BindableText,
+  TextValue,
   PageBuilder,
   SectionBuilder,
   ContainerBuilder as ContainerBuilderFn,

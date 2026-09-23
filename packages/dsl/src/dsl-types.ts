@@ -128,6 +128,19 @@ export interface ContainerDSL extends ContentDSL {
     options?: ListOptions,
   ): void;
   form(key: string, builder: FormBuilder, options?: FormOptions): void;
+  /**
+   * Conditionally render a subtree based on a boolean condition.
+   * When `condition` is a signal, the subtree is mounted/unmounted reactively as
+   * the value flips. When true the `builder` subtree is shown; when false it is
+   * removed (and its handlers/subscriptions torn down). An optional `elseBuilder`
+   * renders while the condition is false. Compiles into the same reactive
+   * reconciliation machinery as `listOf` — there is no separate render path.
+   */
+  when(
+    condition: Bindable<boolean>,
+    builder: ContainerBuilder,
+    elseBuilder?: ContainerBuilder,
+  ): void;
 }
 
 export interface SectionDSL extends ContainerDSL {}
