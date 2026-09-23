@@ -412,6 +412,92 @@ describe('reactive list — listOf', () => {
     dropBtn.dispatchEvent(new Event('click'));
     expect(clicks).toBe(1);
   });
+
+  // ── TASK 2 — keyed reorder preserves DOM element identity ─────────────────────
+
+  it('reorder A B C → C A B preserves the DOM element identity of every item', () => {
+    const items = signal([
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+      { id: 3, name: 'C' },
+    ]);
+    const { container } = mountList(items, (item, _i, c) => c.text(item.name));
+
+    const before = Array.from(container.querySelectorAll('li'));
+    const oldA = before.find(li => li.textContent === 'A')!;
+    const oldB = before.find(li => li.textContent === 'B')!;
+    const oldC = before.find(li => li.textContent === 'C')!;
+
+    items.set([
+      { id: 3, name: 'C' },
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+    ]);
+
+    const after = Array.from(container.querySelectorAll('li'));
+    expect(after.map(li => li.textContent)).toEqual(['C', 'A', 'B']);
+    const newC = after.find(li => li.textContent === 'C')!;
+    const newA = after.find(li => li.textContent === 'A')!;
+    const newB = after.find(li => li.textContent === 'B')!;
+    expect(newC).toBe(oldC);
+    expect(newA).toBe(oldA);
+    expect(newB).toBe(oldB);
+  });
+
+  // ── TASK 3 — changed item data keeps DOM identity, updates content ────────────
+
+  it('changed item data keeps the same DOM element and updates its content in place', () => {
+    const items = signal([
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ]);
+    const { container } = mountList(items, (item, _i, c) => c.text(item.name));
+
+    const beforeLis = Array.from(container.querySelectorAll('li'));
+    const oldItem1 = beforeLis.find(li => li.textContent === 'Alice')!;
+    const oldItem2 = beforeLis.find(li => li.textContent === 'Bob')!;
+    const oldSpan1 = oldItem1.querySelector('span');
+
+    // Same identity (id=1), changed data.
+    items.set([
+      { id: 1, name: 'Amina' },
+      { id: 2, name: 'Bob' },
+    ]);
+
+    const afterLis = Array.from(container.querySelectorAll('li'));
+    expect(afterLis.length).toBe(2);
+    const newItem1 = afterLis.find(li => li.textContent === 'Amina')!;
+    const newItem2 = afterLis.find(li => li.textContent === 'Bob')!;
+
+    // The DOM element for item 1 is preserved; only its content changed.
+    expect(newItem1).toBe(oldItem1);
+    expect(newItem1.textContent).toBe('Amina');
+    expect(container.textContent).not.toContain('Alice');
+    // The inner element is patched in place (not recreated) for a pure text change.
+    expect(newItem1.querySelector('span')).toBe(oldSpan1);
+    // The untouched sibling is completely undisturbed.
+    expect(newItem2).toBe(oldItem2);
+  });
+
+  it('changed item data preserves identity even across a simultaneous reorder', () => {
+    const items = signal([
+      { id: 1, name: 'one' },
+      { id: 2, name: 'two' },
+    ]);
+    const { container } = mountList(items, (item, _i, c) => c.text(item.name));
+    const oldItem1 = Array.from(container.querySelectorAll('li'))
+      .find(li => li.textContent === 'one')!;
+
+    items.set([
+      { id: 2, name: 'two' },
+      { id: 1, name: 'ONE' }, // reordered AND changed
+    ]);
+
+    const after = Array.from(container.querySelectorAll('li'));
+    expect(after.map(li => li.textContent)).toEqual(['two', 'ONE']);
+    const newItem1 = after.find(li => li.textContent === 'ONE')!;
+    expect(newItem1).toBe(oldItem1); // same element, moved + updated
+  });
 });
 
 // ── Unmount / cleanup ─────────────────────────────────────────────────────────
