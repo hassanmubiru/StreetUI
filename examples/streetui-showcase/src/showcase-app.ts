@@ -178,7 +178,77 @@ export function createShowcaseApp() {
       });
     }, { id: 'feature-list' });
 
-    // __DSL_MARKER_2__
+    // Interactive counter — reactive value via a derived string signal
+    page.section('counter', (c) => {
+      c.heading('Interactive counter', { level: 2 });
+      c.text(countText, { id: 'counter-value' });
+      c.button('Increment', { id: 'btn-increment', onClick: () => actions.increment() });
+      c.button('Decrement', { id: 'btn-decrement', onClick: () => actions.decrement() });
+      c.button('Reset', { id: 'btn-reset', onClick: () => actions.reset() });
+    }, { id: 'counter' });
+
+    // Reactive list — driven by listOf over the `features` signal
+    page.section('reactive-list', (c) => {
+      c.heading('Reactive list', { level: 2 });
+      c.text(featureCountText, { id: 'feature-count' });
+      c.listOf('features', features, (item, _i, content) => {
+        content.text(item.name, { id: `feature-${item.id}` });
+      }, { id: 'features-list' });
+      c.button('Add', { id: 'btn-add', onClick: () => actions.addFeature() });
+      c.button('Remove', { id: 'btn-remove', onClick: () => actions.removeLastFeature() });
+      c.button('Reorder', { id: 'btn-reorder', onClick: () => actions.reorderFeatures() });
+      c.button('Update item', {
+        id: 'btn-update',
+        onClick: () => actions.renameFeature(1, 'Core (updated)'),
+      });
+      c.button('Clear', { id: 'btn-clear', onClick: () => actions.clearFeatures() });
+    }, { id: 'list-demo' });
+
+    // Contact form — controlled inputs, validation state, submitted state
+    page.section('contact', (c) => {
+      c.heading('Contact form', { level: 2 });
+      c.form('contact-form', (form) => {
+        form.input({
+          id: 'field-name', type: 'text', placeholder: 'Name', value: formName,
+          onInput: (v) => { formName.set(v); lastEvent.set('input:name'); },
+        });
+        form.input({
+          id: 'field-email', type: 'email', placeholder: 'Email', value: formEmail,
+          onInput: (v) => formEmail.set(v),
+          onChange: (v) => { formEmail.set(v); lastEvent.set('change:email'); },
+        });
+        form.input({
+          id: 'field-message', type: 'text', placeholder: 'Message', value: formMessage,
+          onInput: (v) => { formMessage.set(v); lastEvent.set('input:message'); },
+        });
+        form.text(validationText, { id: 'form-validation' });
+        form.text(submittedText, { id: 'form-submitted' });
+        form.button('Submit', { id: 'btn-submit' });
+      }, { id: 'the-form', onSubmit: () => actions.submitForm() });
+    }, { id: 'contact' });
+
+    // Conditional rendering — state-controlled via a derived 0/1-item list
+    page.section('conditional', (c) => {
+      c.heading('Conditional rendering', { level: 2 });
+      c.button(toggleLabel, { id: 'btn-toggle', onClick: () => actions.toggleDetails() });
+      c.listOf('details', detailsItems, (item, _i, content) => {
+        content.text(item.text, { id: 'details-text' });
+      }, { id: 'details-region' });
+    }, { id: 'conditional' });
+
+    // Events readout
+    page.section('events', (c) => {
+      c.heading('Events', { level: 2 });
+      c.text(lastEventText, { id: 'event-readout' });
+    }, { id: 'events' });
+
+    // Footer
+    page.section('footer', (c) => {
+      c.text('StreetUI Showcase — built entirely with the StreetUI public API.', {
+        id: 'footer-text',
+      });
+    }, { id: 'site-footer' });
+
   });
 
   const compiled = compile(app);
