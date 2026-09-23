@@ -178,6 +178,78 @@ describe('4. keyed reorder preserves DOM identity', () => {
   });
 });
 
+// 5 ── Form interaction ─────────────────────────────────────────────────────
+describe('5. form interaction, validation and submitted state', () => {
+  function typeInto(container: Element, id: string, value: string, type: 'input' | 'change' = 'input') {
+    const el = container.querySelector(`#${id}`) as HTMLInputElement;
+    el.value = value;
+    el.dispatchEvent(new Event(type));
+  }
+
+  it('controlled inputs update their signals on input/change', () => {
+    const { container, state, mounted } = setup();
+    typeInto(container, 'field-name', 'Ada');
+    typeInto(container, 'field-email', 'ada@example.com', 'change');
+    typeInto(container, 'field-message', 'Hello StreetUI');
+    expect(state.formName.get()).toBe('Ada');
+    expect(state.formEmail.get()).toBe('ada@example.com');
+    expect(state.formMessage.get()).toBe('Hello StreetUI');
+    teardown(container, mounted);
+  });
+
+  it('shows a validation message that updates reactively', () => {
+    const { container, mounted } = setup();
+    expect(text(container.querySelector('#form-validation'))).toBe('All fields are required.');
+    typeInto(container, 'field-name', 'Ada');
+    typeInto(container, 'field-email', 'not-an-email');
+    typeInto(container, 'field-message', 'Hi');
+    expect(text(container.querySelector('#form-validation'))).toBe('Please enter a valid email address.');
+    typeInto(container, 'field-email', 'ada@example.com');
+    expect(text(container.querySelector('#form-validation'))).toBe('Looks good.');
+    teardown(container, mounted);
+  });
+
+  it('submitting a valid form sets the submitted state', () => {
+    const { container, state, mounted } = setup();
+    typeInto(container, 'field-name', 'Ada');
+    typeInto(container, 'field-email', 'ada@example.com');
+    typeInto(container, 'field-message', 'Hello');
+    (container.querySelector('#the-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
+    expect(state.submitted.get()).toBe(true);
+    expect(text(container.querySelector('#form-submitted'))).toContain('Thanks Ada');
+    teardown(container, mounted);
+  });
+
+  it('submitting an invalid form does not set submitted', () => {
+    const { container, state, mounted } = setup();
+    typeInto(container, 'field-name', 'Ada'); // email + message missing
+    (container.querySelector('#the-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
+    expect(state.submitted.get()).toBe(false);
+    expect(text(container.querySelector('#form-submitted'))).toBe('');
+    teardown(container, mounted);
+  });
+});
+
+// 6 ── Conditional rendering ────────────────────────────────────────────────
+describe('6. state-controlled conditional rendering', () => {
+  it('toggles the details region on and off', () => {
+    const { container, mounted } = setup();
+    const region = () => container.querySelector('#details-region')!;
+    expect(region().querySelectorAll('li').length).toBe(0);
+    expect(text(container.querySelector('#btn-toggle'))).toBe('Show details');
+
+    (container.querySelector('#btn-toggle') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(region().querySelectorAll('li').length).toBe(1);
+    expect(text(container.querySelector('#details-text'))).toContain('semantic graph');
+    expect(text(container.querySelector('#btn-toggle'))).toBe('Hide details');
+
+    (container.querySelector('#btn-toggle') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(region().querySelectorAll('li').length).toBe(0);
+    teardown(container, mounted);
+  });
+});
+
 // __TESTS_MARKER__
+
 
 
