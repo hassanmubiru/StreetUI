@@ -125,7 +125,7 @@ function reconcileItemChildren(
   mountFn: MountFn,
 ): void {
   const el = itemInstance.domNode;
-  if (!(el instanceof Element)) return;
+  if (!ctx.dom.isElement(el)) return;
 
   const oldChildren = [...itemInstance.children];
   const newChildNodes = [...newItemNode.children];

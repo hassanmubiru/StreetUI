@@ -6,4 +6,5 @@ export * from './mount.js';
 export * from './patch.js';
 export * from './reconciliation.js';
 export * from './renderer.js';
+export * from './ssr.js';
 export * from './tag-map.js';

@@ -12,6 +12,7 @@
  */
 
 import type { GraphNode, ApplicationGraph } from '@streetui/graph';
+import type { DOMAdapter } from '@streetui/dom';
 import type { RenderContext } from './render-context.js';
 import { NodeInstance } from './node-instance.js';
 import { applyProp } from './attributes.js';
@@ -23,7 +24,7 @@ export function mountGraph(ctx: RenderContext): NodeInstance {
   return mountNode(ctx, ctx.graph.root, ctx.container);
 }
 
-function mountNode(
+export function mountNode(
   ctx: RenderContext,
   graphNode: GraphNode,
   parentDom: Node,
@@ -153,19 +154,7 @@ function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    wireSignalBindings(ctx, graphNode, instance, (propKey, value) => {
-      if (propKey === 'label') {
-        dom.setTextContent(el, String(value ?? ''));
-      } else if (propKey === 'disabled') {
-        if (value === true) {
-          dom.setAttribute(el, 'disabled', '');
-        } else {
-          dom.removeAttribute(el, 'disabled');
-        }
-      } else {
-        applyProp(dom, el, propKey, value);
-      }
-    });
+    wireSignalBindings(ctx, graphNode, instance, buttonUpdate(dom, el));
 
     dom.appendChild(parentDom, el);
     return instance;
@@ -231,7 +220,73 @@ function mountNode(
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): void {
+/**
+ * Per-node-type reactive-binding factories. Each returns the `onUpdate`
+ * callback that `wireSignalBindings` invokes when a bound signal changes.
+ * Extracted so both the browser mount path and the hydration path apply the
+ * exact same DOM mutation semantics for each prop — no duplicated rendering
+ * logic.
+ */
+export function textUpdate(
+  dom: DOMAdapter,
+  el: Element,
+  textNode: Text,
+): (propKey: string, value: unknown) => void {
+  return (propKey, value) => {
+    if (propKey === 'text') {
+      dom.setTextContent(textNode, String(value ?? ''));
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+
+export function headingUpdate(
+  dom: DOMAdapter,
+  el: Element,
+): (propKey: string, value: unknown) => void {
+  return (propKey, value) => {
+    if (propKey === 'text') {
+      dom.setTextContent(el, String(value ?? ''));
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+
+export function inputUpdate(
+  dom: DOMAdapter,
+  el: Element,
+): (propKey: string, value: unknown) => void {
+  return (propKey, value) => {
+    if (propKey === 'value') {
+      dom.setProperty(el, 'value', String(value ?? ''));
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+
+export function buttonUpdate(
+  dom: DOMAdapter,
+  el: Element,
+): (propKey: string, value: unknown) => void {
+  return (propKey, value) => {
+    if (propKey === 'label') {
+      dom.setTextContent(el, String(value ?? ''));
+    } else if (propKey === 'disabled') {
+      if (value === true) {
+        dom.setAttribute(el, 'disabled', '');
+      } else {
+        dom.removeAttribute(el, 'disabled');
+      }
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+
+export function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): void {
   const skipKeys = new Set(['text', 'label', 'level', 'inputType', 'src', 'alt',
     'href', 'external', 'value', 'placeholder', 'disabled', '_renderKey', 'key', 'name']);
   for (const [key, value] of Object.entries(graphNode.props)) {
@@ -240,7 +295,7 @@ function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): 
   }
 }
 
-function wireSignalBindings(
+export function wireSignalBindings(
   ctx: RenderContext,
   graphNode: GraphNode,
   instance: NodeInstance,
@@ -270,7 +325,7 @@ type ListBuildFn = (items: unknown) => GraphNode[];
  * DSL-registered build factory produces the desired child graph nodes, which
  * are reconciled against the live DOM with the keyed reconciler.
  */
-function wireReactiveList(
+export function wireReactiveList(
   ctx: RenderContext,
   graphNode: GraphNode,
   instance: NodeInstance,

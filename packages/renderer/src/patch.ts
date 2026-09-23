@@ -19,7 +19,7 @@ export function patchNode(
   if (instance === undefined) return;
 
   const domNode = instance.domNode;
-  if (!(domNode instanceof Element)) return;
+  if (!ctx.dom.isElement(domNode)) return;
 
   const oldValue = graphNode.getProp(propKey);
 

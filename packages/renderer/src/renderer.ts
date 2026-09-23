@@ -17,6 +17,8 @@ import type { CompiledApplication } from '@streetui/compiler';
 import type { StreetRenderer, RenderHandle } from '@streetui/runtime';
 import { createRenderContext } from './render-context.js';
 import { mountGraph } from './mount.js';
+import { hydrateGraph } from './hydrate.js';
+import { StreetRenderHandle } from './render-handle.js';
 import type { NodeInstance } from './node-instance.js';
 
 export interface StreetRendererOptions {
@@ -43,6 +45,20 @@ export class StreetRendererImpl implements StreetRenderer {
     return new StreetRenderHandle(ctx, rootInstance);
   }
 
+  /**
+   * Hydrate a container that already holds server-rendered HTML for this
+   * application. Instead of recreating the DOM, it walks the semantic graph
+   * against the existing nodes, adopting matching elements and attaching
+   * behavior (events + signal subscriptions). Mismatched subtrees are locally
+   * replaced. Returns the same handle type as `mount`.
+   */
+  hydrate(compiled: CompiledApplication, container: Element): RenderHandle {
+    const ctx = createRenderContext(this._dom, compiled.graph, container);
+    const rootInstance = hydrateGraph(ctx);
+    this._wireSignals(ctx, rootInstance);
+    return new StreetRenderHandle(ctx, rootInstance);
+  }
+
   private _wireSignals(
     ctx: ReturnType<typeof createRenderContext>,
     rootInstance: NodeInstance,
@@ -52,44 +68,6 @@ export class StreetRendererImpl implements StreetRenderer {
     // Currently no-op — individual mount calls handle their own subscriptions.
     void ctx;
     void rootInstance;
-  }
-}
-
-class StreetRenderHandle implements RenderHandle {
-  private _disposed = false;
-  private readonly _ctx: ReturnType<typeof createRenderContext>;
-  private readonly _rootInstance: NodeInstance;
-
-  constructor(
-    ctx: ReturnType<typeof createRenderContext>,
-    rootInstance: NodeInstance,
-  ) {
-    this._ctx = ctx;
-    this._rootInstance = rootInstance;
-  }
-
-  flush(): void {
-    if (this._disposed) return;
-    // Signal subscriptions fire synchronously in StreetUI's state system;
-    // flush() is a no-op at the renderer level — DOM is already up to date
-    // unless the scheduler is batching. The scheduler calls flush() after
-    // draining its queue.
-  }
-
-  unmount(): void {
-    if (this._disposed) return;
-    this._disposed = true;
-
-    // Dispose all node instances (removes event listeners, signal subscriptions)
-    this._rootInstance.dispose();
-
-    // Remove all renderer-created children from the container
-    const container = this._ctx.container;
-    while (container.firstChild !== null) {
-      container.removeChild(container.firstChild);
-    }
-
-    this._ctx.instances.clear();
   }
 }
 
