@@ -62,14 +62,14 @@ export interface HeadingOptions extends TextOptions {
   readonly level?: 1 | 2 | 3 | 4 | 5 | 6;
 }
 
-export interface ButtonOptions {
+export interface ButtonOptions extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
   readonly disabled?: Bindable<boolean>;
   readonly onClick?: () => void;
 }
 
-export interface InputOptionsBase {
+export interface InputOptionsBase extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
   readonly type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
