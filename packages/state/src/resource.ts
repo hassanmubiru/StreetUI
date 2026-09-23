@@ -33,7 +33,7 @@ export interface ResourceLoaderContext {
 /** Any value-or-Promise producing function. Receives an abort-aware context. */
 export type ResourceLoader<T> = (ctx: ResourceLoaderContext) => Promise<T> | T;
 
-export interface ResourceOptions {
+export interface ResourceOptions<T = unknown> {
   /** Load immediately on creation. Defaults to `true`. When `false`, stays `idle` until `refetch()`. */
   readonly immediate?: boolean;
   /**
@@ -48,6 +48,22 @@ export interface ResourceOptions {
    * when its owner is removed.
    */
   readonly onCleanup?: (fn: () => void) => void;
+  /**
+   * Server-provided initial value for hydration. When present the resource
+   * starts in `'success'` with this data already visible, and the initial
+   * auto-load is skipped (so the client does not refetch data the server
+   * already resolved). This is the client half of SSR resource transfer; the
+   * server side awaits `refetch()` before serializing. Set `immediate: true`
+   * explicitly to force a client refetch anyway.
+   */
+  readonly initialData?: T;
+  /** Server-provided initial error for hydration (mirrors `initialData`). */
+  readonly initialError?: unknown;
+  /**
+   * Explicit initial status override. Rarely needed — inferred as `'success'`
+   * from `initialData` or `'error'` from `initialError`.
+   */
+  readonly initialStatus?: ResourceStatus;
 }
 
 export interface Resource<T> {
@@ -76,10 +92,25 @@ function isAbortError(err: unknown): boolean {
   );
 }
 
-export function resource<T>(loader: ResourceLoader<T>, options: ResourceOptions = {}): Resource<T> {
-  const status = signal<ResourceStatus>('idle');
-  const data = signal<T | undefined>(undefined);
-  const error = signal<unknown>(undefined);
+export function resource<T>(loader: ResourceLoader<T>, options: ResourceOptions<T> = {}): Resource<T> {
+  // Seed hydrated initial state (SSR transfer). `initialStatus` wins if given,
+  // otherwise infer success/error from the provided value.
+  const hasInitial =
+    options.initialData !== undefined ||
+    options.initialError !== undefined ||
+    options.initialStatus !== undefined;
+
+  const seededStatus: ResourceStatus =
+    options.initialStatus ??
+    (options.initialData !== undefined
+      ? 'success'
+      : options.initialError !== undefined
+        ? 'error'
+        : 'idle');
+
+  const status = signal<ResourceStatus>(seededStatus);
+  const data = signal<T | undefined>(options.initialData);
+  const error = signal<unknown>(options.initialError);
 
   const loading = derived<boolean>(() => status.get() === 'loading');
   const isRefetching = derived<boolean>(() => status.get() === 'loading' && data.get() !== undefined);
@@ -153,7 +184,10 @@ export function resource<T>(loader: ResourceLoader<T>, options: ResourceOptions 
     options.onCleanup(dispose);
   }
 
-  if (options.immediate !== false) {
+  // Auto-load on creation unless disabled. When hydrated initial state is
+  // present we skip the initial load by default (the server already resolved
+  // it); an explicit `immediate: true` still forces a refetch.
+  if (options.immediate === true || (options.immediate !== false && !hasInitial)) {
     void load();
   }
 

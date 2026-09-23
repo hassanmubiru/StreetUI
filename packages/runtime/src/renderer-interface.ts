@@ -16,4 +16,10 @@ export interface RenderHandle {
 
 export interface StreetRenderer {
   mount(application: CompiledApplication, container: Element): RenderHandle;
+  /**
+   * Optional: attach behavior to server-rendered HTML already present in
+   * `container` instead of recreating it. Renderers that cannot hydrate may
+   * omit this; callers fall back to `mount`.
+   */
+  hydrate?(application: CompiledApplication, container: Element): RenderHandle;
 }
