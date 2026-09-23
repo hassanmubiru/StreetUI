@@ -329,4 +329,62 @@ function buildRoutes(
   return [home, signup, welcome, notFound];
 }
 
-// __SHELL__
+// ── Persistent shell with a live locale toggle ───────────────────────────────────
+function accountShell(shell: ContainerDSL, i18n: AccountI18n): void {
+  shell.section(
+    'nav',
+    (n) => {
+      n.heading(i18n.t('app.title'), { level: 1, id: 'brand' });
+      n.link(i18n.t('nav.home'), { href: '/', id: 'nav-home' });
+      n.link(i18n.t('nav.signup'), { href: '/signup', id: 'nav-signup' });
+      n.button(derived(() => i18n.locale.get().toUpperCase()), {
+        id: 'locale-toggle',
+        ariaLabel: i18n.translate('locale.toggle'),
+        onClick: () => i18n.setLocale(i18n.locale.get() === 'en' ? 'fr' : 'en'),
+      });
+    },
+    { id: 'site-nav', role: 'navigation' },
+  );
+  routerOutlet(shell);
+}
+
+// ── App factory + mount ───────────────────────────────────────────────────────────
+export function createAccountI18n(locale = 'en'): AccountI18n {
+  return createI18n<Messages>({ locale, messages, fallbackLocale: 'en' });
+}
+
+export interface AccountApp {
+  readonly router: Router;
+}
+
+export function createAccountApp(opts: AccountAppOptions): AccountApp {
+  let router!: Router;
+  const navigate = (path: string): void => router.navigate(path);
+  const routes = buildRoutes(opts, navigate);
+  const config =
+    opts.history !== undefined ? { routes, history: opts.history } : { routes };
+  router = createRouter(config);
+  return { router };
+}
+
+export interface MountedAccountApp extends AccountApp {
+  unmount(): void;
+}
+
+export interface MountAccountAppOptions extends AccountAppOptions {
+  /** Adopt existing server-rendered markup instead of building fresh. */
+  readonly hydrate?: boolean;
+}
+
+export function mountAccountApp(
+  container: Element,
+  opts: MountAccountAppOptions,
+): MountedAccountApp {
+  const { router } = createAccountApp(opts);
+  const mounted = mountRouter(router, {
+    container,
+    hydrate: opts.hydrate ?? false,
+    shell: (shell) => accountShell(shell, opts.i18n),
+  });
+  return { router, unmount: () => mounted.unmount() };
+}
