@@ -134,5 +134,68 @@ export function createShowcaseApp() {
     },
   };
 
-  // __DSL_MARKER__
+  // ── DSL definition (the whole app is one page) ───────────────────────────────
+  const app = streetui.app({ name: 'StreetUI Showcase', version: '1.0.0' });
+
+  app.page('home', (page) => {
+    // Navigation
+    page.section('nav', (nav) => {
+      nav.heading('StreetUI', { level: 1, id: 'brand' });
+      nav.link('Home', { href: '#home', id: 'nav-home' });
+      nav.link('Features', { href: '#features', id: 'nav-features' });
+      nav.link('GitHub', { href: 'https://example.com', external: true, id: 'nav-github' });
+    }, { id: 'navbar' });
+
+    // Hero
+    page.section('hero', (hero) => {
+      hero.heading('Build UIs from a semantic graph', { level: 1, id: 'hero-title' });
+      hero.text(
+        'A TypeScript-first framework with its own reactivity and a keyed real-DOM reconciler — no virtual DOM.',
+        { id: 'hero-tagline' },
+      );
+      hero.button('Get started', { id: 'hero-cta', onClick: () => actions.increment() });
+    }, { id: 'hero' });
+
+    // Framework description
+    page.section('about', (about) => {
+      about.heading('Why StreetUI', { level: 2 });
+      about.text(
+        'Your app compiles into a semantic application graph. The runtime binds signals; the renderer patches only what changed.',
+        {},
+      );
+    }, { id: 'about' });
+
+    // Feature sections
+    page.section('features', (fs) => {
+      fs.heading('Feature sections', { level: 2 });
+      fs.container('feature-reactivity', (c) => {
+        c.heading('Framework-owned reactivity', { level: 3 });
+        c.text('Signals, derived values, effects and batching ship in @streetui/state.', {});
+      });
+      fs.container('feature-renderer', (c) => {
+        c.heading('Real-DOM renderer', { level: 3 });
+        c.text('A keyed reconciler updates the actual DOM and preserves element identity.', {});
+      });
+    }, { id: 'feature-list' });
+
+    // __DSL_MARKER_2__
+  });
+
+  const compiled = compile(app);
+
+  const state: ShowcaseState = {
+    count, features, formName, formEmail, formMessage, submitted, showDetails, lastEvent,
+  };
+
+  return { compiled, state, actions };
+}
+
+export function mountShowcaseApp(container: Element) {
+  const { compiled, state, actions } = createShowcaseApp();
+  const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+  const runtime = createRuntime({ renderer });
+  const mounted = runtime.mount(compiled, container);
+  return { compiled, state, actions, mounted, unmount: () => mounted.unmount() };
+}
+
 
