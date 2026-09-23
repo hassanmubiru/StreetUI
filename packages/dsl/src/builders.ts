@@ -189,6 +189,7 @@ class ContentBuilderBase implements ContentDSL {
     if (options.placeholder !== undefined) props['placeholder'] = options.placeholder;
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
     const nodeOpts: { key?: string; props: Props; parent: GraphNode } = {
       props,
       parent: this._node,
