@@ -24,8 +24,8 @@ packages/
   state/       Reactive signals, derived state, stores
   events/      Event bus, DOM event bridge
   scheduler/   Microtask update scheduler with priority queues
-  dom/         DOM adapter abstraction (BrowserDOMAdapter)
-  renderer/    StreetUI's own DOM renderer — mount, patch, reconcile
+  dom/         DOM adapter abstraction (BrowserDOMAdapter, ServerDOMAdapter)
+  renderer/    StreetUI's own DOM renderer — mount, patch, reconcile, SSR, hydrate
   testing/     Test renderer and query helpers
   devtools/    Graph inspector, print utilities, node stats
   router/      Client-side routing, navigation, route lifecycle
@@ -37,6 +37,8 @@ apps/
 examples/
   basic-app/       Counter app — full end-to-end demonstration
   streetui-docs/   Multi-page docs site built on @streetui/router
+  streetui-data/   Router + resource() + errorBoundary against a real HTTP API
+  streetui-ssr/    Server rendering + hydration of one universal app
 ```
 
 ---
@@ -189,6 +191,58 @@ errors, and errors stay observable. A complete, runnable data-driven app (real
 local HTTP server, loading → list → error → retry, router-scoped cleanup) lives
 in `examples/streetui-data`. See `packages/state/README.md` for the full
 `resource()` reference.
+
+---
+
+## Server rendering & hydration
+
+StreetUI renders the *same* application on the server and in the browser. The
+server turns a compiled app into an HTML string; the browser then *hydrates*
+that HTML — adopting the existing DOM and attaching behavior — instead of
+throwing it away and re-rendering. Both sides consume the identical semantic
+graph (DSL → Compiler → Graph); there is no second renderer, no virtual DOM, and
+no third-party SSR or hydration framework.
+
+The only new abstraction is a second `DOMAdapter`. `renderToString` drives a
+`ServerDOMAdapter` (a pure in-memory node model that serializes to HTML) through
+the *same* `mountGraph` used in the browser, so there is no duplicated rendering
+logic and no `window`/`document` assumption on the server:
+
+```ts
+import { renderToString, serializeState } from '@streetui/renderer';
+
+const html = renderToString(compile(app));          // "<h1>…</h1><section>…"
+```
+
+`renderToString` mounts, serializes, then disposes — an SSR render never leaves
+a live subscription behind. To move server-resolved state to the client, embed
+it once as an inert, XSS-safe JSON island and read it back during hydration:
+
+```ts
+const island = serializeState({ 'products': data }); // <script type="application/json" …>
+// …ship `html + island`, then in the browser:
+import { createRenderer, readState } from '@streetui/renderer';
+import { BrowserDOMAdapter } from '@streetui/dom';
+
+const seed = readState(new BrowserDOMAdapter(), document)['products'];
+const renderer = createRenderer();
+renderer.hydrate(compile(app), document.getElementById('app')!);
+```
+
+Hydration walks the graph top-down against the server DOM, matching positionally
+(every node maps to exactly one element). Matching subtrees are adopted in place;
+a local mismatch repairs only that subtree rather than tearing down the app.
+After hydration the app is fully live — events fire, signals patch the *same*
+nodes, `when()` toggles, keyed lists reorder without rebuilding, and controlled
+inputs are two-way bound. `resource()` accepts `initialData`/`initialError` so a
+server-resolved fetch is not repeated on the client. `mountRouter(router, {
+hydrate: true })` hydrates the shell and the initial route, then takes over
+client-side navigation.
+
+A complete, runnable example — a Node `server-entry.ts` that prints a document
+and exits cleanly, plus a `browser-entry.ts` that hydrates it — lives in
+`examples/streetui-ssr`. See `packages/renderer/README.md` for the full
+`renderToString` / `hydrate` / state-transfer reference.
 
 ---
 
