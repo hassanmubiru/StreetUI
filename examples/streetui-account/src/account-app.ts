@@ -92,7 +92,8 @@ const messages = {
   },
 } as const;
 
-type Messages = (typeof messages)['en'];
+type MessageKey = keyof (typeof messages)['en'];
+type Messages = Record<MessageKey, string>;
 export type AccountI18n = I18n<Messages>;
 
 export interface SignupValues {
