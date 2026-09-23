@@ -329,6 +329,50 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
     }
     builder(new FormBuilderImpl(node, this._graph));
   }
+
+  when(
+    condition: Bindable<boolean>,
+    builder: ContainerBuilderFn,
+    elseBuilder?: ContainerBuilderFn,
+  ): void {
+    const graph = this._graph;
+    // A dedicated 'conditional' node reuses the reactive-list reconciliation
+    // machinery (same signal subscription + keyed reconcile) but renders as a
+    // neutral <div> rather than a <ul>. It holds zero or one child branch.
+    const node = graph.createNode('conditional', {
+      parent: this._node,
+      props: containerProps({}),
+    });
+
+    // Build the active branch as a single keyed container. Distinct keys for the
+    // then/else branches make a flip a clean swap under the keyed reconciler.
+    const buildBranch = (build: ContainerBuilderFn, tag: 'then' | 'else'): GraphNode => {
+      const branchKey = `when-${tag}:${node.id}`;
+      const branch = graph.createNode('container', {
+        key: branchKey,
+        props: { key: branchKey },
+      });
+      build(new ContainerBuilderImpl(branch, graph));
+      return branch;
+    };
+
+    const buildAll = (raw: unknown): GraphNode[] => {
+      if (raw) return [buildBranch(builder, 'then')];
+      return elseBuilder !== undefined ? [buildBranch(elseBuilder, 'else')] : [];
+    };
+
+    if (isSignal(condition)) {
+      const signalId = `${node.id}:items`;
+      node.stateRefs.push({ signalId, propKey: 'items' });
+      graph.registerHandler(`__signal__${signalId}`, condition as unknown as () => unknown);
+      graph.registerHandler(`__listbuild__${node.id}`, buildAll as unknown as () => unknown);
+      const current = (condition as ReadonlySignal<boolean>).peek();
+      for (const child of buildAll(current)) node.appendChild(child);
+    } else {
+      // Static condition — resolve once at build time, no reactive wiring.
+      for (const child of buildAll(condition)) node.appendChild(child);
+    }
+  }
 }
 
 // ── Concrete builder implementations ─────────────────────────────────────────

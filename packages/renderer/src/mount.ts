@@ -189,11 +189,12 @@ function mountNode(
     return instance;
   }
 
-  // Reactive list — a container whose children are driven by a Signal<T[]>.
-  // Initial item subtrees are already built into the graph by the DSL; on
-  // signal change we reconcile the freshly-built desired children against the
-  // live DOM using the keyed reconciler (no virtual DOM).
-  if (graphNode.type === 'reactive-list') {
+  // Reactive list / conditional — a container whose children are driven by a
+  // Signal. Initial child subtrees are already built into the graph by the DSL;
+  // on signal change we reconcile the freshly-built desired children against the
+  // live DOM using the keyed reconciler (no virtual DOM). A `conditional` uses
+  // the identical machinery but renders as a neutral <div> holding 0..1 branch.
+  if (graphNode.type === 'reactive-list' || graphNode.type === 'conditional') {
     const tag = resolveTag(graphNode.type);
     const el = dom.createElement(tag);
     applyNodeProps(ctx, graphNode, el);
@@ -215,6 +216,18 @@ function mountNode(
   const tag = resolveTag(graphNode.type);
   const el = dom.createElement(tag);
   applyNodeProps(ctx, graphNode, el);
+
+  // Surface a reactive-list item's stable, identity-only reconciliation key as a
+  // public `data-streetui-key` attribute (e.g. "id:1"). This exposes only the
+  // identity part — never the internal `_sig` value signature, signal ids or
+  // graph node ids — so a row is directly selectable and its identity is
+  // inspectable across reorders and in-place data updates.
+  if (graphNode.type === 'list-item') {
+    const itemKey = graphNode.getProp('key');
+    if (itemKey !== undefined) {
+      dom.setAttribute(el, 'data-streetui-key', String(itemKey));
+    }
+  }
 
   // wire form submit
   if (graphNode.type === 'form') {
