@@ -118,7 +118,7 @@ class ContentBuilderBase implements ContentDSL {
     protected readonly _graph: ApplicationGraph,
   ) {}
 
-  heading(text: Bindable<string>, options: HeadingOptions = {}): void {
+  heading(text: BindableText, options: HeadingOptions = {}): void {
     const nodeOpts: { props?: Props } = {
       props: {
         level: options.level ?? 1,
@@ -127,25 +127,25 @@ class ContentBuilderBase implements ContentDSL {
       },
     };
     const node = this._graph.createNode('heading', { parent: this._node, ...nodeOpts });
-    const resolved = bindValue(this._graph, node, 'text', text);
+    const resolved = bindValue<TextValue>(this._graph, node, 'text', text);
     node.setProp('text', resolved);
   }
 
-  text(content: Bindable<string>, options: TextOptions = {}): void {
+  text(content: BindableText, options: TextOptions = {}): void {
     const props: Props = {};
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
     const node = this._graph.createNode('text', { parent: this._node, props });
-    const resolved = bindValue(this._graph, node, 'text', content);
+    const resolved = bindValue<TextValue>(this._graph, node, 'text', content);
     node.setProp('text', resolved);
   }
 
-  button(label: Bindable<string>, options: ButtonOptions = {}): void {
+  button(label: BindableText, options: ButtonOptions = {}): void {
     const props: Props = {};
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
     const node = this._graph.createNode('button', { parent: this._node, props });
-    const resolved = bindValue(this._graph, node, 'label', label);
+    const resolved = bindValue<TextValue>(this._graph, node, 'label', label);
     node.setProp('label', resolved);
     if (options.disabled !== undefined) {
       const resolvedDisabled = bindValue(this._graph, node, 'disabled', options.disabled);
