@@ -48,6 +48,34 @@ function withConsumer<T>(consumer: ReactiveConsumer, fn: () => T): T {
   }
 }
 
+// ── Batch state (must be before Signal class so .set() can reference it) ──────
+
+/** Depth counter — batches nest; only the outermost flush propagates. */
+let _batchDepth = 0;
+
+interface PendingFlush {
+  signal: Signal<unknown>;
+  value: unknown;
+}
+
+/**
+ * Keyed by signal identity — last-write-wins for each signal within a batch.
+ * An ordered Map preserves first-seen insertion order for stable flush sequence.
+ */
+const _pendingFlushes = new Map<Signal<unknown>, PendingFlush>();
+
+function _enqueueBatchFlush(sig: Signal<unknown>, value: unknown): void {
+  _pendingFlushes.set(sig, { signal: sig, value });
+}
+
+function _drainBatch(): void {
+  const flushes = [..._pendingFlushes.values()];
+  _pendingFlushes.clear();
+  for (const { signal: sig, value } of flushes) {
+    sig._flushBatch(value);
+  }
+}
+
 // ── Signal ────────────────────────────────────────────────────────────────────
 
 export interface ReadonlySignal<T> {
