@@ -86,6 +86,17 @@ export interface ContainerDSL extends ContentDSL {
   section(key: string, builder: SectionBuilder, options?: SectionOptions): void;
   container(key: string, builder: ContainerBuilder, options?: ContainerOptions): void;
   list(key: string, builder: ListBuilder, options?: ListOptions): void;
+  /**
+   * Reactive list driven by a Signal<T[]>.
+   * When the signal value changes, the list is reconciled against the new items.
+   * The renderItem callback receives each item and a ContentDSL to build children.
+   */
+  listOf<T>(
+    key: string,
+    items: Signal<T[]> | ReadonlySignal<T[]>,
+    renderItem: (item: T, index: number, content: ContentDSL) => void,
+    options?: ListOptions,
+  ): void;
   form(key: string, builder: FormBuilder, options?: FormOptions): void;
 }
 
