@@ -235,6 +235,7 @@ class ContentBuilderBase implements ContentDSL {
     if (options.height !== undefined) props['height'] = options.height;
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
     const nodeOpts: { key?: string; props: Props; parent: GraphNode } = {
       props,
       parent: this._node,
