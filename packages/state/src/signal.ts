@@ -258,21 +258,6 @@ class Effect implements ReactiveConsumer {
   }
 }
 
-// ── Public factories ──────────────────────────────────────────────────────────
-
-export function signal<T>(initial: T): Signal<T> {
-  return new Signal(initial);
-}
-
-export function derived<T>(fn: () => T): DerivedSignal<T> {
-  return new DerivedSignal(fn);
-}
-
-export function effect(fn: () => void | (() => void)): Unsubscribe {
-  const e = new Effect(fn);
-  return () => e.dispose();
-}
-
 // ── Public API ─────────────────────────────────────────────────────────────────
 
 export function signal<T>(initial: T): Signal<T> {
