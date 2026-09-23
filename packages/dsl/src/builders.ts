@@ -217,7 +217,7 @@ class ContentBuilderBase implements ContentDSL {
     this._graph.createNode('image', nodeOpts);
   }
 
-  link(label: Bindable<string>, options: LinkOptions): void {
+  link(label: BindableText, options: LinkOptions): void {
     const props: Props = {
       href: options.href,
       external: options.external ?? false,
@@ -225,7 +225,7 @@ class ContentBuilderBase implements ContentDSL {
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
     const node = this._graph.createNode('link', { parent: this._node, props });
-    const resolved = bindValue(this._graph, node, 'label', label);
+    const resolved = bindValue<TextValue>(this._graph, node, 'label', label);
     node.setProp('label', resolved);
     if (options.onClick !== undefined) {
       const handlerKey = `click:${node.id}`;
