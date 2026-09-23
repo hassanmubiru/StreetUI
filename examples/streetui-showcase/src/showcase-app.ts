@@ -193,6 +193,10 @@ export function createShowcaseApp() {
       c.text(featureCountText, { id: 'feature-count' });
       c.listOf('features', features, (item, _i, content) => {
         content.text(item.name, { id: `feature-${item.id}` });
+        content.button('Remove', {
+          id: `feature-remove-${item.id}`,
+          onClick: () => actions.removeFeatureById(item.id),
+        });
       }, { id: 'features-list' });
       c.button('Add', { id: 'btn-add', onClick: () => actions.addFeature() });
       c.button('Remove', { id: 'btn-remove', onClick: () => actions.removeLastFeature() });
