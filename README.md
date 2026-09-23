@@ -27,11 +27,12 @@ packages/
   dom/         DOM adapter abstraction (BrowserDOMAdapter, ServerDOMAdapter)
   renderer/    StreetUI's own DOM renderer — mount, patch, reconcile, SSR, hydrate
   testing/     Test renderer and query helpers
-  devtools/    Graph inspector, print utilities, node stats
+  devtools/    Graph inspector, application inspection, print utilities, node stats
   router/      Client-side routing, navigation, route lifecycle
   forms/       Reactive form model + synchronous validation (on signals)
   context/     Build-time provider/consumer scoping (no prop drilling)
   i18n/        Reactive, typed internationalization (on signals)
+  cli/         Developer CLI — create/dev/build/start + project tooling
 
 apps/
   playground/  Live browser playground
@@ -362,3 +363,23 @@ exact same build function renders on the server and hydrates on the client.
 | `@streetui/forms` | Reactive form model + synchronous validation, on signals |
 | `@streetui/context` | Build-time provider/consumer scoping (no prop drilling) |
 | `@streetui/i18n` | Reactive, typed internationalization, on signals |
+| `@streetui/cli` | Developer CLI: `create` / `dev` / `build` / `start`, config, env, project tooling |
+
+---
+
+## Getting started with the CLI
+
+```bash
+npm create streetui@latest my-app
+cd my-app && npm install
+npm run dev      # start the dev server with live reload
+npm run build    # production build → dist/client + dist/server
+npm run start    # serve the production build (SSR + hydration)
+```
+
+The CLI scaffolds a real, working server-rendered app (no placeholders, no
+React, no JSX) and drives the existing StreetUI pipeline — it orchestrates
+`create` / `dev` / `build` / `start` without adding a framework layer of its
+own. Full reference, configuration, environment-variable rules, and SSR details
+are in `packages/cli/README.md`.
+
