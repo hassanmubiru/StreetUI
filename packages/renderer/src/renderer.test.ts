@@ -311,7 +311,7 @@ describe('reactive list — listOf', () => {
     const container = makeContainer();
     const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
     const handle = renderer.mount(compiled, container);
-    return { container, handle };
+    return { container, handle, graph: compiled.graph };
   }
 
   it('renders the initial items', () => {
