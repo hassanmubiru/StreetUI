@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BrowserDOMAdapter } from './browser-adapter.js';
 import { ServerDOMAdapter } from './server-adapter.js';
+import type { DOMAdapter } from './adapter.js';
 import { focusById, focusFirst, FOCUSABLE_SELECTOR } from './focus.js';
 
 describe('focus helpers (browser)', () => {
