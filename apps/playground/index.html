@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StreetUI Playground</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 2rem;
+        background: #0f0f0f;
+        color: #f0f0f0;
+        line-height: 1.6;
+      }
+
+      #app {
+        max-width: 720px;
+        margin: 0 auto;
+      }
+
+      /* StreetUI renders semantic HTML — style it here */
+      h1 { font-size: 2rem; margin-bottom: 0.25rem; color: #fff; }
+      h2 { font-size: 1.25rem; color: #ccc; border-bottom: 1px solid #333; padding-bottom: 0.5rem; }
+
+      section {
+        background: #1a1a1a;
+        border: 1px solid #2a2a2a;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      button {
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1.25rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        margin-right: 0.5rem;
+        margin-top: 0.75rem;
+        transition: background 0.15s;
+      }
+      button:hover { background: #1d4ed8; }
+      button:disabled { background: #444; cursor: not-allowed; }
+
+      input {
+        background: #111;
+        border: 1px solid #333;
+        border-radius: 6px;
+        color: #f0f0f0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        width: 100%;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      input:focus { outline: 2px solid #2563eb; border-color: transparent; }
+
+      ul { padding-left: 1.25rem; }
+      li { margin-bottom: 0.25rem; }
+
+      span { font-size: 1.5rem; font-weight: 700; color: #60a5fa; display: block; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="./dist/main.js"></script>
+  </body>
+</html>

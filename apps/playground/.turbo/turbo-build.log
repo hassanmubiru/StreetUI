@@ -1,0 +1,14 @@
+
+> @streetui/playground@0.1.0 build /home/error51/Downloads/street/apps/playground
+> tsup
+
+CLI Building entry: src/main.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/street/apps/playground/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+ESM dist/main.js     3.09 KB
+ESM dist/main.js.map 6.56 KB
+ESM ⚡️ Build success in 9ms

@@ -1,0 +1,12 @@
+{
+  "name": "@streetui/docs",
+  "version": "0.1.0",
+  "description": "StreetUI documentation site",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "echo \"docs build skipped\"",
+    "test": "echo \"no tests\" && exit 0",
+    "typecheck": "echo \"no typecheck\" && exit 0"
+  }
+}

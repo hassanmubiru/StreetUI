@@ -1,0 +1,39 @@
+{
+  "name": "@streetui/renderer",
+  "version": "0.1.0",
+  "description": "StreetUI renderer — framework-owned DOM renderer, reconciliation, patching",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/graph": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/events": "workspace:*",
+    "@streetui/scheduler": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/dom": "workspace:*",
+    "@streetui/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}

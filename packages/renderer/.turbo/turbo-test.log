@@ -1,0 +1,14 @@
+
+> @streetui/renderer@0.1.0 test /home/error51/Downloads/street/packages/renderer
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/renderer
+
+ ✓ src/renderer.test.ts  (26 tests) 33ms
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  07:05:39
+   Duration  729ms (transform 129ms, setup 0ms, collect 150ms, tests 33ms, environment 221ms, prepare 85ms)
+

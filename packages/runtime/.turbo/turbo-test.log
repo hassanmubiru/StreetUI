@@ -1,0 +1,14 @@
+
+> @streetui/runtime@0.1.0 test /home/error51/Downloads/street/packages/runtime
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/runtime
+
+ ✓ src/runtime.test.ts  (5 tests) 10ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  07:05:37
+   Duration  513ms (transform 136ms, setup 0ms, collect 164ms, tests 10ms, environment 0ms, prepare 92ms)
+

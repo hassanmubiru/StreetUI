@@ -1,0 +1,5 @@
+
+> @streetui/docs@0.1.0 typecheck /home/error51/Downloads/street/apps/docs
+> echo "no typecheck" && exit 0
+
+no typecheck

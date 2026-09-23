@@ -1,0 +1,14 @@
+
+> @streetui/graph@0.1.0 test /home/error51/Downloads/street/packages/graph
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/graph
+
+ ✓ src/graph.test.ts  (26 tests) 11ms
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  07:05:33
+   Duration  332ms (transform 52ms, setup 0ms, collect 58ms, tests 11ms, environment 0ms, prepare 56ms)
+

@@ -1,0 +1,27 @@
+
+> @streetui/scheduler@0.1.0 test /home/error51/Downloads/street/packages/scheduler
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/scheduler
+
+stderr | src/scheduler.test.ts > Scheduler > isolates job failures
+[Scheduler] Job "bad" threw: Error: boom
+    at Object.fn (/home/error51/Downloads/street/packages/scheduler/src/scheduler.test.ts:66:69)
+    at Scheduler.flush (/home/error51/Downloads/street/packages/scheduler/src/scheduler.ts:89:15)
+    at /home/error51/Downloads/street/packages/scheduler/src/scheduler.test.ts:68:20
+    at Proxy.assertThrows (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:2767:5)
+    at Proxy.methodWrapper (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
+    at Proxy.<anonymous> (file:///home/error51/Downloads/street/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:988:16)
+    at Proxy.overwritingMethodWrapper (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1735:33)
+    at Proxy.<anonymous> (file:///home/error51/Downloads/street/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:1468:21)
+    at Proxy.<anonymous> (file:///home/error51/Downloads/street/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:931:17)
+    at Proxy.methodWrapper (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
+
+ ✓ src/scheduler.test.ts  (12 tests) 20ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  07:05:31
+   Duration  1.50s (transform 135ms, setup 0ms, collect 125ms, tests 20ms, environment 0ms, prepare 185ms)
+

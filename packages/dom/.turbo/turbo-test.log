@@ -1,0 +1,14 @@
+
+> @streetui/dom@0.1.0 test /home/error51/Downloads/street/packages/dom
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/dom
+
+ ✓ src/dom.test.ts  (15 tests) 21ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  07:05:31
+   Duration  1.80s (transform 106ms, setup 0ms, collect 91ms, tests 21ms, environment 406ms, prepare 234ms)
+

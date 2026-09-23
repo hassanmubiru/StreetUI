@@ -1,0 +1,14 @@
+
+> @streetui/example-basic-app@0.1.0 test /home/error51/Downloads/street/examples/basic-app
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/examples/basic-app
+
+ ✓ src/counter-app.test.ts  (12 tests) 16ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  07:05:40
+   Duration  686ms (transform 108ms, setup 0ms, collect 105ms, tests 16ms, environment 229ms, prepare 133ms)
+

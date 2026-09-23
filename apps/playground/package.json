@@ -1,0 +1,27 @@
+{
+  "name": "@streetui/playground",
+  "version": "0.1.0",
+  "description": "StreetUI browser playground",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"no tests in playground\" && exit 0",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/graph": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/devtools": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*"
+  }
+}

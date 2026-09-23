@@ -1,0 +1,14 @@
+
+> @streetui/testing@0.1.0 test /home/error51/Downloads/street/packages/testing
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/testing
+
+ ✓ src/testing.test.ts  (13 tests) 13ms
+
+ Test Files  1 passed (1)
+      Tests  13 passed (13)
+   Start at  07:05:41
+   Duration  569ms (transform 89ms, setup 0ms, collect 94ms, tests 13ms, environment 163ms, prepare 81ms)
+

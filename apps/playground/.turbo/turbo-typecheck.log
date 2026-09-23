@@ -1,0 +1,4 @@
+
+> @streetui/playground@0.1.0 typecheck /home/error51/Downloads/street/apps/playground
+> tsc --noEmit
+

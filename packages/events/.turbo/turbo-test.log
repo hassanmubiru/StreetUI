@@ -1,0 +1,14 @@
+
+> @streetui/events@0.1.0 test /home/error51/Downloads/street/packages/events
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/street/packages/events
+
+ ✓ src/events.test.ts  (15 tests) 30ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  07:05:31
+   Duration  1.32s (transform 394ms, setup 0ms, collect 446ms, tests 30ms, environment 0ms, prepare 235ms)
+
