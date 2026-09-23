@@ -274,6 +274,53 @@ export function effect(fn: () => void | (() => void)): Unsubscribe {
 }
 
 // ── Public API ─────────────────────────────────────────────────────────────────
+
+export function signal<T>(initial: T): Signal<T> {
+  return new Signal(initial);
+}
+
+export function derived<T>(fn: () => T): DerivedSignal<T> {
+  return new DerivedSignal(fn);
+}
+
+export function effect(fn: () => void | (() => void)): Unsubscribe {
+  const e = new Effect(fn);
+  return () => e.dispose();
+}
+
+/**
+ * Run multiple signal updates as an atomic batch.
+ *
+ * Within the callback, calls to signal.set() are deferred — each signal
+ * accumulates its latest value. When the outermost batch() returns,
+ * each modified signal fires its subscribers exactly once with the final
+ * value. Nested batch() calls are supported; the flush only runs when the
+ * outermost batch exits.
+ *
+ * Example:
+ *   batch(() => {
+ *     count.set(1);
+ *     count.set(2);
+ *     count.set(3);
+ *   });
+ *   // subscribers see count = 3 exactly once
+ */
+export function batch(fn: () => void): void {
+  _batchDepth++;
+  try {
+    fn();
+  } finally {
+    _batchDepth--;
+    if (_batchDepth === 0) {
+      _drainBatch();
+    }
+  }
+}
+
+/** True when inside a batch() call. Useful for advanced scheduling integration. */
+export function isBatching(): boolean {
+  return _batchDepth > 0;
+}
   _batchDepth++;
   try {
     fn();
