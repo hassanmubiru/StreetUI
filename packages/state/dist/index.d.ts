@@ -45,6 +45,11 @@ declare class Signal<T> implements ReactiveSource<T>, ReadonlySignal<T> {
     update(fn: (current: T) => T): void;
     subscribe(fn: Subscriber<T>): Unsubscribe;
     _removeConsumer(consumer: ReactiveConsumer): void;
+    /**
+     * Called by the batch machinery after the batch has completed.
+     * Notifies subscribers with the final coalesced value.
+     */
+    _flushBatch(value: unknown): void;
     private _flush;
 }
 declare class DerivedSignal<T> implements ReactiveSource<T>, ReactiveConsumer, ReadonlySignal<T> {
@@ -70,7 +75,26 @@ declare class DerivedSignal<T> implements ReactiveSource<T>, ReactiveConsumer, R
 declare function signal<T>(initial: T): Signal<T>;
 declare function derived<T>(fn: () => T): DerivedSignal<T>;
 declare function effect(fn: () => void | (() => void)): Unsubscribe;
+/**
+ * Run multiple signal updates as an atomic batch.
+ *
+ * Within the callback, calls to signal.set() are deferred — each signal
+ * accumulates its latest value. When the outermost batch() returns,
+ * each modified signal fires its subscribers exactly once with the final
+ * value. Nested batch() calls are supported; the flush only runs when the
+ * outermost batch exits.
+ *
+ * Example:
+ *   batch(() => {
+ *     count.set(1);
+ *     count.set(2);
+ *     count.set(3);
+ *   });
+ *   // subscribers see count = 3 exactly once
+ */
 declare function batch(fn: () => void): void;
+/** True when inside a batch() call. Useful for advanced scheduling integration. */
+declare function isBatching(): boolean;
 
 /**
  * A simple reactive store built on top of signals.
@@ -89,4 +113,4 @@ declare class Store<T extends StoreState> {
 }
 declare function createStore<T extends StoreState>(initial: T): Store<T>;
 
-export { DerivedSignal, type ReactiveConsumer, type ReactiveSource, type ReadonlySignal, Signal, Store, type StoreState, type Subscriber, type Unsubscribe, batch, createStore, derived, effect, signal };
+export { DerivedSignal, type ReactiveConsumer, type ReactiveSource, type ReadonlySignal, Signal, Store, type StoreState, type Subscriber, type Unsubscribe, batch, createStore, derived, effect, isBatching, signal };

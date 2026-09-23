@@ -27,6 +27,7 @@ __export(index_exports, {
   createStore: () => createStore,
   derived: () => derived,
   effect: () => effect,
+  isBatching: () => isBatching,
   signal: () => signal
 });
 module.exports = __toCommonJS(index_exports);
@@ -40,6 +41,18 @@ function withConsumer(consumer, fn) {
     return fn();
   } finally {
     _activeConsumer = prev;
+  }
+}
+var _batchDepth = 0;
+var _pendingFlushes = /* @__PURE__ */ new Map();
+function _enqueueBatchFlush(sig, value) {
+  _pendingFlushes.set(sig, { signal: sig, value });
+}
+function _drainBatch() {
+  const flushes = [..._pendingFlushes.values()];
+  _pendingFlushes.clear();
+  for (const { signal: sig, value } of flushes) {
+    sig._flushBatch(value);
   }
 }
 var Signal = class {
@@ -62,7 +75,11 @@ var Signal = class {
   set(value) {
     if (Object.is(this._value, value)) return;
     this._value = value;
-    this._flush(value);
+    if (_batchDepth > 0) {
+      _enqueueBatchFlush(this, value);
+    } else {
+      this._flush(value);
+    }
   }
   update(fn) {
     this.set(fn(this._value));
@@ -75,6 +92,13 @@ var Signal = class {
   }
   _removeConsumer(consumer) {
     this._consumers.delete(consumer);
+  }
+  /**
+   * Called by the batch machinery after the batch has completed.
+   * Notifies subscribers with the final coalesced value.
+   */
+  _flushBatch(value) {
+    this._flush(value);
   }
   _flush(value) {
     for (const sub of [...this._subscribers]) sub(value);
@@ -182,7 +206,18 @@ function effect(fn) {
   return () => e.dispose();
 }
 function batch(fn) {
-  fn();
+  _batchDepth++;
+  try {
+    fn();
+  } finally {
+    _batchDepth--;
+    if (_batchDepth === 0) {
+      _drainBatch();
+    }
+  }
+}
+function isBatching() {
+  return _batchDepth > 0;
 }
 
 // src/store.ts
@@ -243,6 +278,7 @@ function createStore(initial) {
   createStore,
   derived,
   effect,
+  isBatching,
   signal
 });
 //# sourceMappingURL=index.cjs.map
