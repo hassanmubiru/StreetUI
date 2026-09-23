@@ -10,9 +10,24 @@ The scope of this task is to *discover and document*, not to redesign. No API
 was changed. Each entry proposes a backward-compatible improvement for later
 consideration.
 
+> **Update — all four resolved.** These four ergonomics issues have since been
+> implemented as backward-compatible API improvements. Every existing API still
+> works unchanged; the notes below now record the *shipped* solution under each
+> entry. The showcase itself was updated to use the simpler surface where
+> appropriate: the counter binds the `count` number signal directly
+> (`text(count)`), the details block uses `when(showDetails, …)`, the message
+> field uses `input({ bind: formMessage })`, and list-item elements now carry
+> `data-streetui-key`.
+
 ---
 
 ## Issue 1 — Reactive non-string values require a manual `derived(String(...))`
+
+**Status: RESOLVED.** `text()`/`heading()`/`button()` now accept
+`string | number | boolean` and signals thereof (`BindableText`). The renderer
+stringifies at the presentation boundary, so `section.text(count)` and
+`section.text(42)` work with no `derived` wrapper and no cast.
+
 
 **Severity:** Medium (hit by almost every app: counters, totals, flags).
 
@@ -47,6 +62,12 @@ unsafe cast in `basic-app`.
 ---
 
 ## Issue 2 — No conditional-rendering primitive
+
+**Status: RESOLVED.** A `when(condition, builder, elseBuilder?)` primitive was
+added to the container DSL. It compiles to a dedicated `conditional` graph node
+that reuses the existing reactive-list reconciliation machinery (same signal
+subscription + keyed reconcile), renders as a neutral `<div>`, and mounts/removes
+a single keyed branch — no second rendering system, no virtual DOM.
 
 **Severity:** Medium (state-controlled UI is a core need).
 
@@ -87,6 +108,12 @@ place — no new rendering path required, just a friendlier builder surface.
 
 ## Issue 3 — Controlled inputs require manual two-way wiring
 
+**Status: RESOLVED.** `input()` now accepts an optional `bind: Signal<string>`
+that expands to a `value` binding plus an input write-back internally. A
+discriminated union (`BoundInputOptions` XOR `ControlledInputOptions`) rejects
+ambiguous combinations at compile time: `bind` cannot be paired with `value` or
+`onInput`. The explicit `value` + `onInput` form is preserved unchanged.
+
 **Severity:** Low–Medium (every form field).
 
 **Current API**
@@ -120,6 +147,12 @@ cases that need custom write logic.
 ---
 
 ## Issue 4 — `listOf` item rows carry no addressable key/id on their element
+
+**Status: RESOLVED.** Reactive-list item elements now emit
+`data-streetui-key="id:1"` — the stable, identity-only reconciliation key. The
+internal `_sig` value signature, signal ids, handler ids and graph node ids are
+never exposed. The attribute is stable across reorders and in-place data updates,
+and removed items disappear completely.
 
 **Severity:** Low (mostly affects testing/targeting).
 

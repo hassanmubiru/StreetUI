@@ -74,19 +74,12 @@ export function createShowcaseApp() {
   let nextId = 4;
 
   // ── Derived display signals ──────────────────────────────────────────────────
-  // `text()`/`button()` accept Bindable<string>, so numeric or boolean state is
-  // projected to a string through a derived signal (see API-ISSUES.md #1).
-  const countText = derived(() => String(count.get()));
+  // Numeric/boolean signals no longer need a `derived(() => String(...))` wrapper:
+  // text()/button() accept `string | number | boolean` (and signals thereof) and
+  // stringify at the presentation boundary. Derived signals are kept only where a
+  // genuine string *transformation* is required (formatting, labels, messages).
   const featureCountText = derived(() => `${features.get().length} package(s)`);
   const toggleLabel = derived(() => (showDetails.get() ? 'Hide details' : 'Show details'));
-  const detailsItems = derived<{ id: string; text: string }[]>(() =>
-    showDetails.get()
-      ? [{
-          id: 'details',
-          text: 'StreetUI compiles a semantic graph, binds signals in the runtime, and a keyed reconciler patches the real DOM — no virtual DOM.',
-        }]
-      : [],
-  );
   const validationText = derived(() => {
     const n = formName.get().trim();
     const e = formEmail.get().trim();
@@ -178,10 +171,11 @@ export function createShowcaseApp() {
       });
     }, { id: 'feature-list' });
 
-    // Interactive counter — reactive value via a derived string signal
+    // Interactive counter — the number signal is bound directly; text() accepts
+    // `number` (and a signal thereof) and stringifies at the presentation boundary.
     page.section('counter', (c) => {
       c.heading('Interactive counter', { level: 2 });
-      c.text(countText, { id: 'counter-value' });
+      c.text(count, { id: 'counter-value' });
       c.button('Increment', { id: 'btn-increment', onClick: () => actions.increment() });
       c.button('Decrement', { id: 'btn-decrement', onClick: () => actions.decrement() });
       c.button('Reset', { id: 'btn-reset', onClick: () => actions.reset() });
@@ -222,8 +216,7 @@ export function createShowcaseApp() {
           onChange: (v) => { formEmail.set(v); lastEvent.set('change:email'); },
         });
         form.input({
-          id: 'field-message', type: 'text', placeholder: 'Message', value: formMessage,
-          onInput: (v) => { formMessage.set(v); lastEvent.set('input:message'); },
+          id: 'field-message', type: 'text', placeholder: 'Message', bind: formMessage,
         });
         form.text(validationText, { id: 'form-validation' });
         form.text(submittedText, { id: 'form-submitted' });
@@ -231,12 +224,18 @@ export function createShowcaseApp() {
       }, { id: 'the-form', onSubmit: () => actions.submitForm() });
     }, { id: 'contact' });
 
-    // Conditional rendering — state-controlled via a derived 0/1-item list
+    // Conditional rendering — driven by the `when()` primitive over a boolean
+    // signal. The branch is mounted/removed by the keyed reconciler (no vdom).
     page.section('conditional', (c) => {
       c.heading('Conditional rendering', { level: 2 });
       c.button(toggleLabel, { id: 'btn-toggle', onClick: () => actions.toggleDetails() });
-      c.listOf('details', detailsItems, (item, _i, content) => {
-        content.text(item.text, { id: 'details-text' });
+      c.container('details-region', (region) => {
+        region.when(showDetails, (content) => {
+          content.text(
+            'StreetUI compiles a semantic graph, binds signals in the runtime, and a keyed reconciler patches the real DOM — no virtual DOM.',
+            { id: 'details-text' },
+          );
+        });
       }, { id: 'details-region' });
     }, { id: 'conditional' });
 

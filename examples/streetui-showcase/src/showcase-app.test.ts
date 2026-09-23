@@ -234,17 +234,18 @@ describe('5. form interaction, validation and submitted state', () => {
 describe('6. state-controlled conditional rendering', () => {
   it('toggles the details region on and off', () => {
     const { container, mounted } = setup();
-    const region = () => container.querySelector('#details-region')!;
-    expect(region().querySelectorAll('li').length).toBe(0);
+    // Driven by when(): the branch (and its #details-text) is absent while the
+    // signal is false and mounted by the keyed reconciler when it flips true.
+    expect(container.querySelector('#details-text')).toBeNull();
     expect(text(container.querySelector('#btn-toggle'))).toBe('Show details');
 
     (container.querySelector('#btn-toggle') as HTMLButtonElement).dispatchEvent(new Event('click'));
-    expect(region().querySelectorAll('li').length).toBe(1);
+    expect(container.querySelector('#details-text')).not.toBeNull();
     expect(text(container.querySelector('#details-text'))).toContain('semantic graph');
     expect(text(container.querySelector('#btn-toggle'))).toBe('Hide details');
 
     (container.querySelector('#btn-toggle') as HTMLButtonElement).dispatchEvent(new Event('click'));
-    expect(region().querySelectorAll('li').length).toBe(0);
+    expect(container.querySelector('#details-text')).toBeNull();
     teardown(container, mounted);
   });
 });
