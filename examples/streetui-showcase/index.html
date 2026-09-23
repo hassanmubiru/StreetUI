@@ -29,7 +29,8 @@
   <body>
     <!-- StreetUI mounts the entire application into this container. -->
     <div id="app"></div>
-    <!-- Build first: `pnpm --filter @streetui/example-showcase build` (outputs dist/index.js) -->
-    <script type="module" src="./dist/index.js"></script>
+    <!-- Self-contained browser bundle (all @streetui packages inlined). -->
+    <!-- Rebuild with: esbuild src/index.ts --bundle --format=esm --outfile=dist/showcase.bundle.js -->
+    <script type="module" src="./dist/showcase.bundle.js"></script>
   </body>
 </html>
