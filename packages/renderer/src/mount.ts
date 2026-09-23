@@ -20,6 +20,18 @@ import { wireEvents } from './events.js';
 import { resolveTag } from './tag-map.js';
 import { reconcileChildren } from './reconciliation.js';
 
+/**
+ * Prop keys handled by the per-type mount branches (or reserved internals), so
+ * `applyNodeProps` must skip them to avoid double-applying. This set is
+ * invariant across nodes, so it is hoisted to module scope: allocating it once
+ * (rather than per node) removes N Set allocations per mount/SSR pass and the
+ * GC pressure they create. Treat as read-only — never mutate.
+ */
+const SKIP_PROP_KEYS: ReadonlySet<string> = new Set([
+  'text', 'label', 'level', 'inputType', 'src', 'alt', 'href', 'external',
+  'value', 'placeholder', 'disabled', '_renderKey', 'key', 'name',
+]);
+
 export function mountGraph(ctx: RenderContext): NodeInstance {
   return mountNode(ctx, ctx.graph.root, ctx.container);
 }
@@ -287,10 +299,8 @@ export function buttonUpdate(
 }
 
 export function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): void {
-  const skipKeys = new Set(['text', 'label', 'level', 'inputType', 'src', 'alt',
-    'href', 'external', 'value', 'placeholder', 'disabled', '_renderKey', 'key', 'name']);
   for (const [key, value] of Object.entries(graphNode.props)) {
-    if (skipKeys.has(key)) continue;
+    if (SKIP_PROP_KEYS.has(key)) continue;
     applyProp(ctx.dom, el, key, value);
   }
 }
