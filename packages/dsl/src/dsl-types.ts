@@ -15,7 +15,45 @@ export type Bindable<T> = T | ReadonlySignal<T> | Signal<T>;
 export type TextValue = string | number | boolean;
 export type BindableText = TextValue | ReadonlySignal<TextValue>;
 
-export interface TextOptions {
+/**
+ * Accessibility options shared by every element builder.
+ *
+ * These map to standard HTML/ARIA attributes and flow straight through to the
+ * DOM via the renderer's generic attribute pass — there is no separate ARIA
+ * abstraction to keep in sync. Prefer semantic HTML (button/a/input/etc.) and
+ * only reach for these when semantics alone are insufficient. `id` (already
+ * present on each option type) combined with the deterministic `a11yIds()`
+ * helper in `@streetui/core` is how label/description/title associations are
+ * wired in an SSR/hydration-safe way.
+ */
+export interface A11yOptions {
+  /** ARIA role (e.g. 'dialog', 'alert', 'status', 'navigation'). */
+  readonly role?: string;
+  /** tabindex value. Use 0 to make an element focusable, -1 to remove from tab order. */
+  readonly tabIndex?: number;
+  /** aria-label — an accessible name when no visible label element exists. */
+  readonly ariaLabel?: string;
+  /** aria-labelledby — id(s) of the element(s) that label this one. */
+  readonly ariaLabelledBy?: string;
+  /** aria-describedby — id(s) of the element(s) that describe this one. */
+  readonly ariaDescribedBy?: string;
+  /** aria-expanded — for disclosure widgets (rendered as the string "true"/"false"). */
+  readonly ariaExpanded?: boolean;
+  /** aria-controls — id of the element this one controls. */
+  readonly ariaControls?: string;
+  /** aria-hidden — hide decorative content from assistive tech. */
+  readonly ariaHidden?: boolean;
+  /** aria-live — announce dynamic changes ('polite' | 'assertive' | 'off'). */
+  readonly ariaLive?: 'off' | 'polite' | 'assertive';
+  /** aria-current — mark the current item in a set (e.g. 'page' for active nav). */
+  readonly ariaCurrent?: boolean | 'page' | 'step' | 'location' | 'date' | 'time';
+  /** aria-invalid — mark a form field as failing validation. */
+  readonly ariaInvalid?: boolean;
+  /** aria-required — mark a form field as required. */
+  readonly ariaRequired?: boolean;
+}
+
+export interface TextOptions extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
 }
