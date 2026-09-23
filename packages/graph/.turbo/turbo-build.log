@@ -1,57 +1,35 @@
 
-
 > @streetui/graph@0.1.0 build /home/error51/Downloads/StreetUI/packages/graph
 > tsup
 
-[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
+▲ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
 
     package.json:13:6:
-[37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
-         ╵       [32m~~~~~~~[0m
+      13 │       "types": "./dist/index.d.ts"
+         ╵       ~~~~~~~
 
   The "import" condition comes earlier and will be used for all "import" statements:
 
     package.json:11:6:
-[37m      11 │       [32m"import"[37m: "./dist/index.js",
-         ╵       [32m~~~~~~~~[0m
+      11 │       "import": "./dist/index.js",
+         ╵       ~~~~~~~~
 
   The "require" condition comes earlier and will be used for all "require" calls:
 
     package.json:12:6:
-[37m      12 │       [32m"require"[37m: "./dist/index.cjs",
-         ╵       [32m~~~~~~~~~[0m
+      12 │       "require": "./dist/index.cjs",
+         ╵       ~~~~~~~~~
 
-[34mCLI[39m Building entry: src/index.ts
-[34mCLI[39m Using tsconfig: tsconfig.json
-[34mCLI[39m tsup v8.3.5
-[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/graph/tsup.config.ts
-[34mCLI[39m Target: es2022
-[34mCLI[39m Cleaning output folder
-[34mESM[39m Build start
-[34mCJS[39m Build start
+CLI Building entry: src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/graph/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
 
-[90m[[90m8:59:01 AM[90m][39m [43m[30m WARN [39m[49m [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
-
-    package.json:13:6:
-[37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
-         ╵       [32m~~~~~~~[0m
-
-  The "import" condition comes earlier and will be used for all "import" statements:
-
-    package.json:11:6:
-[37m      11 │       [32m"import"[37m: "./dist/index.js",
-         ╵       [32m~~~~~~~~[0m
-
-  The "require" condition comes earlier and will be used for all "require" calls:
-
-    package.json:12:6:
-[37m      12 │       [32m"require"[37m: "./dist/index.cjs",
-         ╵       [32m~~~~~~~~~[0m
-
-
-
-
-[90m[[90m8:59:01 AM[90m][39m [43m[30m WARN [39m[49m [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
+ WARN  [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
 
     package.json:13:6:
 [37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
@@ -71,13 +49,34 @@
 
 
 
-[32mESM[39m [1mdist/index.js     [22m[32m6.22 KB[39m
-[32mESM[39m [1mdist/index.js.map [22m[32m14.74 KB[39m
-[32mESM[39m ⚡️ Build success in 35ms
-[32mCJS[39m [1mdist/index.cjs     [22m[32m7.29 KB[39m
-[32mCJS[39m [1mdist/index.cjs.map [22m[32m14.88 KB[39m
-[32mCJS[39m ⚡️ Build success in 36ms
+
+ WARN  [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
+
+    package.json:13:6:
+[37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
+         ╵       [32m~~~~~~~[0m
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:11:6:
+[37m      11 │       [32m"import"[37m: "./dist/index.js",
+         ╵       [32m~~~~~~~~[0m
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:12:6:
+[37m      12 │       [32m"require"[37m: "./dist/index.cjs",
+         ╵       [32m~~~~~~~~~[0m
+
+
+
+ESM dist/index.js     6.22 KB
+ESM dist/index.js.map 14.74 KB
+ESM ⚡️ Build success in 19ms
+CJS dist/index.cjs     7.29 KB
+CJS dist/index.cjs.map 14.88 KB
+CJS ⚡️ Build success in 19ms
 DTS Build start
-DTS ⚡️ Build success in 846ms
+DTS ⚡️ Build success in 450ms
 DTS dist/index.d.ts  4.04 KB
 DTS dist/index.d.cts 4.04 KB
