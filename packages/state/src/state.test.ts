@@ -129,19 +129,70 @@ describe('effect', () => {
 });
 
 describe('batch', () => {
-  it('batches multiple updates', () => {
+  it('coalesces repeated sets to same signal — subscribers fire once with final value', () => {
+    const count = signal(0);
+    const calls: number[] = [];
+    count.subscribe(v => calls.push(v));
+    batch(() => {
+      count.set(1);
+      count.set(2);
+      count.set(3);
+    });
+    expect(calls).toEqual([3]);
+    expect(count.get()).toBe(3);
+  });
+
+  it('flushes all signals after the outermost batch exits', () => {
     const a = signal(0);
     const b = signal(0);
-    const calls: Array<[number, number]> = [];
-    // subscribe to derived to see combined updates
-    const combined = derived(() => a.get() + b.get());
-    combined.subscribe(v => calls.push([a.peek(), b.peek()]));
+    const aCalls: number[] = [];
+    const bCalls: number[] = [];
+    a.subscribe(v => aCalls.push(v));
+    b.subscribe(v => bCalls.push(v));
     batch(() => {
       a.set(1);
       b.set(2);
     });
-    // combined value should be 3
+    expect(aCalls).toEqual([1]);
+    expect(bCalls).toEqual([2]);
+  });
+
+  it('nested batch — subscribers fire once at outermost exit', () => {
+    const s = signal(0);
+    const calls: number[] = [];
+    s.subscribe(v => calls.push(v));
+    batch(() => {
+      s.set(10);
+      batch(() => {
+        s.set(20);
+        s.set(30);
+      });
+      // still inside outer batch — no flush yet
+      expect(calls).toHaveLength(0);
+    });
+    // now outer batch exited
+    expect(calls).toEqual([30]);
+  });
+
+  it('derived signal sees final value after batch', () => {
+    const a = signal(0);
+    const b = signal(0);
+    const combined = derived(() => a.get() + b.get());
+    batch(() => {
+      a.set(1);
+      b.set(2);
+    });
     expect(combined.get()).toBe(3);
+  });
+
+  it('does not fire for no-op updates inside batch', () => {
+    const s = signal(5);
+    const calls: number[] = [];
+    s.subscribe(v => calls.push(v));
+    batch(() => {
+      s.set(5); // same value — no-op
+    });
+    expect(calls).toHaveLength(0);
   });
 });
 
