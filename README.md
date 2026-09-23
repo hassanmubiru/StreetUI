@@ -28,13 +28,15 @@ packages/
   renderer/    StreetUI's own DOM renderer — mount, patch, reconcile
   testing/     Test renderer and query helpers
   devtools/    Graph inspector, print utilities, node stats
+  router/      Client-side routing, navigation, route lifecycle
 
 apps/
   playground/  Live browser playground
   docs/        Documentation
 
 examples/
-  basic-app/   Counter app — full end-to-end demonstration
+  basic-app/       Counter app — full end-to-end demonstration
+  streetui-docs/   Multi-page docs site built on @streetui/router
 ```
 
 ---
@@ -99,6 +101,36 @@ Signal.set(value)
 
 ---
 
+## Routing
+
+Multi-page applications are built with `@streetui/router`, which sits *above*
+the pipeline and drives which page is mounted. It reuses StreetUI's own signals
+(for route state and active links) and the core `CleanupRegistry` (for route
+teardown) — no virtual DOM, no second reactive system, no third-party deps. On
+navigation only the affected route subtree is recreated; the shell persists.
+
+```ts
+import { createRouter, mountRouter, routerOutlet } from '@streetui/router';
+
+const router = createRouter({
+  routes: [
+    { path: '/',              builder: (page) => page.section('home', s => s.heading('Home')) },
+    { path: '/docs/:section', builder: (page, ctx) => page.section('d', s => s.heading(ctx.params.section ?? '')) },
+    { path: '*',              builder: (page) => page.section('nf', s => s.heading('404')) },
+  ],
+});
+
+mountRouter(router, {
+  container: document.getElementById('app')!,
+  shell: (shell) => { shell.section('nav', n => n.link('Home', { href: '/' })); routerOutlet(shell); },
+});
+```
+
+See `packages/router/README.md` for routes, dynamic/query parameters,
+navigation, active links, 404 handling, and route lifecycle cleanup.
+
+---
+
 ## Packages
 
 | Package | Description |
@@ -115,3 +147,4 @@ Signal.set(value)
 | `@streetui/renderer` | StreetUI's own DOM renderer |
 | `@streetui/testing` | Test renderer and query helpers |
 | `@streetui/devtools` | Graph inspector and debug tools |
+| `@streetui/router` | Client-side routing, navigation, active links, route lifecycle |
