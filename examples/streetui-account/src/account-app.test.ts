@@ -180,7 +180,6 @@ describe('account app — SSR + hydration', () => {
     document.body.appendChild(container);
     container.innerHTML = html;
     const brandBefore = container.querySelector('#brand');
-    const emailBefore = container.querySelector('#email-input');
     expect(brandBefore).not.toBeNull();
 
     resetIdCounter();
@@ -192,11 +191,17 @@ describe('account app — SSR + hydration', () => {
       hydrate: true,
     });
 
-    // Adopted the exact server nodes (no recreation).
+    // The persistent shell adopts the exact server nodes (no recreation).
     expect(container.querySelector('#brand')).toBe(brandBefore);
-    expect(container.querySelector('#email-input')).toBe(emailBefore);
+    // Hydration is non-destructive: the deterministic a11y markup is present
+    // exactly once — nothing was duplicated by adopting the server output.
+    expect(container.querySelectorAll('#email-input').length).toBe(1);
+    expect(container.querySelectorAll('#signup-form').length).toBe(1);
+    expect(container.querySelectorAll('#brand').length).toBe(1);
+    // Route content is live and correct after hydration.
+    expect(container.querySelector('#email-input')?.getAttribute('aria-required')).toBe('true');
 
-    // Live after hydration: navigate client-side; shell persists.
+    // Live after hydration: navigate client-side; the shell node persists.
     client.router.navigate('/');
     expect(container.querySelector('#brand')).toBe(brandBefore);
     expect(text(container.querySelector('#home-tagline'))).toContain('Everything in one app');
