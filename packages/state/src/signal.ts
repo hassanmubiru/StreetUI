@@ -80,7 +80,13 @@ export class Signal<T> implements ReactiveSource<T>, ReadonlySignal<T> {
   set(value: T): void {
     if (Object.is(this._value, value)) return;
     this._value = value;
-    this._flush(value);
+    if (_batchDepth > 0) {
+      // Defer notification until the batch flushes.
+      // The stored value is always the latest (last-write-wins for same signal).
+      _enqueueBatchFlush(this as unknown as Signal<unknown>, value);
+    } else {
+      this._flush(value);
+    }
   }
 
   update(fn: (current: T) => T): void {
@@ -94,6 +100,14 @@ export class Signal<T> implements ReactiveSource<T>, ReadonlySignal<T> {
 
   _removeConsumer(consumer: ReactiveConsumer): void {
     this._consumers.delete(consumer);
+  }
+
+  /**
+   * Called by the batch machinery after the batch has completed.
+   * Notifies subscribers with the final coalesced value.
+   */
+  _flushBatch(value: unknown): void {
+    this._flush(value as T);
   }
 
   private _flush(value: T): void {
