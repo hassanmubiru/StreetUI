@@ -104,12 +104,12 @@ export type ListBuilder = (list: ListDSL) => void;
 // ── Interfaces for each DSL scope ─────────────────────────────────────────────
 
 export interface ContentDSL {
-  heading(text: Bindable<string>, options?: HeadingOptions): void;
-  text(content: Bindable<string>, options?: TextOptions): void;
-  button(label: Bindable<string>, options?: ButtonOptions): void;
+  heading(text: BindableText, options?: HeadingOptions): void;
+  text(content: BindableText, options?: TextOptions): void;
+  button(label: BindableText, options?: ButtonOptions): void;
   input(options?: InputOptions): void;
   image(options: ImageOptions): void;
-  link(label: Bindable<string>, options: LinkOptions): void;
+  link(label: BindableText, options: LinkOptions): void;
 }
 
 export interface ContainerDSL extends ContentDSL {
