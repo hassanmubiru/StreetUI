@@ -69,11 +69,34 @@ function bindValue<T>(
 
 // ── Helper to build Props from ContainerOptions ───────────────────────────────
 
+/**
+ * Copy accessibility options onto a props bag as their corresponding HTML/ARIA
+ * attribute names. Values are written as strings (booleans become "true"/"false"
+ * rather than being dropped) so ARIA state attributes render literally. These
+ * flow to the DOM via the renderer's generic attribute pass — no ARIA-specific
+ * renderer code is involved.
+ */
+function applyA11yProps(props: Props, options: A11yOptions): void {
+  if (options.role !== undefined) props['role'] = options.role;
+  if (options.tabIndex !== undefined) props['tabindex'] = String(options.tabIndex);
+  if (options.ariaLabel !== undefined) props['aria-label'] = options.ariaLabel;
+  if (options.ariaLabelledBy !== undefined) props['aria-labelledby'] = options.ariaLabelledBy;
+  if (options.ariaDescribedBy !== undefined) props['aria-describedby'] = options.ariaDescribedBy;
+  if (options.ariaExpanded !== undefined) props['aria-expanded'] = String(options.ariaExpanded);
+  if (options.ariaControls !== undefined) props['aria-controls'] = options.ariaControls;
+  if (options.ariaHidden !== undefined) props['aria-hidden'] = String(options.ariaHidden);
+  if (options.ariaLive !== undefined) props['aria-live'] = options.ariaLive;
+  if (options.ariaCurrent !== undefined) props['aria-current'] = String(options.ariaCurrent);
+  if (options.ariaInvalid !== undefined) props['aria-invalid'] = String(options.ariaInvalid);
+  if (options.ariaRequired !== undefined) props['aria-required'] = String(options.ariaRequired);
+}
+
 function containerProps(options: ContainerOptions): Props {
   const props: Props = {};
   if (options.class !== undefined) props['class'] = options.class;
   if (options.id !== undefined) props['id'] = options.id;
   if (options.key !== undefined) props['key'] = options.key;
+  applyA11yProps(props, options);
   return props;
 }
 
