@@ -1,14 +1,49 @@
 
-> @streetui/example-basic-app@0.1.0 test /home/error51/Downloads/street/examples/basic-app
+
+> @streetui/example-basic-app@0.1.0 test /home/error51/Downloads/StreetUI/examples/basic-app
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/examples/basic-app
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/basic-app[39m
 
- ✓ src/counter-app.test.ts  (12 tests) 16ms
+[?25l     [90m·[39m renders the count display with initial value 0
+     [90m·[39m increment button fires and updates the signal
+     [90m·[39m DOM updates when signal changes — StreetUI renderer patches the DOM
+     [90m·[39m reset button sets count back to 0
+     [90m·[39m unmount removes all children from container
+     [90m·[39m signal subscriptions do not fire after unmount
+     [90m·[39m compiled graph has the correct structure
+     [90m·[39m heading has correct text prop
+     [90m·[39m buttons have click event handlers registered
+     [90m·[39m count text node has a state ref binding
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m renders the count display with initial value 0
+     [32m✓[39m increment button fires and updates the signal
+     [32m✓[39m DOM updates when signal changes — StreetUI renderer patches the DOM
+     [32m✓[39m reset button sets count back to 0
+     [32m✓[39m unmount removes all children from container
+     [32m✓[39m signal subscriptions do not fire after unmount
+     [32m✓[39m compiled graph has the correct structure
+     [32m✓[39m heading has correct text prop
+     [32m✓[39m buttons have click event handlers registered
+     [32m✓[39m count text node has a state ref binding
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mcounter-app[2m.test.ts[22m[2m (12)[22m
+   [32m✓[39m Counter Application — end-to-end[2m (12)[22m
+     [32m✓[39m renders a heading
+     [32m✓[39m renders two buttons
+     [32m✓[39m renders the count display with initial value 0
+     [32m✓[39m increment button fires and updates the signal
+     [32m✓[39m DOM updates when signal changes — StreetUI renderer patches the DOM
+     [32m✓[39m reset button sets count back to 0
+     [32m✓[39m unmount removes all children from container
+     [32m✓[39m signal subscriptions do not fire after unmount
+     [32m✓[39m compiled graph has the correct structure
+     [32m✓[39m heading has correct text prop
+     [32m✓[39m buttons have click event handlers registered
+     [32m✓[39m count text node has a state ref binding
 
- Test Files  1 passed (1)
-      Tests  12 passed (12)
-   Start at  07:05:40
-   Duration  686ms (transform 108ms, setup 0ms, collect 105ms, tests 16ms, environment 229ms, prepare 133ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 08:59:11
+[2m   Duration [22m 1.03s[2m (transform 164ms, setup 0ms, collect 171ms, tests 36ms, environment 391ms, prepare 182ms)[22m
 
+[?25h[?25h

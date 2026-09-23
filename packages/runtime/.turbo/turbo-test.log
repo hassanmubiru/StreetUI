@@ -1,14 +1,29 @@
 
-> @streetui/runtime@0.1.0 test /home/error51/Downloads/street/packages/runtime
+
+> @streetui/runtime@0.1.0 test /home/error51/Downloads/StreetUI/packages/runtime
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/packages/runtime
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/runtime[39m
 
- ✓ src/runtime.test.ts  (5 tests) 10ms
+[?25l [32m✓[39m [2msrc/[22mruntime[2m.test.ts[22m[2m (5)[22m
+   [32m✓[39m Runtime[2m (5)[22m
+     [32m✓[39m mounts successfully
+     [32m✓[39m throws if mounted twice
+     [32m✓[39m unmounts cleanly
+     [32m✓[39m unmounting twice is safe
+     [32m✓[39m signal change schedules a flush
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mruntime[2m.test.ts[22m[2m (5)[22m
+   [32m✓[39m Runtime[2m (5)[22m
+     [32m✓[39m mounts successfully
+     [32m✓[39m throws if mounted twice
+     [32m✓[39m unmounts cleanly
+     [32m✓[39m unmounting twice is safe
+     [32m✓[39m signal change schedules a flush
 
- Test Files  1 passed (1)
-      Tests  5 passed (5)
-   Start at  07:05:37
-   Duration  513ms (transform 136ms, setup 0ms, collect 164ms, tests 10ms, environment 0ms, prepare 92ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 08:59:08
+[2m   Duration [22m 717ms[2m (transform 271ms, setup 0ms, collect 313ms, tests 8ms, environment 0ms, prepare 114ms)[22m
 
+[?25h[?25h

@@ -1,14 +1,47 @@
 
-> @streetui/compiler@0.1.0 test /home/error51/Downloads/street/packages/compiler
+
+> @streetui/compiler@0.1.0 test /home/error51/Downloads/StreetUI/packages/compiler
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/packages/compiler
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/compiler[39m
 
- ✓ src/compiler.test.ts  (9 tests) 7ms
+[?25l     [90m·[39m returns a CompiledApplication from a StreetApp
+     [90m·[39m compiledAt is a timestamp
+     [90m·[39m applies transform defaults — heading level defaults to 1
+     [90m·[39m assigns _renderKey to every node
+     [90m·[39m produces deterministic output for the same input
+     [90m·[39m does not throw for a valid app with no pages (warning only)
+     [90m·[39m throws for an app with error-level issues
+   [90m·[39m compileGraph[2m (2)[22m
+     [90m·[39m compiles a raw ApplicationGraph
+     [90m·[39m strict:false collects errors without throwing
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m returns a CompiledApplication from a StreetApp
+     [32m✓[39m compiledAt is a timestamp
+     [32m✓[39m applies transform defaults — heading level defaults to 1
+     [32m✓[39m assigns _renderKey to every node
+     [32m✓[39m produces deterministic output for the same input
+     [32m✓[39m does not throw for a valid app with no pages (warning only)
+     [32m✓[39m throws for an app with error-level issues
+   [32m✓[39m compileGraph[2m (2)[22m
+     [32m✓[39m compiles a raw ApplicationGraph
+     [32m✓[39m strict:false collects errors without throwing
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mcompiler[2m.test.ts[22m[2m (9)[22m
+   [32m✓[39m compile[2m (7)[22m
+     [32m✓[39m returns a CompiledApplication from a StreetApp
+     [32m✓[39m compiledAt is a timestamp
+     [32m✓[39m applies transform defaults — heading level defaults to 1
+     [32m✓[39m assigns _renderKey to every node
+     [32m✓[39m produces deterministic output for the same input
+     [32m✓[39m does not throw for a valid app with no pages (warning only)
+     [32m✓[39m throws for an app with error-level issues
+   [32m✓[39m compileGraph[2m (2)[22m
+     [32m✓[39m compiles a raw ApplicationGraph
+     [32m✓[39m strict:false collects errors without throwing
 
- Test Files  1 passed (1)
-      Tests  9 passed (9)
-   Start at  07:05:36
-   Duration  393ms (transform 90ms, setup 0ms, collect 97ms, tests 7ms, environment 0ms, prepare 77ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 08:59:06
+[2m   Duration [22m 783ms[2m (transform 116ms, setup 0ms, collect 127ms, tests 14ms, environment 0ms, prepare 158ms)[22m
 
+[?25h[?25h

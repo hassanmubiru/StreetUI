@@ -1,4 +1,9 @@
 
-> @streetui/runtime@0.1.0 typecheck /home/error51/Downloads/street/packages/runtime
+> @streetui/runtime@0.1.0 typecheck /home/error51/Downloads/StreetUI/packages/runtime
 > tsc --noEmit
 
+src/runtime.test.ts(3,26): error TS7016: Could not find a declaration file for module '@streetui/dsl'. '/home/error51/Downloads/StreetUI/packages/dsl/dist/index.js' implicitly has an 'any' type.
+  Try `npm i --save-dev @types/streetui__dsl` if it exists or add a new declaration (.d.ts) file containing `declare module '@streetui/dsl';`
+src/runtime.test.ts(37,22): error TS7006: Parameter 'page' implicitly has an 'any' type.
+src/runtime.test.ts(89,22): error TS7006: Parameter 'page' implicitly has an 'any' type.
+ ELIFECYCLE  Command failed with exit code 2.

@@ -1,0 +1,83 @@
+
+
+> @streetui/dsl@0.1.0 build /home/error51/Downloads/StreetUI/packages/dsl
+> tsup
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
+
+    package.json:13:6:
+[37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
+         ╵       [32m~~~~~~~[0m
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:11:6:
+[37m      11 │       [32m"import"[37m: "./dist/index.js",
+         ╵       [32m~~~~~~~~[0m
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:12:6:
+[37m      12 │       [32m"require"[37m: "./dist/index.cjs",
+         ╵       [32m~~~~~~~~~[0m
+
+[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.3.5
+[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/dsl/tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+[34mCJS[39m Build start
+
+[90m[[90m8:59:04 AM[90m][39m [43m[30m WARN [39m[49m [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
+
+    package.json:13:6:
+[37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
+         ╵       [32m~~~~~~~[0m
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:11:6:
+[37m      11 │       [32m"import"[37m: "./dist/index.js",
+         ╵       [32m~~~~~~~~[0m
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:12:6:
+[37m      12 │       [32m"require"[37m: "./dist/index.cjs",
+         ╵       [32m~~~~~~~~~[0m
+
+
+
+
+[90m[[90m8:59:04 AM[90m][39m [43m[30m WARN [39m[49m [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mThe condition "types" here will never be used as it comes after both "import" and "require"[0m [package.json]
+
+    package.json:13:6:
+[37m      13 │       [32m"types"[37m: "./dist/index.d.ts"
+         ╵       [32m~~~~~~~[0m
+
+  The "import" condition comes earlier and will be used for all "import" statements:
+
+    package.json:11:6:
+[37m      11 │       [32m"import"[37m: "./dist/index.js",
+         ╵       [32m~~~~~~~~[0m
+
+  The "require" condition comes earlier and will be used for all "require" calls:
+
+    package.json:12:6:
+[37m      12 │       [32m"require"[37m: "./dist/index.cjs",
+         ╵       [32m~~~~~~~~~[0m
+
+
+
+[32mESM[39m [1mdist/index.js     [22m[32m7.64 KB[39m
+[32mESM[39m [1mdist/index.js.map [22m[32m16.97 KB[39m
+[32mESM[39m ⚡️ Build success in 31ms
+[32mCJS[39m [1mdist/index.cjs     [22m[32m8.92 KB[39m
+[32mCJS[39m [1mdist/index.cjs.map [22m[32m17.15 KB[39m
+[32mCJS[39m ⚡️ Build success in 31ms
+DTS Build start
+DTS ⚡️ Build success in 753ms
+DTS dist/index.d.ts  6.26 KB
+DTS dist/index.d.cts 6.26 KB

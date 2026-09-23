@@ -1,14 +1,68 @@
 
-> @streetui/renderer@0.1.0 test /home/error51/Downloads/street/packages/renderer
+
+> @streetui/renderer@0.1.0 test /home/error51/Downloads/StreetUI/packages/renderer
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/packages/renderer
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/renderer[39m
 
- ✓ src/renderer.test.ts  (26 tests) 33ms
+[?25l   [90m·[39m events — button click[2m (1)[22m
+     [90m·[39m fires click handler
+   [90m·[39m reactive signal updates[2m (3)[22m
+     [90m·[39m updates text when signal changes
+     [90m·[39m updates heading when signal changes
+     [90m·[39m updates button disabled state
+   [90m·[39m StreetRenderer unmount[2m (3)[22m
+     [90m·[39m removes all children from container on unmount
+     [90m·[39m calling unmount twice is safe
+     [90m·[39m event listeners are removed after unmount
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G   [32m✓[39m events — button click[2m (1)[22m
+     [32m✓[39m fires click handler
+   [32m✓[39m reactive signal updates[2m (3)[22m
+     [32m✓[39m updates text when signal changes
+     [32m✓[39m updates heading when signal changes
+     [32m✓[39m updates button disabled state
+   [32m✓[39m StreetRenderer unmount[2m (3)[22m
+     [32m✓[39m removes all children from container on unmount
+     [32m✓[39m calling unmount twice is safe
+     [32m✓[39m event listeners are removed after unmount
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (26)[22m
+   [32m✓[39m applyProp[2m (9)[22m
+     [32m✓[39m sets a string attribute
+     [32m✓[39m sets class attribute via "class" key
+     [32m✓[39m sets class attribute via "className" key
+     [32m✓[39m sets boolean attr disabled
+     [32m✓[39m removes boolean attr when false
+     [32m✓[39m removes attr when null
+     [32m✓[39m skips internal _ props
+     [32m✓[39m skips on* handlers
+     [32m✓[39m sets value as DOM property
+   [32m✓[39m patchProp[2m (2)[22m
+     [32m✓[39m skips update when value unchanged
+     [32m✓[39m applies update when value changed
+   [32m✓[39m mountGraph — element creation[2m (8)[22m
+     [32m✓[39m creates a heading element
+     [32m✓[39m creates a text node
+     [32m✓[39m creates a button element
+     [32m✓[39m creates a section element
+     [32m✓[39m creates nested structure
+     [32m✓[39m creates an input element
+     [32m✓[39m creates an image element with src/alt
+     [32m✓[39m creates a link element
+   [32m✓[39m events — button click[2m (1)[22m
+     [32m✓[39m fires click handler
+   [32m✓[39m reactive signal updates[2m (3)[22m
+     [32m✓[39m updates text when signal changes
+     [32m✓[39m updates heading when signal changes
+     [32m✓[39m updates button disabled state
+   [32m✓[39m StreetRenderer unmount[2m (3)[22m
+     [32m✓[39m removes all children from container on unmount
+     [32m✓[39m calling unmount twice is safe
+     [32m✓[39m event listeners are removed after unmount
 
- Test Files  1 passed (1)
-      Tests  26 passed (26)
-   Start at  07:05:39
-   Duration  729ms (transform 129ms, setup 0ms, collect 150ms, tests 33ms, environment 221ms, prepare 85ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
+[2m   Start at [22m 08:59:10
+[2m   Duration [22m 791ms[2m (transform 114ms, setup 0ms, collect 126ms, tests 18ms, environment 317ms, prepare 99ms)[22m
 
+[?25h[?25h
