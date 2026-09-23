@@ -43,4 +43,141 @@ function clickHandlerCount(graph: { handlers: Map<string, unknown> }): number {
   return n;
 }
 
+// 1 ── Initial rendering ────────────────────────────────────────────────────
+describe('1. initial rendering', () => {
+  it('renders navigation, hero, sections and footer', () => {
+    const { container, mounted } = setup();
+    expect(container.querySelector('#navbar')).not.toBeNull();
+    expect(container.querySelector('#hero-title')).not.toBeNull();
+    expect(text(container.querySelector('#hero-title'))).toBe('Build UIs from a semantic graph');
+    expect(container.querySelectorAll('#navbar a').length).toBe(3);
+    expect(container.querySelector('#site-footer')).not.toBeNull();
+    // Every top-level section rendered as a real <section>
+    expect(container.querySelectorAll('section').length).toBeGreaterThanOrEqual(9);
+    teardown(container, mounted);
+  });
+
+  it('renders the initial reactive list with three items', () => {
+    const { container, mounted } = setup();
+    const list = container.querySelector('#features-list')!;
+    expect(list.querySelectorAll('li').length).toBe(3);
+    expect(text(container.querySelector('#feature-1'))).toBe('Core');
+    expect(text(container.querySelector('#feature-2'))).toBe('Renderer');
+    expect(text(container.querySelector('#feature-3'))).toBe('Runtime');
+    teardown(container, mounted);
+  });
+
+  it('external nav link gets target/rel attributes', () => {
+    const { container, mounted } = setup();
+    const gh = container.querySelector('#nav-github')!;
+    expect(gh.getAttribute('target')).toBe('_blank');
+    expect(gh.getAttribute('rel')).toBe('noopener noreferrer');
+    teardown(container, mounted);
+  });
+});
+
+// 2 ── Counter updates ──────────────────────────────────────────────────────
+describe('2. counter updates reactively', () => {
+  it('increments, decrements and resets via real button clicks', () => {
+    const { container, state, mounted } = setup();
+    const value = () => text(container.querySelector('#counter-value'));
+    expect(value()).toBe('0');
+
+    (container.querySelector('#btn-increment') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    (container.querySelector('#btn-increment') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(state.count.get()).toBe(2);
+    expect(value()).toBe('2');
+
+    (container.querySelector('#btn-decrement') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(value()).toBe('1');
+
+    (container.querySelector('#btn-reset') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(state.count.get()).toBe(0);
+    expect(value()).toBe('0');
+    teardown(container, mounted);
+  });
+});
+
+// 3 ── List updates ─────────────────────────────────────────────────────────
+describe('3. reactive list — add / remove / update / clear', () => {
+  it('adds an item', () => {
+    const { container, actions, mounted } = setup();
+    actions.addFeature('Compiler');
+    const list = container.querySelector('#features-list')!;
+    expect(list.querySelectorAll('li').length).toBe(4);
+    expect(text(container.querySelector('#feature-4'))).toBe('Compiler');
+    teardown(container, mounted);
+  });
+
+  it('removes the last item', () => {
+    const { container, actions, mounted } = setup();
+    actions.removeLastFeature();
+    expect(container.querySelector('#features-list')!.querySelectorAll('li').length).toBe(2);
+    expect(container.querySelector('#feature-3')).toBeNull();
+    teardown(container, mounted);
+  });
+
+  it('removes a specific item via its per-item button', () => {
+    const { container, mounted } = setup();
+    (container.querySelector('#feature-remove-2') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(container.querySelector('#feature-2')).toBeNull();
+    expect(container.querySelector('#feature-1')).not.toBeNull();
+    expect(container.querySelector('#feature-3')).not.toBeNull();
+    teardown(container, mounted);
+  });
+
+  it('updates an item in place (data change, identity unchanged)', () => {
+    const { container, actions, mounted } = setup();
+    const spanBefore = container.querySelector('#feature-1')!;
+    actions.renameFeature(1, 'Core (updated)');
+    const spanAfter = container.querySelector('#feature-1')!;
+    expect(text(spanAfter)).toBe('Core (updated)');
+    // Same DOM element reused — content patched in place, not replaced.
+    expect(spanAfter).toBe(spanBefore);
+    teardown(container, mounted);
+  });
+
+  it('clears the list', () => {
+    const { container, actions, mounted } = setup();
+    actions.clearFeatures();
+    expect(container.querySelector('#features-list')!.querySelectorAll('li').length).toBe(0);
+    teardown(container, mounted);
+  });
+
+  it('repopulates after a clear', () => {
+    const { container, actions, mounted } = setup();
+    actions.clearFeatures();
+    actions.addFeature('Fresh');
+    const list = container.querySelector('#features-list')!;
+    expect(list.querySelectorAll('li').length).toBe(1);
+    teardown(container, mounted);
+  });
+});
+
+// 4 ── Keyed reorder preserves DOM identity ─────────────────────────────────
+describe('4. keyed reorder preserves DOM identity', () => {
+  it('rotating the list reuses the exact same <li> and <span> elements', () => {
+    const { container, actions, mounted } = setup();
+    const li = (id: number) => container.querySelector(`#feature-${id}`)!.closest('li');
+    const li1 = li(1), li2 = li(2), li3 = li(3);
+    const span1 = container.querySelector('#feature-1')!;
+
+    // Core, Renderer, Runtime → Renderer, Runtime, Core
+    actions.reorderFeatures();
+
+    expect(li(1)).toBe(li1);
+    expect(li(2)).toBe(li2);
+    expect(li(3)).toBe(li3);
+    expect(container.querySelector('#feature-1')).toBe(span1);
+
+    // Verify the visual order actually changed in the DOM
+    const order = Array.from(container.querySelectorAll('#features-list li span[id^="feature-"]'))
+      .map((s) => text(s));
+    expect(order).toEqual(['Renderer', 'Runtime', 'Core']);
+    teardown(container, mounted);
+  });
+});
+
 // __TESTS_MARKER__
+
+
