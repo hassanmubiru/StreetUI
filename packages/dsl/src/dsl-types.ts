@@ -8,6 +8,13 @@ import type { Signal, ReadonlySignal } from '@streetui/state';
 // A bound value can be a literal or a reactive signal
 export type Bindable<T> = T | ReadonlySignal<T> | Signal<T>;
 
+// Text-like sinks (heading/text/button label/link label) render their value by
+// stringifying it at the presentation boundary, so they accept any primitive
+// that has a meaningful string form — and reactive sources of those. A mutable
+// `Signal<number>` is accepted because it is assignable to `ReadonlySignal<TextValue>`.
+export type TextValue = string | number | boolean;
+export type BindableText = TextValue | ReadonlySignal<TextValue>;
+
 export interface TextOptions {
   readonly class?: string;
   readonly id?: string;
@@ -24,16 +31,39 @@ export interface ButtonOptions {
   readonly onClick?: () => void;
 }
 
-export interface InputOptions {
+export interface InputOptionsBase {
   readonly class?: string;
   readonly id?: string;
   readonly type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
   readonly placeholder?: string;
-  readonly value?: Bindable<string>;
   readonly disabled?: Bindable<boolean>;
-  readonly onInput?: (value: string) => void;
   readonly onChange?: (value: string) => void;
 }
+
+/**
+ * Explicitly-controlled input: supply `value` and/or `onInput` yourself.
+ * `bind` is disallowed here (typed as `never`) so a two-way `bind` can never be
+ * combined with manual `value`/`onInput` wiring — the ambiguity is rejected by
+ * the type checker rather than resolved silently at runtime.
+ */
+export interface ControlledInputOptions extends InputOptionsBase {
+  readonly value?: Bindable<string>;
+  readonly onInput?: (value: string) => void;
+  readonly bind?: never;
+}
+
+/**
+ * Two-way bound input: `bind` expands to `value` (read) + an input handler that
+ * writes the field value back into the signal. Manual `value`/`onInput` are
+ * disallowed here to keep the binding unambiguous.
+ */
+export interface BoundInputOptions extends InputOptionsBase {
+  readonly bind: Signal<string>;
+  readonly value?: never;
+  readonly onInput?: never;
+}
+
+export type InputOptions = ControlledInputOptions | BoundInputOptions;
 
 export interface LinkOptions {
   readonly class?: string;

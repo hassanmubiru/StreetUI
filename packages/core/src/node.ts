@@ -22,7 +22,8 @@ export type SemanticNodeType =
   | 'component'
   | 'slot'
   | 'fragment'
-  | 'reactive-list';
+  | 'reactive-list'
+  | 'conditional';
 
 export interface NodeMetadata {
   readonly createdAt: number;
