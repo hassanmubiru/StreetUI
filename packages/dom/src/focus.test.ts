@@ -44,7 +44,7 @@ describe('focus helpers (browser)', () => {
 
 describe('focus helpers (server) — SSR-safe no-ops', () => {
   it('return false and never throw on the server adapter', () => {
-    const dom = new ServerDOMAdapter();
+    const dom: DOMAdapter = new ServerDOMAdapter();
     const el = dom.createElement('div');
     expect(() => dom.focus(el)).not.toThrow();
     expect(focusById(dom, el, 'anything')).toBe(false);
