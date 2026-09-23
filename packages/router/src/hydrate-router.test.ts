@@ -21,7 +21,7 @@ const routes: RouteDefinition[] = [
     path: '/docs/:section',
     builder: (page, ctx) =>
       page.section('doc', (s) => {
-        s.heading(ctx.params.section, { id: 'section-title' });
+        s.heading(ctx.params.section ?? '', { id: 'section-title' });
         s.text(`q=${ctx.query.get('q') ?? 'none'}`, { id: 'section-q' });
       }),
   },

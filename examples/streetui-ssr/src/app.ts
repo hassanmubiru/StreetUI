@@ -19,7 +19,7 @@ export interface AppState {
   readonly count: Signal<number>;
   readonly name: Signal<string>;
   readonly showDetails: Signal<boolean>;
-  readonly todos: Signal<ReadonlyArray<{ id: number; label: string }>>;
+  readonly todos: Signal<Array<{ id: number; label: string }>>;
 }
 
 /** Plain, JSON-serializable snapshot of the reactive state (for the SSR island). */
@@ -38,11 +38,13 @@ export function createState(seed?: AppSnapshot): AppState {
     count: signal(seed?.count ?? 0),
     name: signal(seed?.name ?? 'world'),
     showDetails: signal(seed?.showDetails ?? false),
-    todos: signal(seed?.todos ?? [
-      { id: 1, label: 'Render on the server' },
-      { id: 2, label: 'Ship HTML' },
-      { id: 3, label: 'Hydrate in place' },
-    ]),
+    todos: signal(
+      (seed?.todos ?? [
+        { id: 1, label: 'Render on the server' },
+        { id: 2, label: 'Ship HTML' },
+        { id: 3, label: 'Hydrate in place' },
+      ]).map((t) => ({ id: t.id, label: t.label })),
+    ),
   };
 }
 

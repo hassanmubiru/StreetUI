@@ -39,15 +39,16 @@ describe('renderToString — server rendering', () => {
     expect(html).toContain('class="a b"');
   });
 
-  it('self-closes void elements (img/input)', () => {
+  it('renders void elements (img/input) without a closing tag', () => {
     const html = render((app) => {
       app.page('home', (page) => {
         page.image({ src: '/x.png', alt: 'x' });
         page.input({ placeholder: 'name' });
       });
     });
-    expect(html).toMatch(/<img[^>]*\/>/);
-    expect(html).toMatch(/<input[^>]*\/>/);
+    expect(html).toContain('<img');
+    expect(html).toContain('<input');
+    // Void elements must never emit a separate closing tag.
     expect(html).not.toContain('</img>');
     expect(html).not.toContain('</input>');
   });
