@@ -145,14 +145,11 @@ class ContentBuilderBase implements ContentDSL {
   ) {}
 
   heading(text: BindableText, options: HeadingOptions = {}): void {
-    const nodeOpts: { props?: Props } = {
-      props: {
-        level: options.level ?? 1,
-        ...(options.class !== undefined ? { class: options.class } : {}),
-        ...(options.id !== undefined ? { id: options.id } : {}),
-      },
-    };
-    const node = this._graph.createNode('heading', { parent: this._node, ...nodeOpts });
+    const props: Props = { level: options.level ?? 1 };
+    if (options.class !== undefined) props['class'] = options.class;
+    if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode('heading', { parent: this._node, props });
     const resolved = bindValue<TextValue>(this._graph, node, 'text', text);
     node.setProp('text', resolved);
   }
@@ -161,6 +158,7 @@ class ContentBuilderBase implements ContentDSL {
     const props: Props = {};
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
     const node = this._graph.createNode('text', { parent: this._node, props });
     const resolved = bindValue<TextValue>(this._graph, node, 'text', content);
     node.setProp('text', resolved);
@@ -170,6 +168,7 @@ class ContentBuilderBase implements ContentDSL {
     const props: Props = {};
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
     const node = this._graph.createNode('button', { parent: this._node, props });
     const resolved = bindValue<TextValue>(this._graph, node, 'label', label);
     node.setProp('label', resolved);
