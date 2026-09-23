@@ -90,6 +90,16 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
     shellApp.page('shell', (page) => shellBuilder(page, router));
     const shellRuntime = createRuntime({ renderer });
     const shellCompiled = compile(shellApp);
+    if (hydrateMode) {
+      // The outlet is a slot the router fills. When the shell hydrates, mark the
+      // outlet node as a hydration boundary so shell hydration adopts the outlet
+      // element itself but preserves the server-rendered route content inside it
+      // (instead of stripping it as surplus). The initial route then hydrates
+      // that content node-for-node.
+      for (const node of shellCompiled.graph.findAll((n) => n.getProp('id') === outletId)) {
+        node.setProp('_hydrationBoundary', true);
+      }
+    }
     shellMounted = hydrateMode
       ? shellRuntime.hydrate(shellCompiled, container)
       : shellRuntime.mount(shellCompiled, container);

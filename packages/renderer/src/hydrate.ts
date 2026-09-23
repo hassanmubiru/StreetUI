@@ -126,6 +126,15 @@ function hydrateNode(ctx: RenderContext, graphNode: GraphNode, domNode: Element)
       if (graphNode.type === 'form') {
         wireEvents(dom, graph, graphNode, domNode, instance);
       }
+      // Hydration boundary (a "slot" such as the router outlet): adopt the
+      // element itself but leave its existing children untouched — neither
+      // hydrated by this pass nor removed as surplus. Something else (e.g. the
+      // router) owns and will hydrate the content already inside it. Without
+      // this, an empty-in-the-graph slot would strip the server-rendered
+      // content it is meant to preserve.
+      if (graphNode.getProp('_hydrationBoundary') === true) {
+        return instance;
+      }
       hydrateChildren(ctx, graphNode, instance, domNode);
       return instance;
     }
