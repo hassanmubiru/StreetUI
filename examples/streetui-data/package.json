@@ -1,0 +1,29 @@
+{
+  "name": "@streetui/example-data",
+  "version": "0.3.0",
+  "private": true,
+  "description": "StreetUI data example — router + resource + errorBoundary against a real local HTTP API",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/dom": "workspace:*",
+    "@streetui/router": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
