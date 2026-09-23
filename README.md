@@ -131,6 +131,67 @@ navigation, active links, 404 handling, and route lifecycle cleanup.
 
 ---
 
+## Async data: resources & error boundaries
+
+Real applications talk to real APIs. `resource()` (in `@streetui/state`) is a
+framework-native async primitive: it runs a `Promise`-returning loader and
+exposes the result as ordinary StreetUI signals — `status`
+(`'idle' | 'loading' | 'success' | 'error'`), `data`, `error`, plus the derived
+`loading` and `isRefetching`. There is no second reactive system, no virtual
+DOM, and no HTTP client baked in: the loader is any async function, so plain
+`fetch()` (or anything else) works.
+
+```ts
+import { resource, derived } from '@streetui/state';
+
+const products = resource<Product[]>(({ signal }) =>
+  fetch('/api/products', { signal }).then((r) => {
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json() as Promise<Product[]>;
+  }),
+);
+
+// Consume reactively — these are the same signals used everywhere else.
+page.when(products.loading, (l) => l.text('Loading…'));
+page.listOf('items', derived(() => products.data.get() ?? []), (p, _i, c) =>
+  c.text(`${p.name} — $${p.price}`),
+);
+```
+
+`resource()` guards against the hard parts automatically: overlapping requests
+are ordered by a monotonic run id (an older response can never overwrite a newer
+one), the in-flight request is aborted via `AbortController` when it is
+superseded or the owner is disposed, and `refetch()` preserves the previous
+`data` while reloading (surfaced as `isRefetching`). Register `dispose` with a
+route's `ctx.onCleanup` and navigating away tears the resource down — it will
+never update detached UI.
+
+Failures are contained with the `errorBoundary` DSL block, which swaps its body
+for a fallback when an observed error signal becomes non-null (or the body
+throws while building) and hands the fallback a `retry()`:
+
+```ts
+c.errorBoundary('products', (body) => {
+  body.listOf('items', list, (p, _i, x) => x.text(p.name));
+}, {
+  source: products.error,
+  onRetry: () => void products.refetch(),
+  fallback: (fb, error, retry) => {
+    fb.text(`Unable to load (${(error as Error).message}).`);
+    fb.button('Retry', { onClick: retry });
+  },
+});
+```
+
+It reuses the same reactive `when()` machinery, so the fallback subtree and all
+its handlers are torn down on removal; it does *not* trap arbitrary global
+errors, and errors stay observable. A complete, runnable data-driven app (real
+local HTTP server, loading → list → error → retry, router-scoped cleanup) lives
+in `examples/streetui-data`. See `packages/state/README.md` for the full
+`resource()` reference.
+
+---
+
 ## Packages
 
 | Package | Description |
