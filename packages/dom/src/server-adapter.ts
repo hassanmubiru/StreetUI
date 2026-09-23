@@ -162,6 +162,10 @@ export class ServerDOMAdapter implements DOMAdapter {
     return null;
   }
 
+  focus(): void {
+    // No focus concept on the server — intentional no-op (SSR-safe).
+  }
+
   isElement(node: Node): node is Element {
     return asServer(node).kind === 'element';
   }

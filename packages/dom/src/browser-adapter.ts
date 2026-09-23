@@ -94,6 +94,10 @@ export class BrowserDOMAdapter implements DOMAdapter {
     return document.getElementById(id);
   }
 
+  focus(element: Element): void {
+    (element as unknown as { focus?: () => void }).focus?.();
+  }
+
   isElement(node: Node): node is Element {
     return node.nodeType === Node.ELEMENT_NODE;
   }

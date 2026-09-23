@@ -47,6 +47,13 @@ export interface DOMAdapter {
   querySelectorAll(root: Element | Document, selector: string): NodeListOf<Element>;
   getElementById(id: string): Element | null;
 
+  // ── Focus ────────────────────────────────────────────────────────────────────
+  /**
+   * Move focus to an element. On the server (or when the element cannot receive
+   * focus) this is a safe no-op, keeping focus management SSR-compatible.
+   */
+  focus(element: Element): void;
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   isElement(node: Node): node is Element;
   isTextNode(node: Node): node is Text;

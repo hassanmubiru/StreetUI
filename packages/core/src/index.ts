@@ -1,3 +1,4 @@
+export * from './a11y-ids.js';
 export * from './application.js';
 export * from './diagnostics.js';
 export * from './environment.js';
