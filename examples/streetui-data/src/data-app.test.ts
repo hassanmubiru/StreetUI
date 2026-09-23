@@ -46,7 +46,7 @@ describe('streetui-data — loading → success against a real HTTP API', () => 
     expect(container.querySelector('#products-loading')).not.toBeNull();
     expect(container.querySelector('#product-1')).toBeNull();
 
-    await settle();
+    await waitFor(() => container.querySelector('#product-1') !== null);
 
     // Data resolved over real HTTP → list rendered, loading gone.
     expect(container.querySelector('#products-loading')).toBeNull();
@@ -58,7 +58,7 @@ describe('streetui-data — loading → success against a real HTTP API', () => 
   it('reflects the server data exactly — swapping the backing data changes the render', async () => {
     api.setProducts([{ id: 7, name: 'Bombax BM100', price: 5200 }]);
     app = mountDataApp(container, { baseUrl, history: createMemoryHistory('/products') });
-    await settle();
+    await waitFor(() => container.querySelector('#product-7') !== null);
     expect(text(container.querySelector('#product-7'))).toBe('Bombax BM100 — $5200');
     expect(container.querySelector('#product-1')).toBeNull();
   });
@@ -66,7 +66,7 @@ describe('streetui-data — loading → success against a real HTTP API', () => 
   it('renders the empty state when the API returns no products', async () => {
     api.setProducts([]);
     app = mountDataApp(container, { baseUrl, history: createMemoryHistory('/products') });
-    await settle();
+    await waitFor(() => container.querySelector('#products-empty') !== null);
     expect(container.querySelector('#products-empty')).not.toBeNull();
     expect(text(container.querySelector('#products-empty'))).toBe('No products available.');
   });
