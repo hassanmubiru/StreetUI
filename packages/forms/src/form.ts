@@ -103,7 +103,9 @@ export function createForm<T extends FormValues>(config: FormConfig<T>): Form<T>
   const fields = new Map<string, FieldInternal>();
 
   for (const name of names) {
-    const initial = config.initialValues[name];
+    // Keys come from Object.keys(initialValues), so the value is always present;
+    // the annotation defeats noUncheckedIndexedAccess widening to `| undefined`.
+    const initial: string = config.initialValues[name] as string;
     const value = signal<string>(initial);
     const touched = signal<boolean>(false);
     const error = derived<string | undefined>(() =>

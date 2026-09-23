@@ -1,0 +1,32 @@
+{
+  "name": "@streetui/example-account",
+  "version": "0.5.0",
+  "private": true,
+  "description": "StreetUI account example — the whole platform together: router + resources + forms + validation + context + i18n + accessibility, server-rendered and hydrated.",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/dom": "workspace:*",
+    "@streetui/router": "workspace:*",
+    "@streetui/forms": "workspace:*",
+    "@streetui/i18n": "workspace:*",
+    "@streetui/context": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
