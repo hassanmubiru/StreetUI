@@ -1,27 +1,73 @@
 
-> @streetui/scheduler@0.1.0 test /home/error51/Downloads/street/packages/scheduler
+
+> @streetui/scheduler@0.1.0 test /home/error51/Downloads/StreetUI/packages/scheduler
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/packages/scheduler
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/scheduler[39m
 
-stderr | src/scheduler.test.ts > Scheduler > isolates job failures
+[?25l     [90m·[39m flushes all jobs
+     [90m·[39m orders by priority: immediate before normal before idle
+     [90m·[39m can cancel a queued job
+     [90m·[39m clear removes all jobs without running them
+     [90m·[39m isolates job failures
+     [90m·[39m scheduleAll queues multiple jobs atomically
+     [90m·[39m does not double-flush if already flushing
+     [90m·[39m microtask flush runs asynchronously
+   [90m·[39m global scheduler helpers[2m (1)[22m
+     [90m·[39m flushSync flushes global scheduler
+[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G[90mstderr[2m | src/scheduler.test.ts[2m > [22m[2mScheduler[2m > [22m[2misolates job failures[22m[39m
 [Scheduler] Job "bad" threw: Error: boom
-    at Object.fn (/home/error51/Downloads/street/packages/scheduler/src/scheduler.test.ts:66:69)
-    at Scheduler.flush (/home/error51/Downloads/street/packages/scheduler/src/scheduler.ts:89:15)
-    at /home/error51/Downloads/street/packages/scheduler/src/scheduler.test.ts:68:20
-    at Proxy.assertThrows (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:2767:5)
-    at Proxy.methodWrapper (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
-    at Proxy.<anonymous> (file:///home/error51/Downloads/street/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:988:16)
-    at Proxy.overwritingMethodWrapper (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1735:33)
-    at Proxy.<anonymous> (file:///home/error51/Downloads/street/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:1468:21)
-    at Proxy.<anonymous> (file:///home/error51/Downloads/street/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:931:17)
-    at Proxy.methodWrapper (file:///home/error51/Downloads/street/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
+    at Object.fn (/home/error51/Downloads/StreetUI/packages/scheduler/src/scheduler.test.ts:66:69)
+    at Scheduler.flush (/home/error51/Downloads/StreetUI/packages/scheduler/src/scheduler.ts:89:15)
+    at /home/error51/Downloads/StreetUI/packages/scheduler/src/scheduler.test.ts:68:20
+    at Proxy.assertThrows (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:2767:5)
+    at Proxy.methodWrapper (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
+    at Proxy.<anonymous> (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:988:16)
+    at Proxy.overwritingMethodWrapper (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1735:33)
+    at Proxy.<anonymous> (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:1468:21)
+    at Proxy.<anonymous> (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:931:17)
+    at Proxy.methodWrapper (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
 
- ✓ src/scheduler.test.ts  (12 tests) 20ms
+[?25l     [90m·[39m flushes all jobs
+     [90m·[39m orders by priority: immediate before normal before idle
+     [90m·[39m can cancel a queued job
+     [90m·[39m clear removes all jobs without running them
+     [90m·[39m isolates job failures
+     [90m·[39m scheduleAll queues multiple jobs atomically
+     [90m·[39m does not double-flush if already flushing
+     [90m·[39m microtask flush runs asynchronously
+   [90m·[39m global scheduler helpers[2m (1)[22m
+     [90m·[39m flushSync flushes global scheduler
+[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m flushes all jobs
+     [32m✓[39m orders by priority: immediate before normal before idle
+     [32m✓[39m can cancel a queued job
+     [32m✓[39m clear removes all jobs without running them
+     [32m✓[39m isolates job failures
+     [32m✓[39m scheduleAll queues multiple jobs atomically
+     [32m✓[39m does not double-flush if already flushing
+     [32m✓[39m microtask flush runs asynchronously
+   [32m✓[39m global scheduler helpers[2m (1)[22m
+     [32m✓[39m flushSync flushes global scheduler
+[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mscheduler[2m.test.ts[22m[2m (12)[22m
+   [32m✓[39m Scheduler[2m (11)[22m
+     [32m✓[39m starts empty
+     [32m✓[39m queues a job
+     [32m✓[39m replaces duplicate key
+     [32m✓[39m flushes all jobs
+     [32m✓[39m orders by priority: immediate before normal before idle
+     [32m✓[39m can cancel a queued job
+     [32m✓[39m clear removes all jobs without running them
+     [32m✓[39m isolates job failures
+     [32m✓[39m scheduleAll queues multiple jobs atomically
+     [32m✓[39m does not double-flush if already flushing
+     [32m✓[39m microtask flush runs asynchronously
+   [32m✓[39m global scheduler helpers[2m (1)[22m
+     [32m✓[39m flushSync flushes global scheduler
 
- Test Files  1 passed (1)
-      Tests  12 passed (12)
-   Start at  07:05:31
-   Duration  1.50s (transform 135ms, setup 0ms, collect 125ms, tests 20ms, environment 0ms, prepare 185ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 08:58:55
+[2m   Duration [22m 3.16s[2m (transform 1.23s, setup 0ms, collect 1.30s, tests 206ms, environment 0ms, prepare 620ms)[22m
 
+[?25h[?25h

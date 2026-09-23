@@ -1,14 +1,62 @@
 
-> @streetui/state@0.1.0 test /home/error51/Downloads/street/packages/state
+
+> @streetui/state@0.1.0 test /home/error51/Downloads/StreetUI/packages/state
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/packages/state
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/state[39m
 
- ✓ src/state.test.ts  (21 tests) 23ms
+[?25l     [90m·[39m reruns when dependency changes
+     [90m·[39m cleans up on stop
+   [90m·[39m batch[2m (1)[22m
+     [90m·[39m batches multiple updates
+   [90m·[39m Store[2m (5)[22m
+     [90m·[39m creates a store with initial state
+     [90m·[39m updates individual fields
+     [90m·[39m exposes signal per field
+     [90m·[39m subscribes to field changes
+     [90m·[39m returns a snapshot
+[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m reruns when dependency changes
+     [32m✓[39m cleans up on stop
+   [32m✓[39m batch[2m (1)[22m
+     [32m✓[39m batches multiple updates
+   [32m✓[39m Store[2m (5)[22m
+     [32m✓[39m creates a store with initial state
+     [32m✓[39m updates individual fields
+     [32m✓[39m exposes signal per field
+     [32m✓[39m subscribes to field changes
+     [32m✓[39m returns a snapshot
+[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mstate[2m.test.ts[22m[2m (21)[22m
+   [32m✓[39m signal[2m (7)[22m
+     [32m✓[39m holds an initial value
+     [32m✓[39m updates value with set
+     [32m✓[39m updates value with update fn
+     [32m✓[39m notifies subscribers on change
+     [32m✓[39m does not notify if value unchanged
+     [32m✓[39m unsubscribes correctly
+     [32m✓[39m peek returns value without tracking
+   [32m✓[39m derived[2m (5)[22m
+     [32m✓[39m computes from source signals
+     [32m✓[39m updates when dependency changes
+     [32m✓[39m notifies subscribers when recomputed
+     [32m✓[39m chains derived signals
+     [32m✓[39m disposes cleanly
+   [32m✓[39m effect[2m (3)[22m
+     [32m✓[39m runs immediately
+     [32m✓[39m reruns when dependency changes
+     [32m✓[39m cleans up on stop
+   [32m✓[39m batch[2m (1)[22m
+     [32m✓[39m batches multiple updates
+   [32m✓[39m Store[2m (5)[22m
+     [32m✓[39m creates a store with initial state
+     [32m✓[39m updates individual fields
+     [32m✓[39m exposes signal per field
+     [32m✓[39m subscribes to field changes
+     [32m✓[39m returns a snapshot
 
- Test Files  1 passed (1)
-      Tests  21 passed (21)
-   Start at  07:05:31
-   Duration  1.34s (transform 147ms, setup 0ms, collect 162ms, tests 23ms, environment 0ms, prepare 142ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m21 passed[39m[22m[90m (21)[39m
+[2m   Start at [22m 08:58:55
+[2m   Duration [22m 3.29s[2m (transform 820ms, setup 0ms, collect 868ms, tests 206ms, environment 0ms, prepare 884ms)[22m
 
+[?25h[?25h

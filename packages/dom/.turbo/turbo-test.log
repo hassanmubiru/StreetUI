@@ -1,14 +1,52 @@
 
-> @streetui/dom@0.1.0 test /home/error51/Downloads/street/packages/dom
+
+> @streetui/dom@0.1.0 test /home/error51/Downloads/StreetUI/packages/dom
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/street/packages/dom
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/dom[39m
 
- ✓ src/dom.test.ts  (15 tests) 21ms
+[?25l     [90m·[39m insertBefore positions correctly
+     [90m·[39m replaceChild swaps nodes
+     [90m·[39m setAttribute / getAttribute / removeAttribute
+     [90m·[39m setProperty sets a DOM property
+     [90m·[39m setTextContent / getTextContent
+     [90m·[39m addEventListener fires the handler
+     [90m·[39m removeEventListener prevents further calls
+     [90m·[39m isElement / isTextNode
+     [90m·[39m parentNode returns parent
+     [90m·[39m nextSibling returns correct node
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m insertBefore positions correctly
+     [32m✓[39m replaceChild swaps nodes
+     [32m✓[39m setAttribute / getAttribute / removeAttribute
+     [32m✓[39m setProperty sets a DOM property
+     [32m✓[39m setTextContent / getTextContent
+     [32m✓[39m addEventListener fires the handler
+     [32m✓[39m removeEventListener prevents further calls
+     [32m✓[39m isElement / isTextNode
+     [32m✓[39m parentNode returns parent
+     [32m✓[39m nextSibling returns correct node
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
+   [32m✓[39m BrowserDOMAdapter[2m (15)[22m
+     [32m✓[39m createElement creates a DOM element
+     [32m✓[39m createTextNode creates a text node
+     [32m✓[39m createComment creates a comment node
+     [32m✓[39m createFragment creates a DocumentFragment
+     [32m✓[39m appendChild / removeChild
+     [32m✓[39m insertBefore positions correctly
+     [32m✓[39m replaceChild swaps nodes
+     [32m✓[39m setAttribute / getAttribute / removeAttribute
+     [32m✓[39m setProperty sets a DOM property
+     [32m✓[39m setTextContent / getTextContent
+     [32m✓[39m addEventListener fires the handler
+     [32m✓[39m removeEventListener prevents further calls
+     [32m✓[39m isElement / isTextNode
+     [32m✓[39m parentNode returns parent
+     [32m✓[39m nextSibling returns correct node
 
- Test Files  1 passed (1)
-      Tests  15 passed (15)
-   Start at  07:05:31
-   Duration  1.80s (transform 106ms, setup 0ms, collect 91ms, tests 21ms, environment 406ms, prepare 234ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m15 passed[39m[22m[90m (15)[39m
+[2m   Start at [22m 08:58:54
+[2m   Duration [22m 4.74s[2m (transform 260ms, setup 0ms, collect 199ms, tests 39ms, environment 2.96s, prepare 678ms)[22m
 
+[?25h[?25h
