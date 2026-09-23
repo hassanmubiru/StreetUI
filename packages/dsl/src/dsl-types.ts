@@ -103,7 +103,7 @@ export interface BoundInputOptions extends InputOptionsBase {
 
 export type InputOptions = ControlledInputOptions | BoundInputOptions;
 
-export interface LinkOptions {
+export interface LinkOptions extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
   readonly href: string;
@@ -111,7 +111,7 @@ export interface LinkOptions {
   readonly onClick?: () => void;
 }
 
-export interface ImageOptions {
+export interface ImageOptions extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
   readonly src: string;
@@ -120,7 +120,7 @@ export interface ImageOptions {
   readonly height?: number;
 }
 
-export interface ContainerOptions {
+export interface ContainerOptions extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
   readonly key?: string;

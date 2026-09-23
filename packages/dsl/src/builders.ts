@@ -26,6 +26,7 @@ import type {
   SectionOptions,
   FormOptions,
   ListOptions,
+  A11yOptions,
   Bindable,
   BindableText,
   TextValue,
