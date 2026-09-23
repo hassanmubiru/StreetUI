@@ -109,6 +109,14 @@ export class BrowserDOMAdapter implements DOMAdapter {
   nextSibling(node: Node): Node | null {
     return node.nextSibling;
   }
+
+  firstChild(node: Node): Node | null {
+    return node.firstChild;
+  }
+
+  childNodes(node: Node): Node[] {
+    return Array.from(node.childNodes);
+  }
 }
 
 export const browserDOMAdapter = new BrowserDOMAdapter();

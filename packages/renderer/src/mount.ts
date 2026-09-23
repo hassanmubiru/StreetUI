@@ -54,13 +54,7 @@ function mountNode(
     ctx.instances.set(graphNode.id, instance);
 
     // Reactive text binding
-    wireSignalBindings(ctx, graphNode, instance, (propKey, value) => {
-      if (propKey === 'text') {
-        dom.setTextContent(textNode, String(value ?? ''));
-      } else {
-        applyProp(dom, el, propKey, value);
-      }
-    });
+    wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, el, textNode));
 
     dom.appendChild(parentDom, el);
     return instance;
@@ -79,13 +73,7 @@ function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    wireSignalBindings(ctx, graphNode, instance, (propKey, value) => {
-      if (propKey === 'text') {
-        dom.setTextContent(el, String(value ?? ''));
-      } else {
-        applyProp(dom, el, propKey, value);
-      }
-    });
+    wireSignalBindings(ctx, graphNode, instance, headingUpdate(dom, el));
 
     dom.appendChild(parentDom, el);
     return instance;
@@ -106,13 +94,7 @@ function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    wireSignalBindings(ctx, graphNode, instance, (propKey, value) => {
-      if (propKey === 'value') {
-        dom.setProperty(el, 'value', String(value ?? ''));
-      } else {
-        applyProp(dom, el, propKey, value);
-      }
-    });
+    wireSignalBindings(ctx, graphNode, instance, inputUpdate(dom, el));
 
     dom.appendChild(parentDom, el);
     return instance;

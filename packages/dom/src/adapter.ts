@@ -52,4 +52,8 @@ export interface DOMAdapter {
   isTextNode(node: Node): node is Text;
   parentNode(node: Node): Node | null;
   nextSibling(node: Node): Node | null;
+  /** First child node (element, text, or otherwise), or null. */
+  firstChild(node: Node): Node | null;
+  /** All child nodes of an element in order (empty for leaf/text nodes). */
+  childNodes(node: Node): Node[];
 }
