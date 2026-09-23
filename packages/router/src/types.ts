@@ -58,6 +58,6 @@ export interface RouteMatch {
   readonly query: URLSearchParams;
   /** The route definition that produced this match. */
   readonly route: RouteDefinition;
-  /** True when this match came from the wildcard/fallback (no explicit route). */
+  /** True when this match came from the wildcard catch-all (`*`) — i.e. a 404. */
   readonly isFallback: boolean;
 }

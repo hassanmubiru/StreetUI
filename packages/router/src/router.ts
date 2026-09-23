@@ -84,7 +84,8 @@ export function createRouter(options: RouterOptions): Router {
         params: matched.params,
         query,
         route: matched.route,
-        isFallback: false,
+        // A catch-all `*` match is the 404 route whether user-supplied or built-in.
+        isFallback: matched.route.path === '*',
       };
     }
     // No explicit route matched — use the fallback (a `*` route if the table
