@@ -291,8 +291,132 @@ describe('reactive signal updates', () => {
   });
 });
 
+// ── Reactive list (listOf) reconciliation ──────────────────────────────────────
+
+describe('reactive list — listOf', () => {
+  function mountList<T>(
+    items: ReturnType<typeof signal<T[]>>,
+    renderItem: (item: T, i: number, content: {
+      text: (t: string) => void;
+      button: (l: string, o?: { onClick?: () => void }) => void;
+    }) => void,
+  ) {
+    resetIdCounter();
+    const app = streetui.app({ name: 'test' });
+    app.page('home', page => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (page as any).listOf('items', items, renderItem);
+    });
+    const compiled = compile(app);
+    const container = makeContainer();
+    const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+    const handle = renderer.mount(compiled, container);
+    return { container, handle };
+  }
+
+  it('renders the initial items', () => {
+    const items = signal(['a', 'b', 'c']);
+    const { container } = mountList(items, (item, _i, c) => c.text(item));
+    expect(container.querySelectorAll('li').length).toBe(3);
+    expect(container.textContent).toContain('a');
+    expect(container.textContent).toContain('c');
+  });
+
+  it('adds an item when the signal grows', () => {
+    const items = signal(['a', 'b']);
+    const { container } = mountList(items, (item, _i, c) => c.text(item));
+    expect(container.querySelectorAll('li').length).toBe(2);
+    items.set(['a', 'b', 'c']);
+    expect(container.querySelectorAll('li').length).toBe(3);
+    expect(container.textContent).toContain('c');
+  });
+
+  it('removes an item when the signal shrinks', () => {
+    const items = signal(['a', 'b', 'c']);
+    const { container } = mountList(items, (item, _i, c) => c.text(item));
+    items.set(['a', 'c']);
+    expect(container.querySelectorAll('li').length).toBe(2);
+    expect(container.textContent).not.toContain('b');
+  });
+
+  it('clears to empty and repopulates', () => {
+    const items = signal(['a', 'b']);
+    const { container } = mountList(items, (item, _i, c) => c.text(item));
+    items.set([]);
+    expect(container.querySelectorAll('li').length).toBe(0);
+    items.set(['x']);
+    expect(container.querySelectorAll('li').length).toBe(1);
+    expect(container.textContent).toContain('x');
+  });
+
+  it('reorders and reuses the SAME DOM nodes (keyed identity + node reuse)', () => {
+    const items = signal(['a', 'b', 'c']);
+    const { container } = mountList(items, (item, _i, c) => c.text(item));
+    const before = Array.from(container.querySelectorAll('li'));
+    const beforeA = before.find(li => li.textContent === 'a')!;
+    const beforeC = before.find(li => li.textContent === 'c')!;
+
+    items.set(['c', 'a', 'b']);
+
+    const after = Array.from(container.querySelectorAll('li'));
+    expect(after.map(li => li.textContent)).toEqual(['c', 'a', 'b']);
+    // Reused by identity — the very same element objects, just moved.
+    expect(after[0]).toBe(beforeC);
+    expect(after[1]).toBe(beforeA);
+  });
+
+  it('replaces content when a keyed item value changes', () => {
+    const items = signal([{ id: 1, label: 'one' }, { id: 2, label: 'two' }]);
+    const { container } = mountList(items, (item, _i, c) => c.text(item.label));
+    expect(container.textContent).toContain('one');
+    items.set([{ id: 1, label: 'ONE' }, { id: 2, label: 'two' }]);
+    expect(container.textContent).toContain('ONE');
+    expect(container.textContent).not.toContain('one');
+    expect(container.querySelectorAll('li').length).toBe(2);
+  });
+
+  it('reuses a keyed item node across reorder even when other items change', () => {
+    const items = signal([{ id: 1, label: 'a' }, { id: 2, label: 'b' }]);
+    const { container } = mountList(items, (item, _i, c) => c.text(item.label));
+    const beforeId2 = Array.from(container.querySelectorAll('li'))
+      .find(li => li.textContent === 'b')!;
+    items.set([{ id: 2, label: 'b' }, { id: 1, label: 'a' }]);
+    const afterId2 = Array.from(container.querySelectorAll('li'))
+      .find(li => li.textContent === 'b')!;
+    expect(afterId2).toBe(beforeId2); // same id + same value → node reused
+  });
+
+  it('cleans up list subscriptions on unmount', () => {
+    const items = signal(['a', 'b']);
+    const { container, handle } = mountList(items, (item, _i, c) => c.text(item));
+    handle.unmount();
+    expect(container.children.length).toBe(0);
+    // Signal still exists; updating it after unmount must be a safe no-op.
+    expect(() => items.set(['a', 'b', 'c', 'd'])).not.toThrow();
+    expect(container.querySelectorAll('li').length).toBe(0);
+  });
+
+  it('disposes removed item event listeners (no leak after removal)', () => {
+    let clicks = 0;
+    const items = signal(['keep', 'drop']);
+    const { container } = mountList(items, (item, _i, c) => {
+      c.text(item);
+      if (item === 'drop') c.button('x', { onClick: () => { clicks++; } });
+    });
+    const dropBtn = container.querySelector('button') as HTMLButtonElement;
+    dropBtn.dispatchEvent(new Event('click'));
+    expect(clicks).toBe(1);
+    items.set(['keep']); // removes the 'drop' item and its button
+    expect(container.querySelector('button')).toBeNull();
+    // The detached button is gone from the DOM — its listener can't fire again.
+    dropBtn.dispatchEvent(new Event('click'));
+    expect(clicks).toBe(1);
+  });
+});
+
 // ── Unmount / cleanup ─────────────────────────────────────────────────────────
-  it('removes all children from container on unmount', () => {
+
+describe('StreetRenderer unmount', () => {
     const compiled = compileApp(app => {
       app.page('home', page => { page.heading('Hi'); });
     });
