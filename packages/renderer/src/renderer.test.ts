@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { resetIdCounter } from '@streetui/core';
 import { streetui } from '@streetui/dsl';
-import { signal } from '@streetui/state';
+import { signal, type Signal } from '@streetui/state';
 import { compile } from '@streetui/compiler';
 import { ApplicationGraph } from '@streetui/graph';
 import { BrowserDOMAdapter } from '@streetui/dom';
@@ -295,7 +295,7 @@ describe('reactive signal updates', () => {
 
 describe('reactive list — listOf', () => {
   function mountList<T>(
-    items: ReturnType<typeof signal<T[]>>,
+    items: Signal<T[]>,
     renderItem: (item: T, i: number, content: {
       text: (t: string) => void;
       button: (l: string, o?: { onClick?: () => void }) => void;
@@ -417,6 +417,7 @@ describe('reactive list — listOf', () => {
 // ── Unmount / cleanup ─────────────────────────────────────────────────────────
 
 describe('StreetRenderer unmount', () => {
+  it('removes all children from container on unmount', () => {
     const compiled = compileApp(app => {
       app.page('home', page => { page.heading('Hi'); });
     });
