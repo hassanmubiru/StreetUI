@@ -249,7 +249,78 @@ describe('6. state-controlled conditional rendering', () => {
   });
 });
 
-// __TESTS_MARKER__
+// 7 ── Event handlers (click / input / change / submit) ─────────────────────
+describe('7. event handlers fire through the graph registry', () => {
+  it('records the last event for each interaction type', () => {
+    const { container, state, mounted } = setup();
+
+    (container.querySelector('#btn-increment') as HTMLButtonElement).dispatchEvent(new Event('click'));
+    expect(state.lastEvent.get()).toBe('click:increment');
+
+    const name = container.querySelector('#field-name') as HTMLInputElement;
+    name.value = 'x';
+    name.dispatchEvent(new Event('input'));
+    expect(state.lastEvent.get()).toBe('input:name');
+
+    const email = container.querySelector('#field-email') as HTMLInputElement;
+    email.value = 'x@y.z';
+    email.dispatchEvent(new Event('change'));
+    expect(state.lastEvent.get()).toBe('change:email');
+
+    (container.querySelector('#the-form') as HTMLFormElement).dispatchEvent(new Event('submit'));
+    expect(state.lastEvent.get()).toBe('submit:form');
+
+    // The readout text reflects the latest event reactively.
+    expect(text(container.querySelector('#event-readout'))).toBe('Last event: submit:form');
+    teardown(container, mounted);
+  });
+});
+
+// 8 ── Unmount / cleanup ────────────────────────────────────────────────────
+describe('8. unmount and cleanup', () => {
+  it('empties the container on unmount', () => {
+    const { container, mounted } = setup();
+    expect(container.children.length).toBeGreaterThan(0);
+    mounted.unmount();
+    expect(container.children.length).toBe(0);
+    container.parentNode?.removeChild(container);
+  });
+
+  it('signal updates after unmount are safe no-ops', () => {
+    const { container, state, mounted } = setup();
+    mounted.unmount();
+    expect(() => {
+      state.count.set(99);
+      state.features.set([{ id: 9, name: 'Late' }]);
+      state.showDetails.set(true);
+    }).not.toThrow();
+    expect(container.children.length).toBe(0);
+    container.parentNode?.removeChild(container);
+  });
+
+  it('list churn leaves no stale graph click-handlers (bounded registry)', () => {
+    const { container, actions, compiled, mounted } = setup();
+    const graph = compiled.graph as unknown as { handlers: Map<string, unknown> };
+
+    // Baseline: static click buttons + one per-item remove button per feature (3).
+    const baseline = clickHandlerCount(graph);
+
+    // Churn the list heavily.
+    for (let i = 0; i < 20; i++) {
+      actions.addFeature(`Pkg ${i}`);
+      actions.reorderFeatures();
+      actions.removeLastFeature();
+    }
+    // Back to the original 3 live items → same click-handler count, no leak.
+    expect(clickHandlerCount(graph)).toBe(baseline);
+
+    // Removing every item drops all per-item handlers.
+    actions.clearFeatures();
+    expect(clickHandlerCount(graph)).toBe(baseline - 3);
+    teardown(container, mounted);
+  });
+});
+
 
 
 
