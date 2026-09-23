@@ -94,3 +94,156 @@ function pageLayout(
     s.container(`${opts.id}-body`, (content) => body(content), { id: `${opts.id}-body` });
   }, { id: `page-${opts.id}` });
 }
+
+// ── Shell (persistent layout + navigation) ──────────────────────────────────────
+/** A navigation link that shows an "(active)" marker when its route is active. */
+function navLink(
+  scope: ContainerDSL,
+  router: Router,
+  label: string,
+  href: string,
+  id: string,
+  exact = false,
+): void {
+  scope.link(label, { href, id });
+  // Active state is a reactive StreetUI signal; when() mounts/removes the marker.
+  scope.when(router.isActive(href, { exact }), (c) => {
+    c.text(' (active)', { id: `${id}-active` });
+  });
+}
+
+export function docsShell(shell: PageDSL, router: Router): void {
+  shell.section('nav', (n) => {
+    n.heading('StreetUI', { level: 1, id: 'brand' });
+    navLink(n, router, 'Home', '/', 'nav-home', true);
+    navLink(n, router, 'Docs', '/docs', 'nav-docs');
+    navLink(n, router, 'Examples', '/examples', 'nav-examples');
+    navLink(n, router, 'About', '/about', 'nav-about');
+    // An external link keeps normal browser behaviour (not intercepted).
+    n.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'nav-github' });
+  }, { id: 'site-nav' });
+
+  // The router renders the active route into this outlet; the shell persists.
+  routerOutlet(shell);
+
+  shell.section('footer', (f) => {
+    f.text('Built with StreetUI + @streetui/router.', { id: 'footer-text' });
+  }, { id: 'site-footer' });
+}
+
+// ── Route builders ──────────────────────────────────────────────────────────────
+function buildRoutes(state: DocsState): RouteDefinition[] {
+  const home: RouteDefinition = {
+    path: '/',
+    builder: (page) =>
+      pageLayout(page, { id: 'home', title: 'Build UIs from a semantic graph' }, (c) => {
+        c.text('A TypeScript-first UI framework with its own reactivity and a keyed real-DOM reconciler.', {
+          id: 'home-tagline',
+        });
+        c.link('Read the docs', { href: '/docs', id: 'home-docs-link' });
+        c.link('See examples', { href: '/examples', id: 'home-examples-link' });
+      }),
+  };
+
+  const docsIndex: RouteDefinition = {
+    path: '/docs',
+    builder: (page) =>
+      pageLayout(page, { id: 'docs', title: 'Documentation' }, (c) => {
+        c.text('Choose a section:', { id: 'docs-intro' });
+        for (const section of DOC_SECTIONS) {
+          c.link(section.title, { href: `/docs/${section.slug}`, id: `docs-link-${section.slug}` });
+        }
+      }),
+  };
+
+  const docsSection: RouteDefinition = {
+    path: '/docs/:section',
+    builder: (page, ctx: RouteContext) => {
+      const slug = ctx.params.section ?? '';
+      const section = findSection(slug);
+      pageLayout(page, { id: 'docsection', title: section?.title ?? 'Unknown section' }, (c) => {
+        if (section !== undefined) {
+          c.text(section.body, { id: 'docsection-body-text' });
+        } else {
+          c.text(`No documentation section named "${slug}".`, { id: 'docsection-missing' });
+        }
+        c.link('Back to docs', { href: '/docs', id: 'docsection-back' });
+      });
+    },
+  };
+
+  const examples: RouteDefinition = {
+    path: '/examples',
+    builder: (page, ctx: RouteContext) => {
+      // Seed the filter from the ?q= query parameter on each mount.
+      state.filter.set(ctx.query.get('q') ?? '');
+      const filtered = derived(() => {
+        const q = state.filter.get().trim().toLowerCase();
+        if (q === '') return EXAMPLES.slice();
+        return EXAMPLES.filter(
+          (e) => e.name.toLowerCase().includes(q) || e.tag.toLowerCase().includes(q),
+        );
+      });
+
+      pageLayout(page, { id: 'examples', title: 'Examples' }, (c) => {
+        c.text('Filter the examples:', { id: 'examples-hint' });
+        c.input({ id: 'examples-filter', type: 'search', placeholder: 'Filter…', bind: state.filter });
+        c.listOf('examples', filtered, (item, _i, content) => {
+          content.text(`${item.name} — ${item.tag}`, { id: `example-${item.id}` });
+        }, { id: 'examples-list' });
+        // Empty-state via when(): shown only when nothing matches.
+        c.when(derived(() => filtered.get().length === 0), (empty) => {
+          empty.text('No examples match your filter.', { id: 'examples-empty' });
+        });
+      });
+    },
+  };
+
+  const about: RouteDefinition = {
+    path: '/about',
+    builder: (page) =>
+      pageLayout(page, { id: 'about', title: 'About' }, (c) => {
+        c.text('StreetUI is a semantic UI framework. This docs site is built with it.', {
+          id: 'about-text',
+        });
+      }),
+  };
+
+  const notFound: RouteDefinition = {
+    path: '*',
+    builder: (page, ctx: RouteContext) =>
+      pageLayout(page, { id: 'notfound', title: '404 — Not found' }, (c) => {
+        c.text(`Nothing here at ${ctx.path}.`, { id: 'notfound-text' });
+        c.link('Go home', { href: '/', id: 'notfound-home' });
+      }),
+  };
+
+  return [home, docsIndex, docsSection, examples, about, notFound];
+}
+
+// ── App factory + mount ─────────────────────────────────────────────────────────
+export interface DocsApp {
+  readonly router: Router;
+  readonly state: DocsState;
+}
+
+export function createDocsApp(history?: RouterHistory): DocsApp {
+  const state: DocsState = { filter: signal('') };
+  const routesConfig = history !== undefined ? { routes: buildRoutes(state), history } : { routes: buildRoutes(state) };
+  const router = createRouter(routesConfig);
+  return { router, state };
+}
+
+export interface MountedDocsApp extends DocsApp {
+  unmount(): void;
+}
+
+export function mountDocsApp(container: Element, history?: RouterHistory): MountedDocsApp {
+  const { router, state } = createDocsApp(history);
+  const mounted = mountRouter(router, {
+    container,
+    shell: (shell) => docsShell(shell, router),
+  });
+  return { router, state, unmount: () => mounted.unmount() };
+}
+
