@@ -1,0 +1,49 @@
+{
+  "name": "@streetui/cli",
+  "version": "0.6.0",
+  "description": "StreetUI CLI — create, develop, build and run StreetUI applications. Orchestrates the existing DSL → Compiler → Graph → Runtime → Renderer pipeline; it is not a new framework layer.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "streetui": "./dist/bin.js",
+    "create-streetui": "./dist/create-bin.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "esbuild": "0.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streetui/streetui.git",
+    "directory": "packages/cli"
+  }
+}
