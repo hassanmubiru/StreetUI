@@ -10,7 +10,7 @@
 
 import { createServer as createHttpServer, type IncomingMessage, type ServerResponse, type Server } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
-import { join, normalize, extname } from 'node:path';
+import { join, normalize, extname, relative, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 /** The contract a project's server entry must satisfy. */
@@ -95,22 +95,53 @@ export class ReloadHub {
   }
 }
 
-/** Resolve a URL path to a file inside `clientDir`, guarding against escapes. */
+/**
+ * Resolve a URL path to a file inside `clientDir`, guarding against escapes.
+ *
+ * Security notes (production hardening, v0.8):
+ *   - Malformed percent-encoding (`decodeURIComponent` throwing) is rejected
+ *     rather than allowed to bubble up as a 500.
+ *   - Null-byte injection (`\0`) is rejected — it can truncate paths in some
+ *     syscalls.
+ *   - Containment is verified with `path.relative`, NOT a raw `startsWith`
+ *     prefix check: a prefix check treats a sibling dir like `<clientDir>-x` as
+ *     "inside" and is a real traversal hole. `relative` yields a `..`-leading or
+ *     absolute path exactly when the target escapes the root.
+ */
 function resolveStatic(clientDir: string, urlPath: string): string | undefined {
-  const clean = normalize(decodeURIComponent(urlPath.split('?')[0] ?? '')).replace(/^(\.\.[/\\])+/, '');
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(urlPath.split('?')[0] ?? '');
+  } catch {
+    return undefined; // malformed percent-encoding
+  }
+  if (decoded.includes('\0')) return undefined; // null-byte injection
+  const clean = normalize(decoded).replace(/^(\.\.[/\\])+/, '');
   const full = join(clientDir, clean);
-  if (!full.startsWith(clientDir)) return undefined; // path traversal guard
-  return full;
+  const rel = relative(clientDir, full);
+  if (rel === '' || (!rel.startsWith('..') && !isAbsolute(rel))) return full;
+  return undefined; // escaped the client root
 }
 
-async function tryServeStatic(clientDir: string, urlPath: string, res: ServerResponse): Promise<boolean> {
+async function tryServeStatic(
+  clientDir: string,
+  urlPath: string,
+  res: ServerResponse,
+  devMode: boolean,
+): Promise<boolean> {
   const full = resolveStatic(clientDir, urlPath);
   if (full === undefined) return false;
   try {
     const info = await stat(full);
     if (!info.isFile()) return false;
     const body = await readFile(full);
-    res.writeHead(200, { 'Content-Type': MIME[extname(full)] ?? 'application/octet-stream' });
+    res.writeHead(200, {
+      'Content-Type': MIME[extname(full)] ?? 'application/octet-stream',
+      // Never let a browser MIME-sniff a served asset into something executable.
+      'X-Content-Type-Options': 'nosniff',
+      // Dev must always re-fetch; production may cache immutable build output.
+      'Cache-Control': devMode ? 'no-cache' : 'public, max-age=3600',
+    });
     res.end(body);
     return true;
   } catch {
@@ -191,7 +222,7 @@ async function handleRequest(
 
   // Static assets first (only paths with an extension, so routes fall through).
   if (extname(url.split('?')[0] ?? '') !== '') {
-    const served = await tryServeStatic(options.clientDir, url, res);
+    const served = await tryServeStatic(options.clientDir, url, res, options.devMode === true);
     if (served) return;
   }
 
@@ -208,8 +239,18 @@ async function handleRequest(
     res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8', ...result.headers });
     res.end(html);
   } catch (err) {
-    const message = err instanceof Error ? err.stack ?? err.message : String(err);
+    // Always surface the failure server-side for operators.
+    // eslint-disable-next-line no-console
+    console.error(`[StreetUI] render error for ${url}:`, err);
+    // But only leak stack traces / internal detail in dev. A production server
+    // must not disclose stacks, file paths or env-derived strings to clients
+    // (information-disclosure hardening, v0.8 §18/§19).
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end(`StreetUI server error while rendering ${url}:\n\n${message}`);
+    if (options.devMode === true) {
+      const message = err instanceof Error ? err.stack ?? err.message : String(err);
+      res.end(`StreetUI server error while rendering ${url}:\n\n${message}`);
+    } else {
+      res.end('Internal Server Error');
+    }
   }
 }

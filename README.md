@@ -383,3 +383,52 @@ React, no JSX) and drives the existing StreetUI pipeline — it orchestrates
 own. Full reference, configuration, environment-variable rules, and SSR details
 are in `packages/cli/README.md`.
 
+---
+
+## Publishing & consuming the packages
+
+Every public package ships as a self-contained npm artifact: dual ESM + CJS
+builds, type declarations for both, `sideEffects: false`, a per-package README
+and LICENSE, and an `exports` map with matching `import`/`require` types. No
+source, tests, benchmarks, temp files, or workspace paths are included in the
+tarballs.
+
+The packaging pipeline lives in `scripts/`:
+
+```bash
+node scripts/apply-publish-metadata.mjs   # normalize package.json publish fields
+node scripts/generate-readmes.mjs         # ensure every package has a README
+node scripts/pack-tarballs.mjs            # npm pack each package → dist-tarballs/
+node scripts/consumer-smoke.mjs           # install the tarballs OUTSIDE the repo
+```
+
+`pack-tarballs.mjs` rewrites every `workspace:*` range to the concrete version
+before packing, so the tarballs resolve each other with no workspace linking.
+`consumer-smoke.mjs` is the package-quality gate: it creates a throwaway project
+outside the monorepo, installs the packed tarballs **offline** (no registry, no
+`workspace:`, no symlinks), and renders a page through `@streetui/dsl`,
+`@streetui/state`, `@streetui/compiler` and `@streetui/renderer` in both ESM and
+CJS. See `docs/publishing.md` for the full flow and current limitations.
+
+---
+
+## Production server & security
+
+`streetui start` serves the production build over `node:http` — no additional
+server framework. Static assets are served with correct MIME types,
+`X-Content-Type-Options: nosniff`, and cacheable `Cache-Control` in production
+(`no-cache` in dev). Path traversal is blocked by resolving each request against
+the client directory and rejecting anything that escapes it (including malformed
+percent-encodings and prefix-sibling directories). Render errors return a
+generic `500` in production and only expose stack detail in dev. Details and the
+threat model are in `docs/production-server.md`.
+
+---
+
+## Everything composed
+
+`examples/streetui-full-app` is a single universal app that uses **every**
+system at once — signals, i18n, context, forms, resource, SSR, hydration with
+DOM-node identity, and client-side routing — verified end to end under a DOM.
+
+

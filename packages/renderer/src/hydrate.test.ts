@@ -216,3 +216,62 @@ describe('hydrate — cleanup', () => {
     expect(container.querySelector('h1')?.textContent).toBe('Title');
   });
 });
+
+describe('hydrate — hydration boundary (slot) preservation', () => {
+  it('adopts a boundary element but preserves foreign children (no surplus removal)', () => {
+    // Server produced an empty slot container; some other owner (e.g. the router)
+    // rendered content INTO it. Marking the node a hydration boundary must keep
+    // that content intact instead of stripping it as surplus.
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) => page.container('slot', () => {}, { id: 'slot' }));
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    // Inject foreign server content into the slot and capture its identity.
+    const slot = container.querySelector('#slot')!;
+    const foreign = document.createElement('section');
+    foreign.id = 'foreign';
+    foreign.textContent = 'owned-elsewhere';
+    slot.appendChild(foreign);
+
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) => page.container('slot', () => {}, { id: 'slot' }));
+    const compiled = compile(clientApp);
+    for (const n of compiled.graph.findAll((g) => g.getProp('id') === 'slot')) {
+      n.setProp('_hydrationBoundary', true);
+    }
+    const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+    renderer.hydrate(compiled, container);
+
+    // Boundary element itself adopted; foreign child preserved by identity.
+    expect(container.querySelector('#slot')).toBe(slot);
+    expect(container.querySelector('#foreign')).toBe(foreign);
+    expect(container.querySelector('#foreign')?.textContent).toBe('owned-elsewhere');
+  });
+
+  it('without the boundary flag, a slot with no expected children strips surplus', () => {
+    // Control case proving the boundary flag is what preserves the content.
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) => page.container('slot', () => {}, { id: 'slot' }));
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const slot = container.querySelector('#slot')!;
+    const foreign = document.createElement('section');
+    foreign.id = 'foreign';
+    slot.appendChild(foreign);
+
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) => page.container('slot', () => {}, { id: 'slot' }));
+    const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+    renderer.hydrate(compile(clientApp), container);
+
+    // No boundary → the unexpected child is removed as surplus.
+    expect(container.querySelector('#foreign')).toBeNull();
+  });
+});
