@@ -17,6 +17,7 @@ import { NodeInstance } from './node-instance.js';
 import { applyProp } from './attributes.js';
 import { wireEvents } from './events.js';
 import { resolveTag } from './tag-map.js';
+import { reconcileChildren } from './reconciliation.js';
 
 export function mountGraph(ctx: RenderContext): NodeInstance {
   return mountNode(ctx, ctx.graph.root, ctx.container);
@@ -188,6 +189,28 @@ function mountNode(
     return instance;
   }
 
+  // Reactive list — a container whose children are driven by a Signal<T[]>.
+  // Initial item subtrees are already built into the graph by the DSL; on
+  // signal change we reconcile the freshly-built desired children against the
+  // live DOM using the keyed reconciler (no virtual DOM).
+  if (graphNode.type === 'reactive-list') {
+    const tag = resolveTag(graphNode.type);
+    const el = dom.createElement(tag);
+    applyNodeProps(ctx, graphNode, el);
+
+    const instance = new NodeInstance(graphNode, el);
+    ctx.instances.set(graphNode.id, instance);
+
+    for (const child of graphNode.children) {
+      const childInstance = mountNode(ctx, child, el);
+      instance.addChild(childInstance);
+    }
+
+    dom.appendChild(parentDom, el);
+    wireReactiveList(ctx, graphNode, instance, el);
+    return instance;
+  }
+
   // Container / section / page / form / list / list-item — structural nodes
   const tag = resolveTag(graphNode.type);
   const el = dom.createElement(tag);
@@ -241,4 +264,80 @@ function wireSignalBindings(
     });
     instance.trackCleanup(unsub);
   }
+}
+
+// ── Reactive list wiring ────────────────────────────────────────────────────────
+
+type ListBuildFn = (items: unknown) => GraphNode[];
+
+/**
+ * Subscribe a reactive-list instance to its driving signal. On each change the
+ * DSL-registered build factory produces the desired child graph nodes, which
+ * are reconciled against the live DOM with the keyed reconciler.
+ */
+function wireReactiveList(
+  ctx: RenderContext,
+  graphNode: GraphNode,
+  instance: NodeInstance,
+  el: Element,
+): void {
+  const build = ctx.graph.getHandler(`__listbuild__${graphNode.id}`) as
+    | ListBuildFn
+    | undefined;
+  if (build === undefined) return;
+
+  for (const stateRef of graphNode.stateRefs) {
+    if (stateRef.propKey !== 'items') continue;
+    const sig = ctx.graph.getHandler(`__signal__${stateRef.signalId}`) as
+      | { subscribe: (fn: (v: unknown) => void) => () => void }
+      | undefined;
+    if (sig === undefined || typeof sig.subscribe !== 'function') continue;
+
+    const unsub = sig.subscribe((value) => {
+      reconcileReactiveList(ctx, graphNode, instance, el, build(value));
+    });
+    instance.trackCleanup(unsub);
+  }
+}
+
+function reconcileReactiveList(
+  ctx: RenderContext,
+  listNode: GraphNode,
+  listInstance: NodeInstance,
+  listEl: Element,
+  newNodes: GraphNode[],
+): void {
+  const oldInstances = [...listInstance.children];
+  const result = reconcileChildren(
+    ctx,
+    listEl,
+    oldInstances,
+    newNodes,
+    (node, parent) => mountNode(ctx, node, parent),
+  );
+
+  // Sync the live instance's children to the reconciled order.
+  listInstance.children.length = 0;
+  for (const inst of result.instances) listInstance.children.push(inst);
+
+  // Forget removed instances from the renderer index, and drop their graph
+  // nodes (and any un-adopted freshly-built duplicates) from the graph index.
+  for (const removed of result.removed) {
+    forgetInstance(ctx, removed);
+    ctx.graph.detachNode(removed.graphNode);
+  }
+  const adopted = new Set(result.instances.map((i) => i.graphNode));
+  for (const built of newNodes) {
+    if (!adopted.has(built)) ctx.graph.detachNode(built);
+  }
+
+  // Keep the graph model consistent: list node children match the new order.
+  for (const child of [...listNode.children]) listNode.removeChild(child);
+  for (const inst of result.instances) listNode.appendChild(inst.graphNode);
+}
+
+/** Recursively remove an instance subtree from the renderer's instance index. */
+function forgetInstance(ctx: RenderContext, instance: NodeInstance): void {
+  ctx.instances.delete(instance.graphNode.id);
+  for (const child of instance.children) forgetInstance(ctx, child);
 }

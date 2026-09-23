@@ -292,8 +292,6 @@ describe('reactive signal updates', () => {
 });
 
 // ── Unmount / cleanup ─────────────────────────────────────────────────────────
-
-describe('StreetRenderer unmount', () => {
   it('removes all children from container on unmount', () => {
     const compiled = compileApp(app => {
       app.page('home', page => { page.heading('Hi'); });
