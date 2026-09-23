@@ -273,51 +273,7 @@ export function effect(fn: () => void | (() => void)): Unsubscribe {
   return () => e.dispose();
 }
 
-// ── Batch ─────────────────────────────────────────────────────────────────────
-
-/** Depth counter — batches nest, so only the outermost flush propagates. */
-let _batchDepth = 0;
-
-/**
- * Pending (signal, newValue) pairs accumulated while inside a batch.
- * We record both so the flush can call each signal's _flush in order,
- * coalescing multiple sets to the same signal (last write wins).
- */
-interface PendingFlush {
-  signal: Signal<unknown>;
-  value: unknown;
-}
-
-/**
- * Keyed by signal identity — ensures only the final value for each signal
- * is flushed. We use an ordered Map so insertion order (first time a signal
- * is seen) is preserved, but the stored value is always the latest.
- */
-const _pendingFlushes = new Map<Signal<unknown>, PendingFlush>();
-
-/**
- * Called by Signal.set() when a batch is active instead of immediately
- * notifying subscribers.
- */
-function _enqueueBatchFlush(sig: Signal<unknown>, value: unknown): void {
-  _pendingFlushes.set(sig, { signal: sig, value });
-}
-
-/**
- * Flush all accumulated batched notifications.
- * Called once when the outermost batch() call returns.
- */
-function _drainBatch(): void {
-  // Snapshot and clear before iterating so any signal changes triggered by
-  // subscribers don't get merged into this flush.
-  const flushes = [..._pendingFlushes.values()];
-  _pendingFlushes.clear();
-  for (const { signal: sig, value } of flushes) {
-    sig._flushBatch(value);
-  }
-}
-
-export function batch(fn: () => void): void {
+// ── Public API ─────────────────────────────────────────────────────────────────
   _batchDepth++;
   try {
     fn();
