@@ -9,6 +9,15 @@ import { mountDataApp, type MountedDataApp } from './data-app.js';
 const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 const text = (el: Element | null): string => el?.textContent?.trim() ?? '';
 
+/** Poll until `predicate` is truthy (real HTTP round-trips take a few macrotasks). */
+async function waitFor(predicate: () => boolean, timeoutMs = 2000): Promise<void> {
+  const start = Date.now();
+  while (!predicate()) {
+    if (Date.now() - start > timeoutMs) throw new Error('waitFor: condition not met in time');
+    await new Promise((r) => setTimeout(r, 5));
+  }
+}
+
 let api: ProductApi;
 let baseUrl: string;
 let container: HTMLElement;
