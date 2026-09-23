@@ -78,6 +78,34 @@ export class Runtime {
   }
 
   /**
+   * Hydrate a container that already holds server-rendered HTML for this
+   * application. Delegates to the renderer's `hydrate` (adopting the existing
+   * DOM instead of recreating it) and falls back to `mount` for renderers that
+   * cannot hydrate. Signal binding is identical to `mount`, so the live client
+   * lifecycle is established the same way.
+   */
+  hydrate(compiled: CompiledApplication, container: Element): MountedApplication {
+    if (this._mounted) {
+      throw new Error('[Runtime] Already mounted. Call unmount() first.');
+    }
+
+    this._renderHandle = this._renderer.hydrate !== undefined
+      ? this._renderer.hydrate(compiled, container)
+      : this._renderer.mount(compiled, container);
+    this._mounted = true;
+
+    this._bindSignals(compiled.graph);
+
+    const self = this;
+    return {
+      renderHandle: this._renderHandle,
+      runtime: this,
+      unmount() { self.unmount(); },
+      flush() { self._scheduler.flush(); },
+    };
+  }
+
+  /**
    * Walk the graph and subscribe to all signal-bound nodes.
    * When a signal changes, schedule a renderer update for that node.
    */

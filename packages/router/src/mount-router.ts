@@ -50,6 +50,12 @@ export interface MountRouterOptions {
   readonly renderer?: StreetRenderer;
   /** Intercept internal `<a>` clicks for client-side navigation. Defaults to true. */
   readonly interceptLinks?: boolean;
+  /**
+   * Hydrate server-rendered HTML already present in the container instead of
+   * mounting fresh. The shell and the *initial* route adopt the existing DOM;
+   * subsequent client-side navigations mount normally. Defaults to false.
+   */
+  readonly hydrate?: boolean;
 }
 
 export interface MountedRouter {
@@ -72,6 +78,7 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
   const renderer = options.renderer ?? createRenderer();
   const outletId = options.outletId ?? ROUTER_OUTLET_ID;
   const interceptLinks = options.interceptLinks ?? true;
+  const hydrateMode = options.hydrate ?? false;
 
   // ── 1. Mount the shell once (if any) and resolve the outlet ──────────────────
   let shellMounted: MountedApplication | null = null;
@@ -82,7 +89,10 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
     const shellBuilder = options.shell;
     shellApp.page('shell', (page) => shellBuilder(page, router));
     const shellRuntime = createRuntime({ renderer });
-    shellMounted = shellRuntime.mount(compile(shellApp), container);
+    const shellCompiled = compile(shellApp);
+    shellMounted = hydrateMode
+      ? shellRuntime.hydrate(shellCompiled, container)
+      : shellRuntime.mount(shellCompiled, container);
 
     const found = container.querySelector(`[id="${outletId}"]`);
     if (found === null) {
@@ -102,6 +112,9 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
     readonly mounted: MountedApplication;
   }
   let active: ActiveRoute | null = null;
+  // Only the very first route render hydrates the server HTML in the outlet;
+  // client-side navigations after that mount fresh.
+  let firstRender = hydrateMode;
 
   const disposeActive = (): void => {
     if (active === null) return;
@@ -127,7 +140,11 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
     const routeApp = streetui.app({ name: `route:${match.pattern}` });
     routeApp.page('route', (page) => match.route.builder(page, ctx));
     const runtime = createRuntime({ renderer });
-    const mounted = runtime.mount(compile(routeApp), outlet);
+    const routeCompiled = compile(routeApp);
+    const mounted = firstRender
+      ? runtime.hydrate(routeCompiled, outlet)
+      : runtime.mount(routeCompiled, outlet);
+    firstRender = false;
 
     active = { registry, mounted };
   };
