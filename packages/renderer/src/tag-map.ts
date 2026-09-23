@@ -21,6 +21,7 @@ const TAG_MAP: Partial<Record<SemanticNodeType, string>> = {
   component: 'div',
   slot: 'div',
   fragment: 'div',
+  'reactive-list': 'ul',
 };
 
 export function resolveTag(type: SemanticNodeType): string {
