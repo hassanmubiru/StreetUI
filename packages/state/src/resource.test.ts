@@ -237,3 +237,68 @@ describe('resource — cleanup', () => {
     r.dispose();
   });
 });
+
+describe('resource — SSR hydration seed', () => {
+  it('starts in success with server-provided initialData and does NOT auto-load', async () => {
+    const loader = vi.fn(() => Promise.resolve([9]));
+    const r = resource(loader, { initialData: [1, 2, 3] });
+    // Seeded synchronously — no loading flash, data already visible.
+    expect(r.status.get()).toBe('success');
+    expect(r.data.get()).toEqual([1, 2, 3]);
+    expect(r.error.get()).toBeUndefined();
+    await tick();
+    // The client must not refetch what the server already resolved.
+    expect(loader).not.toHaveBeenCalled();
+    r.dispose();
+  });
+
+  it('starts in error with server-provided initialError and does NOT auto-load', async () => {
+    const loader = vi.fn(() => Promise.resolve(1));
+    const boom = new Error('server failure');
+    const r = resource(loader, { initialError: boom });
+    expect(r.status.get()).toBe('error');
+    expect(r.error.get()).toBe(boom);
+    await tick();
+    expect(loader).not.toHaveBeenCalled();
+    r.dispose();
+  });
+
+  it('immediate:true forces a client refetch even when seeded', async () => {
+    const d = deferred<number[]>();
+    const loader = vi.fn(() => d.promise);
+    const r = resource(loader, { initialData: [1], immediate: true });
+    // Seeded value visible, but a refetch is already in flight.
+    expect(r.data.get()).toEqual([1]);
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(r.status.get()).toBe('loading');
+    // isRefetching: loading while the seeded data is still shown.
+    expect(r.isRefetching.get()).toBe(true);
+    d.resolve([2, 3]);
+    await r.refetch();
+    expect(r.data.get()).toEqual([2, 3]);
+    r.dispose();
+  });
+
+  it('honours an explicit initialStatus override', () => {
+    const r = resource(() => Promise.resolve(1), {
+      initialStatus: 'idle',
+      immediate: false,
+    });
+    expect(r.status.get()).toBe('idle');
+    r.dispose();
+  });
+
+  it('a seeded resource can still refetch on demand', async () => {
+    const d = deferred<string>();
+    const loader = vi.fn(() => d.promise);
+    const r = resource(loader, { initialData: 'from-server' });
+    expect(loader).not.toHaveBeenCalled();
+    const p = r.refetch();
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(r.status.get()).toBe('loading');
+    d.resolve('from-client');
+    await p;
+    expect(r.data.get()).toBe('from-client');
+    r.dispose();
+  });
+});
