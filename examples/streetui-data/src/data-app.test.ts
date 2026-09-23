@@ -137,14 +137,14 @@ describe('streetui-data — router integration cleans up the previous route reso
       history: createMemoryHistory('/products'),
       onProductsResource: (r) => captured.push(r),
     });
-    await settle();
+    await waitFor(() => container.querySelector('#product-1') !== null);
     expect(captured).toHaveLength(1);
     expect(container.querySelector('#product-1')).not.toBeNull();
 
     // Leave and return: a brand-new resource is created for the second visit.
     app.router.navigate('/');
     app.router.navigate('/products');
-    await settle();
+    await waitFor(() => captured.length === 2 && container.querySelector('#product-1') !== null);
     expect(captured).toHaveLength(2);
     expect(captured[0]).not.toBe(captured[1]);
     expect(container.querySelector('#product-1')).not.toBeNull();
