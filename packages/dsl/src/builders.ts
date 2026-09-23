@@ -170,17 +170,27 @@ class ContentBuilderBase implements ContentDSL {
     };
     if (options.id !== undefined) nodeOpts.key = options.id;
     const node = this._graph.createNode('input', nodeOpts);
-    if (options.value !== undefined) {
-      const resolved = bindValue(this._graph, node, 'value', options.value);
+
+    // Two-way `bind` expands to a value binding + an input write-back. The type
+    // system (BoundInputOptions vs ControlledInputOptions) guarantees `bind` is
+    // never combined with explicit `value`/`onInput`, so there is no ambiguity.
+    const bindSignal = options.bind;
+    const valueBindable: Bindable<string> | undefined =
+      bindSignal !== undefined ? bindSignal : options.value;
+    const inputHandler: ((value: string) => void) | undefined =
+      bindSignal !== undefined ? (v: string) => bindSignal.set(v) : options.onInput;
+
+    if (valueBindable !== undefined) {
+      const resolved = bindValue(this._graph, node, 'value', valueBindable);
       node.setProp('value', resolved);
     }
     if (options.disabled !== undefined) {
       const resolved = bindValue(this._graph, node, 'disabled', options.disabled);
       node.setProp('disabled', resolved);
     }
-    if (options.onInput !== undefined) {
+    if (inputHandler !== undefined) {
       const handlerKey = `input:${node.id}`;
-      this._graph.registerHandler(handlerKey, options.onInput as () => unknown);
+      this._graph.registerHandler(handlerKey, inputHandler as () => unknown);
       node.addEvent({ type: 'input', handlerKey });
     }
     if (options.onChange !== undefined) {
