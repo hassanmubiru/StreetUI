@@ -139,6 +139,27 @@ Behaviour:
 - It does **not** trap arbitrary global errors, and errors remain observable via
   the resource's `error` signal.
 
+## SSR seeding
+
+For server rendering, `resource()` accepts a server-resolved result so the
+client does not re-fetch on hydration:
+
+```ts
+const users = resource(loadUsers, {
+  initialData: seed,        // from the SSR state island (see @streetui/renderer)
+  // initialError: err,     // or seed an error instead
+  // initialStatus: 'success',
+});
+```
+
+When any of `initialData` / `initialError` / `initialStatus` is provided, the
+resource starts in the corresponding non-`idle` state (`'success'` from
+`initialData`, `'error'` from `initialError`, or an explicit `initialStatus`)
+and **skips the automatic initial load**. It can still `refetch()` on demand;
+pass `immediate: true` if you deliberately want a client-side refetch right after
+hydration. Read the seed out of the SSR island with `readState` from
+`@streetui/renderer`.
+
 ## What this is *not*
 
 `resource()` is deliberately small. It is not a caching layer, query library,

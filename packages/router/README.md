@@ -146,6 +146,23 @@ Register any manually-created resources (effects, timers, subscriptions) with
 There is no second cleanup system — this is the same `CleanupRegistry` the
 runtime and renderer already use.
 
+## Hydration (SSR)
+
+When the shell + initial route were rendered on the server, hydrate instead of
+mounting cold:
+
+```ts
+mountRouter(router, { container, hydrate: true, shell });
+```
+
+With `hydrate: true`, `mountRouter` adopts the server-rendered shell and the
+initial route's DOM in place (same element objects, no rebuild), resolving
+dynamic params and query identically on both sides. Client-side navigation then
+takes over — subsequent route changes render fresh into the outlet while the
+shell persists. Use `createMemoryHistory(path)` with the same initial path on
+the server so the initial match agrees. See `packages/renderer/README.md` for
+`renderToString` and the state island.
+
 ## History adapters
 
 `createRouter` uses a browser history by default. For tests or non-DOM
@@ -163,7 +180,7 @@ const router = createRouter({ routes, history: createMemoryHistory('/docs') });
   - `router.navigate(to, { replace? })`, `router.back()`, `router.forward()`
   - `router.isActive(path, { exact? }): ReadonlySignal<boolean>`
   - `router.destroy()`
-- `mountRouter(router, { container, shell?, outletId?, renderer?, interceptLinks? }): MountedRouter`
+- `mountRouter(router, { container, shell?, outletId?, renderer?, interceptLinks?, hydrate? }): MountedRouter`
 - `routerOutlet(scope, id?)` — declare the outlet inside a shell
 - `createBrowserHistory()`, `createMemoryHistory(initial?)`
 - Matching helpers: `matchPattern`, `matchRoutes`, `normalizePath`, `splitTarget`
