@@ -15,4 +15,8 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   splitting: false,
+  // happy-dom is a CommonJS package that does dynamic `require()` of Node
+  // built-ins; bundling it into ESM breaks at load. Keep it (and the workspace
+  // @streetui deps) external so they resolve from node_modules at run time.
+  external: ['happy-dom'],
 });
