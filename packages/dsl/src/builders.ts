@@ -29,13 +29,15 @@ import type {
   Bindable,
   BindableText,
   TextValue,
+  ErrorBoundaryOptions,
+  ErrorSource,
   PageBuilder,
   SectionBuilder,
   ContainerBuilder as ContainerBuilderFn,
   FormBuilder,
   ListBuilder,
 } from './dsl-types.js';
-import type { Signal, ReadonlySignal } from '@streetui/state';
+import { signal, derived, type Signal, type ReadonlySignal } from '@streetui/state';
 
 // ── Signal helpers ────────────────────────────────────────────────────────────
 
@@ -372,6 +374,71 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       // Static condition — resolve once at build time, no reactive wiring.
       for (const child of buildAll(condition)) node.appendChild(child);
     }
+  }
+
+  errorBoundary(
+    id: string,
+    builder: ContainerBuilderFn,
+    options: ErrorBoundaryOptions,
+  ): void {
+    // Normalise the observed error source(s) into an array.
+    const sources: ErrorSource[] =
+      options.source === undefined
+        ? []
+        : Array.isArray(options.source)
+          ? [...options.source]
+          : [options.source];
+
+    // The boundary's own captured error (from a synchronous build throw) and a
+    // retry nonce that forces a re-evaluation even when the boolean is unchanged.
+    const localError = signal<unknown>(undefined);
+    const retryNonce = signal<number>(0);
+
+    const readError = (): unknown => {
+      const local = localError.peek();
+      if (local !== undefined && local !== null) return local;
+      for (const s of sources) {
+        const e = s.peek();
+        if (e !== undefined && e !== null) return e;
+      }
+      return undefined;
+    };
+
+    // Reactive condition: true while an error is present. Reads every input so a
+    // change in any source (or a retry) re-runs the conditional.
+    const hasError = derived<boolean>(() => {
+      retryNonce.get();
+      localError.get();
+      for (const s of sources) s.get();
+      return readError() !== undefined;
+    });
+
+    const retry = (): void => {
+      localError.set(undefined);
+      options.onRetry?.();
+      // Force the body branch to re-attempt even if no observed value changed.
+      retryNonce.update((n) => n + 1);
+    };
+
+    // Wrap in a container so the whole boundary is addressable and disposes as a
+    // unit. `when` provides the reactive body↔fallback swap (and its cleanup).
+    this.container(id, (c) => {
+      c.when(
+        hasError,
+        // Error state → fallback.
+        (fb) => options.fallback(fb, readError(), retry),
+        // Healthy state → body, guarded against synchronous build throws.
+        (body) => {
+          try {
+            builder(body);
+          } catch (err) {
+            // Surface the throw as the boundary's error on the next microtask
+            // (deferred to avoid re-entrant reconciliation during this build).
+            queueMicrotask(() => localError.set(err));
+          }
+        },
+      );
+    }, { id });
   }
 }
 

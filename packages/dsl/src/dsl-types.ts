@@ -101,6 +101,28 @@ export type PageBuilder = (page: PageDSL) => void;
 export type FormBuilder = (form: FormDSL) => void;
 export type ListBuilder = (list: ListDSL) => void;
 
+/** A reactive source of error state (e.g. `resource.error`). `null`/`undefined` means "no error". */
+export type ErrorSource = ReadonlySignal<unknown>;
+
+/** Fallback UI builder — receives the current error and a `retry` callback. */
+export type ErrorFallbackBuilder = (
+  fallback: ContainerDSL,
+  error: unknown,
+  retry: () => void,
+) => void;
+
+export interface ErrorBoundaryOptions {
+  /** Renders when the boundary is in an error state. */
+  readonly fallback: ErrorFallbackBuilder;
+  /**
+   * Reactive error source(s) to observe — typically a resource's `error` signal.
+   * When any becomes non-null, the fallback replaces the body.
+   */
+  readonly source?: ErrorSource | ReadonlyArray<ErrorSource>;
+  /** Invoked by the fallback's `retry()`, before the body is re-attempted (e.g. `resource.refetch`). */
+  readonly onRetry?: () => void;
+}
+
 // ── Interfaces for each DSL scope ─────────────────────────────────────────────
 
 export interface ContentDSL {
@@ -140,6 +162,21 @@ export interface ContainerDSL extends ContentDSL {
     condition: Bindable<boolean>,
     builder: ContainerBuilder,
     elseBuilder?: ContainerBuilder,
+  ): void;
+  /**
+   * Render `builder`, but swap to `options.fallback` when the boundary enters an
+   * error state. A boundary enters that state when (a) any observed `source`
+   * signal (e.g. a `resource.error`) becomes non-null, or (b) the body builder
+   * throws synchronously while building. The fallback receives the current error
+   * and a `retry()` callback (which clears the local error, runs `onRetry`, and
+   * re-attempts the body). Reuses the same reactive `when()` machinery, so its
+   * subtree — and all handlers/subscriptions within it — are torn down on
+   * removal. It does NOT trap arbitrary global errors; errors remain observable.
+   */
+  errorBoundary(
+    id: string,
+    builder: ContainerBuilder,
+    options: ErrorBoundaryOptions,
   ): void;
 }
 
