@@ -1,0 +1,29 @@
+{
+  "name": "@streetui/example-ssr",
+  "version": "0.4.0",
+  "private": true,
+  "description": "StreetUI SSR + hydration example — one app, rendered on the server and hydrated in the browser",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "serve": "node dist/server-entry.js",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/dom": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
