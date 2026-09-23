@@ -1,0 +1,29 @@
+{
+  "name": "@streetui/example-docs",
+  "version": "0.2.0",
+  "private": true,
+  "description": "StreetUI docs website — a real multi-page application built on @streetui/router",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/dom": "workspace:*",
+    "@streetui/router": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
