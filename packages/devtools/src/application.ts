@@ -35,6 +35,28 @@ export interface DiagnosticsSummary {
 }
 
 /**
+ * Cheap, count-only performance snapshot (v0.7 §20). These are structural
+ * counts derived from a single graph walk — NOT timings and NOT a profiler.
+ * They let a DevTools panel or a CI check spot the shapes that correlate with
+ * slow apps (very large graphs, deep trees, big lists, many subscriptions)
+ * without measuring anything at runtime.
+ */
+export interface PerfSnapshot {
+  /** Total GraphNodes in the tree (root included). */
+  readonly totalNodes: number;
+  /** Maximum nesting depth (root = 0). */
+  readonly maxDepth: number;
+  /** Total event handler registrations across all nodes. */
+  readonly eventHandlers: number;
+  /** Total signal→prop bindings across all nodes. */
+  readonly stateBindings: number;
+  /** Distinct signals referenced anywhere in the graph. */
+  readonly distinctSignals: number;
+  /** Largest single-node child count (a proxy for the biggest list/section). */
+  readonly largestChildCount: number;
+}
+
+/**
  * The complete read-only snapshot of a compiled application. Everything here is
  * derived from the single `CompiledApplication` graph — no state is duplicated.
  */
@@ -48,6 +70,22 @@ export interface ApplicationInspection {
   /** Page nodes directly under the root — the app's top-level route surface. */
   readonly pages: InspectedPage[];
   readonly diagnostics: DiagnosticsSummary;
+  /** Cheap structural performance counters (v0.7 §20). */
+  readonly perf: PerfSnapshot;
+}
+
+/** Walk the inspected tree once, accumulating the count-only perf snapshot. */
+function collectPerf(
+  node: InspectedNode,
+  distinctSignals: number,
+  acc: { totalNodes: number; maxDepth: number; eventHandlers: number; stateBindings: number; largestChildCount: number },
+): void {
+  acc.totalNodes += 1;
+  if (node.depth > acc.maxDepth) acc.maxDepth = node.depth;
+  acc.eventHandlers += node.eventTypes.length;
+  acc.stateBindings += node.stateBindings.length;
+  if (node.children.length > acc.largestChildCount) acc.largestChildCount = node.children.length;
+  for (const child of node.children) collectPerf(child, distinctSignals, acc);
 }
 
 /** Collect every distinct signal id referenced by any node in the tree. */
@@ -78,6 +116,9 @@ export function inspectApplication(compiled: CompiledApplication): ApplicationIn
   const diags = compiled.diagnostics.diagnostics;
   const errors = diags.filter((d) => d.severity === 'error').length;
 
+  const perfAcc = { totalNodes: 0, maxDepth: 0, eventHandlers: 0, stateBindings: 0, largestChildCount: 0 };
+  collectPerf(graph, signals.size, perfAcc);
+
   return {
     identity: {
       name: compiled.name,
@@ -92,6 +133,14 @@ export function inspectApplication(compiled: CompiledApplication): ApplicationIn
       errors,
       warnings: diags.length - errors,
       messages: diags.map(formatDiagnostic),
+    },
+    perf: {
+      totalNodes: perfAcc.totalNodes,
+      maxDepth: perfAcc.maxDepth,
+      eventHandlers: perfAcc.eventHandlers,
+      stateBindings: perfAcc.stateBindings,
+      distinctSignals: signals.size,
+      largestChildCount: perfAcc.largestChildCount,
     },
   };
 }

@@ -87,4 +87,28 @@ describe('inspectApplication', () => {
     expect(snapshot.diagnostics.warnings).toBe(0);
     expect(snapshot.diagnostics.messages).toEqual([]);
   });
+
+  it('reports cheap structural perf counters (v0.7 §20)', () => {
+    const label = signal('dynamic');
+    const app = streetui.app({ name: 'perf' });
+    app.page('home', (page) => {
+      page.heading('Title');
+      page.text(label); // one state binding
+      page.button('Go', { onClick: () => void 0 }); // one event handler
+    });
+    const compiled = compile(app);
+    const snapshot = inspectApplication(compiled);
+
+    // Counts only — never timings.
+    expect(snapshot.perf.totalNodes).toBeGreaterThan(0);
+    expect(snapshot.perf.totalNodes).toBe(snapshot.nodeStats['application']! +
+      Object.entries(snapshot.nodeStats)
+        .filter(([t]) => t !== 'application')
+        .reduce((a, [, c]) => a + c, 0));
+    expect(snapshot.perf.maxDepth).toBeGreaterThanOrEqual(2);
+    expect(snapshot.perf.eventHandlers).toBeGreaterThanOrEqual(1);
+    expect(snapshot.perf.stateBindings).toBeGreaterThanOrEqual(1);
+    expect(snapshot.perf.distinctSignals).toBe(snapshot.signals.length);
+    expect(snapshot.perf.largestChildCount).toBeGreaterThanOrEqual(1);
+  });
 });
