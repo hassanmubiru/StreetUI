@@ -251,6 +251,7 @@ class ContentBuilderBase implements ContentDSL {
     };
     if (options.class !== undefined) props['class'] = options.class;
     if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
     const node = this._graph.createNode('link', { parent: this._node, props });
     const resolved = bindValue<TextValue>(this._graph, node, 'label', label);
     node.setProp('label', resolved);
