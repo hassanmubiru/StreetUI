@@ -76,7 +76,7 @@ describe('streetui-data — error → error UI → retry', () => {
   it('shows the error fallback with a Retry button, then recovers on retry', async () => {
     api.setFail(true);
     app = mountDataApp(container, { baseUrl, history: createMemoryHistory('/products') });
-    await settle();
+    await waitFor(() => container.querySelector('#products-error') !== null);
 
     // Failed fetch surfaced through the resource's error → errorBoundary fallback.
     const errorEl = container.querySelector('#products-error');
@@ -90,7 +90,7 @@ describe('streetui-data — error → error UI → retry', () => {
     // Fix the server and retry → new real request → body restored.
     api.setFail(false);
     retry!.click();
-    await settle();
+    await waitFor(() => container.querySelector('#product-1') !== null);
 
     expect(container.querySelector('#products-error')).toBeNull();
     expect(text(container.querySelector('#product-1'))).toBe('Antminer S21 — $3999');
