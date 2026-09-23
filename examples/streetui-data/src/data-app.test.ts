@@ -5,8 +5,6 @@ import { createMemoryHistory } from '@streetui/router';
 import { createProductApi, type Product, type ProductApi } from './api-server.js';
 import { mountDataApp, type MountedDataApp } from './data-app.js';
 
-/** Resolve after all queued microtasks + timers so real fetch round-trips settle. */
-const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 const text = (el: Element | null): string => el?.textContent?.trim() ?? '';
 
 /** Poll until `predicate` is truthy (real HTTP round-trips take a few macrotasks). */
