@@ -306,18 +306,3 @@ export function batch(fn: () => void): void {
 export function isBatching(): boolean {
   return _batchDepth > 0;
 }
-  _batchDepth++;
-  try {
-    fn();
-  } finally {
-    _batchDepth--;
-    if (_batchDepth === 0) {
-      _drainBatch();
-    }
-  }
-}
-
-/** True when inside a batch() call. */
-export function isBatching(): boolean {
-  return _batchDepth > 0;
-}
