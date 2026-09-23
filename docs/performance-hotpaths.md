@@ -115,3 +115,35 @@ Apply **OPT-1 only**. Rebuild the `renderer` package in the /work sandbox, rerun
 the render + ssr + hydration + keyed-lists suites, and compare against
 `baseline.json`. Keep the change only if it measurably improves and breaks no
 semantics (§23 revert-non-improvements).
+
+## OPT-1 RESULT (applied, kept)
+
+Hoisted `applyNodeProps` skip-key set to module-level `SKIP_PROP_KEYS`
+(`packages/renderer/src/mount.ts`). Re-ran the affected suites and, for the
+large-n cases, three additional times to separate signal from noise:
+
+| benchmark (median ms) | v0.6 base | post-OPT-1 (stable) | delta |
+|---|---|---|---|
+| ssr/render-to-string n=5000 | 14.23 | 11.6 – 12.2 | **-14% to -19%** |
+| ssr/render-to-string n=1000 | 1.22 | 1.02 – 1.05 | **-14% to -16%** |
+| render/mount n=5000 | 57.71 | 54.1 – 57.3 | -0.7% to -6% (mild) |
+| keyed-lists (all @ n=5000) | — | — | within ±2.4% (neutral) |
+
+**Verdict: KEEP.** The win is clearest and reproducible on **SSR**, where
+`mountNode → applyNodeProps` runs for every node with no DOM-move cost to mask
+the saved allocations — exactly the path where removing N per-node `Set`
+allocations shows up cleanly. Mount n=5000 improves mildly; lists are neutral
+(their cost is DOM node movement, not prop application). Small-n swings
+(sub-microsecond) and the hydration n=5000 figure are inside the noise band of
+this 2-vCPU VM and the single-capture baseline — not attributed to OPT-1.
+Semantics preserved: all 111 renderer tests pass, including the 4 new
+memory/cleanup cycle tests.
+
+## OPT-2 (`GraphNode.setProp` in-place) — DEFERRED, not applied
+
+Confirmed via `patchNode`/`patchExistingInstance` reads that the *patch* paths
+are safe, but `Graph.serialize()` shares the live `props` reference into its
+snapshot, so in-place mutation would change serialization identity semantics for
+a ~1% self-time gain that never appeared in the mount profile. Per §5/§23,
+documented as *measured, minor, deferred* rather than applied on a guess.
+
