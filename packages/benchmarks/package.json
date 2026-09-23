@@ -1,0 +1,33 @@
+{
+  "name": "@streetui/benchmarks",
+  "version": "0.7.0",
+  "private": true,
+  "description": "StreetUI performance benchmark suite — node:perf_hooks driven, measures the real DSL → Compiler → Graph → Runtime → Renderer pipeline. Not a correctness test suite.",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "bench": "node dist/run.js",
+    "bench:baseline": "node dist/run.js --baseline",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/scheduler": "workspace:*",
+    "@streetui/events": "workspace:*",
+    "@streetui/graph": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/dom": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
