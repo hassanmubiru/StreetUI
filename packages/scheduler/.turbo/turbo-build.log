@@ -1,5 +1,5 @@
 
-> @streetui/scheduler@0.1.0 build /home/error51/Downloads/street/packages/scheduler
+> @streetui/scheduler@0.1.0 build /home/error51/Downloads/StreetUI/packages/scheduler
 > tsup
 
 ▲ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
@@ -23,7 +23,7 @@
 CLI Building entry: src/index.ts
 CLI Using tsconfig: tsconfig.json
 CLI tsup v8.3.5
-CLI Using tsup config: /home/error51/Downloads/street/packages/scheduler/tsup.config.ts
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/scheduler/tsup.config.ts
 CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
@@ -70,13 +70,13 @@ CJS Build start
 
 
 
-ESM dist/index.js     2.39 KB
-ESM dist/index.js.map 5.09 KB
-ESM ⚡️ Build success in 42ms
 CJS dist/index.cjs     3.54 KB
 CJS dist/index.cjs.map 5.21 KB
-CJS ⚡️ Build success in 46ms
+CJS ⚡️ Build success in 28ms
+ESM dist/index.js     2.39 KB
+ESM dist/index.js.map 5.09 KB
+ESM ⚡️ Build success in 28ms
 DTS Build start
-DTS ⚡️ Build success in 1409ms
+DTS ⚡️ Build success in 830ms
 DTS dist/index.d.ts  1.96 KB
 DTS dist/index.d.cts 1.96 KB

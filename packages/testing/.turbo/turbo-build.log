@@ -1,5 +1,5 @@
 
-> @streetui/testing@0.1.0 build /home/error51/Downloads/street/packages/testing
+> @streetui/testing@0.1.0 build /home/error51/Downloads/StreetUI/packages/testing
 > tsup
 
 ▲ [WARNING] The condition "types" here will never be used as it comes after both "import" and "require" [package.json]
@@ -23,7 +23,7 @@
 CLI Building entry: src/index.ts
 CLI Using tsconfig: tsconfig.json
 CLI tsup v8.3.5
-CLI Using tsup config: /home/error51/Downloads/street/packages/testing/tsup.config.ts
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/testing/tsup.config.ts
 CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
@@ -72,11 +72,11 @@ CJS Build start
 
 ESM dist/index.js     2.12 KB
 ESM dist/index.js.map 5.60 KB
-ESM ⚡️ Build success in 17ms
+ESM ⚡️ Build success in 16ms
 CJS dist/index.cjs     3.21 KB
 CJS dist/index.cjs.map 5.69 KB
-CJS ⚡️ Build success in 17ms
+CJS ⚡️ Build success in 16ms
 DTS Build start
-DTS ⚡️ Build success in 402ms
+DTS ⚡️ Build success in 387ms
 DTS dist/index.d.ts  1.74 KB
 DTS dist/index.d.cts 1.74 KB
