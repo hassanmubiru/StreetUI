@@ -170,6 +170,10 @@ export class ServerDOMAdapter implements DOMAdapter {
     return asServer(node).kind === 'text';
   }
 
+  tagName(element: Element): string {
+    return (element as unknown as ServerElement).tagName;
+  }
+
   parentNode(node: Node): Node | null {
     return (asServer(node).parent as unknown as Node | null) ?? null;
   }

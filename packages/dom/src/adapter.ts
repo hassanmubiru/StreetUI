@@ -50,6 +50,8 @@ export interface DOMAdapter {
   // ── Helpers ────────────────────────────────────────────────────────────────
   isElement(node: Node): node is Element;
   isTextNode(node: Node): node is Text;
+  /** Lower-cased tag name of an element (e.g. "div", "h1"). */
+  tagName(element: Element): string;
   parentNode(node: Node): Node | null;
   nextSibling(node: Node): Node | null;
   /** First child node (element, text, or otherwise), or null. */

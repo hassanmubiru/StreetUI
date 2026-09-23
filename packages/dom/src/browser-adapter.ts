@@ -102,6 +102,10 @@ export class BrowserDOMAdapter implements DOMAdapter {
     return node.nodeType === Node.TEXT_NODE;
   }
 
+  tagName(element: Element): string {
+    return element.tagName.toLowerCase();
+  }
+
   parentNode(node: Node): Node | null {
     return node.parentNode;
   }
