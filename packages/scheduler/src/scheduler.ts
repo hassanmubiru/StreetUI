@@ -24,10 +24,32 @@ export interface Job {
   readonly fn: () => void;
 }
 
+/**
+ * Optional error-reporting hook (v0.9 §26/§27). Structurally compatible with
+ * `@streetui/core`'s `DiagnosticSink` (the `error` method) so an application can
+ * route swallowed scheduler-job failures through its own logger instead of the
+ * default `console.error`. Kept as a local structural type so the scheduler
+ * stays dependency-free; no network, no telemetry. When unset, behaviour is
+ * exactly as before.
+ */
+export interface SchedulerDiagnostics {
+  error?(message: string, context?: unknown): void;
+}
+
 export class Scheduler {
   private readonly _queue: Map<string, Job> = new Map();
   private _flushScheduled = false;
   private _flushing = false;
+  private _diagnostics: SchedulerDiagnostics | undefined = undefined;
+
+  /**
+   * Install an optional diagnostic sink for swallowed job errors. Pass
+   * `undefined` to restore the default `console.error` reporting. Additive and
+   * opt-in — the scheduler never sends anything anywhere on its own.
+   */
+  setDiagnostics(sink: SchedulerDiagnostics | undefined): void {
+    this._diagnostics = sink;
+  }
 
   /** Total jobs currently queued. */
   get size(): number {
@@ -88,8 +110,12 @@ export class Scheduler {
         try {
           job.fn();
         } catch (err) {
-          // Isolate job failures — log and continue so remaining jobs still run
-          console.error(`[Scheduler] Job "${job.key}" threw:`, err);
+          // Isolate job failures — report and continue so remaining jobs still run.
+          if (this._diagnostics?.error) {
+            this._diagnostics.error(`Scheduler job "${job.key}" threw`, err);
+          } else {
+            console.error(`[Scheduler] Job "${job.key}" threw:`, err);
+          }
         }
       }
     } finally {

@@ -69,6 +69,37 @@ describe('Scheduler', () => {
     expect(results).toContain('good');
   });
 
+  it('routes swallowed job errors to an installed diagnostic sink (§26/§27)', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const seen: Array<{ message: string; context: unknown }> = [];
+    s.setDiagnostics({ error: (message, context) => seen.push({ message, context }) });
+
+    const err = new Error('boom');
+    s.schedule({ key: 'bad', priority: 'normal', fn: () => { throw err; } });
+    s.flush();
+
+    expect(seen.length).toBe(1);
+    expect(seen[0]?.message).toContain('bad');
+    expect(seen[0]?.context).toBe(err);
+    // The sink replaces the default console reporting — it is not duplicated.
+    expect(consoleSpy).not.toHaveBeenCalled();
+    consoleSpy.mockRestore();
+  });
+
+  it('falls back to console.error when no diagnostic sink is installed', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    s.schedule({ key: 'bad', priority: 'normal', fn: () => { throw new Error('boom'); } });
+    s.flush();
+    expect(consoleSpy).toHaveBeenCalledTimes(1);
+    // Clearing the sink restores default behaviour.
+    s.setDiagnostics({ error: () => {} });
+    s.setDiagnostics(undefined);
+    s.schedule({ key: 'bad2', priority: 'normal', fn: () => { throw new Error('boom2'); } });
+    s.flush();
+    expect(consoleSpy).toHaveBeenCalledTimes(2);
+    consoleSpy.mockRestore();
+  });
+
   it('scheduleAll queues multiple jobs atomically', () => {
     const results: string[] = [];
     s.scheduleAll([
