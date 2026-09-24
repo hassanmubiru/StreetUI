@@ -5,3 +5,4 @@ export * from './environment.js';
 export * from './identity.js';
 export * from './lifecycle.js';
 export * from './node.js';
+export * from './observability.js';
