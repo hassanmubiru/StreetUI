@@ -275,3 +275,121 @@ describe('hydrate — hydration boundary (slot) preservation', () => {
     expect(container.querySelector('#foreign')).toBeNull();
   });
 });
+
+describe('hydrate — mismatch diagnostics (dev, opt-in)', () => {
+  it('emits nothing when the DOM matches the graph', () => {
+    const { container: c1, hydrate: h1 } = prepare((page) => page.heading('OK'));
+    void h1; // build server markup only; re-run with a diagnostic sink below
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) => page.heading('OK'));
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    void c1;
+
+    const { sink, diagnostics } = createHydrationDiagnosticCollector();
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) => page.heading('OK'));
+    createRenderer({
+      domAdapter: new BrowserDOMAdapter(),
+      hydrationDiagnostics: sink,
+    }).hydrate(compile(clientApp), container);
+
+    expect(diagnostics).toHaveLength(0);
+  });
+
+  it('reports a tag mismatch with expected/found/path/action, still repairing', () => {
+    const { sink, diagnostics } = createHydrationDiagnosticCollector();
+
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) => page.heading('Title'));
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    // Corrupt: replace the <h1> with a <p> to force a tag mismatch.
+    const h1 = container.querySelector('h1')!;
+    const wrong = document.createElement('p');
+    wrong.textContent = 'stale';
+    h1.replaceWith(wrong);
+
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) => page.heading('Title'));
+    createRenderer({
+      domAdapter: new BrowserDOMAdapter(),
+      hydrationDiagnostics: sink,
+    }).hydrate(compile(clientApp), container);
+
+    // Self-repair still happened.
+    expect(container.querySelector('p')).toBeNull();
+    expect(container.querySelector('h1')?.textContent).toBe('Title');
+
+    // And a diagnostic described it.
+    const tag = diagnostics.find((d) => d.type === 'tag-mismatch');
+    expect(tag).toBeDefined();
+    expect(tag?.expected).toBe('h1');
+    expect(tag?.found).toBe('p');
+    expect(tag?.nodeType).toBe('heading');
+    expect(tag?.action).toContain('fresh subtree');
+    expect(tag?.message).toContain('Expected: h1');
+    expect(tag?.message).toContain('Found: p');
+  });
+
+  it('reports a surplus element when the graph expects nothing there', () => {
+    const { sink, diagnostics } = createHydrationDiagnosticCollector();
+
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) => page.container('slot', () => {}, { id: 'slot' }));
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    const slot = container.querySelector('#slot')!;
+    const foreign = document.createElement('section');
+    slot.appendChild(foreign);
+
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) => page.container('slot', () => {}, { id: 'slot' }));
+    createRenderer({
+      domAdapter: new BrowserDOMAdapter(),
+      hydrationDiagnostics: sink,
+    }).hydrate(compile(clientApp), container);
+
+    const surplus = diagnostics.find((d) => d.type === 'surplus-element');
+    expect(surplus).toBeDefined();
+    expect(surplus?.expected).toBeNull();
+    expect(surplus?.found).toBe('section');
+    expect(surplus?.action).toContain('surplus');
+    // Repair still occurred.
+    expect(slot.querySelector('section')).toBeNull();
+  });
+
+  it('console sink forwards each diagnostic as one warning line', () => {
+    const lines: string[] = [];
+    const sink = consoleHydrationDiagnosticSink({ warn: (m) => lines.push(m) });
+
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) => page.heading('Title'));
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    container.querySelector('h1')!.replaceWith(document.createElement('p'));
+
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) => page.heading('Title'));
+    createRenderer({
+      domAdapter: new BrowserDOMAdapter(),
+      hydrationDiagnostics: sink,
+    }).hydrate(compile(clientApp), container);
+
+    expect(lines.length).toBeGreaterThan(0);
+    expect(lines[0]).toContain('Hydration mismatch');
+  });
+});
