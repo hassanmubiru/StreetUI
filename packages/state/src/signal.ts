@@ -323,3 +323,23 @@ export function batch(fn: () => void): void {
 export function isBatching(): boolean {
   return _batchDepth > 0;
 }
+
+// ── Inspection (read-only, DevTools-facing) ─────────────────────────────────
+
+/** Whether a signal is writable (`signal()`) or computed (`derived()`). */
+export type SignalKind = 'writable' | 'derived';
+
+/** Classify a reactive value as writable or derived. */
+export function signalKind(source: ReadonlySignal<unknown>): SignalKind {
+  return source instanceof DerivedSignal ? 'derived' : 'writable';
+}
+
+/**
+ * The number of live observers on a signal — direct subscribers plus derived
+ * or effect consumers — or `undefined` if the source does not expose the count.
+ * Read-only; safe for DevTools. Never mutates reactive state.
+ */
+export function observerCount(source: ReadonlySignal<unknown>): number | undefined {
+  const maybe = source as { _observerCount?: () => number };
+  return typeof maybe._observerCount === 'function' ? maybe._observerCount() : undefined;
+}
