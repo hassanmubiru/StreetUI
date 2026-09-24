@@ -18,6 +18,7 @@ import {
   effect,
   batch,
   resource,
+  type Signal,
   // dsl + compiler + renderer
   streetui,
   compile,
