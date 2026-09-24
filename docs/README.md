@@ -7,6 +7,20 @@ DOM, no React/Vue/Preact, no JSX runtime.
 This portal indexes the reference docs. All of it describes **real, shipped
 APIs**; nothing here documents a planned feature as if it exists.
 
+## Release & 1.0
+
+- [Public API statement & report](./api-v1.0.md) — the frozen 1.0 surface (168
+  values, 171 types across 17 packages, all stable), the semver policy, how the
+  surface is enforced, and the post-1.0 roadmap.
+- [Migrating to 1.0](./migration-to-1.0.md) — there is nothing to migrate; the
+  small version-alignment fixes, and what "stable" commits the project to.
+- [Release process](./release-process.md) — the release gates and the scripts
+  that enforce them, and the honest BLOCKED status of the browser and registry
+  gates.
+- [Browser & runtime support](./browser-support.md) — target environments, what
+  was validated (happy-dom, Node 22), and what was not (real browsers).
+- [Changelog](../CHANGELOG.md).
+
 ## Getting started
 
 - The repository [README](../README.md) — install, monorepo layout, quick start.

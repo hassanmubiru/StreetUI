@@ -373,6 +373,64 @@ describe('hydrate — mismatch diagnostics (dev, opt-in)', () => {
     expect(slot.querySelector('section')).toBeNull();
   });
 
+  it('reports a missing element when the DOM lacks a child the graph expects', () => {
+    const { sink, diagnostics } = createHydrationDiagnosticCollector();
+
+    resetIdCounter();
+    const serverApp = streetui.app({ name: 'app' });
+    serverApp.page('home', (page) =>
+      page.container(
+        'box',
+        (c) => {
+          c.heading('One');
+          c.heading('Two');
+        },
+        { id: 'box' },
+      ),
+    );
+    const html = renderToString(compile(serverApp));
+    const container = document.createElement('div');
+    container.innerHTML = html;
+
+    // Drop the second heading so the graph expects a child the DOM cannot supply.
+    const box = container.querySelector('#box')!;
+    const headings = box.querySelectorAll('h1');
+    expect(headings.length).toBe(2);
+    headings[1]!.remove();
+    expect(box.querySelectorAll('h1').length).toBe(1);
+
+    resetIdCounter();
+    const clientApp = streetui.app({ name: 'app' });
+    clientApp.page('home', (page) =>
+      page.container(
+        'box',
+        (c) => {
+          c.heading('One');
+          c.heading('Two');
+        },
+        { id: 'box' },
+      ),
+    );
+    createRenderer({
+      domAdapter: new BrowserDOMAdapter(),
+      hydrationDiagnostics: sink,
+    }).hydrate(compile(clientApp), container);
+
+    const missing = diagnostics.find((d) => d.type === 'missing-element');
+    expect(missing).toBeDefined();
+    expect(missing?.expected).toBe('h1');
+    expect(missing?.found).toBeNull();
+    expect(missing?.nodeType).toBe('heading');
+    expect(missing?.action).toContain('mounted fresh');
+    expect(missing?.message).toContain('(nothing)');
+
+    // Repair mounted the absent child fresh, in order.
+    const repaired = box.querySelectorAll('h1');
+    expect(repaired.length).toBe(2);
+    expect(repaired[0]?.textContent).toBe('One');
+    expect(repaired[1]?.textContent).toBe('Two');
+  });
+
   it('console sink forwards each diagnostic as one warning line', () => {
     const lines: string[] = [];
     const sink = consoleHydrationDiagnosticSink({ warn: (m) => lines.push(m) });

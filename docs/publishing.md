@@ -72,5 +72,8 @@ install time. Its packaging metadata is still validated by the steps above.
   package registry, so nothing was pushed and no "install from registry" claim
   is made. The offline tarball consumption is the strongest achievable proof and
   it passes.
-- **Versions are unchanged.** No packages were version-bumped; there were no
-  breaking changes to the public API in this milestone.
+- **Coordinated version.** All public packages publish at a single coordinated
+  version (`1.0.0` for the stable release); see
+  [`release-process.md`](./release-process.md) and
+  [`api-v1.0.md`](./api-v1.0.md). There are no breaking changes to the public API
+  in the 1.0 stabilization.

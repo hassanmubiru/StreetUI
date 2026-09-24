@@ -431,4 +431,22 @@ threat model are in `docs/production-server.md`.
 system at once — signals, i18n, context, forms, resource, SSR, hydration with
 DOM-node identity, and client-side routing — verified end to end under a DOM.
 
+---
+
+## Release & versioning
+
+StreetUI is at **1.0.0** — a stabilization release. Every public package shares
+this version, and the public API is frozen under semantic versioning. Upgrading
+from 0.9 is drop-in; there are no breaking public API changes.
+
+- [Public API statement & report](docs/api-v1.0.md) — the frozen surface (168
+  values, 171 types across 17 packages, all stable) and the semver policy.
+- [Migrating to 1.0](docs/migration-to-1.0.md) · [Release process](docs/release-process.md) · [Browser & runtime support](docs/browser-support.md) · [Changelog](CHANGELOG.md)
+
+Two release gates are reported honestly as **BLOCKED** in this build
+environment: real-browser validation (no browser available — validated against a
+spec-compliant DOM instead) and registry publication (no reachable registry —
+proven up to offline tarball install). See the release and browser docs for the
+exact status.
+
 
