@@ -67,6 +67,10 @@ function inspectApplication(compiled) {
   const errors = diags.filter((d) => d.severity === "error").length;
   const perfAcc = { totalNodes: 0, maxDepth: 0, eventHandlers: 0, stateBindings: 0, largestChildCount: 0 };
   collectPerf(graph, signals.size, perfAcc);
+  let reactiveLists = 0;
+  for (const key of compiled.graph.handlers.keys()) {
+    if (key.startsWith("__listplan__")) reactiveLists += 1;
+  }
   return {
     identity: {
       name: compiled.name,
@@ -88,7 +92,8 @@ function inspectApplication(compiled) {
       eventHandlers: perfAcc.eventHandlers,
       stateBindings: perfAcc.stateBindings,
       distinctSignals: signals.size,
-      largestChildCount: perfAcc.largestChildCount
+      largestChildCount: perfAcc.largestChildCount,
+      reactiveLists
     }
   };
 }

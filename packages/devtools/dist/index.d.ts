@@ -73,6 +73,15 @@ interface PerfSnapshot {
     readonly distinctSignals: number;
     /** Largest single-node child count (a proxy for the biggest list/section). */
     readonly largestChildCount: number;
+    /**
+     * Number of reactive keyed-list sites driven by the optimised lazy-plan
+     * reconciler (v1.1 §15/§25). Counted from the graph's `__listplan__<id>`
+     * handler registrations — one per `listOf(...)` bound to a signal. These are
+     * the nodes whose updates take the identity-short-circuit + LIS minimal-move
+     * path, so surfacing the count lets a panel or CI check see how much of an app
+     * benefits from the keyed-list engine without measuring anything at runtime.
+     */
+    readonly reactiveLists: number;
 }
 /**
  * The complete read-only snapshot of a compiled application. Everything here is

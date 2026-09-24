@@ -162,6 +162,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
 
 // ../renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
+  if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
     const handler = graph.getHandler(eventDesc.handlerKey);
     if (handler === void 0) continue;
@@ -291,6 +292,109 @@ function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn) {
   reorderDom(ctx, parentDom, newInstances);
   return { instances: newInstances, removed };
 }
+function reconcileChildrenByPlan(ctx, parentDom, oldInstances, plan, mountFn) {
+  const oldByKey = /* @__PURE__ */ new Map();
+  for (const inst of oldInstances) {
+    oldByKey.set(inst.graphNode.key ?? inst.graphNode.id, inst);
+  }
+  const newInstances = [];
+  const usedKeys = /* @__PURE__ */ new Set();
+  const built = [];
+  for (const entry of plan) {
+    const existing = oldByKey.get(entry.key);
+    if (existing !== void 0) {
+      usedKeys.add(entry.key);
+      const oldItem = existing.graphNode.getProp("_item");
+      if (!Object.is(oldItem, entry.item)) {
+        const newSig = entry.sig();
+        const oldSig = existing.graphNode.getProp("_sig");
+        if (!Object.is(oldSig, newSig)) {
+          const freshNode = entry.build();
+          built.push(freshNode);
+          patchExistingInstance(ctx, existing, freshNode);
+          reconcileItemChildren(ctx, existing, freshNode, mountFn);
+          existing.graphNode.setProp("_sig", newSig);
+        }
+        existing.graphNode.setProp("_item", entry.item);
+      }
+      newInstances.push(existing);
+    } else {
+      const freshNode = entry.build();
+      built.push(freshNode);
+      const inst = mountFn(freshNode, parentDom);
+      newInstances.push(inst);
+    }
+  }
+  const removed = [];
+  for (const inst of oldInstances) {
+    const key = inst.graphNode.key ?? inst.graphNode.id;
+    if (!usedKeys.has(key)) removed.push(inst);
+  }
+  for (const inst of removed) {
+    const parent = ctx.dom.parentNode(inst.domNode);
+    if (parent !== null) ctx.dom.removeChild(parent, inst.domNode);
+    inst.dispose();
+  }
+  reorderDomMinimal(ctx, parentDom, oldInstances, newInstances);
+  return { instances: newInstances, removed, built };
+}
+function reorderDomMinimal(ctx, parentDom, oldInstances, newInstances) {
+  const n = newInstances.length;
+  if (n === 0) return;
+  const oldIndexOf = /* @__PURE__ */ new Map();
+  for (let i = 0; i < oldInstances.length; i++) oldIndexOf.set(oldInstances[i], i);
+  const source = new Array(n);
+  let moved = false;
+  let lastSeen = -1;
+  for (let i = 0; i < n; i++) {
+    const oi = oldIndexOf.get(newInstances[i]);
+    if (oi === void 0) {
+      source[i] = -1;
+      moved = true;
+    } else {
+      source[i] = oi;
+      if (oi < lastSeen) moved = true;
+      else lastSeen = oi;
+    }
+  }
+  if (!moved) return;
+  const keep = longestIncreasingSubsequence(source);
+  let refNode = null;
+  for (let i = n - 1; i >= 0; i--) {
+    const domNode = newInstances[i].domNode;
+    if (source[i] === -1 || !keep.has(i)) {
+      if (ctx.dom.nextSibling(domNode) !== refNode) {
+        ctx.dom.insertBefore(parentDom, domNode, refNode);
+      }
+    }
+    refNode = domNode;
+  }
+}
+function longestIncreasingSubsequence(source) {
+  const keep = /* @__PURE__ */ new Set();
+  const n = source.length;
+  const tails = [];
+  const prev = new Array(n).fill(-1);
+  for (let i = 0; i < n; i++) {
+    const v = source[i];
+    if (v < 0) continue;
+    let lo = 0;
+    let hi = tails.length;
+    while (lo < hi) {
+      const mid = lo + hi >> 1;
+      if (source[tails[mid]] < v) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo > 0) prev[i] = tails[lo - 1];
+    tails[lo] = i;
+  }
+  let idx = tails.length > 0 ? tails[tails.length - 1] : -1;
+  while (idx >= 0) {
+    keep.add(idx);
+    idx = prev[idx];
+  }
+  return keep;
+}
 function reconcileItemChildren(ctx, itemInstance, newItemNode, mountFn) {
   const el = itemInstance.domNode;
   if (!ctx.dom.isElement(el)) return;
@@ -392,10 +496,12 @@ function mountNode(ctx, graphNode, parentDom) {
     const textNode = dom.createTextNode(text);
     dom.appendChild(el2, textNode);
     applyNodeProps(ctx, graphNode, el2);
-    wireEvents(dom, graph, graphNode, el2, new NodeInstance(graphNode, el2));
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
-    wireSignalBindings(ctx, graphNode, instance2, textUpdate(dom, el2, textNode));
+    wireEvents(dom, graph, graphNode, el2, instance2);
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, textUpdate(dom, el2, textNode));
+    }
     dom.appendChild(parentDom, el2);
     return instance2;
   }
@@ -409,7 +515,9 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     wireEvents(dom, graph, graphNode, el2, instance2);
-    wireSignalBindings(ctx, graphNode, instance2, headingUpdate(dom, el2));
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, headingUpdate(dom, el2));
+    }
     dom.appendChild(parentDom, el2);
     return instance2;
   }
@@ -425,7 +533,9 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     wireEvents(dom, graph, graphNode, el2, instance2);
-    wireSignalBindings(ctx, graphNode, instance2, inputUpdate(dom, el2));
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, inputUpdate(dom, el2));
+    }
     dom.appendChild(parentDom, el2);
     return instance2;
   }
@@ -473,7 +583,9 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     wireEvents(dom, graph, graphNode, el2, instance2);
-    wireSignalBindings(ctx, graphNode, instance2, buttonUpdate(dom, el2));
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, buttonUpdate(dom, el2));
+    }
     dom.appendChild(parentDom, el2);
     return instance2;
   }
@@ -500,11 +612,11 @@ function mountNode(ctx, graphNode, parentDom) {
       dom.setAttribute(el, "data-streetui-key", String(itemKey));
     }
   }
-  if (graphNode.type === "form") {
-    wireEvents(dom, graph, graphNode, el, new NodeInstance(graphNode, el));
-  }
   const instance = new NodeInstance(graphNode, el);
   ctx.instances.set(graphNode.id, instance);
+  if (graphNode.type === "form") {
+    wireEvents(dom, graph, graphNode, el, instance);
+  }
   for (const child of graphNode.children) {
     const childInstance = mountNode(ctx, child, el);
     instance.addChild(childInstance);
@@ -555,12 +667,15 @@ function buttonUpdate(dom, el) {
   };
 }
 function applyNodeProps(ctx, graphNode, el) {
-  for (const [key, value] of Object.entries(graphNode.props)) {
+  const props = graphNode.props;
+  for (const key in props) {
+    if (!Object.hasOwn(props, key)) continue;
     if (SKIP_PROP_KEYS.has(key)) continue;
-    applyProp(ctx.dom, el, key, value);
+    applyProp(ctx.dom, el, key, props[key]);
   }
 }
 function wireSignalBindings(ctx, graphNode, instance, onUpdate) {
+  if (graphNode.stateRefs.length === 0) return;
   for (const stateRef of graphNode.stateRefs) {
     const signalKey = `__signal__${stateRef.signalId}`;
     const maybeSig = ctx.graph.getHandler(signalKey);
@@ -572,17 +687,44 @@ function wireSignalBindings(ctx, graphNode, instance, onUpdate) {
   }
 }
 function wireReactiveList(ctx, graphNode, instance, el) {
+  const plan = ctx.graph.getHandler(`__listplan__${graphNode.id}`);
   const build = ctx.graph.getHandler(`__listbuild__${graphNode.id}`);
-  if (build === void 0) return;
+  if (plan === void 0 && build === void 0) return;
   for (const stateRef of graphNode.stateRefs) {
     if (stateRef.propKey !== "items") continue;
     const sig = ctx.graph.getHandler(`__signal__${stateRef.signalId}`);
     if (sig === void 0 || typeof sig.subscribe !== "function") continue;
     const unsub = sig.subscribe((value) => {
-      reconcileReactiveList(ctx, graphNode, instance, el, build(value));
+      if (plan !== void 0) {
+        reconcileReactiveListByPlan(ctx, graphNode, instance, el, plan(value));
+      } else {
+        reconcileReactiveList(ctx, graphNode, instance, el, build(value));
+      }
     });
     instance.trackCleanup(unsub);
   }
+}
+function reconcileReactiveListByPlan(ctx, listNode, listInstance, listEl, plan) {
+  const oldInstances = [...listInstance.children];
+  const result = reconcileChildrenByPlan(
+    ctx,
+    listEl,
+    oldInstances,
+    plan,
+    (node, parent) => mountNode(ctx, node, parent)
+  );
+  listInstance.children.length = 0;
+  for (const inst of result.instances) listInstance.children.push(inst);
+  for (const removed of result.removed) {
+    forgetInstance(ctx, removed);
+    ctx.graph.detachNode(removed.graphNode);
+  }
+  const adopted = new Set(result.instances.map((i) => i.graphNode));
+  for (const node of result.built ?? []) {
+    if (!adopted.has(node)) ctx.graph.detachNode(node);
+  }
+  for (const child of [...listNode.children]) listNode.removeChild(child);
+  for (const inst of result.instances) listNode.appendChild(inst.graphNode);
 }
 function reconcileReactiveList(ctx, listNode, listInstance, listEl, newNodes) {
   const oldInstances = [...listInstance.children];
@@ -959,7 +1101,7 @@ function renderToString(compiled, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.0.0";
+var VERSION = "1.2.0";
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   STATE_MARKER_ATTR,

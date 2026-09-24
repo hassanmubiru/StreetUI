@@ -162,8 +162,10 @@ declare function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: El
 declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, onUpdate: (propKey: string, value: unknown) => void): void;
 /**
  * Subscribe a reactive-list instance to its driving signal. On each change the
- * DSL-registered build factory produces the desired child graph nodes, which
- * are reconciled against the live DOM with the keyed reconciler.
+ * DSL-registered plan factory produces lightweight per-row descriptors, which
+ * are reconciled against the live DOM with the keyed, minimal-move reconciler
+ * (spec §15). A `conditional` node has no plan handler and falls back to the
+ * eager build factory (it only ever renders 0..1 branch, so eager is fine).
  */
 declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element): void;
 
@@ -200,6 +202,24 @@ interface ReconcileResult {
     instances: NodeInstance[];
     /** Instances that were removed and must be disposed. */
     removed: NodeInstance[];
+    /**
+     * GraphNodes freshly materialised during this reconcile (new rows + rebuilt
+     * changed rows). The caller detaches any of these that were not adopted as a
+     * live instance's graph node, so no orphan subtree lingers in the graph index.
+     */
+    built?: GraphNode[];
+}
+/**
+ * A lazy reconciliation descriptor for one reactive-list row (mirrors the DSL's
+ * `ListPlanEntry`). `sig()` and `build()` are only invoked for rows that are
+ * genuinely new or whose source reference changed — the whole point of the
+ * plan path (spec §15).
+ */
+interface PlanEntry {
+    readonly key: string;
+    readonly item: unknown;
+    readonly sig: () => string;
+    readonly build: () => GraphNode;
 }
 /**
  * Reconcile children of a container element against a new list of graph nodes.
@@ -211,6 +231,25 @@ interface ReconcileResult {
  * @param mountFn     Factory to create a new NodeInstance for a graph node
  */
 declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], newNodes: readonly GraphNode[], mountFn: MountFn): ReconcileResult;
+/**
+ * Plan-based keyed reconciliation (spec §15 — the optimised reactive-list path).
+ *
+ * Identical observable result to {@link reconcileChildren}, but driven by lazy
+ * {@link PlanEntry} descriptors instead of a pre-built array of GraphNodes:
+ *
+ *  - a reused row whose `item` reference is unchanged does **zero** work — no
+ *    signature hash, no subtree build, no prop patch (the common case for
+ *    append / prepend / remove / reorder / reverse, where existing item objects
+ *    keep their identity);
+ *  - a reused row whose reference changed hashes lazily and, only on a real
+ *    signature change, materialises a fresh subtree for a targeted in-place
+ *    content update;
+ *  - a genuinely new key builds + mounts exactly one subtree.
+ *
+ * DOM reordering uses a longest-increasing-subsequence pass so the number of
+ * moves is minimal (e.g. a prepend into a 10k list moves 1 node, not 10k).
+ */
+declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn): ReconcileResult;
 
 /**
  * StreetUI Renderer — framework-owned DOM renderer.
@@ -370,4 +409,4 @@ declare function renderToString(compiled: CompiledApplication, options?: RenderT
 
 declare function resolveTag(type: SemanticNodeType): string;
 
-export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, renderToString, resolveTag, serializeState, textUpdate, wireEvents, wireReactiveList, wireSignalBindings };
+export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, serializeState, textUpdate, wireEvents, wireReactiveList, wireSignalBindings };
