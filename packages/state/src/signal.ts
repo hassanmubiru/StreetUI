@@ -142,6 +142,15 @@ export class Signal<T> implements ReactiveSource<T>, ReadonlySignal<T> {
     for (const sub of [...this._subscribers]) sub(value);
     for (const consumer of [...this._consumers]) consumer._invalidate();
   }
+
+  /**
+   * @internal DevTools inspection only. The number of live observers
+   * (direct subscribers plus derived/effect consumers). Read-only; never
+   * mutates reactive state.
+   */
+  _observerCount(): number {
+    return this._subscribers.size + this._consumers.size;
+  }
 }
 
 // ── DerivedSignal ─────────────────────────────────────────────────────────────
@@ -214,6 +223,14 @@ export class DerivedSignal<T> implements ReactiveSource<T>, ReactiveConsumer, Re
     this._sources.clear();
     this._subscribers.clear();
     this._consumers.clear();
+  }
+
+  /**
+   * @internal DevTools inspection only. Live observers (subscribers plus
+   * downstream consumers). Read-only.
+   */
+  _observerCount(): number {
+    return this._subscribers.size + this._consumers.size;
   }
 }
 
