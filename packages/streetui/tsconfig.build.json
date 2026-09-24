@@ -1,0 +1,11 @@
+{
+  "//": "Declaration-bundling config used ONLY by tsup's dts build (see tsup.config.ts). It maps the internal @streetui/* specifiers to their SOURCE entry points so rollup-dts resolves every shared type (e.g. StreetApp) to a SINGLE declaration instead of pulling each internal package's pre-bundled .d.ts (which would emit duplicate, nominally-incompatible copies and break consumers like `compile(streetui.app(...))`). rootDir is intentionally omitted here because the source graph spans sibling packages; the JS build uses esbuild and the type-check uses tsconfig.json (which keeps rootDir).",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": null,
+    "paths": {
+      "@streetui/*": ["../*/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"]
+}
