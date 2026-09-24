@@ -103,16 +103,12 @@ describe('streetui — DSL + compiler + SSR', () => {
     expect(html).toContain('Count: 2');
   });
 
-  it('serializeState / readState round-trips hydration state', () => {
+  it('serializeState produces a serialized state payload; readState is exposed', () => {
     const serialized = serializeState({ app: { count: 7 } });
-    const doc = `<div ${''}></div>`;
     expect(typeof serialized).toBe('string');
     expect(serialized).toContain('7');
-    // readState reads from a DOM element carrying the state marker.
-    const el = document.createElement('div');
-    el.setAttribute('data-streetui-state', serialized.replace(/^[^>]*>|<[^>]*$/g, ''));
-    // The precise marker plumbing is covered in the renderer suite; here we only
-    // assert the functions are wired and callable from the public entry.
+    // Full marker round-trip is covered in the renderer suite; here we only
+    // assert the SSR state helpers are wired and callable from the public entry.
     expect(typeof readState).toBe('function');
   });
 });
