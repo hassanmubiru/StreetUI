@@ -14,6 +14,9 @@
     "release:meta": "node scripts/apply-publish-metadata.mjs",
     "release:pack": "node scripts/pack-tarballs.mjs",
     "release:smoke": "node scripts/consumer-smoke.mjs",
+    "release:publish": "node scripts/publish-packages.mjs",
+    "release:publish:dry": "node scripts/publish-packages.mjs --dry-run",
+    "release:browser": "node scripts/browser-harness.mjs",
     "readmes": "node scripts/generate-readmes.mjs"
   },
   "devDependencies": {
