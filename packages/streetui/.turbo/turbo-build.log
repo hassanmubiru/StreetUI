@@ -23,28 +23,28 @@ CJS Build start
 
 ESM dist/index.js          117.18 KB
 ESM dist/server.js         27.00 KB
+ESM dist/testing.js        49.07 KB
 ESM dist/bin.js            29.41 KB
 ESM dist/create-bin.js     29.52 KB
-ESM dist/testing.js        49.07 KB
-ESM dist/server.js.map     71.12 KB
-ESM dist/bin.js.map        75.53 KB
-ESM dist/create-bin.js.map 75.66 KB
-ESM dist/index.js.map      324.25 KB
 ESM dist/testing.js.map    133.70 KB
-ESM ⚡️ Build success in 98ms
+ESM dist/bin.js.map        75.53 KB
+ESM dist/index.js.map      324.25 KB
+ESM dist/create-bin.js.map 75.66 KB
+ESM dist/server.js.map     71.12 KB
+ESM ⚡️ Build success in 112ms
+CJS dist/server.cjs         28.20 KB
 CJS dist/index.cjs          123.56 KB
-CJS dist/testing.cjs        50.34 KB
 CJS dist/bin.cjs            30.58 KB
 CJS dist/create-bin.cjs     30.69 KB
-CJS dist/server.cjs         28.20 KB
-CJS dist/testing.cjs.map    134.52 KB
-CJS dist/bin.cjs.map        75.28 KB
-CJS dist/index.cjs.map      328.38 KB
-CJS dist/create-bin.cjs.map 75.41 KB
+CJS dist/testing.cjs        50.34 KB
 CJS dist/server.cjs.map     72.29 KB
-CJS ⚡️ Build success in 98ms
+CJS dist/bin.cjs.map        75.28 KB
+CJS dist/create-bin.cjs.map 75.41 KB
+CJS dist/testing.cjs.map    134.52 KB
+CJS dist/index.cjs.map      328.38 KB
+CJS ⚡️ Build success in 112ms
 DTS Build start
-DTS ⚡️ Build success in 2468ms
+DTS ⚡️ Build success in 2883ms
 DTS dist/bin.d.ts                             20.00 B
 DTS dist/testing.d.ts                         5.12 KB
 DTS dist/index.d.ts                           79.50 KB
