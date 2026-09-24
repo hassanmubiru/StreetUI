@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/benchmarks
 
- ✓ src/harness.test.ts  (7 tests) 10ms
+ ✓ src/harness.test.ts  (7 tests) 5ms
 
  Test Files  1 passed (1)
       Tests  7 passed (7)
-   Start at  20:07:01
-   Duration  525ms (transform 55ms, setup 0ms, collect 52ms, tests 10ms, environment 173ms, prepare 94ms)
+   Start at  20:08:04
+   Duration  606ms (transform 58ms, setup 0ms, collect 50ms, tests 5ms, environment 213ms, prepare 124ms)
 
