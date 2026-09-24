@@ -170,6 +170,25 @@ importers:
         specifier: '*'
         version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
 
+  examples/streetui-performance-app:
+    dependencies:
+      streetui:
+        specifier: workspace:*
+        version: link:../../packages/streetui
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
   examples/streetui-showcase:
     dependencies:
       streetui:

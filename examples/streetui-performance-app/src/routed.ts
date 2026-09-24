@@ -13,6 +13,7 @@ import {
   type RouteDefinition,
   type MountedRouter,
   type Router,
+  type StreetRenderer,
 } from 'streetui';
 import { createDeps, ThemeContext, type AppDeps, type Theme } from './deps.js';
 import { buildShell } from './shell.js';
@@ -41,6 +42,8 @@ export interface MountPerfOptions {
   readonly useBrowserHistory?: boolean;
   readonly deps?: AppDeps;
   readonly theme?: Theme;
+  /** Override the renderer (e.g. a counting DOM adapter for benchmarks). */
+  readonly renderer?: StreetRenderer;
 }
 
 export interface MountedPerfApp {
@@ -62,6 +65,7 @@ export function mountPerfApp(container: Element, opts: MountPerfOptions = {}): M
     mountRouter(router, {
       container,
       ...(opts.hydrate !== undefined ? { hydrate: opts.hydrate } : {}),
+      ...(opts.renderer !== undefined ? { renderer: opts.renderer } : {}),
       shell: (sh) => buildShell(sh, router, deps),
     }),
   );
