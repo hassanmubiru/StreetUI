@@ -28,6 +28,7 @@ export default defineConfig({
   },
   format: ['esm', 'cjs'],
   dts: { resolve: [/^@streetui\//] },
+  tsconfig: 'tsconfig.build.json',
   sourcemap: true,
   clean: true,
   splitting: false,
