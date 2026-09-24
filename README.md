@@ -1,18 +1,62 @@
 # StreetUI
 
-A TypeScript-first semantic application framework with its own renderer.
+**StreetUI — a complete TypeScript UI framework.** It ships as a single npm
+package, `streetui`, with its own compiler, semantic application graph,
+reactivity, and DOM renderer.
 
-StreetUI owns its entire stack:
+No React. No Vue. No Preact. No JSX. No virtual DOM libraries. StreetUI owns its
+entire stack:
 
 ```
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
 
-No React. No Vue. No Preact. No JSX. No virtual DOM libraries.
+---
+
+## Install
+
+```bash
+npm install streetui
+```
+
+Everything is imported from the one package:
+
+```ts
+import {
+  signal, derived, streetui, compile,
+  createRenderer, BrowserDOMAdapter, createRuntime,
+} from 'streetui';
+```
+
+Two curated subpaths live in the **same** package (you still only install
+`streetui`):
+
+- `streetui/server` — `renderToString`, `serializeState`, `readState`, `ServerDOMAdapter`
+- `streetui/testing` — `render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `flushUpdates`
 
 ---
 
-## Monorepo structure
+## Create a new app
+
+```bash
+npx streetui create my-app     # templates: basic, ssr
+cd my-app
+npm install
+npm run dev
+```
+
+`streetui create` scaffolds a real, working server-rendered app (no
+placeholders, no React, no JSX) and drives the StreetUI pipeline directly. CLI
+commands: `streetui create | dev | build | start` (flags `--port`, `--host`,
+`--help`, `--version`).
+
+---
+
+## Internal architecture (modules)
+
+StreetUI is internally modular, but **consumers install only the single
+`streetui` package** — the modules below are its internal structure, not
+separately installed dependencies.
 
 ```
 packages/
@@ -54,7 +98,9 @@ section below.
 
 ---
 
-## Quick start
+## Developing StreetUI (contributors)
+
+Working on the framework itself (not consuming it) uses the monorepo toolchain:
 
 ```bash
 pnpm install
@@ -68,11 +114,7 @@ pnpm typecheck
 ## DSL example
 
 ```ts
-import { signal } from '@streetui/state';
-import { streetui } from '@streetui/dsl';
-import { compile } from '@streetui/compiler';
-import { createRuntime } from '@streetui/runtime';
-import { createRenderer } from '@streetui/renderer';
+import { signal, streetui, compile, createRuntime, createRenderer } from 'streetui';
 
 const count = signal(0);
 
@@ -123,7 +165,7 @@ teardown) — no virtual DOM, no second reactive system, no third-party deps. On
 navigation only the affected route subtree is recreated; the shell persists.
 
 ```ts
-import { createRouter, mountRouter, routerOutlet } from '@streetui/router';
+import { createRouter, mountRouter, routerOutlet } from 'streetui';
 
 const router = createRouter({
   routes: [
@@ -155,7 +197,7 @@ DOM, and no HTTP client baked in: the loader is any async function, so plain
 `fetch()` (or anything else) works.
 
 ```ts
-import { resource, derived } from '@streetui/state';
+import { resource, derived } from 'streetui';
 
 const products = resource<Product[]>(({ signal }) =>
   fetch('/api/products', { signal }).then((r) => {
@@ -214,7 +256,7 @@ renderer's existing binding is the only listener; `values`, `errors`, `touched`,
 `dirty`, `valid`, and the submission `status` are all (derived) signals.
 
 ```ts
-import { createForm, required, email, minLength } from '@streetui/forms';
+import { createForm, required, email, minLength } from 'streetui';
 
 const form = createForm({
   initialValues: { email: '', password: '' },
@@ -251,7 +293,7 @@ nested builders execute and may `consume()`), then pops it; consumers resolve th
 nearest active provider or the required default.
 
 ```ts
-import { createContext } from '@streetui/context';
+import { createContext } from 'streetui';
 
 const FormContext = createContext<FormScope | null>(null, 'app.form');
 
@@ -292,7 +334,7 @@ the server and client always compute the same ids and a re-rendered subtree
 never breaks its associations:
 
 ```ts
-import { a11yIds } from '@streetui/core';
+import { a11yIds } from 'streetui';
 
 const ids = a11yIds('email');   // { input:'email-input', label:'email-label', error:'email-error', ... }
 group.text('Email', { id: ids.label });
@@ -311,7 +353,7 @@ returns a derived signal that recomputes on locale change; `translate()` is a
 one-shot read for values captured once (validator messages, static labels).
 
 ```ts
-import { createI18n } from '@streetui/i18n';
+import { createI18n } from 'streetui';
 
 const i18n = createI18n({ locale: 'en', messages, fallbackLocale: 'en' });
 
