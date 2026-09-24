@@ -146,7 +146,7 @@ describe('streetui — hydration (SSR markup adopted, then reactive)', () => {
     clientCount.set(5);
     await flush();
     expect(container.querySelector('#count')?.textContent).toBe('Count: 5');
-    handle.dispose();
+    handle.unmount();
   });
 });
 
