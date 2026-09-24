@@ -92,14 +92,16 @@ const tarballMap = new Map();
 for (const file of readdirSync(TARBALL_DIR)) {
   if (!file.endsWith('.tgz')) continue;
   const tgzPath = join(TARBALL_DIR, file);
-  // Read the package name from the tarball's package.json via npm pack output
-  // File naming: streetui-<pkg>-1.0.0.tgz  (e.g. streetui-core-1.0.0.tgz)
-  // Map back to @streetui/<pkg>
+  // Special case: unified package is streetui-1.0.0.tgz (no sub-pkg segment)
+  if (/^streetui-\d+\.\d+\.\d+\.tgz$/.test(file)) {
+    tarballMap.set('streetui', tgzPath);
+    continue;
+  }
+  // All others: streetui-<pkg>-1.0.0.tgz → @streetui/<pkg>
   const match = /^streetui-(.+)-[\d.]+\.tgz$/.exec(file);
   if (!match) continue;
   const shortName = match[1];
-  const fullName = shortName === 'cli' ? '@streetui/cli' : `@streetui/${shortName}`;
-  tarballMap.set(fullName, tgzPath);
+  tarballMap.set(`@streetui/${shortName}`, tgzPath);
 }
 
 const missing = PUBLISH_ORDER.filter(n => !tarballMap.has(n));
