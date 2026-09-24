@@ -1,6 +1,6 @@
 {
   "name": "@streetui/core",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "StreetUI core — application identity, lifecycle, diagnostics, environment",
   "type": "module",
   "main": "./dist/index.cjs",

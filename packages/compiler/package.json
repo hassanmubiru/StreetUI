@@ -1,6 +1,6 @@
 {
   "name": "@streetui/compiler",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "StreetUI compiler — DSL → validation → Semantic Application Graph",
   "type": "module",
   "main": "./dist/index.cjs",
