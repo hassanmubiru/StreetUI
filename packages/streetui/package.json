@@ -1,0 +1,113 @@
+{
+  "name": "streetui",
+  "version": "1.0.0",
+  "description": "StreetUI — a complete TypeScript UI framework with its own compiler, semantic application graph, reactivity, DOM renderer, router, resources, forms, context, i18n, SSR, hydration, testing, devtools and CLI. One install, one import.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "streetui": "./dist/bin.js",
+    "create-streetui": "./dist/create-bin.js"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./server": {
+      "import": {
+        "types": "./dist/server.d.ts",
+        "default": "./dist/server.js"
+      },
+      "require": {
+        "types": "./dist/server.d.cts",
+        "default": "./dist/server.cjs"
+      }
+    },
+    "./testing": {
+      "import": {
+        "types": "./dist/testing.d.ts",
+        "default": "./dist/testing.js"
+      },
+      "require": {
+        "types": "./dist/testing.d.cts",
+        "default": "./dist/testing.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsup && node scripts/scrub-dts.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "esbuild": "0.24.2"
+  },
+  "devDependencies": {
+    "@streetui/core": "workspace:*",
+    "@streetui/state": "workspace:*",
+    "@streetui/graph": "workspace:*",
+    "@streetui/dsl": "workspace:*",
+    "@streetui/compiler": "workspace:*",
+    "@streetui/runtime": "workspace:*",
+    "@streetui/events": "workspace:*",
+    "@streetui/scheduler": "workspace:*",
+    "@streetui/dom": "workspace:*",
+    "@streetui/renderer": "workspace:*",
+    "@streetui/router": "workspace:*",
+    "@streetui/forms": "workspace:*",
+    "@streetui/context": "workspace:*",
+    "@streetui/i18n": "workspace:*",
+    "@streetui/devtools": "workspace:*",
+    "@streetui/testing": "workspace:*",
+    "@streetui/cli": "workspace:*",
+    "@types/node": "*",
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/streetui/streetui.git",
+    "directory": "packages/streetui"
+  },
+  "keywords": [
+    "streetui",
+    "ui",
+    "framework",
+    "typescript",
+    "ssr",
+    "hydration",
+    "reactivity",
+    "signals",
+    "router",
+    "forms",
+    "i18n",
+    "renderer",
+    "no-virtual-dom"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ]
+}
