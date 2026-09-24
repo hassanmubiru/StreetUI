@@ -174,17 +174,18 @@ describe('streetui — router', () => {
 });
 
 describe('streetui — forms', () => {
-  it('validates fields with built-in validators', () => {
+  it('validates fields with built-in validators (reactively)', () => {
     const form = createForm({
-      fields: { emailAddr: '' },
+      initialValues: { emailAddr: '' },
       validators: { emailAddr: [required(), email()] },
     });
-    form.fields.emailAddr.setValue('');
-    form.validate();
-    expect(form.fields.emailAddr.valid.get()).toBe(false);
-    form.fields.emailAddr.setValue('user@example.com');
-    form.validate();
-    expect(form.fields.emailAddr.valid.get()).toBe(true);
+    const emailField = form.field('emailAddr');
+    emailField.setValue('');
+    expect(emailField.valid.get()).toBe(false);
+    emailField.setValue('user@example.com');
+    expect(emailField.valid.get()).toBe(true);
+    expect(form.valid.get()).toBe(true);
+    form.dispose();
   });
 });
 
