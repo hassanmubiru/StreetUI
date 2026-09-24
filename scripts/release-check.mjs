@@ -58,6 +58,8 @@ const PUBLIC = new Set([
   'core', 'state', 'graph', 'dsl', 'compiler', 'runtime', 'events', 'scheduler',
   'dom', 'renderer', 'router', 'forms', 'i18n', 'context', 'devtools', 'testing',
   'cli',
+  // Unified single-package consumer entry — the one thing end-users install.
+  'streetui',
 ]);
 
 // ── Load every workspace package (public + private) into a name→pkg map. ──────
