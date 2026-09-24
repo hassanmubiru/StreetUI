@@ -32,6 +32,7 @@
     "@streetui/renderer": "workspace:*",
     "@streetui/dom": "workspace:*",
     "@streetui/runtime": "workspace:*",
+    "@streetui/scheduler": "workspace:*",
     "@streetui/state": "workspace:*"
   },
   "devDependencies": {
