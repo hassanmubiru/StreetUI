@@ -10,11 +10,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@streetui/compiler": "0.1.0",
-    "@streetui/dom": "0.1.0",
-    "@streetui/dsl": "0.1.0",
-    "@streetui/renderer": "0.1.0",
-    "@streetui/state": "0.1.0"
+    "@streetui/compiler": "__FRAMEWORK_VERSION__",
+    "@streetui/dom": "__FRAMEWORK_VERSION__",
+    "@streetui/dsl": "__FRAMEWORK_VERSION__",
+    "@streetui/renderer": "__FRAMEWORK_VERSION__",
+    "@streetui/state": "__FRAMEWORK_VERSION__"
   },
   "devDependencies": {
     "@streetui/cli": "__FRAMEWORK_VERSION__",
