@@ -35,9 +35,32 @@ function walk(dir) {
 }
 
 const SCOPED = /@streetui\/[a-z][a-z0-9-]*/g;
-// A real module specifier for an internal package (leak we must never ship).
-const REAL_IMPORT = /\bfrom\s*['"]@streetui\/[a-z][a-z0-9-]*['"]/;
-const REAL_REQUIRE = /\brequire\(\s*['"]@streetui\/[a-z][a-z0-9-]*['"]\s*\)/;
+
+/**
+ * Detect a *real*, load-bearing reference to an internal package — i.e. a
+ * statement-level `import`/`export … from '@streetui/…'` or a
+ * `require('@streetui/…')` call. We deliberately ignore comment lines (JSDoc
+ * continuation lines begin with `*`, and `//`/`/*` mark line/block comments) and
+ * plain string-literal usages such as `spec.startsWith('@streetui/')`, which are
+ * legitimate runtime logic in the bundled CLI, not module specifiers.
+ *
+ * @param {string} source
+ * @returns {boolean}
+ */
+function hasRealInternalRef(source) {
+  for (const raw of source.split('\n')) {
+    const line = raw.trim();
+    // Skip comment lines (block-comment bodies, line comments, JSDoc).
+    if (line.startsWith('*') || line.startsWith('//') || line.startsWith('/*')) continue;
+    // `import …/export … from '@streetui/x'` (module specifier).
+    if (/\bfrom\s*['"]@streetui\/[a-z][a-z0-9-]*['"]/.test(line)) return true;
+    // `import '@streetui/x'` (bare side-effect import).
+    if (/^\s*import\s*['"]@streetui\/[a-z][a-z0-9-]*['"]/.test(line)) return true;
+    // `require('@streetui/x')` (CJS module load — not `.startsWith('@streetui/')`).
+    if (/\brequire\(\s*['"]@streetui\/[a-z][a-z0-9-]*['"]\s*\)/.test(line)) return true;
+  }
+  return false;
+}
 
 const files = walk(distDir);
 let scrubbed = 0;
@@ -51,14 +74,18 @@ for (const file of files) {
 
   const original = readFileSync(file, 'utf8');
 
-  // A surviving import/require of an internal package is a real leak.
-  if (REAL_IMPORT.test(original) || REAL_REQUIRE.test(original)) {
+  // A surviving statement-level import/require of an internal package is a real
+  // leak — the bundle failed to inline a dependency. Fail loudly.
+  if (hasRealInternalRef(original)) {
     leaks.push(file);
     continue;
   }
 
+  // Only *declaration* files get their residual comment/prose mentions rewritten
+  // to the public name. Runtime JS is left byte-for-byte intact (its `@streetui/`
+  // occurrences are string literals in the CLI's project-validation logic).
+  if (!isDecl) continue;
   if (!SCOPED.test(original)) continue;
-  // Only comment/prose mentions remain — rewrite them to the public name.
   const next = original.replace(SCOPED, 'streetui');
   if (next !== original) {
     writeFileSync(file, next);
@@ -74,4 +101,5 @@ if (leaks.length > 0) {
   process.exit(1);
 }
 
-console.log(`scrub-dts: cleaned ${scrubbed} file(s); no internal import leaks.`);
+console.log(`scrub-dts: cleaned ${scrubbed} declaration file(s); no internal import leaks.`);
+
