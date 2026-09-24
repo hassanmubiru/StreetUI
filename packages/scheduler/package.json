@@ -1,6 +1,6 @@
 {
   "name": "@streetui/scheduler",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "StreetUI update scheduler — batching, microtask flushing, ordered queues",
   "type": "module",
   "main": "./dist/index.cjs",
