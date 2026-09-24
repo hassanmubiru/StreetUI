@@ -1,14 +1,14 @@
 
-> streetui@1.0.0 test /home/error51/Downloads/StreetUI/packages/streetui
+> streetui@1.2.0 test /home/error51/Downloads/StreetUI/packages/streetui
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/streetui
 
- ✓ src/streetui.public.test.ts  (12 tests) 27ms
+ ✓ src/streetui.public.test.ts  (14 tests) 23ms
 
  Test Files  1 passed (1)
-      Tests  12 passed (12)
-   Start at  12:38:10
-   Duration  804ms (transform 179ms, setup 0ms, collect 191ms, tests 27ms, environment 221ms, prepare 133ms)
+      Tests  14 passed (14)
+   Start at  19:54:37
+   Duration  671ms (transform 173ms, setup 0ms, collect 197ms, tests 23ms, environment 180ms, prepare 86ms)
 
