@@ -69,4 +69,72 @@ function measure(fn, { warmup = 4, iterations = 15, setup } = {}) {
 }
 
 const results = {};
-// PLACEHOLDER_SCENARIOS
+
+// helper: freshly mount the users view over a counting adapter at a known state
+function mountUsers(sizing) {
+  const { adapter, reset, snapshot, structuralWrites } = makeCountingAdapter();
+  const renderer = createRenderer({ domAdapter: adapter });
+  const deps = createDeps(sizing ? { sizing } : {});
+  const host = container();
+  const handle = renderer.mount(compilePage(deps, 'users'), host);
+  return { deps, host, handle, reset, snapshot, structuralWrites, renderer };
+}
+
+// ── A: initial mount of the real 10,000-row users view ───────────────────────
+{
+  let created = 0, lastHandle = null;
+  const timing = measure((s) => {
+    lastHandle?.unmount?.();
+    s.reset();
+    s.handle = s.renderer.mount(s.compiled, s.container);
+    const c = s.snapshot();
+    created = c.createElement + c.createTextNode;
+    lastHandle = s.handle;
+  }, {
+    iterations: 10, warmup: 3,
+    setup: () => {
+      const { adapter, reset, snapshot } = makeCountingAdapter();
+      const renderer = createRenderer({ domAdapter: adapter });
+      return { renderer, reset, snapshot, container: container(),
+        compiled: compilePage(createDeps(), 'users') };
+    },
+  });
+  lastHandle?.unmount?.();
+  results.initialMountUsers10k = {
+    description: 'Initial mount of the users route (10,000-row keyed table) in the real app.',
+    rows: 10000, nodesCreated: created, timing,
+  };
+}
+
+// ── B: hydration of the SSR users view — must create ZERO DOM nodes (G) ──────
+{
+  const island = renderIsland({ view: 'users' });
+  const { adapter, reset, snapshot } = makeCountingAdapter();
+  const renderer = createRenderer({ domAdapter: adapter });
+  let created = -1;
+  const timing = measure((s) => {
+    reset();
+    s.handle = renderer.hydrate(s.compiled, s.app);
+    const c = snapshot();
+    created = c.createElement + c.createTextNode;
+    s.handle.unmount?.();
+  }, {
+    iterations: 8, warmup: 2,
+    setup: () => {
+      const host = container();
+      host.innerHTML = island.html;
+      const app = host.querySelector('#app');
+      return { app, compiled: compilePage(createDeps(), 'users') };
+    },
+  });
+  results.hydrateUsers10k = {
+    description: 'Hydrate the server-rendered 10,000-row users view; must adopt existing DOM.',
+    ssrBytes: island.bytes, ssrBodyLength: island.body.length,
+    nodesCreatedDuringHydration: created,
+    invariant_G_zeroNodesCreated: created === 0,
+    timing,
+  };
+}
+
+// PLACEHOLDER_2
+
