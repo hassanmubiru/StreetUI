@@ -1,0 +1,19 @@
+[
+  "streetui-cli-1.0.0.tgz",
+  "streetui-compiler-1.0.0.tgz",
+  "streetui-context-1.0.0.tgz",
+  "streetui-core-1.0.0.tgz",
+  "streetui-devtools-1.0.0.tgz",
+  "streetui-dom-1.0.0.tgz",
+  "streetui-dsl-1.0.0.tgz",
+  "streetui-events-1.0.0.tgz",
+  "streetui-forms-1.0.0.tgz",
+  "streetui-graph-1.0.0.tgz",
+  "streetui-i18n-1.0.0.tgz",
+  "streetui-renderer-1.0.0.tgz",
+  "streetui-router-1.0.0.tgz",
+  "streetui-runtime-1.0.0.tgz",
+  "streetui-scheduler-1.0.0.tgz",
+  "streetui-state-1.0.0.tgz",
+  "streetui-testing-1.0.0.tgz"
+]
