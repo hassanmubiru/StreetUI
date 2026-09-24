@@ -1,0 +1,14 @@
+
+> @streetui/example-performance-app@1.3.0 test /home/error51/Downloads/StreetUI/examples/streetui-performance-app
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-performance-app
+
+ ✓ src/perf-app.test.ts  (5 tests) 115ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  21:45:42
+   Duration  1.12s (transform 227ms, setup 0ms, collect 243ms, tests 115ms, environment 243ms, prepare 180ms)
+
