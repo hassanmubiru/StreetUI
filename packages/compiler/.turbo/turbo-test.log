@@ -6,10 +6,10 @@
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/compiler
 
  ✓ src/public-api.stability.test.ts  (2 tests) 7ms
- ✓ src/compiler.test.ts  (9 tests) 11ms
+ ✓ src/compiler.test.ts  (9 tests) 16ms
 
  Test Files  2 passed (2)
       Tests  11 passed (11)
-   Start at  12:26:14
-   Duration  509ms (transform 161ms, setup 0ms, collect 278ms, tests 18ms, environment 1ms, prepare 240ms)
+   Start at  12:27:14
+   Duration  548ms (transform 192ms, setup 0ms, collect 335ms, tests 23ms, environment 1ms, prepare 210ms)
 
