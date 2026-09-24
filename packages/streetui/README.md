@@ -81,7 +81,7 @@ app.page('home', (page) => {
 });
 
 const compiled = compile(app);
-const renderer = createRenderer(new BrowserDOMAdapter());
+const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
 renderer.mount(compiled, document.getElementById('app')!);
 ```
 
@@ -101,7 +101,7 @@ const state = serializeState({ counter: { count: 0 } });
 // client
 import { createRenderer, BrowserDOMAdapter } from 'streetui';
 
-const renderer = createRenderer(new BrowserDOMAdapter());
+const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
 renderer.hydrate(compiled, document.getElementById('app')!); // reuses server DOM
 ```
 
