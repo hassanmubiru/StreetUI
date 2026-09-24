@@ -144,7 +144,59 @@ describe('memory / graph handler registry is stable across cycles', () => {
   });
 });
 
-// ── OPT-1 keyed-list stress: many mutations must not leak (spec §17) ────────────
+/** Hydrate through the real pipeline while keeping the context handle so the
+ *  instance index can be inspected — mirrors StreetRendererImpl.hydrate. */
+function hydrateWithCtx(graph: ReturnType<typeof compile>['graph'], container: Element) {
+  const ctx = createRenderContext(new BrowserDOMAdapter(), graph, container);
+  const root = hydrateGraph(ctx);
+  const handle = new StreetRenderHandle(ctx, root);
+  return { ctx, handle };
+}
+
+describe('memory / hydration cycles drain to zero (v1.2 §11/§13)', () => {
+  it('flat app: hydrate adopts server DOM, unmount drains the instance index', () => {
+    const compiled = compileFlatApp(30);
+    const html = renderToString(compiled);
+    for (let cycle = 0; cycle < 40; cycle++) {
+      const container = makeContainer();
+      container.innerHTML = html; // server-produced markup
+      const childrenBefore = container.children.length;
+      const { ctx, handle } = hydrateWithCtx(compiled.graph, container);
+      // Hydration adopts existing elements — it must not add or drop any.
+      expect(container.children.length).toBe(childrenBefore);
+      expect(ctx.instances.size).toBeGreaterThan(0);
+      handle.unmount();
+      expect(ctx.instances.size).toBe(0);
+      expect(container.children.length).toBe(0);
+    }
+  });
+
+  it('reactive text: post-hydration writes update the adopted node, post-unmount writes are safe no-ops', () => {
+    const sig = signal('v0');
+    const compiled = compileReactiveApp(sig);
+    const html = renderToString(compiled);
+
+    const containers: HTMLDivElement[] = [];
+    for (let cycle = 0; cycle < 25; cycle++) {
+      const container = makeContainer();
+      container.innerHTML = html;
+      containers.push(container);
+      const { handle } = hydrateWithCtx(compiled.graph, container);
+      // The guarded update-closure path (v1.2) must still wire a live binding
+      // for a genuinely reactive node: this write reaches the adopted DOM.
+      sig.set(`live-${cycle}`);
+      expect(container.textContent).toContain(`live-${cycle}`);
+      handle.unmount();
+    }
+
+    // After all cycles, a final write reaches none of the unmounted containers.
+    sig.set('after-all');
+    for (const c of containers) {
+      expect(c.children.length).toBe(0);
+      expect(c.textContent).toBe('');
+    }
+  });
+});
 describe('memory / keyed-list mutation stress leaves no residue', () => {
   interface Row { id: number; label: string }
   const rows = (n: number, off = 0): Row[] =>

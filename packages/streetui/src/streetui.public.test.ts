@@ -51,7 +51,7 @@ const flush = () => new Promise<void>((r) => setTimeout(r, 0));
 
 describe('streetui — single import surface', () => {
   it('exposes the framework version', () => {
-    expect(VERSION).toBe('1.1.0');
+    expect(VERSION).toBe('1.2.0');
   });
 
   it('exposes every headline API from one import (no @streetui/* needed)', () => {
