@@ -1,0 +1,4 @@
+
+> @streetui/router@1.0.0 typecheck /home/error51/Downloads/StreetUI/packages/router
+> tsc --noEmit
+
