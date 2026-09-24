@@ -64,7 +64,12 @@ export class StreetRendererImpl implements StreetRenderer {
    * replaced. Returns the same handle type as `mount`.
    */
   hydrate(compiled: CompiledApplication, container: Element): RenderHandle {
-    const ctx = createRenderContext(this._dom, compiled.graph, container);
+    const ctx = createRenderContext(
+      this._dom,
+      compiled.graph,
+      container,
+      this._hydrationDiagnostics,
+    );
     const rootInstance = hydrateGraph(ctx);
     this._wireSignals(ctx, rootInstance);
     return new StreetRenderHandle(ctx, rootInstance);
