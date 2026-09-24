@@ -1,16 +1,16 @@
 
-> @streetui/forms@1.0.0 test /home/error51/Downloads/StreetUI/packages/forms
+> @streetui/forms@1.2.0 test /home/error51/Downloads/StreetUI/packages/forms
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/forms
 
- ✓ src/validators.test.ts  (7 tests) 10ms
+ ✓ src/validators.test.ts  (7 tests) 6ms
  ✓ src/public-api.stability.test.ts  (6 tests) 6ms
- ✓ src/form.test.ts  (11 tests) 19ms
+ ✓ src/form.test.ts  (11 tests) 11ms
 
  Test Files  3 passed (3)
       Tests  24 passed (24)
-   Start at  12:37:43
-   Duration  501ms (transform 131ms, setup 0ms, collect 229ms, tests 35ms, environment 1ms, prepare 372ms)
+   Start at  19:54:13
+   Duration  365ms (transform 113ms, setup 0ms, collect 175ms, tests 23ms, environment 1ms, prepare 211ms)
 

@@ -1,15 +1,15 @@
 
-> @streetui/events@1.0.0 test /home/error51/Downloads/StreetUI/packages/events
+> @streetui/events@1.2.0 test /home/error51/Downloads/StreetUI/packages/events
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/events
 
- ✓ src/public-api.stability.test.ts  (1 test) 8ms
- ✓ src/events.test.ts  (15 tests) 13ms
+ ✓ src/public-api.stability.test.ts  (1 test) 2ms
+ ✓ src/events.test.ts  (15 tests) 7ms
 
  Test Files  2 passed (2)
       Tests  16 passed (16)
-   Start at  12:37:24
-   Duration  456ms (transform 92ms, setup 0ms, collect 132ms, tests 21ms, environment 0ms, prepare 224ms)
+   Start at  19:54:06
+   Duration  315ms (transform 69ms, setup 0ms, collect 91ms, tests 9ms, environment 0ms, prepare 146ms)
 

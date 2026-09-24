@@ -1,15 +1,15 @@
 
-> @streetui/context@1.0.0 test /home/error51/Downloads/StreetUI/packages/context
+> @streetui/context@1.2.0 test /home/error51/Downloads/StreetUI/packages/context
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/context
 
- ✓ src/context.test.ts  (8 tests) 12ms
- ✓ src/public-api.stability.test.ts  (2 tests) 5ms
+ ✓ src/public-api.stability.test.ts  (2 tests) 3ms
+ ✓ src/context.test.ts  (8 tests) 6ms
 
  Test Files  2 passed (2)
       Tests  10 passed (10)
-   Start at  12:37:36
-   Duration  444ms (transform 82ms, setup 0ms, collect 87ms, tests 17ms, environment 1ms, prepare 242ms)
+   Start at  19:54:00
+   Duration  305ms (transform 66ms, setup 0ms, collect 71ms, tests 9ms, environment 0ms, prepare 170ms)
 
