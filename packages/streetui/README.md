@@ -28,7 +28,7 @@ import {
   createContext,
   createI18n,
   renderToString,
-  hydrate,
+  serializeState,
 } from 'streetui';
 ```
 
