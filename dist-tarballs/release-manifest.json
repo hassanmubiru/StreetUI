@@ -1,0 +1,641 @@
+{
+  "generatedAt": "2026-09-24T06:05:40.000Z",
+  "gitCommit": "c440dc1bb514a7421b5740fb318df331aa690922",
+  "channel": "stable",
+  "packageCount": 17,
+  "versions": [
+    "1.0.0"
+  ],
+  "ok": true,
+  "errorCount": 0,
+  "warningCount": 0,
+  "findings": [],
+  "packages": [
+    {
+      "name": "@streetui/cli",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE",
+        "templates"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {
+        "esbuild": "0.24.2"
+      },
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/compiler",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/graph": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dsl": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/context",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/core",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/devtools",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/graph": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/compiler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dsl": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/dom",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/dsl",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/graph": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/events",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/forms",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/graph",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/i18n",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/renderer",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/graph": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/events": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/scheduler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/compiler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dsl": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dom": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/runtime": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/router",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dsl": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/compiler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/runtime": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/renderer": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dom": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/runtime",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/graph": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/events": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/scheduler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/compiler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dsl": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/scheduler",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/state",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {},
+      "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "@streetui/testing",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        }
+      },
+      "internalDependencies": {
+        "@streetui/core": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/graph": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/compiler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dsl": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/renderer": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/dom": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/runtime": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/scheduler": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        },
+        "@streetui/state": {
+          "spec": "workspace:*",
+          "resolvedVersion": "1.0.0"
+        }
+      },
+      "externalDependencies": {},
+      "distPresent": true
+    }
+  ]
+}
