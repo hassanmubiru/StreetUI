@@ -6,6 +6,7 @@ export default defineConfig({
     'src/browser-entry.ts',
     'src/routed.ts',
     'src/server-entry.ts',
+    'src/bench-support.ts',
   ],
   format: ['esm'],
   dts: false,
