@@ -1,0 +1,16 @@
+
+> @streetui/compiler@1.2.0 test /home/error51/Downloads/StreetUI/packages/compiler
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/compiler
+
+ ✓ src/public-api.stability.test.ts  (2 tests) 6ms
+ ✓ src/compiler.test.ts  (9 tests) 12ms
+ ✓ src/analysis/analyze.test.ts  (4 tests) 5ms
+
+ Test Files  3 passed (3)
+      Tests  15 passed (15)
+   Start at  19:54:21
+   Duration  539ms (transform 264ms, setup 0ms, collect 469ms, tests 23ms, environment 1ms, prepare 268ms)
+
