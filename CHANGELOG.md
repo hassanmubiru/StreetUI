@@ -5,6 +5,47 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.2.0 — Compiler, initial render & runtime
+
+A **minor, additive** release. No breaking changes over 1.1.0/1.0.0; the public
+API (168 values / 171 types) is unchanged and no dependency was added. The v1.0
+architecture is fully preserved.
+
+### Performance & correctness (measured, happy-dom / Node)
+
+- **Hydration** allocation pass: the per-child diagnostic path string is now
+  built only when a diagnostics sink is attached, and per-type update closures
+  are built only for genuinely-reactive nodes. Profiled samples −38%
+  (786 → 489), wall ~3.8 → ~3.3 ms/10k; hydration still creates **zero** DOM
+  nodes. The same reactive-only closure guard was applied to `mount`.
+- **Mount** micro-optimisations: killed a throwaway per-node `NodeInstance`,
+  replaced `Object.entries` with an allocation-free `for..in`/`Object.hasOwn`
+  prop loop, and added empty-events/empty-stateRefs guards. Op counts unchanged.
+- All v1.1 keyed-list wins and every fine-grained invariant are preserved
+  (single update = 1 mutation, deep-state = 1 node, SSR byte-identical at
+  338920 B, reverse = N−1 minimal moves).
+- **Honest non-results:** CPU profiling proved the v1.1 initial-render (+16%)
+  and reverse (+5.5%) "regressions" are happy-dom timing noise and unavoidable
+  DOM-engine cost, not StreetUI algorithmic regressions — so no speculative fast
+  path was added. Runtime bundle is now **flat** (gzip 28680 → 28764 B, +0.29%),
+  the +84 B disclosed as the cost of the hydration/mount allocation wins.
+
+### DevTools / diagnostics
+
+- New opt-in compiler inspection — `analyzeGraph`, `inspectCompilation`,
+  `formatInspection` — reachable only from the dev-facing `streetui/testing`
+  subpath (and `@streetui/compiler/diagnostics`). Deliberately kept **off** the
+  runtime `streetui` barrel and out of `compile()` so it tree-shakes away and
+  never regresses initial render.
+
+### Not claimed
+
+- No cross-framework performance claim is made. React/Vue/Svelte/Solid harnesses
+  exist but could not run (offline registry 403, no Chromium/Playwright);
+  competitor and real-browser results are **BLOCKED, not faked**. All numbers are
+  happy-dom/Node and v1.2-vs-v1.1 only. See
+  [`V1.2-PERFORMANCE-REPORT.md`](./V1.2-PERFORMANCE-REPORT.md).
+
 ## 1.1.0 — Performance: keyed-list reconciler
 
 A **minor, additive** release. No breaking changes over 1.0.0; existing code
