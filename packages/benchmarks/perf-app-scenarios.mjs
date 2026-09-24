@@ -136,5 +136,89 @@ function mountUsers(sizing) {
   };
 }
 
-// PLACEHOLDER_2
+// ── C (§12): fine-grained proof — toggle 1 of 1,000 controls touches 1 node ──
+{
+  const { adapter, reset, structuralWrites, snapshot } = makeCountingAdapter();
+  const renderer = createRenderer({ domAdapter: adapter });
+  const deps = createDeps(); // 1,000 interactive controls
+  const handle = renderer.mount(compilePage(deps, 'controls'), container());
+  reset();
+  deps.pushToggle(500);
+  const writes = structuralWrites();
+  const detail = snapshot();
+  handle.unmount?.();
+  results.fineGrainedToggle1of1000 = {
+    description: 'With 1,000 independent controls mounted, toggling exactly one control.',
+    controls: 1000, structuralWritesObserved: writes, breakdown: detail,
+    invariant_singleRegionUpdated: writes === 1,
+  };
+}
+
+// ── D (§11): forms isolation — typing one field does not touch another ───────
+{
+  const { adapter, reset, structuralWrites, snapshot } = makeCountingAdapter();
+  const renderer = createRenderer({ domAdapter: adapter });
+  const deps = createDeps();
+  const handle = renderer.mount(compilePage(deps, 'settings'), container());
+  const emailBefore = deps.settingsForm.field('contactEmail').value.peek();
+  reset();
+  deps.settingsForm.field('displayName').setValue('Ada Lovelace');
+  const writes = structuralWrites();
+  const detail = snapshot();
+  const emailAfter = deps.settingsForm.field('contactEmail').value.peek();
+  handle.unmount?.();
+  results.formsFieldIsolation = {
+    description: 'Type into displayName; the unrelated contactEmail field must not change.',
+    structuralWritesObserved: writes, breakdown: detail,
+    unrelatedFieldUnchanged: emailBefore === emailAfter,
+    invariant_isolated: emailBefore === emailAfter && writes >= 1 && writes <= 3,
+  };
+}
+
+// ── E: real-app keyed-list mutations (search-narrow, sort, reverse) ──────────
+{
+  const listOps = {};
+  // search narrow: how many structural writes to filter 10k → matches of 'aa'
+  {
+    const m = mountUsers();
+    const before = m.deps.totalCount.peek();
+    m.reset();
+    m.deps.query.set('aa');
+    const after = m.deps.totalCount.peek();
+    listOps.searchNarrow = {
+      description: 'Set search query on the 10k table (filters rows).',
+      rowsBefore: before, rowsAfter: after,
+      structuralWrites: m.structuralWrites(), breakdown: m.snapshot(),
+    };
+    m.handle.unmount?.();
+  }
+  // sort key change (reorder): id → score
+  {
+    const m = mountUsers();
+    m.reset();
+    m.deps.sortKey.set('score');
+    listOps.sortReorder = {
+      description: 'Change sort key id → score on the 10k table (minimal-move reorder).',
+      rows: m.deps.totalCount.peek(),
+      structuralWrites: m.structuralWrites(), breakdown: m.snapshot(),
+    };
+    m.handle.unmount?.();
+  }
+  // reverse (sort direction toggle) — the disclosed v1.1 worst-case path
+  {
+    const m = mountUsers();
+    m.reset();
+    m.deps.sortDir.set('desc');
+    listOps.reverseToggle = {
+      description: 'Toggle sort direction asc → desc on the 10k table (reverse).',
+      rows: m.deps.totalCount.peek(),
+      structuralWrites: m.structuralWrites(), breakdown: m.snapshot(),
+    };
+    m.handle.unmount?.();
+  }
+  results.keyedListOps = listOps;
+}
+
+// PLACEHOLDER_3
+
 
