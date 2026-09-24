@@ -69,6 +69,8 @@ function measure(fn, { warmup = 4, iterations = 15, setup } = {}) {
 }
 
 const results = {};
+const gc = () => { try { globalThis.gc?.(); } catch { /* no --expose-gc */ } };
+
 
 // helper: freshly mount the users view over a counting adapter at a known state
 function mountUsers(sizing) {
