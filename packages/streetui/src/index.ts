@@ -71,7 +71,8 @@ export * from '@streetui/i18n';
 export * from '@streetui/devtools';
 
 // ── Project configuration (used by streetui.config.ts) ────────────────────────
-// Selective re-export from the CLI so `defineConfig` is importable from
-// `streetui` without pulling the CLI's runtime surface into the main barrel.
-export { defineConfig } from '@streetui/cli';
-export type { StreetUIConfig, ResolvedConfig } from '@streetui/cli';
+// Re-exported from a tiny local module (see ./config.ts) so application imports
+// of `streetui` don't pull the CLI's build machinery (esbuild) into the client
+// runtime bundle. The config *type* is still single-sourced from the CLI.
+export { defineConfig } from './config.js';
+export type { StreetUIConfig, ResolvedConfig } from './config.js';
