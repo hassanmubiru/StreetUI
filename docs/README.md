@@ -52,6 +52,23 @@ APIs**; nothing here documents a planned feature as if it exists.
   through the compiler, the one semantic graph, the runtime, and the renderer to
   the DOM; reactivity, lifecycle, SSR/hydration, router, resources, and the CLI.
 
+## Guides
+
+Task-oriented guides that teach the unified `streetui` API using examples taken
+from the real `examples/streetui-performance-app`:
+
+- [Getting started](./getting-started.md) — the mental model and your first app.
+- [Reactivity](./reactivity.md) — `signal`, `derived`, `effect`, `batch`, and
+  `get()` vs `peek()`.
+- [Components](./components.md) — the builder DSL, composition, `when`, `listOf`,
+  and error boundaries.
+- [Routing](./routing.md) — `createRouter` / `mountRouter`, params, history, and
+  cleanup.
+- [Forms](./forms.md) — `createForm`, validators, field state, and field isolation.
+- [Data](./data.md) — `resource` for async loading, retry, and abort.
+- [SSR](./ssr.md) — `renderToString` and state serialization.
+- [Hydration](./hydration.md) — adopting server DOM with the zero-node guarantee.
+
 ## Developer experience
 
 - [DevTools](./devtools.md) — `createDevTools`, the panel snapshot, the explicit
