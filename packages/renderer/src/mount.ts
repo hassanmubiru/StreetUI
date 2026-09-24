@@ -65,10 +65,15 @@ export function mountNode(
     const textNode = dom.createTextNode(text);
     dom.appendChild(el, textNode);
     applyNodeProps(ctx, graphNode, el);
-    wireEvents(dom, graph, graphNode, el, new NodeInstance(graphNode, el));
 
+    // Create the live instance up front and reuse it for event wiring. The
+    // previous code allocated a throwaway NodeInstance solely to satisfy
+    // wireEvents' signature, wasting one NodeInstance (+ its children array and
+    // CleanupRegistry) per text node — pure GC pressure on the hottest mount
+    // path. wireEvents/wireSignalBindings each early-return on empty arrays.
     const instance = new NodeInstance(graphNode, el);
     ctx.instances.set(graphNode.id, instance);
+    wireEvents(dom, graph, graphNode, el, instance);
 
     // Reactive text binding
     wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, el, textNode));
@@ -216,13 +221,13 @@ export function mountNode(
     }
   }
 
-  // wire form submit
-  if (graphNode.type === 'form') {
-    wireEvents(dom, graph, graphNode, el, new NodeInstance(graphNode, el));
-  }
-
   const instance = new NodeInstance(graphNode, el);
   ctx.instances.set(graphNode.id, instance);
+
+  // wire form submit (reuse the live instance rather than a throwaway)
+  if (graphNode.type === 'form') {
+    wireEvents(dom, graph, graphNode, el, instance);
+  }
 
   // Recurse into children
   for (const child of graphNode.children) {
@@ -303,9 +308,14 @@ export function buttonUpdate(
 }
 
 export function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): void {
-  for (const [key, value] of Object.entries(graphNode.props)) {
+  // Iterate own enumerable keys directly rather than via Object.entries, which
+  // allocates a wrapper array plus one [key,value] tuple per prop — measurable
+  // GC pressure when multiplied across every node in a large initial render.
+  const props = graphNode.props;
+  for (const key in props) {
+    if (!Object.hasOwn(props, key)) continue;
     if (SKIP_PROP_KEYS.has(key)) continue;
-    applyProp(ctx.dom, el, key, value);
+    applyProp(ctx.dom, el, key, props[key]);
   }
 }
 
@@ -315,6 +325,9 @@ export function wireSignalBindings(
   instance: NodeInstance,
   onUpdate: (propKey: string, value: unknown) => void,
 ): void {
+  // Fast exit for the common non-reactive node — avoids allocating a for-of
+  // iterator over an empty stateRefs array on every static node.
+  if (graphNode.stateRefs.length === 0) return;
   for (const stateRef of graphNode.stateRefs) {
     const signalKey = `__signal__${stateRef.signalId}`;
     const maybeSig = ctx.graph.getHandler(signalKey) as

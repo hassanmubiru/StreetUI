@@ -16,6 +16,9 @@ export function wireEvents(
   element: Element,
   instance: NodeInstance,
 ): void {
+  // Fast exit for event-free nodes — avoids allocating a for-of iterator over
+  // an empty array on every node during a large mount/hydrate.
+  if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
     const handler = graph.getHandler(eventDesc.handlerKey);
     if (handler === undefined) continue;

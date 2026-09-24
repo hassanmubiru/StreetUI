@@ -14,5 +14,10 @@
  */
 export * from '@streetui/testing';
 
+// Opt-in compiler diagnostics (spec §14): static-graph analysis + inspection.
+// Exposed on the diagnostic subpath so they stay OUT of the runtime barrel
+// (`streetui`), keeping the shipped client bundle lean (§6/§7).
+export * from '@streetui/compiler/diagnostics';
+
 // Re-export the framework version for parity with the main entry.
 export { VERSION } from './version.js';

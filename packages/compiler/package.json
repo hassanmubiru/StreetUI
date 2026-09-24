@@ -16,6 +16,16 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./diagnostics": {
+      "import": {
+        "types": "./dist/diagnostics.d.ts",
+        "default": "./dist/diagnostics.js"
+      },
+      "require": {
+        "types": "./dist/diagnostics.d.cts",
+        "default": "./dist/diagnostics.cjs"
+      }
     }
   },
   "scripts": {

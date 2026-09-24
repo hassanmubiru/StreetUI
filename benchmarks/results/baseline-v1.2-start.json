@@ -1,0 +1,200 @@
+{
+  "streetuiVersion": "1.1.0",
+  "nodeVersion": "v22.23.2",
+  "browserVersion": null,
+  "commit": "v1.2-baseline-reconfirm",
+  "timestamp": "2026-09-24T14:11:06.129Z",
+  "environment": {
+    "domEnvironment": "happy-dom (Node) — relative deltas valid; absolute != browser",
+    "realBrowser": "BLOCKED (no Chromium/Playwright)",
+    "cpu": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "arch": "x64",
+    "platform": "linux"
+  },
+  "benchmarks": {
+    "A_initialRender": {
+      "nodes": 10000,
+      "medianMs": 90.4845,
+      "p95Ms": 155.409,
+      "minMs": 81.3978,
+      "maxMs": 155.409,
+      "samples": 15,
+      "domNodesCreated": 20002,
+      "note": "time to create DOM; synchronous mount == interactive"
+    },
+    "B_singleUpdate": {
+      "nodes": 10000,
+      "medianMs": 0.0272,
+      "p95Ms": 0.0349,
+      "minMs": 0.0236,
+      "maxMs": 0.1207,
+      "samples": 40,
+      "domMutations": 1,
+      "note": "one signal write in a 10k tree; domMutations MUST be 1 (targeted, no subtree re-render)"
+    },
+    "C_largeList": {
+      "append": {
+        "items": 10000,
+        "medianMs": 66.4622,
+        "p95Ms": 186.0919,
+        "minMs": 63.0492,
+        "maxMs": 186.0919,
+        "samples": 12,
+        "domNodesCreated": 3,
+        "domNodesRemoved": 0
+      },
+      "prepend": {
+        "items": 10000,
+        "medianMs": 298.3642,
+        "p95Ms": 308.4612,
+        "minMs": 293.3916,
+        "maxMs": 308.4612,
+        "samples": 12,
+        "domNodesCreated": 3,
+        "domNodesRemoved": 0
+      },
+      "remove-first": {
+        "items": 10000,
+        "medianMs": 69.6524,
+        "p95Ms": 74.8012,
+        "minMs": 62.9519,
+        "maxMs": 74.8012,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-middle": {
+        "items": 10000,
+        "medianMs": 69.4978,
+        "p95Ms": 88.6055,
+        "minMs": 64.2015,
+        "maxMs": 88.6055,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-last": {
+        "items": 10000,
+        "medianMs": 75.2597,
+        "p95Ms": 94.9148,
+        "minMs": 64.9224,
+        "maxMs": 94.9148,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "reorder": {
+        "items": 10000,
+        "medianMs": 300.9305,
+        "p95Ms": 306.1017,
+        "minMs": 292.0573,
+        "maxMs": 306.1017,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "reverse": {
+        "items": 10000,
+        "medianMs": 296.8632,
+        "p95Ms": 310.5637,
+        "minMs": 289.9835,
+        "maxMs": 310.5637,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "update-item": {
+        "items": 10000,
+        "medianMs": 69.9287,
+        "p95Ms": 182.5335,
+        "minMs": 63.8047,
+        "maxMs": 182.5335,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      }
+    },
+    "D_fanOut": {
+      "subscribers=1000": {
+        "subscribers": 1000,
+        "medianMs": 0.3256,
+        "p95Ms": 5.9353,
+        "minMs": 0.2717,
+        "maxMs": 7.498,
+        "samples": 25,
+        "domMutations": 1000,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      },
+      "subscribers=10000": {
+        "subscribers": 10000,
+        "medianMs": 3.0254,
+        "p95Ms": 7.6909,
+        "minMs": 2.8549,
+        "maxMs": 7.6954,
+        "samples": 25,
+        "domMutations": 10000,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      }
+    },
+    "E_deepState": {
+      "leaves": 4,
+      "medianMs": 0.0017,
+      "p95Ms": 0.0049,
+      "minMs": 0.0013,
+      "maxMs": 0.0215,
+      "samples": 40,
+      "nodesUpdated": 1,
+      "note": "update one deep branch; nodesUpdated MUST be 1 of 4 leaves (fine-grained)"
+    },
+    "F_ssr": {
+      "nodes": 10000,
+      "medianMs": 23.4933,
+      "p95Ms": 24.9972,
+      "minMs": 21.3817,
+      "maxMs": 28.2359,
+      "samples": 20,
+      "outputBytes": 338920,
+      "note": "renderToString of a 10k-node app; output size in bytes"
+    },
+    "G_hydration": {
+      "nodes": 10000,
+      "medianMs": 8.2657,
+      "p95Ms": 9.4608,
+      "minMs": 3.9308,
+      "maxMs": 9.4608,
+      "samples": 15,
+      "domNodesCreatedDuringHydration": 0,
+      "environment": "happy-dom (NOT a real browser)",
+      "realBrowser": "BLOCKED: no Chromium/Playwright",
+      "note": "adopts server DOM; domNodesCreatedDuringHydration should be ~0 for a matching tree"
+    },
+    "H_bundleSize": {
+      "streetuiRuntime": {
+        "file": "packages/streetui/dist/index.js",
+        "raw": 121336,
+        "gzip": 27488,
+        "brotli": 23769
+      },
+      "ssrSubset": {
+        "file": "packages/streetui/dist/server.js",
+        "raw": 27777,
+        "gzip": 6331,
+        "brotli": 5607
+      },
+      "minimalApp": null,
+      "routerApp": {
+        "file": "examples/streetui-full-app/dist/routed.js",
+        "raw": 4198,
+        "gzip": 1539,
+        "brotli": 1370
+      },
+      "fullApp": {
+        "file": "examples/streetui-full-app/dist/index.js",
+        "raw": 3725,
+        "gzip": 1353,
+        "brotli": 1195
+      },
+      "note": "sizes in bytes; gzip level 9; brotli default. Measured on built dist."
+    }
+  }
+}
