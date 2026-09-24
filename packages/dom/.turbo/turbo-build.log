@@ -17,6 +17,6 @@ CJS dist/index.cjs     11.72 KB
 CJS dist/index.cjs.map 25.20 KB
 CJS ⚡️ Build success in 15ms
 DTS Build start
-DTS ⚡️ Build success in 537ms
+DTS ⚡️ Build success in 619ms
 DTS dist/index.d.ts  9.90 KB
 DTS dist/index.d.cts 9.90 KB

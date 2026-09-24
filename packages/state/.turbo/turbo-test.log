@@ -5,12 +5,12 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/state
 
- ✓ src/state.test.ts  (25 tests) 15ms
- ✓ src/public-api.stability.test.ts  (8 tests) 12ms
- ✓ src/resource.test.ts  (19 tests) 29ms
+ ✓ src/public-api.stability.test.ts  (8 tests) 11ms
+ ✓ src/state.test.ts  (25 tests) 25ms
+ ✓ src/resource.test.ts  (19 tests) 36ms
 
  Test Files  3 passed (3)
       Tests  52 passed (52)
-   Start at  12:36:14
-   Duration  484ms (transform 219ms, setup 0ms, collect 334ms, tests 56ms, environment 1ms, prepare 318ms)
+   Start at  12:37:34
+   Duration  641ms (transform 171ms, setup 0ms, collect 278ms, tests 71ms, environment 1ms, prepare 381ms)
 
