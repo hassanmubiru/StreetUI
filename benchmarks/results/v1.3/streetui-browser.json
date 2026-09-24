@@ -27,5 +27,5 @@
     "longTasks": null
   },
   "nodeFallback": "Node/happy-dom relative measurements + DOM-mutation-count invariants for these workloads are in benchmarks/results/v1.3/streetui-node.json (a different runtime; not a browser substitute).",
-  "timestamp": "2026-09-24T17:47:01.400Z"
+  "timestamp": "2026-09-24T18:17:10.309Z"
 }

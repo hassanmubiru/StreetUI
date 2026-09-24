@@ -1,14 +1,14 @@
 {
   "schema": "streetui-environment/v1.3",
-  "timestamp": "2026-09-24T17:47:01.403Z",
-  "commit": "v1.3-phase5",
+  "timestamp": "2026-09-24T18:17:10.315Z",
+  "commit": "v1.3-final",
   "host": {
     "node": "v22.23.2",
     "platform": "Linux 6.8.0-138-generic x64",
     "cpus": 2,
     "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
     "totalMemMB": 4107,
-    "freeMemMB": 3672
+    "freeMemMB": 3655
   },
   "runs": {
     "nodeRealApp": {
