@@ -1,5 +1,5 @@
 
-> @streetui/docs@0.1.0 test /home/error51/Downloads/street/apps/docs
+> @streetui/docs@0.1.0 test /home/error51/Downloads/StreetUI/apps/docs
 > echo "no tests" && exit 0
 
 no tests

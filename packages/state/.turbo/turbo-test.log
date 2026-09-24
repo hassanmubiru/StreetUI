@@ -1,0 +1,16 @@
+
+> @streetui/state@1.0.0 test /home/error51/Downloads/StreetUI/packages/state
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/state
+
+ ✓ src/public-api.stability.test.ts  (8 tests) 6ms
+ ✓ src/state.test.ts  (25 tests) 22ms
+ ✓ src/resource.test.ts  (19 tests) 36ms
+
+ Test Files  3 passed (3)
+      Tests  52 passed (52)
+   Start at  12:24:40
+   Duration  540ms (transform 165ms, setup 0ms, collect 332ms, tests 65ms, environment 1ms, prepare 345ms)
+

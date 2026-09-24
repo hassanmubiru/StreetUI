@@ -1,64 +1,15 @@
 
-
-> @streetui/graph@0.1.0 test /home/error51/Downloads/StreetUI/packages/graph
+> @streetui/graph@1.0.0 test /home/error51/Downloads/StreetUI/packages/graph
 > vitest run
 
 
-[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/graph[39m
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/graph
 
-[?25l     [90m·[39m findById locates nodes
-     [90m·[39m findByType returns matching nodes
-     [90m·[39m findAll with predicate works
-     [90m·[39m detachNode removes from index
-     [90m·[39m nodeCount tracks all nodes
-     [90m·[39m walk visits all nodes
-     [90m·[39m registerHandler / getHandler roundtrip
-     [90m·[39m validate warns on missing handler
-     [90m·[39m validate passes when handler exists
-     [90m·[39m serializes to plain object
-[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m findById locates nodes
-     [32m✓[39m findByType returns matching nodes
-     [32m✓[39m findAll with predicate works
-     [32m✓[39m detachNode removes from index
-     [32m✓[39m nodeCount tracks all nodes
-     [32m✓[39m walk visits all nodes
-     [32m✓[39m registerHandler / getHandler roundtrip
-     [32m✓[39m validate warns on missing handler
-     [32m✓[39m validate passes when handler exists
-     [32m✓[39m serializes to plain object
-[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mgraph[2m.test.ts[22m[2m (26)[22m
-   [32m✓[39m GraphNode[2m (14)[22m
-     [32m✓[39m creates a node with correct type
-     [32m✓[39m starts with no children and no parent
-     [32m✓[39m appendChild sets parent and child
-     [32m✓[39m removeChild detaches node
-     [32m✓[39m insertBefore positions child correctly
-     [32m✓[39m replaceChild swaps nodes
-     [32m✓[39m setProp / getProp roundtrip
-     [32m✓[39m addEvent / removeEvent
-     [32m✓[39m depth is 0 for root
-     [32m✓[39m depth increases with nesting
-     [32m✓[39m root returns topmost ancestor
-     [32m✓[39m isLeaf is true when no children
-     [32m✓[39m shallowClone creates independent copy
-     [32m✓[39m reparents child when appended to new parent
-   [32m✓[39m ApplicationGraph[2m (12)[22m
-     [32m✓[39m creates with an application root node
-     [32m✓[39m createNode attaches to specified parent
-     [32m✓[39m findById locates nodes
-     [32m✓[39m findByType returns matching nodes
-     [32m✓[39m findAll with predicate works
-     [32m✓[39m detachNode removes from index
-     [32m✓[39m nodeCount tracks all nodes
-     [32m✓[39m walk visits all nodes
-     [32m✓[39m registerHandler / getHandler roundtrip
-     [32m✓[39m validate warns on missing handler
-     [32m✓[39m validate passes when handler exists
-     [32m✓[39m serializes to plain object
+ ✓ src/graph.test.ts  (26 tests) 15ms
+ ✓ src/public-api.stability.test.ts  (1 test) 4ms
 
-[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[32m26 passed[39m[22m[90m (26)[39m
-[2m   Start at [22m 08:59:01
-[2m   Duration [22m 622ms[2m (transform 103ms, setup 0ms, collect 99ms, tests 23ms, environment 0ms, prepare 170ms)[22m
+ Test Files  2 passed (2)
+      Tests  27 passed (27)
+   Start at  12:24:55
+   Duration  479ms (transform 122ms, setup 0ms, collect 164ms, tests 19ms, environment 1ms, prepare 239ms)
 
-[?25h[?25h
