@@ -18,7 +18,11 @@ import { NodeInstance } from './node-instance.js';
 import { applyProp } from './attributes.js';
 import { wireEvents } from './events.js';
 import { resolveTag } from './tag-map.js';
-import { reconcileChildren } from './reconciliation.js';
+import {
+  reconcileChildren,
+  reconcileChildrenByPlan,
+  type PlanEntry,
+} from './reconciliation.js';
 
 /**
  * Prop keys handled by the per-type mount branches (or reserved internals), so
@@ -329,11 +333,14 @@ export function wireSignalBindings(
 // ── Reactive list wiring ────────────────────────────────────────────────────────
 
 type ListBuildFn = (items: unknown) => GraphNode[];
+type ListPlanFn = (items: unknown) => PlanEntry[];
 
 /**
  * Subscribe a reactive-list instance to its driving signal. On each change the
- * DSL-registered build factory produces the desired child graph nodes, which
- * are reconciled against the live DOM with the keyed reconciler.
+ * DSL-registered plan factory produces lightweight per-row descriptors, which
+ * are reconciled against the live DOM with the keyed, minimal-move reconciler
+ * (spec §15). A `conditional` node has no plan handler and falls back to the
+ * eager build factory (it only ever renders 0..1 branch, so eager is fine).
  */
 export function wireReactiveList(
   ctx: RenderContext,
@@ -341,10 +348,13 @@ export function wireReactiveList(
   instance: NodeInstance,
   el: Element,
 ): void {
+  const plan = ctx.graph.getHandler(`__listplan__${graphNode.id}`) as
+    | ListPlanFn
+    | undefined;
   const build = ctx.graph.getHandler(`__listbuild__${graphNode.id}`) as
     | ListBuildFn
     | undefined;
-  if (build === undefined) return;
+  if (plan === undefined && build === undefined) return;
 
   for (const stateRef of graphNode.stateRefs) {
     if (stateRef.propKey !== 'items') continue;
@@ -354,10 +364,52 @@ export function wireReactiveList(
     if (sig === undefined || typeof sig.subscribe !== 'function') continue;
 
     const unsub = sig.subscribe((value) => {
-      reconcileReactiveList(ctx, graphNode, instance, el, build(value));
+      if (plan !== undefined) {
+        reconcileReactiveListByPlan(ctx, graphNode, instance, el, plan(value));
+      } else {
+        reconcileReactiveList(ctx, graphNode, instance, el, build!(value));
+      }
     });
     instance.trackCleanup(unsub);
   }
+}
+
+function reconcileReactiveListByPlan(
+  ctx: RenderContext,
+  listNode: GraphNode,
+  listInstance: NodeInstance,
+  listEl: Element,
+  plan: PlanEntry[],
+): void {
+  const oldInstances = [...listInstance.children];
+  const result = reconcileChildrenByPlan(
+    ctx,
+    listEl,
+    oldInstances,
+    plan,
+    (node, parent) => mountNode(ctx, node, parent),
+  );
+
+  // Sync the live instance's children to the reconciled order.
+  listInstance.children.length = 0;
+  for (const inst of result.instances) listInstance.children.push(inst);
+
+  // Forget removed instances, and drop their graph nodes.
+  for (const removed of result.removed) {
+    forgetInstance(ctx, removed);
+    ctx.graph.detachNode(removed.graphNode);
+  }
+  // Detach any freshly-built subtree that was not adopted as a live instance
+  // (e.g. the top node of a rebuilt changed row, whose live instance keeps its
+  // original graph node).
+  const adopted = new Set(result.instances.map((i) => i.graphNode));
+  for (const node of result.built ?? []) {
+    if (!adopted.has(node)) ctx.graph.detachNode(node);
+  }
+
+  // Keep the graph model consistent: list node children match the new order.
+  for (const child of [...listNode.children]) listNode.removeChild(child);
+  for (const inst of result.instances) listNode.appendChild(inst.graphNode);
 }
 
 function reconcileReactiveList(

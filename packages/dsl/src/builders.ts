@@ -40,6 +40,22 @@ import type {
 } from './dsl-types.js';
 import { signal, derived, type Signal, type ReadonlySignal } from '@streetui/state';
 
+/**
+ * A single reactive-list reconciliation descriptor (spec §15).
+ *
+ * Emitted by the `__listplan__<nodeId>` handler on every list change. `key` is
+ * the item's identity-only reconciliation key (cheap to compute); `item` is the
+ * source value *reference* used for identity short-circuiting; `sig()` computes
+ * the content signature on demand (only when the reference changed); `build()`
+ * materialises the full item subtree on demand (only for new/changed rows).
+ */
+export interface ListPlanEntry {
+  readonly key: string;
+  readonly item: unknown;
+  readonly sig: () => string;
+  readonly build: () => GraphNode;
+}
+
 // ── Signal helpers ────────────────────────────────────────────────────────────
 
 function isSignal(v: unknown): v is Signal<unknown> | ReadonlySignal<unknown> {
@@ -319,19 +335,47 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       const itemKey = reactiveListItemKey(item, index);
       const itemNode = graph.createNode('list-item', {
         key: itemKey,
-        props: { key: itemKey, _sig: reactiveListItemSignature(item) },
+        // `_item` records the source item *reference* so the reconciler can
+        // short-circuit unchanged rows by identity (no signature hashing); `_sig`
+        // is the content signature used to detect an in-place data change when the
+        // reference differs. Both are internal metadata (leading `_`) and never
+        // reach the DOM.
+        props: {
+          key: itemKey,
+          _sig: reactiveListItemSignature(item),
+          // The item reference is stored as opaque internal metadata (never
+          // rendered); cast through `unknown` since `T` is not a `PropValue`.
+          _item: item as unknown as Props[string],
+        },
       });
       renderItem(item, index, new ContainerBuilderImpl(itemNode, graph));
       return itemNode;
     };
 
-    // Factory the renderer invokes on every change to produce the desired,
-    // freshly-rendered child nodes for the new items array.
-    const buildAll = (raw: unknown): GraphNode[] => {
+    // Lazy reconciliation plan (spec §15 — the measured keyed-list hot path).
+    //
+    // Instead of eagerly rebuilding all N item GraphNodes (and hashing every item
+    // with JSON.stringify) on *every* emission — the dominant cost of the old
+    // `buildAll` path — the renderer receives lightweight descriptors and only
+    // materialises a subtree for rows that are genuinely new or whose data
+    // actually changed. `key` is cheap (identity only); `sig()` and `build()` are
+    // thunks the reconciler calls on demand.
+    const buildPlan = (raw: unknown): ListPlanEntry[] => {
       const arr = Array.isArray(raw) ? (raw as T[]) : [];
-      return arr.map((item, i) => buildItem(item, i));
+      const plan: ListPlanEntry[] = new Array(arr.length);
+      for (let i = 0; i < arr.length; i++) {
+        const item = arr[i]!;
+        const index = i;
+        plan[i] = {
+          key: reactiveListItemKey(item, index),
+          item,
+          sig: () => reactiveListItemSignature(item),
+          build: () => buildItem(item, index),
+        };
+      }
+      return plan;
     };
-    graph.registerHandler(`__listbuild__${node.id}`, buildAll as unknown as () => unknown);
+    graph.registerHandler(`__listplan__${node.id}`, buildPlan as unknown as () => unknown);
 
     // Build the initial children into the graph so the first mount renders them.
     const current = isSignal(items)

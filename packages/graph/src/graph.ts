@@ -87,6 +87,7 @@ export class ApplicationGraph {
       this.handlers.delete(`__signal__${ref.signalId}`);
     }
     this.handlers.delete(`__listbuild__${node.id}`);
+    this.handlers.delete(`__listplan__${node.id}`);
   }
 
   // ── Handler registry ──────────────────────────────────────────────────────

@@ -28,6 +28,25 @@ export interface ReconcileResult {
   instances: NodeInstance[];
   /** Instances that were removed and must be disposed. */
   removed: NodeInstance[];
+  /**
+   * GraphNodes freshly materialised during this reconcile (new rows + rebuilt
+   * changed rows). The caller detaches any of these that were not adopted as a
+   * live instance's graph node, so no orphan subtree lingers in the graph index.
+   */
+  built?: GraphNode[];
+}
+
+/**
+ * A lazy reconciliation descriptor for one reactive-list row (mirrors the DSL's
+ * `ListPlanEntry`). `sig()` and `build()` are only invoked for rows that are
+ * genuinely new or whose source reference changed — the whole point of the
+ * plan path (spec §15).
+ */
+export interface PlanEntry {
+  readonly key: string;
+  readonly item: unknown;
+  readonly sig: () => string;
+  readonly build: () => GraphNode;
 }
 
 /**
@@ -100,6 +119,173 @@ export function reconcileChildren(
   reorderDom(ctx, parentDom, newInstances);
 
   return { instances: newInstances, removed };
+}
+
+/**
+ * Plan-based keyed reconciliation (spec §15 — the optimised reactive-list path).
+ *
+ * Identical observable result to {@link reconcileChildren}, but driven by lazy
+ * {@link PlanEntry} descriptors instead of a pre-built array of GraphNodes:
+ *
+ *  - a reused row whose `item` reference is unchanged does **zero** work — no
+ *    signature hash, no subtree build, no prop patch (the common case for
+ *    append / prepend / remove / reorder / reverse, where existing item objects
+ *    keep their identity);
+ *  - a reused row whose reference changed hashes lazily and, only on a real
+ *    signature change, materialises a fresh subtree for a targeted in-place
+ *    content update;
+ *  - a genuinely new key builds + mounts exactly one subtree.
+ *
+ * DOM reordering uses a longest-increasing-subsequence pass so the number of
+ * moves is minimal (e.g. a prepend into a 10k list moves 1 node, not 10k).
+ */
+export function reconcileChildrenByPlan(
+  ctx: RenderContext,
+  parentDom: Element,
+  oldInstances: NodeInstance[],
+  plan: readonly PlanEntry[],
+  mountFn: MountFn,
+): ReconcileResult {
+  const oldByKey = new Map<string, NodeInstance>();
+  for (const inst of oldInstances) {
+    oldByKey.set(inst.graphNode.key ?? inst.graphNode.id, inst);
+  }
+
+  const newInstances: NodeInstance[] = [];
+  const usedKeys = new Set<string>();
+  const built: GraphNode[] = [];
+
+  for (const entry of plan) {
+    const existing = oldByKey.get(entry.key);
+    if (existing !== undefined) {
+      usedKeys.add(entry.key);
+      const oldItem = existing.graphNode.getProp('_item');
+      // Identity short-circuit: same reference ⇒ data cannot have changed.
+      if (!Object.is(oldItem, entry.item)) {
+        const newSig = entry.sig();
+        const oldSig = existing.graphNode.getProp('_sig');
+        if (!Object.is(oldSig, newSig)) {
+          const freshNode = entry.build();
+          built.push(freshNode);
+          patchExistingInstance(ctx, existing, freshNode);
+          reconcileItemChildren(ctx, existing, freshNode, mountFn);
+          existing.graphNode.setProp('_sig', newSig);
+        }
+        // Cache the new reference so the next pass can short-circuit again.
+        existing.graphNode.setProp('_item', entry.item as never);
+      }
+      newInstances.push(existing);
+    } else {
+      const freshNode = entry.build();
+      built.push(freshNode);
+      const inst = mountFn(freshNode, parentDom);
+      newInstances.push(inst);
+    }
+  }
+
+  // Determine + remove stale instances.
+  const removed: NodeInstance[] = [];
+  for (const inst of oldInstances) {
+    const key = inst.graphNode.key ?? inst.graphNode.id;
+    if (!usedKeys.has(key)) removed.push(inst);
+  }
+  for (const inst of removed) {
+    const parent = ctx.dom.parentNode(inst.domNode);
+    if (parent !== null) ctx.dom.removeChild(parent, inst.domNode);
+    inst.dispose();
+  }
+
+  // Minimal-move reorder to the desired order.
+  reorderDomMinimal(ctx, parentDom, oldInstances, newInstances);
+
+  return { instances: newInstances, removed, built };
+}
+
+/**
+ * Minimal-move DOM reorder.
+ *
+ * Reused nodes retain their previous DOM slots and newly-mounted nodes sit at
+ * the end. We compute the longest increasing subsequence of the reused nodes'
+ * previous positions; those are already in correct relative order and stay put.
+ * Every other node is inserted before its right-hand neighbour, walking
+ * right-to-left. This yields exactly (n − |LIS|) `insertBefore` calls — the
+ * minimum — instead of the O(n) sweep the naive reorder performs on a prepend.
+ */
+function reorderDomMinimal(
+  ctx: RenderContext,
+  parentDom: Element,
+  oldInstances: NodeInstance[],
+  newInstances: NodeInstance[],
+): void {
+  const n = newInstances.length;
+  if (n === 0) return;
+
+  const oldIndexOf = new Map<NodeInstance, number>();
+  for (let i = 0; i < oldInstances.length; i++) oldIndexOf.set(oldInstances[i]!, i);
+
+  const source = new Array<number>(n);
+  let moved = false;
+  let lastSeen = -1;
+  for (let i = 0; i < n; i++) {
+    const oi = oldIndexOf.get(newInstances[i]!);
+    if (oi === undefined) {
+      source[i] = -1; // freshly mounted row
+      moved = true;
+    } else {
+      source[i] = oi;
+      if (oi < lastSeen) moved = true; // an out-of-order reused row exists
+      else lastSeen = oi;
+    }
+  }
+
+  // Fast path: nothing is out of order and there are no new rows to reposition.
+  if (!moved) return;
+
+  const keep = longestIncreasingSubsequence(source);
+
+  let refNode: Node | null = null;
+  for (let i = n - 1; i >= 0; i--) {
+    const domNode = newInstances[i]!.domNode;
+    if (source[i] === -1 || !keep.has(i)) {
+      if (ctx.dom.nextSibling(domNode) !== refNode) {
+        ctx.dom.insertBefore(parentDom, domNode, refNode);
+      }
+    }
+    refNode = domNode;
+  }
+}
+
+/**
+ * Indices (into `source`) forming a longest strictly-increasing subsequence,
+ * ignoring `-1` entries (new rows, which always move). O(n log n) with
+ * predecessor reconstruction.
+ */
+function longestIncreasingSubsequence(source: readonly number[]): Set<number> {
+  const keep = new Set<number>();
+  const n = source.length;
+  const tails: number[] = []; // tails[k] = source-index of smallest tail of an LIS of length k+1
+  const prev = new Array<number>(n).fill(-1);
+
+  for (let i = 0; i < n; i++) {
+    const v = source[i]!;
+    if (v < 0) continue;
+    let lo = 0;
+    let hi = tails.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (source[tails[mid]!]! < v) lo = mid + 1;
+      else hi = mid;
+    }
+    if (lo > 0) prev[i] = tails[lo - 1]!;
+    tails[lo] = i;
+  }
+
+  let idx = tails.length > 0 ? tails[tails.length - 1]! : -1;
+  while (idx >= 0) {
+    keep.add(idx);
+    idx = prev[idx]!;
+  }
+  return keep;
 }
 
 /**
