@@ -241,16 +241,38 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       const itemKey = reactiveListItemKey(item, index);
       const itemNode = graph.createNode("list-item", {
         key: itemKey,
-        props: { key: itemKey, _sig: reactiveListItemSignature(item) }
+        // `_item` records the source item *reference* so the reconciler can
+        // short-circuit unchanged rows by identity (no signature hashing); `_sig`
+        // is the content signature used to detect an in-place data change when the
+        // reference differs. Both are internal metadata (leading `_`) and never
+        // reach the DOM.
+        props: {
+          key: itemKey,
+          _sig: reactiveListItemSignature(item),
+          // The item reference is stored as opaque internal metadata (never
+          // rendered); cast through `unknown` since `T` is not a `PropValue`.
+          _item: item
+        }
       });
       renderItem(item, index, new ContainerBuilderImpl(itemNode, graph));
       return itemNode;
     };
-    const buildAll = (raw) => {
+    const buildPlan = (raw) => {
       const arr = Array.isArray(raw) ? raw : [];
-      return arr.map((item, i) => buildItem(item, i));
+      const plan = new Array(arr.length);
+      for (let i = 0; i < arr.length; i++) {
+        const item = arr[i];
+        const index = i;
+        plan[i] = {
+          key: reactiveListItemKey(item, index),
+          item,
+          sig: () => reactiveListItemSignature(item),
+          build: () => buildItem(item, index)
+        };
+      }
+      return plan;
     };
-    graph.registerHandler(`__listbuild__${node.id}`, buildAll);
+    graph.registerHandler(`__listplan__${node.id}`, buildPlan);
     const current = isSignal(items) ? items.peek() : items;
     const initial = Array.isArray(current) ? current : [];
     initial.forEach((item, i) => {
