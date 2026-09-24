@@ -21,32 +21,21 @@ CJS Build start
 
 
 
-ESM dist/bin.js            29.29 KB
-ESM dist/index.js          29.48 KB
-ESM dist/create-bin.js     29.40 KB
-ESM dist/bin.js.map        75.22 KB
-ESM dist/index.js.map      74.59 KB
-ESM dist/create-bin.js.map 75.51 KB
-ESM ⚡️ Build success in 124ms
 CJS dist/bin.cjs            30.46 KB
 CJS dist/create-bin.cjs     30.58 KB
 CJS dist/index.cjs          32.21 KB
 CJS dist/bin.cjs.map        74.97 KB
 CJS dist/create-bin.cjs.map 75.26 KB
 CJS dist/index.cjs.map      74.46 KB
-CJS ⚡️ Build success in 125ms
+CJS ⚡️ Build success in 74ms
+ESM dist/bin.js            29.29 KB
+ESM dist/create-bin.js     29.40 KB
+ESM dist/index.js          29.48 KB
+ESM dist/bin.js.map        75.22 KB
+ESM dist/create-bin.js.map 75.51 KB
+ESM dist/index.js.map      74.59 KB
+ESM ⚡️ Build success in 74ms
 DTS Build start
-error TS2688: Cannot find type definition file for 'node'.
-  The file is in the program because:
-    Entry point of type library 'node' specified in compilerOptions
-src/index.ts(88,30): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
-
-Error: error occurred in dts build
-    at Worker.<anonymous> (/home/error51/Downloads/StreetUI/node_modules/.pnpm/tsup@8.3.5_postcss@8.5.28_typescript@5.6.3/node_modules/tsup/dist/index.js:1541:26)
-    at Worker.emit (node:events:509:28)
-    at MessagePort.<anonymous> (node:internal/worker:350:14)
-    at [nodejs.internal.kHybridDispatch] (node:internal/event_target:843:20)
-    at MessagePort.<anonymous> (node:internal/per_context/messageport:23:28)
-DTS Build error
- ELIFECYCLE  Command failed with exit code 1.
- WARN   Local package.json exists, but node_modules missing, did you mean to install?
+DTS ⚡️ Build success in 1602ms
+DTS dist/index.d.ts  14.57 KB
+DTS dist/index.d.cts 14.57 KB

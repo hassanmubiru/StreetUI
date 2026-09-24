@@ -22,15 +22,8 @@ function createShowcaseApp() {
   const showDetails = signal(false);
   const lastEvent = signal("none");
   let nextId = 4;
-  const countText = derived(() => String(count.get()));
   const featureCountText = derived(() => `${features.get().length} package(s)`);
   const toggleLabel = derived(() => showDetails.get() ? "Hide details" : "Show details");
-  const detailsItems = derived(
-    () => showDetails.get() ? [{
-      id: "details",
-      text: "StreetUI compiles a semantic graph, binds signals in the runtime, and a keyed reconciler patches the real DOM \u2014 no virtual DOM."
-    }] : []
-  );
   const validationText = derived(() => {
     const n = formName.get().trim();
     const e = formEmail.get().trim();
@@ -126,7 +119,7 @@ function createShowcaseApp() {
     }, { id: "feature-list" });
     page.section("counter", (c) => {
       c.heading("Interactive counter", { level: 2 });
-      c.text(countText, { id: "counter-value" });
+      c.text(count, { id: "counter-value" });
       c.button("Increment", { id: "btn-increment", onClick: () => actions.increment() });
       c.button("Decrement", { id: "btn-decrement", onClick: () => actions.decrement() });
       c.button("Reset", { id: "btn-reset", onClick: () => actions.reset() });
@@ -178,11 +171,7 @@ function createShowcaseApp() {
           id: "field-message",
           type: "text",
           placeholder: "Message",
-          value: formMessage,
-          onInput: (v) => {
-            formMessage.set(v);
-            lastEvent.set("input:message");
-          }
+          bind: formMessage
         });
         form.text(validationText, { id: "form-validation" });
         form.text(submittedText, { id: "form-submitted" });
@@ -192,8 +181,13 @@ function createShowcaseApp() {
     page.section("conditional", (c) => {
       c.heading("Conditional rendering", { level: 2 });
       c.button(toggleLabel, { id: "btn-toggle", onClick: () => actions.toggleDetails() });
-      c.listOf("details", detailsItems, (item, _i, content) => {
-        content.text(item.text, { id: "details-text" });
+      c.container("details-region", (region) => {
+        region.when(showDetails, (content) => {
+          content.text(
+            "StreetUI compiles a semantic graph, binds signals in the runtime, and a keyed reconciler patches the real DOM \u2014 no virtual DOM.",
+            { id: "details-text" }
+          );
+        });
       }, { id: "details-region" });
     }, { id: "conditional" });
     page.section("events", (c) => {

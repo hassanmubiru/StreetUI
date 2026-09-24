@@ -1,0 +1,14 @@
+
+> @streetui/example-account@0.5.0 build /home/error51/Downloads/StreetUI/examples/streetui-account
+> tsup
+
+CLI Building entry: src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/examples/streetui-account/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+ESM dist/index.js     12.26 KB
+ESM dist/index.js.map 26.34 KB
+ESM ⚡️ Build success in 13ms

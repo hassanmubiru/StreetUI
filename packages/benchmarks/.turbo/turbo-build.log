@@ -1,0 +1,16 @@
+
+> @streetui/benchmarks@0.7.0 build /home/error51/Downloads/StreetUI/packages/benchmarks
+> tsup
+
+CLI Building entry: src/index.ts, src/run.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/benchmarks/tsup.config.ts
+CLI Target: node20
+CLI Cleaning output folder
+ESM Build start
+ESM dist/index.js     22.29 KB
+ESM dist/run.js       27.51 KB
+ESM dist/index.js.map 55.38 KB
+ESM dist/run.js.map   59.75 KB
+ESM ⚡️ Build success in 32ms

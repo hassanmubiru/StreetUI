@@ -1,0 +1,18 @@
+
+> @streetui/example-ssr@0.4.0 build /home/error51/Downloads/StreetUI/examples/streetui-ssr
+> tsup
+
+CLI Building entry: src/browser-entry.ts, src/index.ts, src/server-entry.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/examples/streetui-ssr/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+ESM dist/browser-entry.js     2.71 KB
+ESM dist/index.js             3.67 KB
+ESM dist/server-entry.js      2.82 KB
+ESM dist/browser-entry.js.map 7.91 KB
+ESM dist/index.js.map         9.87 KB
+ESM dist/server-entry.js.map  7.86 KB
+ESM ⚡️ Build success in 15ms

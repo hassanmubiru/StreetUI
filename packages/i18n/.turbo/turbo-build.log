@@ -1,0 +1,22 @@
+
+> @streetui/i18n@1.0.0 build /home/error51/Downloads/StreetUI/packages/i18n
+> tsup
+
+CLI Building entry: src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/i18n/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
+ESM dist/index.js     1.86 KB
+ESM dist/index.js.map 6.49 KB
+ESM ⚡️ Build success in 9ms
+CJS dist/index.cjs     2.95 KB
+CJS dist/index.cjs.map 6.57 KB
+CJS ⚡️ Build success in 9ms
+DTS Build start
+DTS ⚡️ Build success in 511ms
+DTS dist/index.d.ts  2.83 KB
+DTS dist/index.d.cts 2.83 KB
