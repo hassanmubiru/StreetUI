@@ -1,0 +1,15 @@
+# Build output
+dist/
+.streetui/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
