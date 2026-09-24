@@ -379,6 +379,7 @@ function mountPerfApp(container, opts = {}) {
     () => mountRouter(router, {
       container,
       ...opts.hydrate !== void 0 ? { hydrate: opts.hydrate } : {},
+      ...opts.renderer !== void 0 ? { renderer: opts.renderer } : {},
       shell: (sh) => buildShell(sh, router, deps)
     })
   );

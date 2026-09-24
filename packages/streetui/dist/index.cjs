@@ -169,7 +169,7 @@ __export(src_exports, {
 module.exports = __toCommonJS(src_exports);
 
 // src/version.ts
-var VERSION = "1.2.0";
+var VERSION = "1.3.0";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;

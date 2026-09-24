@@ -326,7 +326,7 @@ declare class CliError extends Error {
  */
 
 /** The CLI version, read from the compiled package. Kept in one place. */
-declare const CLI_VERSION = "1.2.0";
+declare const CLI_VERSION = "1.3.0";
 /** Options for `runCli`, all injectable so tests can drive it in-process. */
 interface RunCliOptions {
     /** Working directory the command acts on. Defaults to `process.cwd()`. */

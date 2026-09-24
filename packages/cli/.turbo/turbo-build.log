@@ -1,5 +1,5 @@
 
-> @streetui/cli@1.2.0 build /home/error51/Downloads/StreetUI/packages/cli
+> @streetui/cli@1.3.0 build /home/error51/Downloads/StreetUI/packages/cli
 > tsup
 
 CLI Building entry: src/bin.ts, src/create-bin.ts, src/index.ts
@@ -27,15 +27,15 @@ CJS dist/index.cjs          32.21 KB
 CJS dist/bin.cjs.map        74.97 KB
 CJS dist/create-bin.cjs.map 75.26 KB
 CJS dist/index.cjs.map      74.46 KB
-CJS ⚡️ Build success in 52ms
+CJS ⚡️ Build success in 40ms
+ESM dist/create-bin.js     29.40 KB
 ESM dist/bin.js            29.29 KB
 ESM dist/index.js          29.48 KB
-ESM dist/create-bin.js     29.40 KB
-ESM dist/index.js.map      74.59 KB
 ESM dist/create-bin.js.map 75.51 KB
 ESM dist/bin.js.map        75.22 KB
-ESM ⚡️ Build success in 52ms
+ESM dist/index.js.map      74.59 KB
+ESM ⚡️ Build success in 40ms
 DTS Build start
-DTS ⚡️ Build success in 1132ms
+DTS ⚡️ Build success in 993ms
 DTS dist/index.d.ts  14.57 KB
 DTS dist/index.d.cts 14.57 KB

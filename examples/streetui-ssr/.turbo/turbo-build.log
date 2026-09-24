@@ -12,7 +12,7 @@ ESM Build start
 ESM dist/browser-entry.js     2.68 KB
 ESM dist/index.js             3.62 KB
 ESM dist/server-entry.js      2.79 KB
-ESM dist/server-entry.js.map  7.83 KB
-ESM dist/index.js.map         9.83 KB
 ESM dist/browser-entry.js.map 7.87 KB
-ESM ⚡️ Build success in 30ms
+ESM dist/index.js.map         9.83 KB
+ESM dist/server-entry.js.map  7.83 KB
+ESM ⚡️ Build success in 13ms
