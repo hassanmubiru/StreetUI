@@ -142,12 +142,12 @@ for (const pkgName of PUBLISH_ORDER) {
   const shortName = pkgName.replace('@streetui/', '');
 
   if (DRY_RUN) {
-    console.log(`  [dry-run] would publish ${pkgName}@1.2.0 from ${tgz}`);
+    console.log(`  [dry-run] would publish ${pkgName}@1.3.0 from ${tgz}`);
     results.push({ name: pkgName, status: 'dry-run' });
     continue;
   }
 
-  process.stdout.write(`  publishing ${pkgName}@1.2.0 ... `);
+  process.stdout.write(`  publishing ${pkgName}@1.3.0 ... `);
   try {
     execFileSync(
       'npm',
