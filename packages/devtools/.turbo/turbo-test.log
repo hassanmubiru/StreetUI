@@ -5,15 +5,15 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/devtools
 
- ✓ src/inspect-reactive.test.ts  (10 tests) 10ms
- ✓ src/diagnostics.test.ts  (4 tests) 6ms
- ✓ src/devtools.test.ts  (10 tests) 11ms
- ✓ src/application.test.ts  (10 tests) 15ms
- ✓ src/public-api.stability.test.ts  (1 test) 5ms
- ✓ src/panels.test.ts  (11 tests) 11ms
+ ✓ src/inspect-reactive.test.ts  (10 tests) 12ms
+ ✓ src/application.test.ts  (10 tests) 7ms
+ ✓ src/devtools.test.ts  (10 tests) 8ms
+ ✓ src/public-api.stability.test.ts  (1 test) 4ms
+ ✓ src/diagnostics.test.ts  (4 tests) 4ms
+ ✓ src/panels.test.ts  (11 tests) 16ms
 
  Test Files  6 passed (6)
       Tests  46 passed (46)
-   Start at  19:54:25
-   Duration  498ms (transform 370ms, setup 0ms, collect 818ms, tests 59ms, environment 1ms, prepare 614ms)
+   Start at  20:06:53
+   Duration  430ms (transform 308ms, setup 0ms, collect 695ms, tests 51ms, environment 1ms, prepare 420ms)
 
