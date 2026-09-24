@@ -1,63 +1,15 @@
 
-
-> @streetui/dsl@0.1.0 test /home/error51/Downloads/StreetUI/packages/dsl
+> @streetui/dsl@1.0.0 test /home/error51/Downloads/StreetUI/packages/dsl
 > vitest run
 
 
-[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/dsl[39m
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dsl
 
-[?25l   [90m·[39m input[2m (2)[22m
-     [90m·[39m creates an input node
-     [90m·[39m registers onInput handler
-   [90m·[39m reactive binding[2m (2)[22m
-     [90m·[39m records state ref when a signal is passed as text
-     [90m·[39m stores initial signal value as prop
-   [90m·[39m nesting[2m (1)[22m
-     [90m·[39m builds deeply nested structure
-   [90m·[39m validation[2m (1)[22m
-     [90m·[39m build() does not throw for a valid graph
-[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G   [32m✓[39m input[2m (2)[22m
-     [32m✓[39m creates an input node
-     [32m✓[39m registers onInput handler
-   [32m✓[39m reactive binding[2m (2)[22m
-     [32m✓[39m records state ref when a signal is passed as text
-     [32m✓[39m stores initial signal value as prop
-   [32m✓[39m nesting[2m (1)[22m
-     [32m✓[39m builds deeply nested structure
-   [32m✓[39m validation[2m (1)[22m
-     [32m✓[39m build() does not throw for a valid graph
-[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdsl[2m.test.ts[22m[2m (17)[22m
-   [32m✓[39m streetui.app[2m (2)[22m
-     [32m✓[39m creates a StreetApp
-     [32m✓[39m builds an ApplicationGraph
-   [32m✓[39m page[2m (3)[22m
-     [32m✓[39m adds a page node to the graph
-     [32m✓[39m sets the page key
-     [32m✓[39m supports multiple pages
-   [32m✓[39m section[2m (1)[22m
-     [32m✓[39m adds a section inside a page
-   [32m✓[39m heading[2m (2)[22m
-     [32m✓[39m creates a heading node
-     [32m✓[39m respects heading level option
-   [32m✓[39m text[2m (1)[22m
-     [32m✓[39m creates a text node
-   [32m✓[39m button[2m (2)[22m
-     [32m✓[39m creates a button node
-     [32m✓[39m registers click handler
-   [32m✓[39m input[2m (2)[22m
-     [32m✓[39m creates an input node
-     [32m✓[39m registers onInput handler
-   [32m✓[39m reactive binding[2m (2)[22m
-     [32m✓[39m records state ref when a signal is passed as text
-     [32m✓[39m stores initial signal value as prop
-   [32m✓[39m nesting[2m (1)[22m
-     [32m✓[39m builds deeply nested structure
-   [32m✓[39m validation[2m (1)[22m
-     [32m✓[39m build() does not throw for a valid graph
+ ✓ src/public-api.stability.test.ts  (2 tests) 4ms
+ ✓ src/dsl.test.ts  (17 tests) 16ms
 
-[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[32m17 passed[39m[22m[90m (17)[39m
-[2m   Start at [22m 08:59:03
-[2m   Duration [22m 568ms[2m (transform 127ms, setup 0ms, collect 138ms, tests 19ms, environment 0ms, prepare 113ms)[22m
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  12:24:59
+   Duration  521ms (transform 183ms, setup 0ms, collect 264ms, tests 20ms, environment 0ms, prepare 193ms)
 
-[?25h[?25h
