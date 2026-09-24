@@ -1,0 +1,25 @@
+{
+  "//": "v1.3 competitor status. Competitor frameworks (react/vue/svelte/solid) CANNOT be benchmarked in this environment: the npm registry is unreachable offline (GET registry.npmjs.org -> 403) so they cannot be installed, and there is no Chromium/Playwright for the in-browser scenarios. The harness (benchmarks/run-competitors.mjs), scenario implementations (benchmarks/competitors/*), pinned versions (benchmarks/framework-versions.json) and result schema are complete and will populate real numbers once a registry and a real browser are available. NO competitor numbers are fabricated. Do NOT read StreetUI's numbers as beating any competitor: there is no competitor data to compare against.",
+  "schema": "streetui-competitors/v1.3",
+  "status": "BLOCKED",
+  "blockedReason": "npm registry unreachable offline (E403 Forbidden) -> competitor packages cannot be installed; and no Chromium/Playwright is present -> in-browser scenarios (A initial render, C list ops, D fan-out, G hydration) cannot run. F (SSR, Node-only) is also blocked because the framework packages themselves cannot be installed.",
+  "remediation": "On a machine with npm registry access and a browser: from benchmarks/, install the pinned versions in framework-versions.json, `npx playwright install chromium`, then `node benchmarks/run-competitors.mjs`. It writes react.json/vue.json/svelte.json/solid.json in the shared A-H schema.",
+  "runner": "benchmarks/run-competitors.mjs",
+  "versionsPinnedIn": "benchmarks/framework-versions.json",
+  "methodology": "benchmarks/methodology.md",
+  "frameworks": {
+    "react": { "status": "BLOCKED", "pinnedVersion": "19.1.0", "resultFile": "../react.json" },
+    "vue": { "status": "BLOCKED", "pinnedVersion": "3.5.13", "resultFile": "../vue.json" },
+    "svelte": { "status": "BLOCKED", "pinnedVersion": "5.19.0", "resultFile": "../svelte.json" },
+    "solid": { "status": "BLOCKED", "pinnedVersion": "1.9.3", "resultFile": "../solid.json" }
+  },
+  "scenarios": {
+    "A_initialRender": null,
+    "C_largeList": null,
+    "D_fanOut": null,
+    "F_ssr": null,
+    "G_hydration": null,
+    "H_bundleSize": null
+  },
+  "timestamp": "2026-09-24T17:45:00.000Z"
+}
