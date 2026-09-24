@@ -1,0 +1,21 @@
+{
+  "//": "DEV-ONLY benchmark artifact — React 19 competitor. These deps MUST NEVER be added to the `streetui` runtime. Exact pins only (no ^/~), per benchmarks/framework-versions.json pinPolicy.",
+  "//buildTooling": "vite + @vitejs/plugin-react are the build-time compiler toolchain (not in framework-versions.json's framework pin set). Resolve @vitejs/plugin-react to the release compatible with vite 6 when the registry is reachable; the version below is a best-known pin.",
+  "name": "@bench-competitor/react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "React 19 side of the StreetUI cross-framework benchmark (scenarios A-H). Dev-only; never shipped.",
+  "scripts": {
+    "build": "vite build",
+    "build:ssr": "vite build --ssr src/ssr.jsx"
+  },
+  "dependencies": {
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "4.3.4",
+    "vite": "6.0.7"
+  }
+}

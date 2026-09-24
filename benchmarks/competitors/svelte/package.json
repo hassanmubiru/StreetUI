@@ -1,0 +1,20 @@
+{
+  "//": "DEV-ONLY benchmark artifact — Svelte 5 competitor. These deps MUST NEVER be added to the `streetui` runtime. Exact pins only (no ^/~).",
+  "//buildTooling": "@sveltejs/vite-plugin-svelte is the REQUIRED Svelte 5 compiler (runes/components cannot run uncompiled); it is not in framework-versions.json's framework pin set. Resolve it to the release compatible with svelte 5 + vite 6 when the registry is reachable; the pin below is a best-known value.",
+  "name": "@bench-competitor/svelte",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Svelte 5 side of the StreetUI cross-framework benchmark (scenarios A-H), runes. Dev-only; never shipped.",
+  "scripts": {
+    "build": "vite build",
+    "build:ssr": "vite build --ssr src/ssr.mjs"
+  },
+  "dependencies": {
+    "svelte": "5.19.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "5.0.3",
+    "vite": "6.0.7"
+  }
+}

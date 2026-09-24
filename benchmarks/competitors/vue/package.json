@@ -1,0 +1,20 @@
+{
+  "//": "DEV-ONLY benchmark artifact — Vue 3.5 competitor. These deps MUST NEVER be added to the `streetui` runtime. Exact pins only (no ^/~).",
+  "//ssr": "@vue/server-renderer is Vue's real server renderer, versioned in lockstep with vue (3.5.13). It is a separate package from `vue` and required for scenario F.",
+  "name": "@bench-competitor/vue",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Vue 3.5 side of the StreetUI cross-framework benchmark (scenarios A-H), render-function style. Dev-only; never shipped.",
+  "scripts": {
+    "build": "vite build",
+    "build:ssr": "vite build --ssr src/ssr.mjs"
+  },
+  "dependencies": {
+    "vue": "3.5.13",
+    "@vue/server-renderer": "3.5.13"
+  },
+  "devDependencies": {
+    "vite": "6.0.7"
+  }
+}
