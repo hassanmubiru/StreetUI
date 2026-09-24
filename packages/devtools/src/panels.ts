@@ -191,14 +191,14 @@ function capture(
 
   const application: ApplicationPanel = {
     identity: app.identity,
-    nodeCount: app.nodeStats.total,
-    maxDepth: app.nodeStats.maxDepth,
+    nodeCount: app.perf.totalNodes,
+    maxDepth: app.perf.maxDepth,
     pages: app.pages,
     signalCount: app.signals.length,
-    eventHandlers: app.nodeStats.eventHandlers,
-    stateBindings: app.nodeStats.stateBindings,
-    errors: app.diagnostics.filter((d) => d.severity === 'error').length,
-    warnings: app.diagnostics.filter((d) => d.severity === 'warning').length,
+    eventHandlers: app.perf.eventHandlers,
+    stateBindings: app.perf.stateBindings,
+    errors: app.diagnostics.errors,
+    warnings: app.diagnostics.warnings,
   };
 
   const live: Record<string, SignalInspection> = {};
@@ -214,10 +214,7 @@ function capture(
 
   const performance: PerformancePanel = {
     snapshot: app.perf,
-    diagnostics: diagnosePerformance(
-      compiled,
-      options.perfThresholds !== undefined ? options.perfThresholds : undefined,
-    ),
+    diagnostics: diagnosePerformance(compiled, options.perfThresholds),
   };
 
   const snapshot: DevToolsSnapshot = {
@@ -321,7 +318,7 @@ function formatSnapshot(s: DevToolsSnapshot): string {
     `Performance: ${s.performance.diagnostics.length} diagnostic(s), ${s.performance.snapshot.totalNodes} nodes`,
   );
   for (const d of s.performance.diagnostics) {
-    lines.push(`  [${d.severity}] ${d.code}: ${d.message}`);
+    lines.push(`  ${d.code}: ${d.message}`);
   }
 
   return lines.join('\n');
