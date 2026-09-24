@@ -93,7 +93,7 @@ function mountUsers(sizing) {
     created = c.createElement + c.createTextNode;
     lastHandle = s.handle;
   }, {
-    iterations: 10, warmup: 3,
+    iterations: 5, warmup: 2,
     setup: () => {
       const { adapter, reset, snapshot } = makeCountingAdapter();
       const renderer = createRenderer({ domAdapter: adapter });
@@ -107,6 +107,7 @@ function mountUsers(sizing) {
     rows: 10000, nodesCreated: created, timing,
   };
 }
+gc();
 
 // ── B: hydration of the SSR users view — must create ZERO DOM nodes (G) ──────
 {
