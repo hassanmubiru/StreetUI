@@ -1,0 +1,14 @@
+
+> @streetui/benchmarks@0.7.0 test /home/error51/Downloads/StreetUI/packages/benchmarks
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/benchmarks
+
+ ✓ src/harness.test.ts  (7 tests) 10ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  20:07:01
+   Duration  525ms (transform 55ms, setup 0ms, collect 52ms, tests 10ms, environment 173ms, prepare 94ms)
+
