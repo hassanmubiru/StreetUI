@@ -1,19 +1,19 @@
 // src/browser-entry.ts
-import { createRenderer, readState } from "@streetui/renderer";
-import { BrowserDOMAdapter } from "@streetui/dom";
+import { createRenderer, readState } from "streetui";
+import { BrowserDOMAdapter } from "streetui";
 
 // src/index.ts
-import { streetui } from "@streetui/dsl";
-import { compile } from "@streetui/compiler";
+import { streetui } from "streetui";
+import { compile } from "streetui";
 
 // src/app.ts
-import { derived } from "@streetui/state";
+import { derived } from "streetui";
 
 // src/deps.ts
-import { signal, resource } from "@streetui/state";
-import { createI18n } from "@streetui/i18n";
-import { createForm, required, minLength, email } from "@streetui/forms";
-import { createContext } from "@streetui/context";
+import { signal, resource } from "streetui";
+import { createI18n } from "streetui";
+import { createForm, required, minLength, email } from "streetui";
+import { createContext } from "streetui";
 var ThemeContext = createContext({ name: "light" }, "theme");
 var MESSAGES = {
   en: {

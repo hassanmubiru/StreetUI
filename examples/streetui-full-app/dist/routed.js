@@ -1,11 +1,11 @@
 // src/routed.ts
-import { createRouter, mountRouter, routerOutlet, createMemoryHistory } from "@streetui/router";
+import { createRouter, mountRouter, routerOutlet, createMemoryHistory } from "streetui";
 
 // src/deps.ts
-import { signal, resource } from "@streetui/state";
-import { createI18n } from "@streetui/i18n";
-import { createForm, required, minLength, email } from "@streetui/forms";
-import { createContext } from "@streetui/context";
+import { signal, resource } from "streetui";
+import { createI18n } from "streetui";
+import { createForm, required, minLength, email } from "streetui";
+import { createContext } from "streetui";
 var ThemeContext = createContext({ name: "light" }, "theme");
 var MESSAGES = {
   en: {
@@ -49,7 +49,7 @@ function createDeps(options = {}) {
 }
 
 // src/app.ts
-import { derived } from "@streetui/state";
+import { derived } from "streetui";
 function buildApp(page, deps) {
   const { count, i18n, form, user } = deps;
   const theme = ThemeContext.consume();

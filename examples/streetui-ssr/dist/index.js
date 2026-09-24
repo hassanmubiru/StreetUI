@@ -1,7 +1,7 @@
 // src/app.ts
-import { streetui } from "@streetui/dsl";
-import { signal, derived } from "@streetui/state";
-import { compile } from "@streetui/compiler";
+import { streetui } from "streetui";
+import { signal, derived } from "streetui";
+import { compile } from "streetui";
 var STATE_KEY = "ssr-demo";
 function createState(seed) {
   return {
@@ -59,7 +59,7 @@ function compileApp(state) {
 }
 
 // src/document.ts
-import { renderToString, serializeState } from "@streetui/renderer";
+import { renderToString, serializeState } from "streetui";
 function renderDocument(seed) {
   const state = createState(seed);
   const compiled = compileApp(state);
@@ -83,8 +83,8 @@ function renderDocument(seed) {
 }
 
 // src/browser-entry.ts
-import { createRenderer, readState } from "@streetui/renderer";
-import { BrowserDOMAdapter } from "@streetui/dom";
+import { createRenderer, readState } from "streetui";
+import { BrowserDOMAdapter } from "streetui";
 function hydrateApp(appContainer, stateRoot) {
   const dom = new BrowserDOMAdapter();
   const transferred = readState(dom, stateRoot ?? appContainer);

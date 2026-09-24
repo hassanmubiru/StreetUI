@@ -1,11 +1,11 @@
 // src/browser-entry.ts
-import { createRenderer, readState } from "@streetui/renderer";
-import { BrowserDOMAdapter } from "@streetui/dom";
+import { createRenderer, readState } from "streetui";
+import { BrowserDOMAdapter } from "streetui";
 
 // src/app.ts
-import { streetui } from "@streetui/dsl";
-import { signal, derived } from "@streetui/state";
-import { compile } from "@streetui/compiler";
+import { streetui } from "streetui";
+import { signal, derived } from "streetui";
+import { compile } from "streetui";
 var STATE_KEY = "ssr-demo";
 function createState(seed) {
   return {

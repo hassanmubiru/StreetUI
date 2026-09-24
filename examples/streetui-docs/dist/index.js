@@ -1,10 +1,10 @@
 // src/docs-app.ts
-import { signal, derived } from "@streetui/state";
+import { signal, derived } from "streetui";
 import {
   createRouter,
   mountRouter,
   routerOutlet
-} from "@streetui/router";
+} from "streetui";
 var DOC_SECTIONS = [
   {
     slug: "getting-started",

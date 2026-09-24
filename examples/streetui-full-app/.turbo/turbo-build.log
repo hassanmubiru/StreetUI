@@ -9,10 +9,10 @@ CLI Using tsup config: /home/error51/Downloads/StreetUI/examples/streetui-full-a
 CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
-ESM dist/browser-entry.js     4.34 KB
-ESM dist/routed.js            4.14 KB
-ESM dist/index.js             3.69 KB
-ESM dist/routed.js.map        10.67 KB
-ESM dist/browser-entry.js.map 11.18 KB
-ESM dist/index.js.map         9.37 KB
+ESM dist/index.js             3.64 KB
+ESM dist/browser-entry.js     4.28 KB
+ESM dist/routed.js            4.10 KB
+ESM dist/index.js.map         9.31 KB
+ESM dist/browser-entry.js.map 11.11 KB
+ESM dist/routed.js.map        10.62 KB
 ESM ⚡️ Build success in 16ms

@@ -76,21 +76,21 @@ function createAccountApi(initial = DEFAULT_PLANS) {
 }
 
 // src/account-app.ts
-import { derived, resource } from "@streetui/state";
-import { a11yIds } from "@streetui/core";
+import { derived, resource } from "streetui";
+import { a11yIds } from "streetui";
 import {
   createForm,
   required,
   email as emailValidator,
   minLength
-} from "@streetui/forms";
-import { createI18n } from "@streetui/i18n";
-import { createContext } from "@streetui/context";
+} from "streetui";
+import { createI18n } from "streetui";
+import { createContext } from "streetui";
 import {
   createRouter,
   mountRouter,
   routerOutlet
-} from "@streetui/router";
+} from "streetui";
 var messages = {
   en: {
     "app.title": "StreetUI Accounts",

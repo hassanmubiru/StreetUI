@@ -1,10 +1,10 @@
 // src/showcase-app.ts
-import { signal, derived } from "@streetui/state";
-import { streetui } from "@streetui/dsl";
-import { compile } from "@streetui/compiler";
-import { createRuntime } from "@streetui/runtime";
-import { createRenderer } from "@streetui/renderer";
-import { BrowserDOMAdapter } from "@streetui/dom";
+import { signal, derived } from "streetui";
+import { streetui } from "streetui";
+import { compile } from "streetui";
+import { createRuntime } from "streetui";
+import { createRenderer } from "streetui";
+import { BrowserDOMAdapter } from "streetui";
 function isValidEmail(email) {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
 }

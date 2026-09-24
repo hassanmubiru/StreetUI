@@ -1,10 +1,10 @@
 // src/data-app.ts
-import { derived, resource } from "@streetui/state";
+import { derived, resource } from "streetui";
 import {
   createRouter,
   mountRouter,
   routerOutlet
-} from "@streetui/router";
+} from "streetui";
 async function fetchProducts(baseUrl, signal2) {
   const response = await fetch(`${baseUrl}/api/products`, { signal: signal2 });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);

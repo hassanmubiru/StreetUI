@@ -1,9 +1,9 @@
 // src/counter-app.ts
-import { signal } from "@streetui/state";
-import { streetui } from "@streetui/dsl";
-import { compile } from "@streetui/compiler";
-import { createRuntime } from "@streetui/runtime";
-import { createRenderer } from "@streetui/renderer";
+import { signal } from "streetui";
+import { streetui } from "streetui";
+import { compile } from "streetui";
+import { createRuntime } from "streetui";
+import { createRenderer } from "streetui";
 function createCounterApp() {
   const count = signal(0);
   const app = streetui.app({ name: "Counter", version: "1.0.0" });

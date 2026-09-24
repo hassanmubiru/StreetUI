@@ -9,6 +9,6 @@ CLI Using tsup config: /home/error51/Downloads/StreetUI/examples/streetui-docs/t
 CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
-ESM dist/index.js     5.75 KB
-ESM dist/index.js.map 13.74 KB
-ESM ⚡️ Build success in 8ms
+ESM dist/index.js     5.73 KB
+ESM dist/index.js.map 13.72 KB
+ESM ⚡️ Build success in 17ms
