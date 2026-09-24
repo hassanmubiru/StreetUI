@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-account
 
- ❯ src/account-app.test.ts  (10 tests | 2 failed) 374ms
-   × account app — resources (plans) > loads plans from the real API and renders them 49ms
+ ❯ src/account-app.test.ts  (10 tests | 2 failed) 397ms
+   × account app — resources (plans) > loads plans from the real API and renders them 48ms
      → expected '' to be 'Free' // Object.is equality
-   × account app — resources (plans) > shows an error + retry when the plans request fails 84ms
+   × account app — resources (plans) > shows an error + retry when the plans request fails 85ms
      → expected '' to be 'Free' // Object.is equality
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
@@ -51,7 +51,7 @@ AssertionError: expected '' to be 'Free' // Object.is equality
 
  Test Files  1 failed (1)
       Tests  2 failed | 8 passed (10)
-   Start at  12:32:34
-   Duration  1.09s (transform 171ms, setup 0ms, collect 185ms, tests 374ms, environment 220ms, prepare 98ms)
+   Start at  12:35:57
+   Duration  1.11s (transform 158ms, setup 0ms, collect 167ms, tests 397ms, environment 202ms, prepare 119ms)
 
  ELIFECYCLE  Test failed. See above for more details.
