@@ -1,21 +1,15 @@
 {
-  "generatedAt": "2026-09-24T17:13:39.598Z",
-  "gitCommit": "93ff22774421e79f3ce933d430a966ddf2bd7429",
+  "generatedAt": "2026-09-24T17:14:22.035Z",
+  "gitCommit": "aa2eb7cd50f016c08f8f8c41f7f1aa7d3a994154",
   "channel": "stable",
   "packageCount": 18,
   "versions": [
     "1.2.0"
   ],
-  "ok": false,
-  "errorCount": 1,
+  "ok": true,
+  "errorCount": 0,
   "warningCount": 0,
-  "findings": [
-    {
-      "level": "error",
-      "pkg": "(release set)",
-      "message": "public packages are 1.2.0 but --release-version demands 1.0.0"
-    }
-  ],
+  "findings": [],
   "packages": [
     {
       "name": "@streetui/cli",

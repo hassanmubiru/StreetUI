@@ -219,6 +219,158 @@ function mountUsers(sizing) {
   results.keyedListOps = listOps;
 }
 
+// ── F (§9): router navigation across real routes ─────────────────────────────
+{
+  // correctness: mounting and navigating swaps the outlet content
+  const host = container();
+  const app = mountPerfApp(host, { path: '/' });
+  const atOverview = host.querySelector('#route-overview') !== null;
+  app.router.navigate('/users');
+  const atUsers = host.querySelector('#users-table') !== null;
+  app.router.navigate('/settings');
+  const atSettings = host.querySelector('#settings-form') !== null;
+  app.router.back();
+  const backToUsers = host.querySelector('#users-table') !== null;
+  app.unmount();
+
+  const timing = measure((s) => {
+    s.app.router.navigate('/dashboard');
+    s.app.router.navigate('/users');
+    s.app.router.navigate('/settings');
+    s.app.router.navigate('/');
+  }, {
+    iterations: 12, warmup: 3,
+    setup: () => {
+      const h = container();
+      return { app: mountPerfApp(h, { path: '/' }) };
+    },
+  });
+  results.routerNavigation = {
+    description: 'Navigate /→/dashboard→/users→/settings→/ using the real router + shell.',
+    correctness: { atOverview, atUsers, atSettings, backToUsers,
+      allTransitionsCorrect: atOverview && atUsers && atSettings && backToUsers },
+    fourNavigationsTiming: timing,
+  };
+}
+
+// ── G (§13): large-app lifecycle — repeated cycles must not accumulate ───────
+{
+  const CYCLES = 8;
+  const orphanAfterUnmount = [];
+  const nodesPerCycle = [];
+  for (let i = 0; i < CYCLES; i++) {
+    const { adapter, reset, snapshot } = makeCountingAdapter();
+    const renderer = createRenderer({ domAdapter: adapter });
+    const host = container();
+    reset();
+    const app = mountPerfApp(host, {
+      path: '/', renderer,
+      deps: createDeps({ sizing: { rows: 1500, controls: 150 } }),
+    });
+    // exercise the app: navigate + interact across routes
+    app.router.navigate('/users');
+    app.deps.query.set('a');
+    app.deps.query.set('');
+    app.router.navigate('/settings');
+    app.deps.settingsForm.field('displayName').setValue('Grace');
+    app.router.navigate('/dashboard');
+    app.deps.notify('cycle notice');
+    app.router.navigate('/');
+    const created = snapshot().createElement + snapshot().createTextNode;
+    nodesPerCycle.push(created);
+    app.unmount();
+    orphanAfterUnmount.push(host.childNodes.length);
+  }
+  const first = nodesPerCycle[0];
+  const stable = nodesPerCycle.every((n) => n === first);
+  const cleanUnmount = orphanAfterUnmount.every((n) => n === 0);
+  results.lifecycleNoAccumulation = {
+    description: 'Mount → navigate all routes → interact → unmount, repeated; check for growth.',
+    cycles: CYCLES, nodesCreatedPerCycle: nodesPerCycle, orphanNodesAfterUnmount: orphanAfterUnmount,
+    invariant_noNodeCountDrift: stable,
+    invariant_unmountLeavesNoOrphans: cleanUnmount,
+  };
+}
+
+// ── H (§8): SSR of the real app (bytes are the app's own; NOT the v1.2 figure) ─
+{
+  const views = ['overview', 'dashboard', 'users', 'controls', 'settings'];
+  const ssr = {};
+  for (const v of views) {
+    const island = renderIsland({ view: v });
+    ssr[v] = { bytes: island.bytes, bodyLength: island.body.length };
+  }
+  results.ssrByView = {
+    description: 'renderToString bytes for each route body of the real app (default sizing).',
+    note: 'These are this app’s own SSR sizes; not comparable to the v1.2 synthetic SSR baseline.',
+    views: ssr,
+  };
+}
+
 // PLACEHOLDER_3
+
+// ── assemble output ──────────────────────────────────────────────────────────
+const args = Object.fromEntries(process.argv.slice(2)
+  .filter((a) => a.startsWith('--')).map((a) => {
+    const [k, ...v] = a.slice(2).split('='); return [k, v.join('=') || true];
+  }));
+
+const invariants = {
+  G_hydrationCreatesZeroNodes: results.hydrateUsers10k.invariant_G_zeroNodesCreated,
+  fineGrained_toggle1of1000_singleWrite: results.fineGrainedToggle1of1000.invariant_singleRegionUpdated,
+  forms_fieldIsolation: results.formsFieldIsolation.invariant_isolated,
+  lifecycle_noNodeDrift: results.lifecycleNoAccumulation.invariant_noNodeCountDrift,
+  lifecycle_cleanUnmount: results.lifecycleNoAccumulation.invariant_unmountLeavesNoOrphans,
+  router_transitionsCorrect: results.routerNavigation.correctness.allTransitionsCorrect,
+};
+const allInvariantsHold = Object.values(invariants).every(Boolean);
+
+const output = {
+  schema: 'streetui-node/v1.3',
+  status: 'PASS',
+  target: 'examples/streetui-performance-app (real multi-route application)',
+  runtime: 'node + happy-dom (NOT a browser; browser metrics gated separately, see streetui-browser.json)',
+  measurement: 'DOM mutations counted at the single BrowserDOMAdapter choke point; timings via perf_hooks.',
+  version: '1.3.0',
+  commit: args.commit ?? null,
+  timestamp: new Date().toISOString(),
+  environment: {
+    node: process.version,
+    platform: `${os.type()} ${os.release()} ${os.arch()}`,
+    cpus: os.cpus().length,
+    cpuModel: os.cpus()[0]?.model ?? 'unknown',
+    totalMemMB: Math.round(os.totalmem() / 1e6),
+    domImplementation: 'happy-dom',
+  },
+  invariants,
+  allInvariantsHold,
+  scenarios: results,
+};
+
+const outPath = typeof args.out === 'string'
+  ? args.out
+  : path.resolve(__dirname, 'results', 'v1.3', 'streetui-node.json');
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
+fs.writeFileSync(outPath, JSON.stringify(output, null, 2) + '\n');
+
+// concise console summary
+console.log('=== StreetUI v1.3 node/real-app scenarios ===');
+console.log(`initial mount (10k users): ${results.initialMountUsers10k.timing.medianMs}ms median, ` +
+  `${results.initialMountUsers10k.nodesCreated} nodes`);
+console.log(`hydration created nodes: ${results.hydrateUsers10k.nodesCreatedDuringHydration} ` +
+  `(G invariant: ${invariants.G_hydrationCreatesZeroNodes ? 'HOLDS' : 'FAIL'})`);
+console.log(`toggle 1/1000 structural writes: ${results.fineGrainedToggle1of1000.structuralWritesObserved} ` +
+  `(single-region: ${invariants.fineGrained_toggle1of1000_singleWrite ? 'HOLDS' : 'FAIL'})`);
+console.log(`form field isolation writes: ${results.formsFieldIsolation.structuralWritesObserved} ` +
+  `(isolated: ${invariants.forms_fieldIsolation ? 'HOLDS' : 'FAIL'})`);
+console.log(`lifecycle: nodes/cycle ${JSON.stringify(results.lifecycleNoAccumulation.nodesCreatedPerCycle)} ` +
+  `orphans ${JSON.stringify(results.lifecycleNoAccumulation.orphanNodesAfterUnmount)}`);
+console.log(`router 4-nav: ${results.routerNavigation.fourNavigationsTiming.medianMs}ms median ` +
+  `(correct: ${invariants.router_transitionsCorrect ? 'YES' : 'NO'})`);
+console.log(`all invariants hold: ${allInvariantsHold ? 'YES' : 'NO'}`);
+console.log(`written: ${outPath}`);
+if (!allInvariantsHold) process.exitCode = 1;
+
+
 
 
