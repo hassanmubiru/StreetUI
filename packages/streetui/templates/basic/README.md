@@ -35,5 +35,5 @@ __PROJECT_NAME__/
 └── package.json
 ```
 
-> **Note:** the `@streetui/*` packages are not yet published to npm. In this
-> preview, install them from the StreetUI monorepo (workspace linking).
+This project depends on a single package — `streetui` — and all of its source
+imports from `"streetui"`.

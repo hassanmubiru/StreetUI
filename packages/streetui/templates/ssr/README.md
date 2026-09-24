@@ -42,6 +42,5 @@ __PROJECT_NAME__/
 `src/main.ts` reads that snapshot in the browser and hydrates the existing DOM so
 the app becomes interactive without re-rendering.
 
-> **Note:** the `@streetui/*` packages are not yet published to npm. In this
-> preview, install them from the StreetUI monorepo (workspace linking) — see the
-> StreetUI docs for details.
+This project depends on a single package — `streetui` — and all of its source
+imports from `"streetui"`.
