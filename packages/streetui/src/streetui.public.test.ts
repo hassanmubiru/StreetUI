@@ -119,7 +119,7 @@ describe('streetui — DSL + compiler + SSR', () => {
 
 describe('streetui — hydration (SSR markup adopted, then reactive)', () => {
   it('hydrates server HTML in place and stays reactive', async () => {
-    const build = (count: ReturnType<typeof signal<number>>) => {
+    const build = (count: Signal<number>) => {
       const app = streetui.app({ name: 'hydrate-app' });
       app.page('home', (page) => {
         page.section('main', (s) => {
