@@ -40,15 +40,21 @@ export function hydrateGraph(ctx: RenderContext): NodeInstance {
   // exactly as in mountNode.
   const instance = new NodeInstance(root, ctx.container);
   ctx.instances.set(root.id, instance);
-  hydrateChildren(ctx, root, instance, ctx.container);
+  hydrateChildren(ctx, root, instance, ctx.container, 'app');
   return instance;
 }
 
 /**
  * Adopt `domNode` as the live element for `graphNode` and attach behavior.
  * The caller has already verified `domNode` matches `graphNode` (right tag).
+ * `path` is the human-readable position used only for dev diagnostics.
  */
-function hydrateNode(ctx: RenderContext, graphNode: GraphNode, domNode: Element): NodeInstance {
+function hydrateNode(
+  ctx: RenderContext,
+  graphNode: GraphNode,
+  domNode: Element,
+  path: string,
+): NodeInstance {
   const { dom, graph } = ctx;
 
   switch (graphNode.type) {
@@ -115,7 +121,7 @@ function hydrateNode(ctx: RenderContext, graphNode: GraphNode, domNode: Element)
       // the browser drives subsequent updates against the adopted instances.
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
-      hydrateChildren(ctx, graphNode, instance, domNode);
+      hydrateChildren(ctx, graphNode, instance, domNode, path);
       wireReactiveList(ctx, graphNode, instance, domNode);
       return instance;
     }
@@ -136,7 +142,7 @@ function hydrateNode(ctx: RenderContext, graphNode: GraphNode, domNode: Element)
       if (graphNode.getProp('_hydrationBoundary') === true) {
         return instance;
       }
-      hydrateChildren(ctx, graphNode, instance, domNode);
+      hydrateChildren(ctx, graphNode, instance, domNode, path);
       return instance;
     }
   }
@@ -156,13 +162,16 @@ function hydrateChildren(
   parentGraphNode: GraphNode,
   parentInstance: NodeInstance,
   parentDom: Element,
+  parentPath: string,
 ): void {
   const expected = parentGraphNode.children;
   const actual = elementChildren(ctx, parentDom);
   let cursor = 0;
 
-  for (const childNode of expected) {
+  for (let i = 0; i < expected.length; i++) {
+    const childNode = expected[i]!;
     const want = expectedTag(ctx, childNode);
+    const childPath = `${parentPath} / ${childNode.type}[${i}]`;
     const actualEl = actual[cursor];
 
     if (
@@ -171,7 +180,7 @@ function hydrateChildren(
       ctx.dom.tagName(actualEl) === want
     ) {
       // Match — adopt the existing element.
-      const inst = hydrateNode(ctx, childNode, actualEl);
+      const inst = hydrateNode(ctx, childNode, actualEl, childPath);
       parentInstance.addChild(inst);
       cursor++;
     } else {
@@ -182,16 +191,67 @@ function hydrateChildren(
       parentInstance.addChild(inst);
       if (actualEl !== undefined) {
         // Drop the mismatched element that the fresh node replaces.
+        const found = ctx.dom.isElement(actualEl) ? ctx.dom.tagName(actualEl) : null;
+        reportHydrationDiagnostic(ctx, {
+          type: 'tag-mismatch',
+          expected: want,
+          found,
+          path: childPath,
+          nodeId: childNode.id,
+          nodeType: childNode.type,
+          action: 'mounted fresh subtree in place',
+        });
         ctx.dom.removeChild(parentDom, actualEl);
         cursor++;
+      } else {
+        reportHydrationDiagnostic(ctx, {
+          type: 'missing-element',
+          expected: want,
+          found: null,
+          path: childPath,
+          nodeId: childNode.id,
+          nodeType: childNode.type,
+          action: 'mounted fresh subtree',
+        });
       }
     }
   }
 
   // Remove any surplus server elements the graph no longer expects.
   for (let i = cursor; i < actual.length; i++) {
-    ctx.dom.removeChild(parentDom, actual[i]!);
+    const surplus = actual[i]!;
+    reportHydrationDiagnostic(ctx, {
+      type: 'surplus-element',
+      expected: null,
+      found: ctx.dom.isElement(surplus) ? ctx.dom.tagName(surplus) : null,
+      path: `${parentPath} / [surplus ${i}]`,
+      nodeId: null,
+      nodeType: null,
+      action: 'removed surplus server element',
+    });
+    ctx.dom.removeChild(parentDom, surplus);
   }
+}
+
+/**
+ * Emit a hydration diagnostic through the (optional) sink. When no sink is
+ * attached this is a single cheap `undefined` check — the production default.
+ */
+function reportHydrationDiagnostic(
+  ctx: RenderContext,
+  d: {
+    type: 'tag-mismatch' | 'missing-element' | 'surplus-element';
+    expected: string | null;
+    found: string | null;
+    path: string;
+    nodeId: string | null;
+    nodeType: string | null;
+    action: string;
+  },
+): void {
+  const sink = ctx.hydrationDiagnostics;
+  if (sink === undefined) return;
+  sink.report({ ...d, message: formatHydrationDiagnostic(d) });
 }
 
 /** Mount a fresh subtree for `node` and splice it before `ref` (or append). */
