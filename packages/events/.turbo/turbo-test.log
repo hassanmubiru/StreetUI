@@ -6,10 +6,10 @@
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/events
 
  ✓ src/public-api.stability.test.ts  (1 test) 5ms
- ✓ src/events.test.ts  (15 tests) 12ms
+ ✓ src/events.test.ts  (15 tests) 13ms
 
  Test Files  2 passed (2)
       Tests  16 passed (16)
-   Start at  20:09:54
-   Duration  534ms (transform 117ms, setup 0ms, collect 143ms, tests 18ms, environment 0ms, prepare 262ms)
+   Start at  20:11:20
+   Duration  448ms (transform 118ms, setup 0ms, collect 149ms, tests 18ms, environment 1ms, prepare 249ms)
 

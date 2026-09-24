@@ -6,12 +6,12 @@
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/core
 
  ✓ src/a11y-ids.test.ts  (4 tests) 8ms
- ✓ src/observability.test.ts  (6 tests) 11ms
- ✓ src/public-api.stability.test.ts  (3 tests) 4ms
- ✓ src/core.test.ts  (28 tests) 17ms
+ ✓ src/observability.test.ts  (6 tests) 7ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 8ms
+ ✓ src/core.test.ts  (28 tests) 12ms
 
  Test Files  4 passed (4)
       Tests  41 passed (41)
-   Start at  20:10:06
-   Duration  557ms (transform 168ms, setup 0ms, collect 335ms, tests 40ms, environment 2ms, prepare 498ms)
+   Start at  20:11:19
+   Duration  519ms (transform 205ms, setup 0ms, collect 396ms, tests 35ms, environment 2ms, prepare 506ms)
 

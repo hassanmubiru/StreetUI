@@ -5,31 +5,31 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/cli
 
- ✓ src/templates.test.ts  (8 tests) 5ms
- ✓ src/env.test.ts  (5 tests) 12ms
- ✓ src/args.test.ts  (10 tests) 24ms
- ✓ src/diagnostics.test.ts  (7 tests) 19ms
- ✓ src/create.test.ts  (6 tests) 100ms
- ✓ src/public-api.stability.test.ts  (3 tests) 9ms
- ✓ src/cli.test.ts  (5 tests) 8ms
+ ✓ src/args.test.ts  (10 tests) 7ms
+ ✓ src/diagnostics.test.ts  (7 tests) 9ms
+ ✓ src/templates.test.ts  (8 tests) 13ms
+ ✓ src/env.test.ts  (5 tests) 9ms
+ ✓ src/create.test.ts  (6 tests) 81ms
+ ✓ src/cli.test.ts  (5 tests) 7ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 13ms
 stderr | src/serve.test.ts > serve — error disclosure boundary > production hides the stack and returns a generic 500
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-rXxM9E/server.mjs:1:32)
+    at render (/tmp/streetui-serve-rwDkbB/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
 stderr | src/serve.test.ts > serve — error disclosure boundary > dev exposes the error detail for debugging
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-3ennbd/server.mjs:1:32)
+    at render (/tmp/streetui-serve-C6Q0PK/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
- ✓ src/serve.test.ts  (8 tests) 363ms
- ✓ src/e2e.test.ts  (1 test) 437ms
-   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 431ms
+ ✓ src/serve.test.ts  (8 tests) 372ms
+ ✓ src/e2e.test.ts  (1 test) 476ms
+   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 469ms
 
  Test Files  9 passed (9)
       Tests  53 passed (53)
-   Start at  20:10:08
-   Duration  1.07s (transform 725ms, setup 0ms, collect 1.34s, tests 979ms, environment 4ms, prepare 1.27s)
+   Start at  20:11:17
+   Duration  1.10s (transform 912ms, setup 0ms, collect 1.51s, tests 988ms, environment 4ms, prepare 1.29s)
 

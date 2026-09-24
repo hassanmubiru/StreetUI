@@ -5,11 +5,11 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/i18n
 
- ✓ src/public-api.stability.test.ts  (3 tests) 11ms
- ✓ src/i18n.test.ts  (14 tests) 19ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 9ms
+ ✓ src/i18n.test.ts  (14 tests) 18ms
 
  Test Files  2 passed (2)
       Tests  17 passed (17)
-   Start at  20:10:15
-   Duration  459ms (transform 99ms, setup 0ms, collect 145ms, tests 30ms, environment 1ms, prepare 231ms)
+   Start at  20:11:36
+   Duration  508ms (transform 135ms, setup 0ms, collect 188ms, tests 27ms, environment 1ms, prepare 228ms)
 
