@@ -51,6 +51,12 @@ interface RenderHandle {
 }
 interface StreetRenderer {
     mount(application: CompiledApplication, container: Element): RenderHandle;
+    /**
+     * Optional: attach behavior to server-rendered HTML already present in
+     * `container` instead of recreating it. Renderers that cannot hydrate may
+     * omit this; callers fall back to `mount`.
+     */
+    hydrate?(application: CompiledApplication, container: Element): RenderHandle;
 }
 
 /**
@@ -88,6 +94,14 @@ declare class Runtime {
      */
     mount(compiled: CompiledApplication, container: Element): MountedApplication;
     unmount(): void;
+    /**
+     * Hydrate a container that already holds server-rendered HTML for this
+     * application. Delegates to the renderer's `hydrate` (adopting the existing
+     * DOM instead of recreating it) and falls back to `mount` for renderers that
+     * cannot hydrate. Signal binding is identical to `mount`, so the live client
+     * lifecycle is established the same way.
+     */
+    hydrate(compiled: CompiledApplication, container: Element): MountedApplication;
     /**
      * Walk the graph and subscribe to all signal-bound nodes.
      * When a signal changes, schedule a renderer update for that node.

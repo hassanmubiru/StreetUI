@@ -27,17 +27,43 @@ __export(index_exports, {
   DiagnosticError: () => DiagnosticError,
   Environment: () => Environment,
   Lifecycle: () => Lifecycle,
+  StreetFrameworkError: () => StreetFrameworkError,
+  a11yIds: () => a11yIds,
+  consoleDiagnosticSink: () => consoleDiagnosticSink,
   createApplication: () => createApplication,
   createNodeId: () => createNodeId,
   environment: () => environment,
   formatDiagnostic: () => formatDiagnostic,
+  formatDiagnosticContext: () => formatDiagnosticContext,
+  frameworkError: () => frameworkError,
   generateApplicationId: () => generateApplicationId,
   generateNodeId: () => generateNodeId,
   nextId: () => nextId,
   nodeIdPrefix: () => nodeIdPrefix,
-  resetIdCounter: () => resetIdCounter
+  reportDiagnostic: () => reportDiagnostic,
+  resetIdCounter: () => resetIdCounter,
+  toIdToken: () => toIdToken
 });
 module.exports = __toCommonJS(index_exports);
+
+// src/a11y-ids.ts
+var UNSAFE = /[^A-Za-z0-9_-]+/g;
+function toIdToken(base) {
+  const token = base.trim().replace(UNSAFE, "-").replace(/^-+|-+$/g, "");
+  return token.length > 0 ? token : "field";
+}
+function a11yIds(base) {
+  const token = toIdToken(base);
+  return {
+    base: token,
+    input: `${token}-input`,
+    label: `${token}-label`,
+    description: `${token}-description`,
+    error: `${token}-error`,
+    title: `${token}-title`,
+    id: (suffix) => `${token}-${toIdToken(suffix)}`
+  };
+}
 
 // src/identity.ts
 var _counter = 0;
@@ -276,6 +302,46 @@ var BaseNode = class {
     this.metadata = { createdAt: Date.now() };
   }
 };
+
+// src/observability.ts
+function formatDiagnosticContext(context) {
+  if (context === void 0) return "";
+  const parts = [];
+  if (context.package !== void 0) parts.push(`package=${context.package}`);
+  if (context.operation !== void 0) parts.push(`operation=${context.operation}`);
+  if (context.nodeId !== void 0) parts.push(`node=${context.nodeId}`);
+  if (context.route !== void 0) parts.push(`route=${context.route}`);
+  if (context.resource !== void 0) parts.push(`resource=${context.resource}`);
+  return parts.length > 0 ? ` [${parts.join(", ")}]` : "";
+}
+var StreetFrameworkError = class extends Error {
+  context;
+  constructor(message, context) {
+    super(`${message}${formatDiagnosticContext(context)}`);
+    this.name = "StreetFrameworkError";
+    this.context = context ?? void 0;
+  }
+};
+function frameworkError(message, context) {
+  return new StreetFrameworkError(message, context);
+}
+function reportDiagnostic(sink, level, message, context) {
+  if (sink === void 0) return;
+  const fn = sink[level];
+  if (typeof fn !== "function") return;
+  try {
+    fn.call(sink, message, context);
+  } catch {
+  }
+}
+function consoleDiagnosticSink(logger = console) {
+  return {
+    debug: (m, c) => logger.debug?.(`${m}${formatDiagnosticContext(c)}`),
+    info: (m, c) => logger.info?.(`${m}${formatDiagnosticContext(c)}`),
+    warn: (m, c) => logger.warn?.(`${m}${formatDiagnosticContext(c)}`),
+    error: (m, c) => logger.error?.(`${m}${formatDiagnosticContext(c)}`)
+  };
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Application,
@@ -285,14 +351,21 @@ var BaseNode = class {
   DiagnosticError,
   Environment,
   Lifecycle,
+  StreetFrameworkError,
+  a11yIds,
+  consoleDiagnosticSink,
   createApplication,
   createNodeId,
   environment,
   formatDiagnostic,
+  formatDiagnosticContext,
+  frameworkError,
   generateApplicationId,
   generateNodeId,
   nextId,
   nodeIdPrefix,
-  resetIdCounter
+  reportDiagnostic,
+  resetIdCounter,
+  toIdToken
 });
 //# sourceMappingURL=index.cjs.map

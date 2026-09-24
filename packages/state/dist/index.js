@@ -70,6 +70,14 @@ var Signal = class {
     for (const sub of [...this._subscribers]) sub(value);
     for (const consumer of [...this._consumers]) consumer._invalidate();
   }
+  /**
+   * @internal DevTools inspection only. The number of live observers
+   * (direct subscribers plus derived/effect consumers). Read-only; never
+   * mutates reactive state.
+   */
+  _observerCount() {
+    return this._subscribers.size + this._consumers.size;
+  }
 };
 var DerivedSignal = class {
   _value = void 0;
@@ -129,6 +137,13 @@ var DerivedSignal = class {
     this._subscribers.clear();
     this._consumers.clear();
   }
+  /**
+   * @internal DevTools inspection only. Live observers (subscribers plus
+   * downstream consumers). Read-only.
+   */
+  _observerCount() {
+    return this._subscribers.size + this._consumers.size;
+  }
 };
 var Effect = class {
   _fn;
@@ -185,6 +200,13 @@ function batch(fn) {
 function isBatching() {
   return _batchDepth > 0;
 }
+function signalKind(source) {
+  return source instanceof DerivedSignal ? "derived" : "writable";
+}
+function observerCount(source) {
+  const maybe = source;
+  return typeof maybe._observerCount === "function" ? maybe._observerCount() : void 0;
+}
 
 // src/store.ts
 var Store = class {
@@ -235,6 +257,84 @@ var Store = class {
 function createStore(initial) {
   return new Store(initial);
 }
+
+// src/resource.ts
+function isAbortError(err) {
+  return err instanceof Error && err.name === "AbortError" || typeof DOMException !== "undefined" && err instanceof DOMException && err.name === "AbortError";
+}
+function resource(loader, options = {}) {
+  const hasInitial = options.initialData !== void 0 || options.initialError !== void 0 || options.initialStatus !== void 0;
+  const seededStatus = options.initialStatus ?? (options.initialData !== void 0 ? "success" : options.initialError !== void 0 ? "error" : "idle");
+  const status = signal(seededStatus);
+  const data = signal(options.initialData);
+  const error = signal(options.initialError);
+  const loading = derived(() => status.get() === "loading");
+  const isRefetching = derived(() => status.get() === "loading" && data.get() !== void 0);
+  let disposed = false;
+  let runId = 0;
+  let controller = null;
+  const load = async () => {
+    if (disposed) return;
+    controller?.abort();
+    const myRun = ++runId;
+    const myController = new AbortController();
+    controller = myController;
+    batch(() => {
+      error.set(void 0);
+      status.set("loading");
+    });
+    try {
+      const result = await loader({ signal: myController.signal });
+      if (disposed || myRun !== runId) return;
+      batch(() => {
+        data.set(result);
+        error.set(void 0);
+        status.set("success");
+      });
+    } catch (err) {
+      if (disposed || myRun !== runId) return;
+      if (isAbortError(err)) return;
+      batch(() => {
+        error.set(err);
+        status.set("error");
+      });
+    }
+  };
+  const refetch = () => load();
+  const watchUnsubs = [];
+  if (options.watch !== void 0) {
+    for (const dep of options.watch) {
+      watchUnsubs.push(
+        dep.subscribe(() => {
+          if (!disposed) void load();
+        })
+      );
+    }
+  }
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    controller?.abort();
+    controller = null;
+    for (const unsub of watchUnsubs) unsub();
+    watchUnsubs.length = 0;
+  };
+  if (options.onCleanup !== void 0) {
+    options.onCleanup(dispose);
+  }
+  if (options.immediate === true || options.immediate !== false && !hasInitial) {
+    void load();
+  }
+  return {
+    status,
+    data,
+    error,
+    loading,
+    isRefetching,
+    refetch,
+    dispose
+  };
+}
 export {
   DerivedSignal,
   Signal,
@@ -244,6 +344,9 @@ export {
   derived,
   effect,
   isBatching,
-  signal
+  observerCount,
+  resource,
+  signal,
+  signalKind
 };
 //# sourceMappingURL=index.js.map

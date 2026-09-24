@@ -15,10 +15,28 @@ interface Job {
     readonly priority: Priority;
     readonly fn: () => void;
 }
+/**
+ * Optional error-reporting hook (v0.9 §26/§27). Structurally compatible with
+ * `@streetui/core`'s `DiagnosticSink` (the `error` method) so an application can
+ * route swallowed scheduler-job failures through its own logger instead of the
+ * default `console.error`. Kept as a local structural type so the scheduler
+ * stays dependency-free; no network, no telemetry. When unset, behaviour is
+ * exactly as before.
+ */
+interface SchedulerDiagnostics {
+    error?(message: string, context?: unknown): void;
+}
 declare class Scheduler {
     private readonly _queue;
     private _flushScheduled;
     private _flushing;
+    private _diagnostics;
+    /**
+     * Install an optional diagnostic sink for swallowed job errors. Pass
+     * `undefined` to restore the default `console.error` reporting. Additive and
+     * opt-in — the scheduler never sends anything anywhere on its own.
+     */
+    setDiagnostics(sink: SchedulerDiagnostics | undefined): void;
     /** Total jobs currently queued. */
     get size(): number;
     /** True if a flush has been scheduled but not yet executed. */
@@ -52,4 +70,4 @@ declare function scheduleImmediate(key: string, fn: () => void): void;
 /** Convenience: flush the global scheduler synchronously. */
 declare function flushSync(): void;
 
-export { type Job, type Priority, Scheduler, flushSync, scheduleImmediate, scheduleUpdate, scheduler };
+export { type Job, type Priority, Scheduler, type SchedulerDiagnostics, flushSync, scheduleImmediate, scheduleUpdate, scheduler };

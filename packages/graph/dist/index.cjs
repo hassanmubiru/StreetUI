@@ -169,9 +169,29 @@ var ApplicationGraph = class {
   }
   _removeFromIndex(node) {
     this._nodeIndex.delete(node.id);
+    this._unregisterNodeHandlers(node);
     for (const child of node.children) {
       this._removeFromIndex(child);
     }
+  }
+  /**
+   * Remove every handler-registry entry owned by a single node. A node owns:
+   *  - one entry per event descriptor (its `handlerKey`),
+   *  - one `__signal__<signalId>` entry per state ref (signalIds are namespaced
+   *    by node id, so they are never shared between nodes), and
+   *  - a `__listbuild__<id>` entry if it is a reactive-list.
+   * Called for every node in a detached subtree so removing list items (or
+   * discarding freshly-built-but-unadopted item subtrees) leaves no stale
+   * registrations behind.
+   */
+  _unregisterNodeHandlers(node) {
+    for (const event of node.events) {
+      this.handlers.delete(event.handlerKey);
+    }
+    for (const ref of node.stateRefs) {
+      this.handlers.delete(`__signal__${ref.signalId}`);
+    }
+    this.handlers.delete(`__listbuild__${node.id}`);
   }
   // ── Handler registry ──────────────────────────────────────────────────────
   registerHandler(key, fn) {
@@ -179,6 +199,14 @@ var ApplicationGraph = class {
   }
   getHandler(key) {
     return this.handlers.get(key);
+  }
+  /** True if a handler is currently registered under `key`. Inspection helper. */
+  hasHandler(key) {
+    return this.handlers.has(key);
+  }
+  /** Number of currently-registered handlers. Inspection helper. */
+  get handlerCount() {
+    return this.handlers.size;
   }
   // ── Lookup ────────────────────────────────────────────────────────────────
   findById(id) {

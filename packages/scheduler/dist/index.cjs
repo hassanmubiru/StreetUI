@@ -38,6 +38,15 @@ var Scheduler = class {
   _queue = /* @__PURE__ */ new Map();
   _flushScheduled = false;
   _flushing = false;
+  _diagnostics = void 0;
+  /**
+   * Install an optional diagnostic sink for swallowed job errors. Pass
+   * `undefined` to restore the default `console.error` reporting. Additive and
+   * opt-in — the scheduler never sends anything anywhere on its own.
+   */
+  setDiagnostics(sink) {
+    this._diagnostics = sink;
+  }
   /** Total jobs currently queued. */
   get size() {
     return this._queue.size;
@@ -90,7 +99,11 @@ var Scheduler = class {
         try {
           job.fn();
         } catch (err) {
-          console.error(`[Scheduler] Job "${job.key}" threw:`, err);
+          if (this._diagnostics?.error) {
+            this._diagnostics.error(`Scheduler job "${job.key}" threw`, err);
+          } else {
+            console.error(`[Scheduler] Job "${job.key}" threw:`, err);
+          }
         }
       }
     } finally {

@@ -27,11 +27,14 @@ __export(index_exports, {
   PageBuilderImpl: () => PageBuilderImpl,
   SectionBuilderImpl: () => SectionBuilderImpl,
   StreetApp: () => StreetApp,
+  reactiveListItemKey: () => reactiveListItemKey,
+  reactiveListItemSignature: () => reactiveListItemSignature,
   streetui: () => streetui
 });
 module.exports = __toCommonJS(index_exports);
 
 // src/builders.ts
+var import_state = require("@streetui/state");
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -44,12 +47,49 @@ function bindValue(graph, node, propKey, value) {
   }
   return value;
 }
+function applyA11yProps(props, options) {
+  if (options.role !== void 0) props["role"] = options.role;
+  if (options.tabIndex !== void 0) props["tabindex"] = String(options.tabIndex);
+  if (options.ariaLabel !== void 0) props["aria-label"] = options.ariaLabel;
+  if (options.ariaLabelledBy !== void 0) props["aria-labelledby"] = options.ariaLabelledBy;
+  if (options.ariaDescribedBy !== void 0) props["aria-describedby"] = options.ariaDescribedBy;
+  if (options.ariaExpanded !== void 0) props["aria-expanded"] = String(options.ariaExpanded);
+  if (options.ariaControls !== void 0) props["aria-controls"] = options.ariaControls;
+  if (options.ariaHidden !== void 0) props["aria-hidden"] = String(options.ariaHidden);
+  if (options.ariaLive !== void 0) props["aria-live"] = options.ariaLive;
+  if (options.ariaCurrent !== void 0) props["aria-current"] = String(options.ariaCurrent);
+  if (options.ariaInvalid !== void 0) props["aria-invalid"] = String(options.ariaInvalid);
+  if (options.ariaRequired !== void 0) props["aria-required"] = String(options.ariaRequired);
+}
 function containerProps(options) {
   const props = {};
   if (options.class !== void 0) props["class"] = options.class;
   if (options.id !== void 0) props["id"] = options.id;
   if (options.key !== void 0) props["key"] = options.key;
+  applyA11yProps(props, options);
   return props;
+}
+function itemIdentity(item, index) {
+  if (item !== null && typeof item === "object") {
+    const obj = item;
+    if ("id" in obj) return `id:${String(obj["id"])}`;
+    if ("key" in obj) return `key:${String(obj["key"])}`;
+    return `idx:${index}`;
+  }
+  return `val:${String(item)}`;
+}
+function itemValueSignature(item) {
+  try {
+    return JSON.stringify(item) ?? String(item);
+  } catch {
+    return String(item);
+  }
+}
+function reactiveListItemSignature(item) {
+  return itemValueSignature(item);
+}
+function reactiveListItemKey(item, index) {
+  return itemIdentity(item, index);
 }
 var ContentBuilderBase = class {
   constructor(_node, _graph) {
@@ -57,14 +97,11 @@ var ContentBuilderBase = class {
     this._graph = _graph;
   }
   heading(text, options = {}) {
-    const nodeOpts = {
-      props: {
-        level: options.level ?? 1,
-        ...options.class !== void 0 ? { class: options.class } : {},
-        ...options.id !== void 0 ? { id: options.id } : {}
-      }
-    };
-    const node = this._graph.createNode("heading", { parent: this._node, ...nodeOpts });
+    const props = { level: options.level ?? 1 };
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("heading", { parent: this._node, props });
     const resolved = bindValue(this._graph, node, "text", text);
     node.setProp("text", resolved);
   }
@@ -72,6 +109,7 @@ var ContentBuilderBase = class {
     const props = {};
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
     const node = this._graph.createNode("text", { parent: this._node, props });
     const resolved = bindValue(this._graph, node, "text", content);
     node.setProp("text", resolved);
@@ -80,6 +118,7 @@ var ContentBuilderBase = class {
     const props = {};
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
     const node = this._graph.createNode("button", { parent: this._node, props });
     const resolved = bindValue(this._graph, node, "label", label);
     node.setProp("label", resolved);
@@ -99,23 +138,27 @@ var ContentBuilderBase = class {
     if (options.placeholder !== void 0) props["placeholder"] = options.placeholder;
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
     const nodeOpts = {
       props,
       parent: this._node
     };
     if (options.id !== void 0) nodeOpts.key = options.id;
     const node = this._graph.createNode("input", nodeOpts);
-    if (options.value !== void 0) {
-      const resolved = bindValue(this._graph, node, "value", options.value);
+    const bindSignal = options.bind;
+    const valueBindable = bindSignal !== void 0 ? bindSignal : options.value;
+    const inputHandler = bindSignal !== void 0 ? (v) => bindSignal.set(v) : options.onInput;
+    if (valueBindable !== void 0) {
+      const resolved = bindValue(this._graph, node, "value", valueBindable);
       node.setProp("value", resolved);
     }
     if (options.disabled !== void 0) {
       const resolved = bindValue(this._graph, node, "disabled", options.disabled);
       node.setProp("disabled", resolved);
     }
-    if (options.onInput !== void 0) {
+    if (inputHandler !== void 0) {
       const handlerKey = `input:${node.id}`;
-      this._graph.registerHandler(handlerKey, options.onInput);
+      this._graph.registerHandler(handlerKey, inputHandler);
       node.addEvent({ type: "input", handlerKey });
     }
     if (options.onChange !== void 0) {
@@ -133,6 +176,7 @@ var ContentBuilderBase = class {
     if (options.height !== void 0) props["height"] = options.height;
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
     const nodeOpts = {
       props,
       parent: this._node
@@ -147,6 +191,7 @@ var ContentBuilderBase = class {
     };
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
     const node = this._graph.createNode("link", { parent: this._node, props });
     const resolved = bindValue(this._graph, node, "label", label);
     node.setProp("label", resolved);
@@ -182,6 +227,36 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
     });
     builder(new ListBuilderImpl(node, this._graph));
   }
+  listOf(key, items, renderItem, options = {}) {
+    const graph = this._graph;
+    const node = graph.createNode("reactive-list", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    const signalId = `${node.id}:items`;
+    node.stateRefs.push({ signalId, propKey: "items" });
+    graph.registerHandler(`__signal__${signalId}`, items);
+    const buildItem = (item, index) => {
+      const itemKey = reactiveListItemKey(item, index);
+      const itemNode = graph.createNode("list-item", {
+        key: itemKey,
+        props: { key: itemKey, _sig: reactiveListItemSignature(item) }
+      });
+      renderItem(item, index, new ContainerBuilderImpl(itemNode, graph));
+      return itemNode;
+    };
+    const buildAll = (raw) => {
+      const arr = Array.isArray(raw) ? raw : [];
+      return arr.map((item, i) => buildItem(item, i));
+    };
+    graph.registerHandler(`__listbuild__${node.id}`, buildAll);
+    const current = isSignal(items) ? items.peek() : items;
+    const initial = Array.isArray(current) ? current : [];
+    initial.forEach((item, i) => {
+      node.appendChild(buildItem(item, i));
+    });
+  }
   form(key, builder, options = {}) {
     const props = containerProps(options);
     const node = this._graph.createNode("form", {
@@ -195,6 +270,76 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       node.addEvent({ type: "submit", handlerKey });
     }
     builder(new FormBuilderImpl(node, this._graph));
+  }
+  when(condition, builder, elseBuilder) {
+    const graph = this._graph;
+    const node = graph.createNode("conditional", {
+      parent: this._node,
+      props: containerProps({})
+    });
+    const buildBranch = (build, tag) => {
+      const branchKey = `when-${tag}:${node.id}`;
+      const branch = graph.createNode("container", {
+        key: branchKey,
+        props: { key: branchKey }
+      });
+      build(new ContainerBuilderImpl(branch, graph));
+      return branch;
+    };
+    const buildAll = (raw) => {
+      if (raw) return [buildBranch(builder, "then")];
+      return elseBuilder !== void 0 ? [buildBranch(elseBuilder, "else")] : [];
+    };
+    if (isSignal(condition)) {
+      const signalId = `${node.id}:items`;
+      node.stateRefs.push({ signalId, propKey: "items" });
+      graph.registerHandler(`__signal__${signalId}`, condition);
+      graph.registerHandler(`__listbuild__${node.id}`, buildAll);
+      const current = condition.peek();
+      for (const child of buildAll(current)) node.appendChild(child);
+    } else {
+      for (const child of buildAll(condition)) node.appendChild(child);
+    }
+  }
+  errorBoundary(id, builder, options) {
+    const sources = options.source === void 0 ? [] : Array.isArray(options.source) ? [...options.source] : [options.source];
+    const localError = (0, import_state.signal)(void 0);
+    const retryNonce = (0, import_state.signal)(0);
+    const readError = () => {
+      const local = localError.peek();
+      if (local !== void 0 && local !== null) return local;
+      for (const s of sources) {
+        const e = s.peek();
+        if (e !== void 0 && e !== null) return e;
+      }
+      return void 0;
+    };
+    const hasError = (0, import_state.derived)(() => {
+      retryNonce.get();
+      localError.get();
+      for (const s of sources) s.get();
+      return readError() !== void 0;
+    });
+    const retry = () => {
+      localError.set(void 0);
+      options.onRetry?.();
+      retryNonce.update((n) => n + 1);
+    };
+    this.container(id, (c) => {
+      c.when(
+        hasError,
+        // Error state → fallback.
+        (fb) => options.fallback(fb, readError(), retry),
+        // Healthy state → body, guarded against synchronous build throws.
+        (body) => {
+          try {
+            builder(body);
+          } catch (err) {
+            queueMicrotask(() => localError.set(err));
+          }
+        }
+      );
+    }, { id });
   }
 };
 var SectionBuilderImpl = class extends ContainerBuilderBase {
@@ -269,6 +414,8 @@ var streetui = {
   PageBuilderImpl,
   SectionBuilderImpl,
   StreetApp,
+  reactiveListItemKey,
+  reactiveListItemSignature,
   streetui
 });
 //# sourceMappingURL=index.cjs.map

@@ -91,8 +91,23 @@ declare class ApplicationGraph {
     attachNode(node: GraphNode, parent: GraphNode): void;
     detachNode(node: GraphNode): void;
     private _removeFromIndex;
+    /**
+     * Remove every handler-registry entry owned by a single node. A node owns:
+     *  - one entry per event descriptor (its `handlerKey`),
+     *  - one `__signal__<signalId>` entry per state ref (signalIds are namespaced
+     *    by node id, so they are never shared between nodes), and
+     *  - a `__listbuild__<id>` entry if it is a reactive-list.
+     * Called for every node in a detached subtree so removing list items (or
+     * discarding freshly-built-but-unadopted item subtrees) leaves no stale
+     * registrations behind.
+     */
+    private _unregisterNodeHandlers;
     registerHandler(key: string, fn: HandlerFn): void;
     getHandler(key: string): HandlerFn | undefined;
+    /** True if a handler is currently registered under `key`. Inspection helper. */
+    hasHandler(key: string): boolean;
+    /** Number of currently-registered handlers. Inspection helper. */
+    get handlerCount(): number;
     findById(id: NodeId): GraphNode | undefined;
     findAll(predicate: (node: GraphNode) => boolean): GraphNode[];
     findByType(type: GraphNode['type']): GraphNode[];
