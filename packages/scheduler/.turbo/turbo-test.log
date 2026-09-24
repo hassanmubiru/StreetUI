@@ -1,11 +1,11 @@
 
-> @streetui/scheduler@1.2.0 test /home/error51/Downloads/StreetUI/packages/scheduler
+> @streetui/scheduler@1.3.0 test /home/error51/Downloads/StreetUI/packages/scheduler
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/scheduler
 
- ✓ src/public-api.stability.test.ts  (1 test) 2ms
+ ✓ src/public-api.stability.test.ts  (1 test) 3ms
 stderr | src/scheduler.test.ts > Scheduler > isolates job failures
 [Scheduler] Job "bad" threw: Error: boom
     at Object.fn (/home/error51/Downloads/StreetUI/packages/scheduler/src/scheduler.test.ts:66:69)
@@ -19,10 +19,10 @@ stderr | src/scheduler.test.ts > Scheduler > isolates job failures
     at Proxy.<anonymous> (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:931:17)
     at Proxy.methodWrapper (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
 
- ✓ src/scheduler.test.ts  (14 tests) 20ms
+ ✓ src/scheduler.test.ts  (14 tests) 15ms
 
  Test Files  2 passed (2)
       Tests  15 passed (15)
-   Start at  20:11:16
-   Duration  300ms (transform 60ms, setup 0ms, collect 70ms, tests 22ms, environment 0ms, prepare 141ms)
+   Start at  21:42:16
+   Duration  341ms (transform 64ms, setup 0ms, collect 75ms, tests 17ms, environment 0ms, prepare 167ms)
 
