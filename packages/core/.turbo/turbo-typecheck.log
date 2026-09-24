@@ -1,4 +1,4 @@
 
-> @streetui/core@0.1.0 typecheck /home/error51/Downloads/StreetUI/packages/core
+> @streetui/core@1.0.0 typecheck /home/error51/Downloads/StreetUI/packages/core
 > tsc --noEmit
 

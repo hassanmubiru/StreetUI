@@ -1,4 +1,4 @@
 
-> @streetui/scheduler@0.1.0 typecheck /home/error51/Downloads/StreetUI/packages/scheduler
+> @streetui/scheduler@1.0.0 typecheck /home/error51/Downloads/StreetUI/packages/scheduler
 > tsc --noEmit
 
