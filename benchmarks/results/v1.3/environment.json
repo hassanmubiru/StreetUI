@@ -1,6 +1,6 @@
 {
   "schema": "streetui-environment/v1.3",
-  "timestamp": "2026-09-24T18:17:10.315Z",
+  "timestamp": "2026-09-24T18:22:21.961Z",
   "commit": "v1.3-final",
   "host": {
     "node": "v22.23.2",
@@ -8,7 +8,7 @@
     "cpus": 2,
     "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
     "totalMemMB": 4107,
-    "freeMemMB": 3655
+    "freeMemMB": 3567
   },
   "runs": {
     "nodeRealApp": {
@@ -38,8 +38,9 @@
   },
   "steps": [
     {
-      "label": "node-harness",
-      "reused": true,
+      "label": "node real-app harness",
+      "file": "/sessions/sweet-gallant-mendel/work/packages/benchmarks/perf-app-scenarios.mjs",
+      "status": 0,
       "ok": true
     },
     {

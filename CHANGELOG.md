@@ -5,6 +5,60 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## v1.3 milestone — Real-world application performance & browser validation
+
+A **measurement, real-application, and documentation** milestone. **No public API
+change** (168 values / 171 types preserved), **no breaking changes**, and **no new
+runtime dependency**. The shipped package version stays `1.2.0`: the release
+registry gate is BLOCKED offline (E403), so no publish/version bump is performed;
+a 1.3.0 minor bump would be semver-correct for these additive-only changes and is
+deferred to the release process. Full detail in
+[`V1.3-REAL-WORLD-PERFORMANCE-REPORT.md`](./V1.3-REAL-WORLD-PERFORMANCE-REPORT.md).
+
+### Added (all outside the shipped `streetui` package)
+
+- **`examples/streetui-performance-app`** — a real multi-route application
+  (header/nav/sidebar shell, a 10,000-row keyed users table, 1,000 interactive
+  controls, validated forms, `:id` + wildcard routing, an async resource with
+  retry/abort, i18n, SSR + hydration). Built entirely on the frozen API; no new
+  API was required.
+- **Node real-app harness** (`benchmarks/run-streetui.mjs`,
+  `packages/benchmarks/perf-app-scenarios.mjs` + per-scenario worker) measuring
+  initial mount, router navigation, hydration, fine-grained updates, form
+  isolation, keyed-list ops, SSR sizes, and lifecycle accumulation — DOM mutations
+  counted at the single `BrowserDOMAdapter` choke point.
+- **Bundle measurement** (`scripts/bundle-sizes.mjs`): minified raw/gzip/brotli
+  across minimal/typical/full/real-app profiles, esbuild as a measurement-only
+  tool (never a runtime dependency).
+- **Result set** `benchmarks/results/v1.3/` with regression gates and an
+  `environment.json`, each carrying PASS / BLOCKED / NOT_RUN + exact reason.
+- **Eight documentation guides** (getting-started, reactivity, components,
+  routing, forms, data, ssr, hydration) written against the real app and indexed
+  from `docs/README.md`.
+
+### Measured (Node + happy-dom; not browser numbers)
+
+- Hydrating the 10,000-row view creates **0** DOM nodes (zero-node guarantee holds
+  on a realistic view). Fine-grained update cost is **independent of N** (2 writes
+  at 100 or 1,000 controls). Form field isolation is DOM-verified. 8 lifecycle
+  cycles show no node drift and 0 orphans.
+- Shipped bundle unchanged: full minified barrel **20,105 B gzip**, minimal app
+  **8,606 B gzip**, **0 B** framework CSS. The diagnostic unminified-barrel gzip
+  moved 28,764 → 28,765 B (**+1 byte**, disclosed); the shipped minified size did
+  not change.
+
+### Blocked (recorded, never fabricated)
+
+- **Real-browser metrics** (paint/layout/TTI/frame pacing/JS heap): BLOCKED — no
+  Chromium/Playwright and the offline registry (E403) cannot fetch one.
+- **Competitor comparison** (React/Vue/Svelte/Solid): BLOCKED — cannot install
+  offline, no browser to run them. **No winner or ranking is asserted.**
+
+### Verification
+
+- Build 29/29, typecheck 47/47, tests **657** — the deltas over v1.2 (28/46/652)
+  are entirely the new performance-app package and its 5-test suite.
+
 ## 1.2.0 — Compiler, initial render & runtime
 
 A **minor, additive** release. No breaking changes over 1.1.0/1.0.0; the public

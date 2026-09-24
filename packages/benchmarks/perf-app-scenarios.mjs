@@ -70,13 +70,30 @@ const invariants = {
 };
 const allInvariantsHold = Object.values(invariants).every(Boolean);
 
+// Read the ACTUAL shipped package version rather than hardcoding one, so this
+// artifact can never claim a version the code does not carry. "v1.3" is the
+// real-world-performance milestone label; the package version is whatever
+// packages/streetui/package.json says today.
+function readStreetuiVersion() {
+  const candidates = [
+    path.resolve(__dirname, '../../packages/streetui/package.json'),
+    path.resolve(__dirname, '../streetui/package.json'),
+  ];
+  for (const p of candidates) {
+    try { return JSON.parse(fs.readFileSync(p, 'utf8')).version; } catch { /* try next */ }
+  }
+  return 'unknown';
+}
+const streetuiVersion = readStreetuiVersion();
+
 const output = {
   schema: 'streetui-node/v1.3',
   status: 'PASS',
   target: 'examples/streetui-performance-app (real multi-route application)',
   runtime: 'node + happy-dom (NOT a browser; browser metrics gated separately, see streetui-browser.json)',
   measurement: 'DOM mutations counted at the single BrowserDOMAdapter choke point; timings via perf_hooks; each scenario isolated in its own process.',
-  version: '1.3.0',
+  milestone: 'v1.3',
+  version: streetuiVersion,
   commit: args.commit ?? null,
   timestamp: new Date().toISOString(),
   environment: {
