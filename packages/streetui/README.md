@@ -67,16 +67,16 @@ StreetUI's UI layer is a **semantic builder DSL** — you describe pages and
 sections with builders rather than free-standing element functions:
 
 ```ts
-import { streetui, signal, compile, createRenderer } from 'streetui';
-import { BrowserDOMAdapter } from 'streetui';
+import { streetui, signal, compile, createRenderer, BrowserDOMAdapter } from 'streetui';
 
 const count = signal(0);
 
-const app = streetui.app({ name: 'counter' }).page('home', (page) => {
-  page.heading('Hello, StreetUI');
-  page.section((s) => {
-    s.text(() => `Count: ${count.get()}`);
-    s.button('Increment', { on: { click: () => count.set(count.peek() + 1) } });
+const app = streetui.app({ name: 'counter' });
+app.page('home', (page) => {
+  page.heading('Hello, StreetUI', { level: 1 });
+  page.section('main', (s) => {
+    s.text(() => `Count: ${count.get()}`, { id: 'count' });
+    s.button('Increment', { id: 'inc', onClick: () => count.set(count.peek() + 1) });
   });
 });
 
@@ -93,16 +93,17 @@ Render on the server and hydrate on the client using the same framework:
 // server
 import { renderToString, serializeState } from 'streetui/server';
 
-const { html } = renderToString(compiled);
+const html = renderToString(compiled); // → HTML string
+const state = serializeState({ counter: { count: 0 } });
 ```
 
 ```ts
 // client
-import { createRenderer, hydrate, readState } from 'streetui';
-```
+import { createRenderer, BrowserDOMAdapter } from 'streetui';
 
-The server-only helpers are also available from the `streetui/server` subpath,
-and the testing helpers from `streetui/testing` — all part of the same package.
+const renderer = createRenderer(new BrowserDOMAdapter());
+renderer.hydrate(compiled, document.getElementById('app')!); // reuses server DOM
+```
 
 ## Subpath entries
 
