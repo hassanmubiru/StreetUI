@@ -1,0 +1,4 @@
+
+> @streetui/dsl@1.0.0 typecheck /home/error51/Downloads/StreetUI/packages/dsl
+> tsc --noEmit
+
