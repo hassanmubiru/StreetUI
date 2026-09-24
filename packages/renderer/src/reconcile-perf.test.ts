@@ -50,9 +50,10 @@ function makeCountingAdapter(): { adapter: DOMAdapter; c: Counts; reset: () => v
     setAttribute(e: Element, n: string, v: string) { c.setAttribute++; return base.setAttribute(e, n, v); },
   } as Record<string, unknown>;
   // Pass through any adapter method we did not explicitly wrap.
+  const proto = base as unknown as Record<string, (...args: unknown[]) => unknown>;
   for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(base))) {
-    if (k !== 'constructor' && typeof (base as never)[k] === 'function' && !(k in adapter)) {
-      adapter[k] = (...a: unknown[]) => (base as never)[k](...(a as never));
+    if (k !== 'constructor' && typeof proto[k] === 'function' && !(k in adapter)) {
+      adapter[k] = (...a: unknown[]) => proto[k]!(...a);
     }
   }
   return {

@@ -111,4 +111,28 @@ describe('inspectApplication', () => {
     expect(snapshot.perf.distinctSignals).toBe(snapshot.signals.length);
     expect(snapshot.perf.largestChildCount).toBeGreaterThanOrEqual(1);
   });
+
+  it('counts reactive keyed-list sites via __listplan__ handlers (v1.1 §25)', () => {
+    const rowsA = signal([{ id: 1, label: 'a' }]);
+    const rowsB = signal([{ id: 2, label: 'b' }]);
+    const app = streetui.app({ name: 'lists' });
+    app.page('home', (page) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (page as any).listOf('la', rowsA, (it: { label: string }, _i: number, c: any) => c.text(it.label));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (page as any).listOf('lb', rowsB, (it: { label: string }, _i: number, c: any) => c.text(it.label));
+      page.heading('static'); // not a reactive list
+    });
+    const compiled = compile(app);
+    const snapshot = inspectApplication(compiled);
+    // Exactly the two signal-driven lists take the optimised plan path.
+    expect(snapshot.perf.reactiveLists).toBe(2);
+  });
+
+  it('reports zero reactive lists for an app with no signal-driven lists', () => {
+    const app = streetui.app({ name: 'no-lists' });
+    app.page('home', (page) => page.heading('X'));
+    const compiled = compile(app);
+    expect(inspectApplication(compiled).perf.reactiveLists).toBe(0);
+  });
 });

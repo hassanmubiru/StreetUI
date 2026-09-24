@@ -1,6 +1,6 @@
 {
   "name": "@streetui/events",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "StreetUI event abstraction — framework event bus, DOM event bridging",
   "type": "module",
   "main": "./dist/index.cjs",

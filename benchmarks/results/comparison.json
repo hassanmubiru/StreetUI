@@ -1,20 +1,20 @@
 {
-  "//": "Cross-framework comparison. StreetUI numbers are real (this v1.1 baseline, happy-dom/Node). Competitor rows are BLOCKED: frameworks cannot be installed offline and there is no real browser. Do NOT read the StreetUI numbers as beating any competitor — there is no competitor data to compare against. See methodology.md.",
+  "//": "Cross-framework comparison. StreetUI numbers are real (shipped v1.1 optimised result, happy-dom/Node). Competitor rows are BLOCKED: frameworks cannot be installed offline and there is no real browser. Do NOT read the StreetUI numbers as beating any competitor — there is no competitor data to compare against. See methodology.md.",
   "methodology": "benchmarks/methodology.md",
-  "generatedFrom": "benchmarks/results/baseline.json",
-  "timestamp": "2026-09-24T12:02:32.773Z",
+  "generatedFrom": "benchmarks/results/streetui.json",
+  "timestamp": "2026-09-24T16:00:00.000Z",
   "frameworks": [
     {
       "framework": "streetui",
       "version": "1.1.0",
-      "initialRender_ms": 104.2002,
-      "singleUpdate_ms": 0.0295,
+      "initialRender_ms": 120.8419,
+      "singleUpdate_ms": 0.0292,
       "singleUpdate_domMutations": 1,
-      "listUpdate_append_ms": 72.0161,
-      "listUpdate_reorder_ms": 325.5471,
-      "ssr_ms": 30.9364,
-      "hydration_ms": 6.8157,
-      "bundle_runtime_gzip": 27488,
+      "listUpdate_append_ms": 39.599,
+      "listUpdate_reorder_ms": 36.6681,
+      "ssr_ms": 31.5029,
+      "hydration_ms": 6.5981,
+      "bundle_runtime_gzip": 28680,
       "environment": "happy-dom (Node); real-browser numbers BLOCKED"
     },
     {

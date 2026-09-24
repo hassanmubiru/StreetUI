@@ -54,6 +54,15 @@ export interface PerfSnapshot {
   readonly distinctSignals: number;
   /** Largest single-node child count (a proxy for the biggest list/section). */
   readonly largestChildCount: number;
+  /**
+   * Number of reactive keyed-list sites driven by the optimised lazy-plan
+   * reconciler (v1.1 §15/§25). Counted from the graph's `__listplan__<id>`
+   * handler registrations — one per `listOf(...)` bound to a signal. These are
+   * the nodes whose updates take the identity-short-circuit + LIS minimal-move
+   * path, so surfacing the count lets a panel or CI check see how much of an app
+   * benefits from the keyed-list engine without measuring anything at runtime.
+   */
+  readonly reactiveLists: number;
 }
 
 /**
@@ -119,6 +128,14 @@ export function inspectApplication(compiled: CompiledApplication): ApplicationIn
   const perfAcc = { totalNodes: 0, maxDepth: 0, eventHandlers: 0, stateBindings: 0, largestChildCount: 0 };
   collectPerf(graph, signals.size, perfAcc);
 
+  // Count optimised keyed-list sites from the handler registry (one
+  // `__listplan__<id>` per signal-driven `listOf`). Reading the map directly
+  // keeps this a pure, count-only derivation — no second graph walk.
+  let reactiveLists = 0;
+  for (const key of compiled.graph.handlers.keys()) {
+    if (key.startsWith('__listplan__')) reactiveLists += 1;
+  }
+
   return {
     identity: {
       name: compiled.name,
@@ -141,6 +158,7 @@ export function inspectApplication(compiled: CompiledApplication): ApplicationIn
       stateBindings: perfAcc.stateBindings,
       distinctSignals: signals.size,
       largestChildCount: perfAcc.largestChildCount,
+      reactiveLists,
     },
   };
 }

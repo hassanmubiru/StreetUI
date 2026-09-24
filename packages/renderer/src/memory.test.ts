@@ -141,3 +141,65 @@ describe('memory / graph handler registry is stable across cycles', () => {
     expect(stableCount).toBe(3);
   });
 });
+
+// ── OPT-1 keyed-list stress: many mutations must not leak (spec §17) ────────────
+describe('memory / keyed-list mutation stress leaves no residue', () => {
+  interface Row { id: number; label: string }
+  const rows = (n: number, off = 0): Row[] =>
+    Array.from({ length: n }, (_, i) => ({ id: i + off, label: `item-${i + off}` }));
+
+  function compileRowList(items: Signal<Row[]>) {
+    resetIdCounter();
+    const app = streetui.app({ name: 'mem-rowlist' });
+    app.page('home', (page) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (page as any).listOf('rows', items, (item: Row, _i: number, c: any) =>
+        c.text(item.label),
+      );
+    });
+    return compile(app);
+  }
+
+  // Count graph handler entries owned by reactive-list plumbing that MUST be
+  // pruned when their item/list nodes are detached.
+  const listHandlerKeys = (graph: { handlers: Map<string, unknown> }): number =>
+    [...graph.handlers.keys()].filter(
+      (k) => k.startsWith('__signal__') || k.startsWith('__listbuild__') || k.startsWith('__listplan__'),
+    ).length;
+
+  it('grow → churn → return to start drains instances and handlers to baseline', () => {
+    const base = rows(100);
+    const items = signal(base);
+    const compiled = compileRowList(items);
+    const { ctx, handle } = mountWithCtx(compiled.graph, makeContainer());
+
+    const baselineInstances = ctx.instances.size;
+    const baselineHandlers = listHandlerKeys(compiled.graph);
+    expect(baselineInstances).toBeGreaterThan(200); // 100 <li> + 100 <span> + structure
+
+    // 300 mixed mutations: append, prepend, remove, reorder, reverse, update.
+    let cur = base;
+    for (let i = 0; i < 300; i++) {
+      const mode = i % 6;
+      if (mode === 0) cur = [...cur, ...rows(1, 1000 + i)];
+      else if (mode === 1) cur = [...rows(1, 2000 + i), ...cur];
+      else if (mode === 2) cur = cur.slice(1);
+      else if (mode === 3 && cur.length > 1) {
+        const c = [...cur]; const f = c[0]!; c[0] = c[c.length - 1]!; c[c.length - 1] = f; cur = c;
+      } else if (mode === 4) cur = [...cur].reverse();
+      else cur = cur.map((r, idx) => (idx === 0 ? { ...r, label: r.label + '*' } : r));
+      items.set(cur);
+    }
+
+    // Return to the EXACT original item references.
+    items.set(base);
+
+    // No residue: instance index and list-handler registry are back to baseline.
+    expect(ctx.instances.size).toBe(baselineInstances);
+    expect(listHandlerKeys(compiled.graph)).toBe(baselineHandlers);
+
+    handle.unmount();
+    // Full unmount drains the instance index to just-the-root-or-empty.
+    expect(ctx.instances.size).toBeLessThanOrEqual(1);
+  });
+});

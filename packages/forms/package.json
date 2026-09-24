@@ -1,6 +1,6 @@
 {
   "name": "@streetui/forms",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "StreetUI forms — reactive form state, validation, and submission lifecycle built on signals",
   "type": "module",
   "main": "./dist/index.cjs",
