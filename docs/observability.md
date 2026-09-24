@@ -41,7 +41,7 @@ context as a compact ` [package=…, operation=…]` suffix. Pass your own logge
 route elsewhere:
 
 ```ts
-import { consoleDiagnosticSink } from '@streetui/core';
+import { consoleDiagnosticSink } from 'streetui';
 
 const sink = consoleDiagnosticSink();          // → console
 const custom = consoleDiagnosticSink(myLogger); // → your logger
@@ -75,7 +75,7 @@ By default a swallowed error is reported to `console.error`. Install a sink to
 route those failures through your own logger instead:
 
 ```ts
-import { scheduler } from '@streetui/scheduler';
+import { scheduler } from 'streetui';
 
 scheduler.setDiagnostics({
   error(message, context) {
@@ -108,7 +108,7 @@ recovery `action`, and a one-line `message`.
 import {
   createHydrationDiagnosticCollector,
   consoleHydrationDiagnosticSink,
-} from '@streetui/renderer';
+} from 'streetui';
 
 // Accumulate into an array (tests, DevTools panel):
 const { sink, diagnostics } = createHydrationDiagnosticCollector();

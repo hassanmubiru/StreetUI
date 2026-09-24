@@ -31,6 +31,50 @@ That is the complete list. Nothing in `core`, `state`, `graph`, `dsl`,
 `compiler`, `runtime`, `events`, `scheduler`, `dom`, `renderer`, `router`,
 `forms`, `i18n`, `context`, `devtools`, or `testing` changed shape.
 
+## Installing 1.0: one package instead of many
+
+The most visible packaging change is that StreetUI is now consumed as a
+**single npm package**, `streetui`, rather than a set of separately-installed
+`@streetui/*` packages. You install one dependency:
+
+```bash
+npm install streetui
+```
+
+and import every public symbol from it, with two curated subpaths in the same
+package:
+
+```ts
+import { signal, streetui, compile, createRenderer, createRuntime } from 'streetui';
+import { renderToString, serializeState, readState } from 'streetui/server';
+import { render, findByRole, renderServerThenHydrate } from 'streetui/testing';
+```
+
+If you previously depended on several `@streetui/*` packages, the mechanical
+change is to replace those dependencies with the one `streetui` dependency and
+repoint the imports:
+
+```diff
+- import { signal, derived } from '@streetui/state';
+- import { streetui } from '@streetui/dsl';
+- import { compile } from '@streetui/compiler';
+- import { createRenderer } from '@streetui/renderer';
++ import { signal, derived, streetui, compile, createRenderer } from 'streetui';
+```
+
+The **exported names and their behavior are unchanged** — only the specifier
+moves. Server-only helpers (`renderToString`, `serializeState`, `readState`,
+`ServerDOMAdapter`) live under `streetui/server`, and the test helpers
+(`render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `flushUpdates`)
+under `streetui/testing`. Internally StreetUI is still modular, but that
+modularity is now an implementation detail rather than something you install.
+
+Note this repository's `streetui` package has **not** been published to a public
+npm registry in this environment (see [Release process](./release-process.md)
+and [Publishing](./publishing.md) for the honest, BLOCKED registry gate); the
+single-package shape is verified via offline tarball consumption, not a registry
+install.
+
 ## If you are on an earlier 0.x
 
 Upgrading from 0.6–0.8 to 1.0 is still expected to be drop-in for the public
@@ -39,9 +83,10 @@ API, but those versions predate parts of the current surface (for example the
 read the [changelog](../CHANGELOG.md) for what was *added* between your version
 and 1.0 — additions are backward compatible, but you may want to adopt them.
 
-Update every `@streetui/*` dependency to `1.0.0` together. Because internal
-edges are version-locked at pack time, mixing a `1.0.0` package with a `0.9.x`
-one is unsupported and the release check will flag the divergence.
+Replace any set of `@streetui/*` dependencies with the single `streetui`
+dependency at `1.0.0` and repoint imports as shown above. (Internally the
+modules remain version-locked and coordinated; the release check still flags any
+divergence within the packaged set.)
 
 ## What "1.0 stable" commits us to
 

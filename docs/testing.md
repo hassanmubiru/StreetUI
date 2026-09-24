@@ -13,7 +13,7 @@ Compiles and mounts a `StreetApp` into a detached container, returning a
 `RenderResult`:
 
 ```ts
-import { render } from '@streetui/testing';
+import { render } from 'streetui/testing';
 
 const r = render(app);
 

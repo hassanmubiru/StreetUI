@@ -4,6 +4,30 @@ StreetUI is a TypeScript-first semantic application framework with its own
 compiler, semantic application graph, reactivity, and DOM renderer — no virtual
 DOM, no React/Vue/Preact, no JSX runtime.
 
+It ships as a **single npm package**, `streetui`. You install one package and
+import everything from it:
+
+```bash
+npm install streetui
+```
+
+```ts
+import { signal, streetui, compile, createRenderer, createRuntime } from 'streetui';
+```
+
+Two curated subpaths live in the same package: `streetui/server`
+(`renderToString`, `serializeState`, `readState`, `ServerDOMAdapter`) and
+`streetui/testing` (`render`, `findByRole`, `waitFor`, `renderServerThenHydrate`,
+`flushUpdates`). Scaffold a new app with:
+
+```bash
+npx streetui create my-app     # templates: basic, ssr
+```
+
+Internally StreetUI is still modular (the `@streetui/*` modules described in
+[Architecture](./architecture.md)), but consumers never install those
+individually — only `streetui`.
+
 This portal indexes the reference docs. All of it describes **real, shipped
 APIs**; nothing here documents a planned feature as if it exists.
 

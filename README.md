@@ -385,9 +385,14 @@ exact same build function renders on the server and hydrates on the client.
 
 ---
 
-## Packages
+## Internal modules
 
-| Package | Description |
+These are StreetUI's internal modules. **Consumers install only the single
+`streetui` package** and import every symbol below from `streetui` (with the
+`streetui/server` and `streetui/testing` subpaths); the `@streetui/*` names are
+internal boundaries, not separately published dependencies.
+
+| Module | Description |
 |---|---|
 | `@streetui/core` | Identity, lifecycle, diagnostics |
 | `@streetui/dsl` | Semantic TypeScript DSL |
@@ -412,7 +417,7 @@ exact same build function renders on the server and hydrates on the client.
 ## Getting started with the CLI
 
 ```bash
-npm create streetui@latest my-app
+npx streetui create my-app
 cd my-app && npm install
 npm run dev      # start the dev server with live reload
 npm run build    # production build → dist/client + dist/server

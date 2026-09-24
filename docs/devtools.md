@@ -22,8 +22,8 @@ Three principles hold throughout:
 Creates a `DevToolsSession` over one compiled application.
 
 ```ts
-import { compile } from '@streetui/compiler';
-import { createDevTools } from '@streetui/devtools';
+import { compile } from 'streetui';
+import { createDevTools } from 'streetui';
 
 const compiled = compile(app);
 
