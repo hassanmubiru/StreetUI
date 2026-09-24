@@ -6,6 +6,10 @@ import { compile } from '@streetui/compiler';
 import { BrowserDOMAdapter } from '@streetui/dom';
 import { createRenderer } from './renderer.js';
 import { renderToString } from './ssr.js';
+import {
+  createHydrationDiagnosticCollector,
+  consoleHydrationDiagnosticSink,
+} from './hydration-diagnostics.js';
 
 /**
  * Build the SAME application on the "server" and the "client". The server render
