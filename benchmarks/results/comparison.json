@@ -1,21 +1,21 @@
 {
-  "//": "Cross-framework comparison. StreetUI numbers are real (shipped v1.1 optimised result, happy-dom/Node). Competitor rows are BLOCKED: frameworks cannot be installed offline and there is no real browser. Do NOT read the StreetUI numbers as beating any competitor — there is no competitor data to compare against. See methodology.md.",
+  "//": "Cross-framework comparison. StreetUI numbers are real (shipped v1.2 optimised result, happy-dom/Node). Competitor rows are BLOCKED: frameworks cannot be installed offline and there is no real browser. Do NOT read the StreetUI numbers as beating any competitor — there is no competitor data to compare against. See methodology.md.",
   "methodology": "benchmarks/methodology.md",
   "generatedFrom": "benchmarks/results/streetui.json",
   "timestamp": "2026-09-24T16:00:00.000Z",
   "frameworks": [
     {
       "framework": "streetui",
-      "version": "1.1.0",
-      "initialRender_ms": 120.8419,
-      "singleUpdate_ms": 0.0292,
+      "version": "1.2.0",
+      "initialRender_ms": 105.9924,
+      "singleUpdate_ms": 0.0319,
       "singleUpdate_domMutations": 1,
-      "listUpdate_append_ms": 39.599,
-      "listUpdate_reorder_ms": 36.6681,
-      "ssr_ms": 31.5029,
-      "hydration_ms": 6.5981,
-      "bundle_runtime_gzip": 28680,
-      "environment": "happy-dom (Node); real-browser numbers BLOCKED"
+      "listUpdate_append_ms": 39.9658,
+      "listUpdate_reorder_ms": 37.8401,
+      "ssr_ms": 20.4765,
+      "hydration_ms": 3.8674,
+      "bundle_runtime_gzip": 28764,
+      "environment": "happy-dom (Node); real-browser numbers BLOCKED. Absolute deltas vs the v1.1 row are dominated by happy-dom timing noise (see methodology.md); relative same-run scenario deltas are the valid signal."
     },
     {
       "framework": "react",

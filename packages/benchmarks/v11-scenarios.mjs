@@ -90,7 +90,7 @@ const round = (x) => Math.round(x * 1e4) / 1e4;
 
 // ── app builders (real public DSL) ───────────────────────────────────────────
 function flatApp(n) {
-  const app = streetui.app({ name: 'flat', version: '1.1.0' });
+  const app = streetui.app({ name: 'flat', version: '1.2.0' });
   app.page('home', (p) => p.section('main', (s) => {
     for (let i = 0; i < n; i++) s.text(`node ${i}`, { class: 'row' });
   }));
@@ -98,7 +98,7 @@ function flatApp(n) {
 }
 // n static nodes + ONE signal-bound text (scenario B: single targeted update).
 function oneBoundInManyApp(n, sig) {
-  const app = streetui.app({ name: 'oneBound', version: '1.1.0' });
+  const app = streetui.app({ name: 'oneBound', version: '1.2.0' });
   app.page('home', (p) => p.section('main', (s) => {
     for (let i = 0; i < n; i++) s.text(`static ${i}`, { class: 'row' });
     s.text(sig, { class: 'live', id: 'live' });
@@ -107,14 +107,14 @@ function oneBoundInManyApp(n, sig) {
 }
 // 1 signal → n bound subscribers (scenario D: fan-out).
 function fanoutApp(n, sig) {
-  const app = streetui.app({ name: 'fanout', version: '1.1.0' });
+  const app = streetui.app({ name: 'fanout', version: '1.2.0' });
   app.page('home', (p) => p.section('main', (s) => {
     for (let i = 0; i < n; i++) s.text(sig, { class: 'sub' });
   }));
   return app;
 }
 function listApp(items) {
-  const app = streetui.app({ name: 'list', version: '1.1.0' });
+  const app = streetui.app({ name: 'list', version: '1.2.0' });
   app.page('home', (p) => p.section('main', (s) => {
     s.listOf('rows', items, (item, _i, content) => content.text(item.label, { class: 'cell' }));
   }));
@@ -238,7 +238,7 @@ const benchmarks = {};
       const preferences = signal({ theme: 'dark' });
       const permissions = signal({ admin: false });
       const activity = signal({ lastSeen: 0, streak: 0 });
-      const app = streetui.app({ name: 'deep', version: '1.1.0' });
+      const app = streetui.app({ name: 'deep', version: '1.2.0' });
       app.page('home', (p) => p.section('main', (s) => {
         // 4 leaves via derived (reactive); only the activity leaf recomputes on activity.set().
         s.text(derived(() => profile.get().name), { class: 'leaf' });
@@ -318,10 +318,10 @@ function arg(name, def = null) {
   const hit = process.argv.find((a) => a.startsWith('--' + name + '='));
   return hit ? hit.slice(name.length + 3) : def;
 }
-const { VERSION } = { VERSION: '1.1.0' };
+const { VERSION } = { VERSION: '1.2.0' };
 
 const out = {
-  streetuiVersion: '1.1.0',
+  streetuiVersion: '1.2.0',
   nodeVersion: process.version,
   browserVersion: null, // BLOCKED: no Chromium/Playwright in this environment
   commit: arg('commit', 'uncommitted'),

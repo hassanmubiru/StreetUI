@@ -1,10 +1,9 @@
 {
-  "status": "BLOCKED",
-  "reason": "Playwright is not installed (no npm registry access) and no Chromium binary is available in this environment. Real-browser scenarios (A initial render / time-to-interactive, G hydration) cannot be measured. Install playwright + chromium (npx playwright install chromium) on a machine with registry access and re-run `node scripts/browser-harness.mjs`.",
+  "status": "ERROR",
+  "reason": "Playwright is present but Chromium failed to launch: browserType.launch: Executable doesn't exist at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
   "scenarios": {
     "A_initialRender": null,
     "G_hydration": null
   },
-  "fallback": "Node/happy-dom relative measurements for these workloads are in benchmarks/results/baseline.json and results/streetui.json.",
-  "timestamp": "2026-09-24T12:05:51.817Z"
+  "timestamp": "2026-09-24T15:59:17.854Z"
 }
