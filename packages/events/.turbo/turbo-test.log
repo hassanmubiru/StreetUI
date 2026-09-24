@@ -1,54 +1,15 @@
 
-
-> @streetui/events@0.1.0 test /home/error51/Downloads/StreetUI/packages/events
+> @streetui/events@1.0.0 test /home/error51/Downloads/StreetUI/packages/events
 > vitest run
 
 
-[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/events[39m
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/events
 
-[?25l     [90m·[39m listenerCount returns correct count
-     [90m·[39m does not throw when emitting with no handlers
-   [90m·[39m StreetEvent[2m (4)[22m
-     [90m·[39m has correct type and timestamp
-     [90m·[39m preventDefault sets defaultPrevented
-     [90m·[39m stopPropagation can be called without error
-     [90m·[39m carries optional data
-   [90m·[39m DomEventRegistry[2m (2)[22m
-     [90m·[39m tracks binding count
-     [90m·[39m removeAll clears all bindings
-[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m listenerCount returns correct count
-     [32m✓[39m does not throw when emitting with no handlers
-   [32m✓[39m StreetEvent[2m (4)[22m
-     [32m✓[39m has correct type and timestamp
-     [32m✓[39m preventDefault sets defaultPrevented
-     [32m✓[39m stopPropagation can be called without error
-     [32m✓[39m carries optional data
-   [32m✓[39m DomEventRegistry[2m (2)[22m
-     [32m✓[39m tracks binding count
-     [32m✓[39m removeAll clears all bindings
-[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mevents[2m.test.ts[22m[2m (15)[22m
-   [32m✓[39m EventBus[2m (9)[22m
-     [32m✓[39m registers and dispatches events
-     [32m✓[39m fires multiple handlers for same event
-     [32m✓[39m off removes handler
-     [32m✓[39m on returns unsubscribe fn
-     [32m✓[39m once fires only one time
-     [32m✓[39m clear removes all handlers for a type
-     [32m✓[39m clear without type removes all handlers
-     [32m✓[39m listenerCount returns correct count
-     [32m✓[39m does not throw when emitting with no handlers
-   [32m✓[39m StreetEvent[2m (4)[22m
-     [32m✓[39m has correct type and timestamp
-     [32m✓[39m preventDefault sets defaultPrevented
-     [32m✓[39m stopPropagation can be called without error
-     [32m✓[39m carries optional data
-   [32m✓[39m DomEventRegistry[2m (2)[22m
-     [32m✓[39m tracks binding count
-     [32m✓[39m removeAll clears all bindings
+ ✓ src/public-api.stability.test.ts  (1 test) 3ms
+ ✓ src/events.test.ts  (15 tests) 14ms
 
-[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[32m15 passed[39m[22m[90m (15)[39m
-[2m   Start at [22m 08:58:55
-[2m   Duration [22m 3.16s[2m (transform 916ms, setup 0ms, collect 930ms, tests 16ms, environment 2ms, prepare 849ms)[22m
+ Test Files  2 passed (2)
+      Tests  16 passed (16)
+   Start at  12:24:30
+   Duration  481ms (transform 142ms, setup 0ms, collect 170ms, tests 17ms, environment 1ms, prepare 217ms)
 
-[?25h[?25h

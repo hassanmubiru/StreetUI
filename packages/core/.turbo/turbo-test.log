@@ -1,70 +1,17 @@
 
-
-> @streetui/core@0.1.0 test /home/error51/Downloads/StreetUI/packages/core
+> @streetui/core@1.0.0 test /home/error51/Downloads/StreetUI/packages/core
 > vitest run
 
 
-[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/core[39m
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/core
 
-[?25l     [90m·[39m collects errors
-     [90m·[39m collects warnings
-     [90m·[39m throws DiagnosticError when errors present
-     [90m·[39m does not throw when only warnings
-     [90m·[39m merges another collector
-     [90m·[39m clears diagnostics
-     [90m·[39m formats diagnostics correctly
-   [90m·[39m Environment[2m (2)[22m
-     [90m·[39m detects test environment
-     [90m·[39m detects server environment
-[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m collects errors
-     [32m✓[39m collects warnings
-     [32m✓[39m throws DiagnosticError when errors present
-     [32m✓[39m does not throw when only warnings
-     [32m✓[39m merges another collector
-     [32m✓[39m clears diagnostics
-     [32m✓[39m formats diagnostics correctly
-   [32m✓[39m Environment[2m (2)[22m
-     [32m✓[39m detects test environment
-     [32m✓[39m detects server environment
-[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mcore[2m.test.ts[22m[2m (28)[22m
-   [32m✓[39m identity[2m (3)[22m
-     [32m✓[39m generates unique node IDs
-     [32m✓[39m includes prefix in node ID
-     [32m✓[39m generates application IDs with app prefix
-   [32m✓[39m Application[2m (7)[22m
-     [32m✓[39m creates an application with the given name
-     [32m✓[39m starts in created phase
-     [32m✓[39m transitions to active after mount
-     [32m✓[39m transitions to destroyed after unmount
-     [32m✓[39m throws if mounted twice
-     [32m✓[39m calls onMount hooks
-     [32m✓[39m calls onUnmount hooks
-   [32m✓[39m Lifecycle[2m (6)[22m
-     [32m✓[39m starts in created phase
-     [32m✓[39m is not mounted when created
-     [32m✓[39m is mounted after transition to active
-     [32m✓[39m is destroyed after transition to destroyed
-     [32m✓[39m fires hooks on transition
-     [32m✓[39m can remove a hook
-   [32m✓[39m CleanupRegistry[2m (3)[22m
-     [32m✓[39m runs all cleanup functions
-     [32m✓[39m clears after run
-     [32m✓[39m does not throw if one cleanup throws
-   [32m✓[39m DiagnosticCollector[2m (7)[22m
-     [32m✓[39m collects errors
-     [32m✓[39m collects warnings
-     [32m✓[39m throws DiagnosticError when errors present
-     [32m✓[39m does not throw when only warnings
-     [32m✓[39m merges another collector
-     [32m✓[39m clears diagnostics
-     [32m✓[39m formats diagnostics correctly
-   [32m✓[39m Environment[2m (2)[22m
-     [32m✓[39m detects test environment
-     [32m✓[39m detects server environment
+ ✓ src/observability.test.ts  (6 tests) 15ms
+ ✓ src/a11y-ids.test.ts  (4 tests) 9ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 10ms
+ ✓ src/core.test.ts  (28 tests) 29ms
 
-[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[32m28 passed[39m[22m[90m (28)[39m
-[2m   Start at [22m 08:58:55
-[2m   Duration [22m 3.83s[2m (transform 1.82s, setup 0ms, collect 1.95s, tests 42ms, environment 0ms, prepare 741ms)[22m
+ Test Files  4 passed (4)
+      Tests  41 passed (41)
+   Start at  12:24:29
+   Duration  652ms (transform 281ms, setup 0ms, collect 471ms, tests 62ms, environment 2ms, prepare 672ms)
 
-[?25h[?25h
