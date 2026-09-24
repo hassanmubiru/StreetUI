@@ -26,6 +26,8 @@ const PUBLIC = new Set([
   'core', 'state', 'graph', 'dsl', 'compiler', 'runtime', 'events', 'scheduler',
   'dom', 'renderer', 'router', 'forms', 'i18n', 'context', 'devtools', 'testing',
   'cli',
+  // Unified single-package consumer entry.
+  'streetui',
 ]);
 
 // 1. Build the name → version map from the source packages.
