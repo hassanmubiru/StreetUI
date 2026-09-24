@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@playwright/test':
+        specifier: ^1.63.0
+        version: 1.63.0
       '@typescript-eslint/eslint-plugin':
         specifier: 8.11.0
         version: 8.11.0(@typescript-eslint/parser@8.11.0(eslint@9.13.0)(typescript@5.6.3))(eslint@9.13.0)(typescript@5.6.3)
@@ -20,6 +23,9 @@ importers:
       eslint:
         specifier: 9.13.0
         version: 9.13.0
+      playwright:
+        specifier: ^1.63.0
+        version: 1.63.0
       tsup:
         specifier: 8.3.5
         version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
@@ -109,6 +115,326 @@ importers:
         specifier: '*'
         version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
 
+  examples/streetui-account:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../../packages/compiler
+      '@streetui/context':
+        specifier: workspace:*
+        version: link:../../packages/context
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../../packages/dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../../packages/dsl
+      '@streetui/forms':
+        specifier: workspace:*
+        version: link:../../packages/forms
+      '@streetui/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@streetui/router':
+        specifier: workspace:*
+        version: link:../../packages/router
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  examples/streetui-data:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../../packages/compiler
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../../packages/dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../../packages/dsl
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@streetui/router':
+        specifier: workspace:*
+        version: link:../../packages/router
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  examples/streetui-docs:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../../packages/compiler
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../../packages/dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../../packages/dsl
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@streetui/router':
+        specifier: workspace:*
+        version: link:../../packages/router
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  examples/streetui-full-app:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../../packages/compiler
+      '@streetui/context':
+        specifier: workspace:*
+        version: link:../../packages/context
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../../packages/dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../../packages/dsl
+      '@streetui/forms':
+        specifier: workspace:*
+        version: link:../../packages/forms
+      '@streetui/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@streetui/router':
+        specifier: workspace:*
+        version: link:../../packages/router
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  examples/streetui-showcase:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../../packages/compiler
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../../packages/dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../../packages/dsl
+      '@streetui/graph':
+        specifier: workspace:*
+        version: link:../../packages/graph
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  examples/streetui-ssr:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../../packages/compiler
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../../packages/dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../../packages/dsl
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../../packages/runtime
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../../packages/state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  packages/benchmarks:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../dsl
+      '@streetui/events':
+        specifier: workspace:*
+        version: link:../events
+      '@streetui/graph':
+        specifier: workspace:*
+        version: link:../graph
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../renderer
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+      '@streetui/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  packages/cli:
+    dependencies:
+      esbuild:
+        specifier: 0.24.2
+        version: 0.24.2
+    devDependencies:
+      '@types/node':
+        specifier: '*'
+        version: 26.6.2
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
   packages/compiler:
     dependencies:
       '@streetui/core':
@@ -123,6 +449,18 @@ importers:
       '@streetui/state':
         specifier: workspace:*
         version: link:../state
+    devDependencies:
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  packages/context:
     devDependencies:
       tsup:
         specifier: '*'
@@ -223,11 +561,43 @@ importers:
         specifier: '*'
         version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
 
+  packages/forms:
+    dependencies:
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../state
+    devDependencies:
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
   packages/graph:
     dependencies:
       '@streetui/core':
         specifier: workspace:*
         version: link:../core
+    devDependencies:
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  packages/i18n:
+    dependencies:
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../state
     devDependencies:
       tsup:
         specifier: '*'
@@ -265,6 +635,43 @@ importers:
       '@streetui/scheduler':
         specifier: workspace:*
         version: link:../scheduler
+      '@streetui/state':
+        specifier: workspace:*
+        version: link:../state
+    devDependencies:
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      tsup:
+        specifier: '*'
+        version: 8.3.5(postcss@8.5.28)(typescript@5.6.3)
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
+  packages/router:
+    dependencies:
+      '@streetui/compiler':
+        specifier: workspace:*
+        version: link:../compiler
+      '@streetui/core':
+        specifier: workspace:*
+        version: link:../core
+      '@streetui/dom':
+        specifier: workspace:*
+        version: link:../dom
+      '@streetui/dsl':
+        specifier: workspace:*
+        version: link:../dsl
+      '@streetui/renderer':
+        specifier: workspace:*
+        version: link:../renderer
+      '@streetui/runtime':
+        specifier: workspace:*
+        version: link:../runtime
       '@streetui/state':
         specifier: workspace:*
         version: link:../state
@@ -363,6 +770,9 @@ importers:
       '@streetui/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@streetui/scheduler':
+        specifier: workspace:*
+        version: link:../scheduler
       '@streetui/state':
         specifier: workspace:*
         version: link:../state
@@ -798,6 +1208,11 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
+
+  '@playwright/test@1.63.0':
+    resolution: {integrity: sha512-oxMK4vllB9RK5NQ2l1pq1IfOf2AvnEuj/vYGDj0H2nMtmtZpKtCwt/l00GEO6xjGfpBNAvjovvYdCm50dRQkpQ==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   '@rollup/rollup-android-arm-eabi@4.63.4':
     resolution: {integrity: sha512-I+BSHzTAhKN2n7ZwGZsegGcZjDpLqFOMAtJz/u6uFGe0pUFbq56dEHjqJV/ZUdRJtNXNxA+hREUatZBvMR3Oiw==}
@@ -1534,6 +1949,16 @@ packages:
     resolution: {integrity: sha512-TfySrs/5nm8fQJDcBDuUng3VOUKsd7S+zqvbOTiGXHfxX4wK31ard+hoNuvkicM/2YFzlpDgABOevKSsB4G/FA==}
     engines: {node: '>= 6'}
 
+  playwright-core@1.63.0:
+    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.63.0:
+    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   postcss-load-config@6.0.1:
     resolution: {integrity: sha512-oPtTM4oerL+UXmx+93ytZVN82RrlY/wPUV8IeDxFrzIjXOLF1pN+EmKPLbubvKHT2HC20xXsCAH2Z+CKV6Oz/g==}
     engines: {node: '>= 18'}
@@ -2158,6 +2583,10 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
+
+  '@playwright/test@1.63.0':
+    dependencies:
+      playwright: 1.63.0
 
   '@rollup/rollup-android-arm-eabi@4.63.4':
     optional: true
@@ -2903,6 +3332,12 @@ snapshots:
   picomatch@4.0.7: {}
 
   pirates@4.0.7: {}
+
+  playwright-core@1.63.0: {}
+
+  playwright@1.63.0:
+    dependencies:
+      playwright-core: 1.63.0
 
   postcss-load-config@6.0.1(postcss@8.5.28):
     dependencies:
