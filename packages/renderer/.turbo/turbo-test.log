@@ -1,0 +1,21 @@
+
+> @streetui/renderer@1.0.0 test /home/error51/Downloads/StreetUI/packages/renderer
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/renderer
+
+ ✓ src/ssr.test.ts  (13 tests) 42ms
+ ✓ src/a11y.test.ts  (6 tests) 33ms
+ ✓ src/error-boundary.test.ts  (7 tests) 42ms
+ ✓ src/public-api.stability.test.ts  (4 tests) 39ms
+ ✓ src/api-improvements.test.ts  (27 tests) 68ms
+ ✓ src/hydrate.test.ts  (19 tests) 94ms
+ ✓ src/renderer.test.ts  (42 tests) 119ms
+ ✓ src/memory.test.ts  (4 tests) 157ms
+
+ Test Files  8 passed (8)
+      Tests  122 passed (122)
+   Start at  12:25:12
+   Duration  1.89s (transform 1.19s, setup 0ms, collect 3.05s, tests 594ms, environment 5.80s, prepare 1.76s)
+
