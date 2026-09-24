@@ -46,21 +46,26 @@ export function makeCountingAdapter(): CountingAdapter {
     insertBefore: 0, removeChild: 0,
   };
   const b = base as unknown as Record<string, (...a: unknown[]) => unknown>;
+  const call = (k: string, ...a: unknown[]): unknown => {
+    const fn = b[k];
+    if (typeof fn !== 'function') throw new Error(`adapter missing ${k}`);
+    return fn.apply(base, a);
+  };
   const adapter: Record<string, unknown> = {
-    createElement: (t: unknown) => { c.createElement++; return b.createElement(t); },
-    createTextNode: (d: unknown) => { c.createTextNode++; return b.createTextNode(d); },
-    createComment: (d: unknown) => { c.createComment++; return b.createComment(d); },
-    appendChild: (p: unknown, ch: unknown) => { c.appendChild++; return b.appendChild(p, ch); },
-    insertBefore: (p: unknown, ch: unknown, r: unknown) => { c.insertBefore++; return b.insertBefore(p, ch, r); },
-    removeChild: (p: unknown, ch: unknown) => { c.removeChild++; return b.removeChild(p, ch); },
-    setAttribute: (e: unknown, n: unknown, v: unknown) => { c.setAttribute++; return b.setAttribute(e, n, v); },
-    removeAttribute: (e: unknown, n: unknown) => { c.removeAttribute++; return b.removeAttribute(e, n); },
-    setProperty: (e: unknown, n: unknown, v: unknown) => { c.setProperty++; return b.setProperty(e, n, v); },
-    setTextContent: (n: unknown, t: unknown) => { c.setTextContent++; return b.setTextContent(n, t); },
+    createElement: (t: unknown) => { c.createElement++; return call('createElement', t); },
+    createTextNode: (d: unknown) => { c.createTextNode++; return call('createTextNode', d); },
+    createComment: (d: unknown) => { c.createComment++; return call('createComment', d); },
+    appendChild: (p: unknown, ch: unknown) => { c.appendChild++; return call('appendChild', p, ch); },
+    insertBefore: (p: unknown, ch: unknown, r: unknown) => { c.insertBefore++; return call('insertBefore', p, ch, r); },
+    removeChild: (p: unknown, ch: unknown) => { c.removeChild++; return call('removeChild', p, ch); },
+    setAttribute: (e: unknown, n: unknown, v: unknown) => { c.setAttribute++; return call('setAttribute', e, n, v); },
+    removeAttribute: (e: unknown, n: unknown) => { c.removeAttribute++; return call('removeAttribute', e, n); },
+    setProperty: (e: unknown, n: unknown, v: unknown) => { c.setProperty++; return call('setProperty', e, n, v); },
+    setTextContent: (n: unknown, t: unknown) => { c.setTextContent++; return call('setTextContent', n, t); },
   };
   for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(base))) {
     if (k !== 'constructor' && typeof b[k] === 'function' && !(k in adapter)) {
-      adapter[k] = (...a: unknown[]) => b[k](...a);
+      adapter[k] = (...a: unknown[]) => call(k, ...a);
     }
   }
   return {
