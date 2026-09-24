@@ -10,14 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@streetui/compiler": "__FRAMEWORK_VERSION__",
-    "@streetui/dom": "__FRAMEWORK_VERSION__",
-    "@streetui/dsl": "__FRAMEWORK_VERSION__",
-    "@streetui/renderer": "__FRAMEWORK_VERSION__",
-    "@streetui/state": "__FRAMEWORK_VERSION__"
+    "streetui": "__FRAMEWORK_VERSION__"
   },
   "devDependencies": {
-    "@streetui/cli": "__FRAMEWORK_VERSION__",
     "typescript": "^5.6.3"
   },
   "engines": {
