@@ -94,7 +94,7 @@ const output = {
 
 const outPath = typeof args.out === 'string'
   ? args.out
-  : path.resolve(__dirname, 'results', 'v1.3', 'streetui-node.json');
+  : path.resolve(__dirname, '..', '..', 'benchmarks', 'results', 'v1.3', 'streetui-node.json');
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 fs.writeFileSync(outPath, JSON.stringify(output, null, 2) + '\n');
 
