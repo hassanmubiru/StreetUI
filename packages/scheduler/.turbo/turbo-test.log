@@ -19,10 +19,10 @@ stderr | src/scheduler.test.ts > Scheduler > isolates job failures
     at Proxy.<anonymous> (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/@vitest+expect@2.1.4/node_modules/@vitest/expect/dist/index.js:931:17)
     at Proxy.methodWrapper (file:///home/error51/Downloads/StreetUI/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)
 
- ✓ src/scheduler.test.ts  (14 tests) 15ms
+ ✓ src/scheduler.test.ts  (14 tests) 11ms
 
  Test Files  2 passed (2)
       Tests  15 passed (15)
-   Start at  21:42:16
-   Duration  341ms (transform 64ms, setup 0ms, collect 75ms, tests 17ms, environment 0ms, prepare 167ms)
+   Start at  21:45:00
+   Duration  299ms (transform 60ms, setup 0ms, collect 75ms, tests 14ms, environment 0ms, prepare 141ms)
 
