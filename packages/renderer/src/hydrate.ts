@@ -22,6 +22,7 @@ import type { RenderContext } from './render-context.js';
 import { NodeInstance } from './node-instance.js';
 import { wireEvents } from './events.js';
 import { resolveTag } from './tag-map.js';
+import { formatHydrationDiagnostic } from './hydration-diagnostics.js';
 import {
   mountNode,
   wireSignalBindings,
