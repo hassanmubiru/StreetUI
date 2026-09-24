@@ -1,0 +1,49 @@
+{
+  "//": "v1.3 cross-framework comparison. StreetUI rows are REAL measurements taken against the real example application (examples/streetui-performance-app) in Node + happy-dom (NOT a browser) plus MINIFIED bundle sizes. Every competitor row is BLOCKED: frameworks cannot be installed offline (E403) and there is no real browser. THERE IS NO COMPETITOR DATA. Do NOT read StreetUI's numbers as beating, matching, or losing to any competitor — no comparison is possible and none is claimed. StreetUI's own timings are happy-dom/Node figures and are NOT browser numbers (those are BLOCKED, see streetui-browser.json).",
+  "schema": "streetui-comparison/v1.3",
+  "methodology": "benchmarks/methodology.md",
+  "generatedFrom": {
+    "streetuiNode": "benchmarks/results/v1.3/streetui-node.json",
+    "streetuiBundle": "benchmarks/results/v1.3/bundle.json",
+    "streetuiBrowser": "benchmarks/results/v1.3/streetui-browser.json (BLOCKED)",
+    "competitors": "benchmarks/results/v1.3/competitors.json (BLOCKED)"
+  },
+  "workloadNote": "The StreetUI numbers below come from a REAL multi-route application with a 10,000-row users route and 1,000 interactive controls — a different, larger workload than the v1.2 synthetic scenarios. They are not comparable to the v1.2 comparison.json rows.",
+  "frameworks": [
+    {
+      "framework": "streetui",
+      "version": "1.2.0",
+      "runtime": "node + happy-dom (NOT a browser)",
+      "realApp_initialMountUsers10k_ms": 2101.4203,
+      "realApp_initialMountUsers10k_domNodes": 150032,
+      "realApp_routerFourNavigations_ms": 418.1259,
+      "fineGrained_toggle1of1000_domWrites": 2,
+      "fineGrained_toggle1of100_domWrites": 2,
+      "forms_typeOneField_structuralWrites": 7,
+      "hydration_nodesCreated": 0,
+      "keyedList_searchNarrow_structuralWrites": 10004,
+      "keyedList_reverse_structuralWrites": 10002,
+      "bundle_minimal_gzip": 8606,
+      "bundle_typical_gzip": 15365,
+      "bundle_full_gzip": 20105,
+      "bundle_realApp_gzip": 15690,
+      "bundle_unminifiedFullBarrel_gzip": 28764,
+      "browser_metrics": "BLOCKED (no Chromium/Playwright)",
+      "note": "happy-dom timings are relative/indicative, not browser numbers; DOM-mutation counts are exact (single-adapter choke point). All framework invariants hold."
+    },
+    { "framework": "react", "version": "see framework-versions.json (19.1.0)", "status": "BLOCKED",
+      "realApp_initialMountUsers10k_ms": null, "fineGrained_toggle1of1000_domWrites": null,
+      "hydration_nodesCreated": null, "bundle_typical_gzip": null, "browser_metrics": "BLOCKED" },
+    { "framework": "vue", "version": "see framework-versions.json (3.5.13)", "status": "BLOCKED",
+      "realApp_initialMountUsers10k_ms": null, "fineGrained_toggle1of1000_domWrites": null,
+      "hydration_nodesCreated": null, "bundle_typical_gzip": null, "browser_metrics": "BLOCKED" },
+    { "framework": "svelte", "version": "see framework-versions.json (5.19.0)", "status": "BLOCKED",
+      "realApp_initialMountUsers10k_ms": null, "fineGrained_toggle1of1000_domWrites": null,
+      "hydration_nodesCreated": null, "bundle_typical_gzip": null, "browser_metrics": "BLOCKED" },
+    { "framework": "solid", "version": "see framework-versions.json (1.9.3)", "status": "BLOCKED",
+      "realApp_initialMountUsers10k_ms": null, "fineGrained_toggle1of1000_domWrites": null,
+      "hydration_nodesCreated": null, "bundle_typical_gzip": null, "browser_metrics": "BLOCKED" }
+  ],
+  "ranking": "NONE — insufficient data. No winner or ordering is asserted because no competitor could be measured.",
+  "timestamp": "2026-09-24T17:45:00.000Z"
+}

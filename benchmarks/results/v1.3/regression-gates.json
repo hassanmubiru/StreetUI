@@ -1,0 +1,50 @@
+{
+  "schema": "streetui-regression/v1.3",
+  "status": "PASS",
+  "comparedAgainst": "measured v1.2 baseline (benchmarks/results/streetui.json + baseline-v1.2-start.json)",
+  "note": "Only invariants and bundle size are gated. Absolute timings are NOT gated: the v1.3 workload is a different, larger real application (a 10,000-row route in a full multi-route app) than the v1.2 synthetic scenarios, so cross-version timing deltas would be meaningless. See methodology.md.",
+  "v12Baseline": {
+    "bundleUnminifiedFullBarrelGzip": 28764,
+    "singleUpdateDomMutations": 1,
+    "hydrationNodesCreated": 0
+  },
+  "gates": [
+    {
+      "id": "hydration_creates_zero_nodes",
+      "pass": true,
+      "detail": "v1.3 nodesCreatedDuringHydration must be 0 (v1.2 baseline 0)"
+    },
+    {
+      "id": "fine_grained_update_independent_of_N",
+      "pass": true,
+      "detail": "toggling 1 of N controls writes a constant number of regions regardless of N (fine-grained property)"
+    },
+    {
+      "id": "forms_field_isolation",
+      "pass": true,
+      "detail": "typing one field does not mutate an unrelated field (DOM-level proof)"
+    },
+    {
+      "id": "lifecycle_no_node_drift",
+      "pass": true,
+      "detail": "repeated mount/unmount cycles create an identical node count each cycle"
+    },
+    {
+      "id": "lifecycle_clean_unmount",
+      "pass": true,
+      "detail": "unmount leaves zero orphan nodes"
+    },
+    {
+      "id": "router_transitions_correct",
+      "pass": true,
+      "detail": "all router transitions render the correct route"
+    },
+    {
+      "id": "bundle_no_regression",
+      "pass": true,
+      "detail": "unminified full-barrel gzip must be <= v1.2 baseline 28764; measured 28764"
+    }
+  ],
+  "allGatesPass": true,
+  "timestamp": "2026-09-24T17:47:01.403Z"
+}
