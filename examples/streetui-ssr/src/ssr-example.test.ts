@@ -8,8 +8,8 @@
  * values), and every interaction drives the adopted nodes in place.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
-import { renderToString, serializeState } from '@streetui/renderer';
+import { resetIdCounter } from 'streetui';
+import { renderToString, serializeState } from 'streetui';
 import {
   createState,
   compileApp,

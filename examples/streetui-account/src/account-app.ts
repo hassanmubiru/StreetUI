@@ -15,18 +15,18 @@
  * the client, so translations and a11y ids must be deterministic — they are.
  */
 
-import { signal, derived, resource, type Resource } from '@streetui/state';
-import type { ContainerDSL } from '@streetui/dsl';
-import { a11yIds } from '@streetui/core';
+import { signal, derived, resource, type Resource } from 'streetui';
+import type { ContainerDSL } from 'streetui';
+import { a11yIds } from 'streetui';
 import {
   createForm,
   required,
   email as emailValidator,
   minLength,
   type Form,
-} from '@streetui/forms';
-import { createI18n, type I18n } from '@streetui/i18n';
-import { createContext, type Context } from '@streetui/context';
+} from 'streetui';
+import { createI18n, type I18n } from 'streetui';
+import { createContext, type Context } from 'streetui';
 import {
   createRouter,
   mountRouter,
@@ -35,7 +35,7 @@ import {
   type RouteDefinition,
   type RouteContext,
   type RouterHistory,
-} from '@streetui/router';
+} from 'streetui';
 import type { Plan } from './api-server.js';
 
 // ── i18n messages ───────────────────────────────────────────────────────────────
@@ -185,7 +185,7 @@ export interface AccountAppOptions {
 
 function pageLayout(
   scope: ContainerDSL,
-  opts: { id: string; title: import('@streetui/dsl').BindableText },
+  opts: { id: string; title: import('streetui').BindableText },
   body: (content: ContainerDSL) => void,
 ): void {
   scope.section(

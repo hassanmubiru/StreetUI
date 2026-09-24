@@ -2,8 +2,8 @@
  * Browser entry — read the SSR island, rebuild the same deps, hydrate the
  * server DOM in place. Auto-boots in a real browser; callable from tests.
  */
-import { createRenderer, readState } from '@streetui/renderer';
-import { BrowserDOMAdapter } from '@streetui/dom';
+import { createRenderer, readState } from 'streetui';
+import { BrowserDOMAdapter } from 'streetui';
 import { compileApp } from './index.js';
 import { createDeps, STATE_KEY, type AppDeps, type AppSnapshot, type Theme } from './deps.js';
 

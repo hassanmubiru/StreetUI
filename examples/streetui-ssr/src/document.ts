@@ -6,7 +6,7 @@
  * Pure server-side: no window, no document, no DOM globals.
  */
 
-import { renderToString, serializeState } from '@streetui/renderer';
+import { renderToString, serializeState } from 'streetui';
 import { createState, compileApp, snapshot, STATE_KEY, type AppSnapshot } from './app.js';
 
 /**

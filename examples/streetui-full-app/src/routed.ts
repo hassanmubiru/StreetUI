@@ -3,7 +3,7 @@
  * two routes. Reuses the same DSL building blocks. Supports SSR + hydration
  * (mountRouter's `hydrate` option) and live client-side navigation.
  */
-import { createRouter, mountRouter, routerOutlet, createMemoryHistory, type RouteDefinition, type MountedRouter } from '@streetui/router';
+import { createRouter, mountRouter, routerOutlet, createMemoryHistory, type RouteDefinition, type MountedRouter } from 'streetui';
 import { createDeps } from './deps.js';
 import { buildApp } from './app.js';
 

@@ -6,12 +6,12 @@
  * Runs under happy-dom so real DOM APIs are available.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
+import { resetIdCounter } from 'streetui';
 import { createCounterApp } from './counter-app.js';
-import { compile } from '@streetui/compiler';
-import { createRenderer } from '@streetui/renderer';
-import { createRuntime } from '@streetui/runtime';
-import { BrowserDOMAdapter } from '@streetui/dom';
+import { compile } from 'streetui';
+import { createRenderer } from 'streetui';
+import { createRuntime } from 'streetui';
+import { BrowserDOMAdapter } from 'streetui';
 
 beforeEach(() => resetIdCounter());
 

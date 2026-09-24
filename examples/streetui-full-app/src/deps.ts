@@ -4,10 +4,10 @@
  * every StreetUI system: signals, i18n, context, forms + validators, and a
  * server-seedable resource.
  */
-import { signal, resource, type Signal, type Resource } from '@streetui/state';
-import { createI18n, type I18n } from '@streetui/i18n';
-import { createForm, required, minLength, email, type Form } from '@streetui/forms';
-import { createContext } from '@streetui/context';
+import { signal, resource, type Signal, type Resource } from 'streetui';
+import { createI18n, type I18n } from 'streetui';
+import { createForm, required, minLength, email, type Form } from 'streetui';
+import { createContext } from 'streetui';
 
 export interface Theme {
   readonly name: 'light' | 'dark';

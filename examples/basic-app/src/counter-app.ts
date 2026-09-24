@@ -14,11 +14,11 @@
  * React, no virtual DOM, no third-party rendering library.
  */
 
-import { signal } from '@streetui/state';
-import { streetui } from '@streetui/dsl';
-import { compile } from '@streetui/compiler';
-import { createRuntime } from '@streetui/runtime';
-import { createRenderer } from '@streetui/renderer';
+import { signal } from 'streetui';
+import { streetui } from 'streetui';
+import { compile } from 'streetui';
+import { createRuntime } from 'streetui';
+import { createRenderer } from 'streetui';
 
 export function createCounterApp() {
   // ── Reactive state ──────────────────────────────────────────────────────────

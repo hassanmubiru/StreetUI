@@ -18,8 +18,8 @@
  * reactive lists (`listOf`) and a two-way bound input (`bind`).
  */
 
-import { signal, derived, type Signal } from '@streetui/state';
-import type { ContainerDSL, PageDSL } from '@streetui/dsl';
+import { signal, derived, type Signal } from 'streetui';
+import type { ContainerDSL, PageDSL } from 'streetui';
 import {
   createRouter,
   mountRouter,
@@ -28,7 +28,7 @@ import {
   type RouteDefinition,
   type RouteContext,
   type RouterHistory,
-} from '@streetui/router';
+} from 'streetui';
 
 // ── Static content data ────────────────────────────────────────────────────────
 interface DocSection {

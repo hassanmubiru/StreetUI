@@ -6,8 +6,8 @@
  *   - forms          a validated sign-up form (name + email)
  *   - resource       a server-seedable user, shown when loaded
  */
-import { type PageDSL } from '@streetui/dsl';
-import { derived } from '@streetui/state';
+import { type PageDSL } from 'streetui';
+import { derived } from 'streetui';
 import { ThemeContext, type AppDeps } from './deps.js';
 
 export function buildApp(page: PageDSL, deps: AppDeps): void {

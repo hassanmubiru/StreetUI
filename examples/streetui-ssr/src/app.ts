@@ -11,9 +11,9 @@
  * instead of recreating it.
  */
 
-import { streetui, type PageDSL } from '@streetui/dsl';
-import { signal, derived, type Signal } from '@streetui/state';
-import { compile, type CompiledApplication } from '@streetui/compiler';
+import { streetui, type PageDSL } from 'streetui';
+import { signal, derived, type Signal } from 'streetui';
+import { compile, type CompiledApplication } from 'streetui';
 
 export interface AppState {
   readonly count: Signal<number>;

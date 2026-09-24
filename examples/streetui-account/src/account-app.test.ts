@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
-import { createMemoryHistory } from '@streetui/router';
-import type { Form } from '@streetui/forms';
+import { resetIdCounter } from 'streetui';
+import { createMemoryHistory } from 'streetui';
+import type { Form } from 'streetui';
 import { createAccountApi, type AccountApi } from './api-server.js';
 import {
   mountAccountApp,

@@ -3,8 +3,8 @@
  * The ThemeContext must be active while the page builder runs, so we compile
  * inside `ThemeContext.provide(...)`.
  */
-import { streetui } from '@streetui/dsl';
-import { compile, type CompiledApplication } from '@streetui/compiler';
+import { streetui } from 'streetui';
+import { compile, type CompiledApplication } from 'streetui';
 import { buildApp } from './app.js';
 import { ThemeContext, type AppDeps, type Theme } from './deps.js';
 

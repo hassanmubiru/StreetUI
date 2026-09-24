@@ -7,8 +7,8 @@
  * route cleanup. Uses an in-memory history so navigation is deterministic.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
-import { createMemoryHistory } from '@streetui/router';
+import { resetIdCounter } from 'streetui';
+import { createMemoryHistory } from 'streetui';
 import { mountDocsApp } from './docs-app.js';
 
 beforeEach(() => resetIdCounter());

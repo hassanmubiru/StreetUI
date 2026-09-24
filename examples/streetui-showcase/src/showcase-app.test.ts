@@ -9,11 +9,11 @@
  * rendering, event handlers, and unmount/cleanup.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
+import { resetIdCounter } from 'streetui';
 import { createShowcaseApp } from './showcase-app.js';
-import { createRenderer } from '@streetui/renderer';
-import { createRuntime } from '@streetui/runtime';
-import { BrowserDOMAdapter } from '@streetui/dom';
+import { createRenderer } from 'streetui';
+import { createRuntime } from 'streetui';
+import { BrowserDOMAdapter } from 'streetui';
 
 beforeEach(() => resetIdCounter());
 

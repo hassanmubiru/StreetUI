@@ -16,8 +16,8 @@
  *   *                404
  */
 
-import { signal, derived, resource, type Resource } from '@streetui/state';
-import type { ContainerDSL } from '@streetui/dsl';
+import { signal, derived, resource, type Resource } from 'streetui';
+import type { ContainerDSL } from 'streetui';
 import {
   createRouter,
   mountRouter,
@@ -26,7 +26,7 @@ import {
   type RouteDefinition,
   type RouteContext,
   type RouterHistory,
-} from '@streetui/router';
+} from 'streetui';
 import type { Product } from './api-server.js';
 
 // ── API client (transport-agnostic Promise-returning functions) ────────────────

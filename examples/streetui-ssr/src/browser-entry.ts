@@ -10,8 +10,8 @@
  * place.
  */
 
-import { createRenderer, readState } from '@streetui/renderer';
-import { BrowserDOMAdapter } from '@streetui/dom';
+import { createRenderer, readState } from 'streetui';
+import { BrowserDOMAdapter } from 'streetui';
 import { createState, compileApp, STATE_KEY, type AppSnapshot, type AppState } from './app.js';
 
 export interface HydrateResult {

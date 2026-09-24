@@ -4,8 +4,8 @@
  * navigation — all composed in one app.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
-import { renderToString, serializeState } from '@streetui/renderer';
+import { resetIdCounter } from 'streetui';
+import { renderToString, serializeState } from 'streetui';
 import { compileApp } from './index.js';
 import { createDeps, snapshot, STATE_KEY, type AppSnapshot, type User } from './deps.js';
 import { hydrateApp } from './browser-entry.js';

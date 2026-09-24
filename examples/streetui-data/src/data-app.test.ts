@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { resetIdCounter } from '@streetui/core';
-import type { Resource } from '@streetui/state';
-import { createMemoryHistory } from '@streetui/router';
+import { resetIdCounter } from 'streetui';
+import type { Resource } from 'streetui';
+import { createMemoryHistory } from 'streetui';
 import { createProductApi, type Product, type ProductApi } from './api-server.js';
 import { mountDataApp, type MountedDataApp } from './data-app.js';
 

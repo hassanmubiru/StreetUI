@@ -11,14 +11,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@streetui/core": "workspace:*",
-    "@streetui/state": "workspace:*",
-    "@streetui/dsl": "workspace:*",
-    "@streetui/compiler": "workspace:*",
-    "@streetui/runtime": "workspace:*",
-    "@streetui/renderer": "workspace:*",
-    "@streetui/dom": "workspace:*",
-    "@streetui/router": "workspace:*"
+    "streetui": "workspace:*"
   },
   "devDependencies": {
     "typescript": "*",

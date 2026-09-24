@@ -14,12 +14,12 @@
  * integration tests can drive the app exactly like a user would.
  */
 
-import { signal, derived, type Signal } from '@streetui/state';
-import { streetui } from '@streetui/dsl';
-import { compile } from '@streetui/compiler';
-import { createRuntime } from '@streetui/runtime';
-import { createRenderer } from '@streetui/renderer';
-import { BrowserDOMAdapter } from '@streetui/dom';
+import { signal, derived, type Signal } from 'streetui';
+import { streetui } from 'streetui';
+import { compile } from 'streetui';
+import { createRuntime } from 'streetui';
+import { createRenderer } from 'streetui';
+import { BrowserDOMAdapter } from 'streetui';
 
 export interface Feature {
   readonly id: number;
