@@ -39,8 +39,9 @@ console.log('📦 StreetUI 1.0.0 — npm publish');
 console.log('================================');
 if (DRY_RUN) console.log('⚠️  DRY RUN — no packages will be published\n');
 
-// ── Publish order: leaves → dependents → CLI last (has native esbuild dep) ──
-// Core primitives first, then compilers/renderers, then integrations, then CLI.
+// ── Publish order: leaves → dependents → CLI last, unified streetui last ────
+// Core primitives first, then compilers/renderers, then integrations, then CLI,
+// then the unified streetui package which bundles everything.
 const PUBLISH_ORDER = [
   // Tier 1 — zero internal deps
   '@streetui/core',
@@ -63,8 +64,10 @@ const PUBLISH_ORDER = [
   '@streetui/context',
   '@streetui/devtools',
   '@streetui/testing',
-  // CLI last (native binary dep via esbuild)
+  // CLI (native binary dep via esbuild)
   '@streetui/cli',
+  // Unified single-package consumer entry (bundles everything above)
+  'streetui',
 ];
 
 // ── Pre-check 1: npm auth ────────────────────────────────────────────────────
