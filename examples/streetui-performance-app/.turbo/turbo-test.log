@@ -1,0 +1,36 @@
+
+> @streetui/example-performance-app@1.3.0 test /home/error51/Downloads/StreetUI/examples/streetui-performance-app
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-performance-app
+
+ ❯ src/perf-app.test.ts  (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/perf-app.test.ts [ src/perf-app.test.ts ]
+Error: Failed to resolve import "streetui" from "src/perf-app.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /home/error51/Downloads/StreetUI/examples/streetui-performance-app/src/perf-app.test.ts:2:50
+  1  |  import { describe, it, expect } from "vitest";
+  2  |  import { createRenderer, BrowserDOMAdapter } from "streetui";
+     |                                                     ^
+  3  |  import { createDeps, snapshot } from "./deps.js";
+  4  |  import { compilePage } from "./index.js";
+ ❯ TransformPluginContext._formatError ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41
+ ❯ TransformPluginContext.error ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16
+ ❯ normalizeUrl ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23
+ ❯ ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+ ❯ TransformPluginContext.transform ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7
+ ❯ PluginContainer.transform ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18
+ ❯ loadAndTransform ../../node_modules/.pnpm/vite@5.4.21_@types+node@26.6.2/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  19:55:35
+   Duration  2.14s (transform 64ms, setup 0ms, collect 0ms, tests 0ms, environment 920ms, prepare 317ms)
+
+ ELIFECYCLE  Test failed. See above for more details.
