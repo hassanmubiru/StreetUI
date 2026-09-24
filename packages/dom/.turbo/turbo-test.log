@@ -1,16 +1,16 @@
 
-> @streetui/dom@1.2.0 test /home/error51/Downloads/StreetUI/packages/dom
+> @streetui/dom@1.3.0 test /home/error51/Downloads/StreetUI/packages/dom
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dom
 
- ✓ src/dom.test.ts  (15 tests) 17ms
- ✓ src/focus.test.ts  (5 tests) 23ms
+ ✓ src/dom.test.ts  (15 tests) 13ms
  ✓ src/public-api.stability.test.ts  (3 tests) 4ms
+ ✓ src/focus.test.ts  (5 tests) 12ms
 
  Test Files  3 passed (3)
       Tests  23 passed (23)
-   Start at  20:11:28
-   Duration  853ms (transform 122ms, setup 0ms, collect 158ms, tests 43ms, environment 997ms, prepare 345ms)
+   Start at  21:42:23
+   Duration  643ms (transform 115ms, setup 0ms, collect 170ms, tests 29ms, environment 812ms, prepare 202ms)
 

@@ -1,15 +1,15 @@
 
-> @streetui/i18n@1.2.0 test /home/error51/Downloads/StreetUI/packages/i18n
+> @streetui/i18n@1.3.0 test /home/error51/Downloads/StreetUI/packages/i18n
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/i18n
 
- ✓ src/public-api.stability.test.ts  (3 tests) 9ms
- ✓ src/i18n.test.ts  (14 tests) 18ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 5ms
+ ✓ src/i18n.test.ts  (14 tests) 6ms
 
  Test Files  2 passed (2)
       Tests  17 passed (17)
-   Start at  20:11:36
-   Duration  508ms (transform 135ms, setup 0ms, collect 188ms, tests 27ms, environment 1ms, prepare 228ms)
+   Start at  21:42:29
+   Duration  359ms (transform 85ms, setup 0ms, collect 107ms, tests 11ms, environment 0ms, prepare 146ms)
 
