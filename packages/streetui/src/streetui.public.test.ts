@@ -75,7 +75,9 @@ describe('streetui — reactivity', () => {
     const b = signal(2);
     const sum = derived(() => a.get() + b.get());
     const seen: number[] = [];
-    const dispose = effect(() => seen.push(sum.get()));
+    const dispose = effect(() => {
+      seen.push(sum.get());
+    });
     expect(sum.get()).toBe(3);
     batch(() => {
       a.set(10);
