@@ -1,0 +1,20 @@
+{
+  "//": "DEV-ONLY benchmark artifact — Solid 1.9 competitor. These deps MUST NEVER be added to the `streetui` runtime. Exact pins only (no ^/~).",
+  "//buildTooling": "vite-plugin-solid is the REQUIRED Solid compiler (JSX + fine-grained reactivity cannot run uncompiled); it is not in framework-versions.json's framework pin set. Resolve it to the release compatible with solid-js 1.9 + vite 6 when the registry is reachable; the pin below is a best-known value.",
+  "name": "@bench-competitor/solid",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Solid 1.9 side of the StreetUI cross-framework benchmark (scenarios A-H). Dev-only; never shipped.",
+  "scripts": {
+    "build": "vite build",
+    "build:ssr": "vite build --ssr src/ssr.jsx"
+  },
+  "dependencies": {
+    "solid-js": "1.9.3"
+  },
+  "devDependencies": {
+    "vite-plugin-solid": "2.11.0",
+    "vite": "6.0.7"
+  }
+}

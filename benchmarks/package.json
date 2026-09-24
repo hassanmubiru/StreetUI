@@ -1,0 +1,15 @@
+{
+  "//": "DEV-ONLY orchestrator tooling for the competitor benchmark harness. These deps MUST NEVER be added to the `streetui` runtime. `npm install` here makes benchmarks/run-competitors.mjs runnable (it drives each competitor's own vite build/preview + Playwright). Exact pins only (no ^/~).",
+  "name": "@streetui/benchmark-competitors-orchestrator",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Runs the cross-framework competitor benchmark (scenarios A-H) and writes results/*.json. Dev-only; never shipped.",
+  "scripts": {
+    "bench:competitors": "node run-competitors.mjs"
+  },
+  "devDependencies": {
+    "vite": "6.0.7",
+    "playwright": "1.49.1"
+  }
+}
