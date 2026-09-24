@@ -9,7 +9,12 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "dev": "turbo run dev --parallel",
-    "clean": "turbo run clean && rm -rf node_modules"
+    "clean": "turbo run clean && rm -rf node_modules",
+    "release:check": "node scripts/release-check.mjs",
+    "release:meta": "node scripts/apply-publish-metadata.mjs",
+    "release:pack": "node scripts/pack-tarballs.mjs",
+    "release:smoke": "node scripts/consumer-smoke.mjs",
+    "readmes": "node scripts/generate-readmes.mjs"
   },
   "devDependencies": {
     "turbo": "2.3.3",
