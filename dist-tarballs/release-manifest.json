@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-09-24T09:38:55.204Z",
-  "gitCommit": "1787f1eb867fc9e54ccb7f1686c8e1aeb920c45b",
+  "generatedAt": "2026-09-24T09:39:41.963Z",
+  "gitCommit": "47cedf58fe67f46b868a9677eeb94d9359547bab",
   "channel": "stable",
-  "packageCount": 17,
+  "packageCount": 18,
   "versions": [
     "1.0.0"
   ],
@@ -635,6 +635,55 @@
         }
       },
       "externalDependencies": {},
+      "distPresent": true
+    },
+    {
+      "name": "streetui",
+      "version": "1.0.0",
+      "private": false,
+      "files": [
+        "dist",
+        "templates",
+        "README.md",
+        "LICENSE"
+      ],
+      "exports": {
+        ".": {
+          "import": {
+            "types": "./dist/index.d.ts",
+            "default": "./dist/index.js"
+          },
+          "require": {
+            "types": "./dist/index.d.cts",
+            "default": "./dist/index.cjs"
+          }
+        },
+        "./server": {
+          "import": {
+            "types": "./dist/server.d.ts",
+            "default": "./dist/server.js"
+          },
+          "require": {
+            "types": "./dist/server.d.cts",
+            "default": "./dist/server.cjs"
+          }
+        },
+        "./testing": {
+          "import": {
+            "types": "./dist/testing.d.ts",
+            "default": "./dist/testing.js"
+          },
+          "require": {
+            "types": "./dist/testing.d.cts",
+            "default": "./dist/testing.cjs"
+          }
+        },
+        "./package.json": "./package.json"
+      },
+      "internalDependencies": {},
+      "externalDependencies": {
+        "esbuild": "0.24.2"
+      },
       "distPresent": true
     }
   ]
