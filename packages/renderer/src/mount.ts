@@ -75,8 +75,14 @@ export function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    // Reactive text binding
-    wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, el, textNode));
+    // Reactive text binding — only build the update closure when the node has
+    // bindings. wireSignalBindings early-returns on empty stateRefs, so for a
+    // static text node (the common case in a large initial render) the
+    // textUpdate closure would be allocated and thrown away: avoidable GC
+    // pressure on the hottest mount path.
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, el, textNode));
+    }
 
     dom.appendChild(parentDom, el);
     return instance;
@@ -95,7 +101,9 @@ export function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    wireSignalBindings(ctx, graphNode, instance, headingUpdate(dom, el));
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance, headingUpdate(dom, el));
+    }
 
     dom.appendChild(parentDom, el);
     return instance;
@@ -116,7 +124,9 @@ export function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    wireSignalBindings(ctx, graphNode, instance, inputUpdate(dom, el));
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance, inputUpdate(dom, el));
+    }
 
     dom.appendChild(parentDom, el);
     return instance;
@@ -175,7 +185,9 @@ export function mountNode(
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
 
-    wireSignalBindings(ctx, graphNode, instance, buttonUpdate(dom, el));
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance, buttonUpdate(dom, el));
+    }
 
     dom.appendChild(parentDom, el);
     return instance;

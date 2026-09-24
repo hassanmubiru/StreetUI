@@ -238,3 +238,51 @@ describe('streetui/testing — testing helpers', () => {
     result.unmount();
   });
 });
+
+describe('streetui/testing — compiler diagnostics (v1.2 §14)', () => {
+  it('inspects a compiled graph through the public testing subpath', async () => {
+    // The diagnostic inspection API is a DEV tool: it is reachable from the
+    // `streetui/testing` subpath but deliberately kept OFF the runtime barrel
+    // so it tree-shakes out of shipped apps.
+    const { inspectCompilation, formatInspection, analyzeGraph } = await import(
+      // eslint-disable-next-line import/no-unresolved
+      'streetui/testing'
+    );
+    const label = signal('tick');
+    const app = streetui.app({ name: 'diag-demo', version: '3.4.0' });
+    app.page('home', (p) =>
+      p.section('main', (s) => {
+        s.text('static', { class: 'a' });
+        s.text(label, { class: 'live' });
+        s.button('go', { id: 'b' });
+      }),
+    );
+    const { graph } = compile(app);
+
+    const insp = inspectCompilation(graph);
+    expect(insp.name).toBe('diag-demo');
+    expect(insp.version).toBe('3.4.0');
+    expect(insp.summary.staticRatio).toBeGreaterThan(0);
+    expect(insp.summary.staticRatio).toBeLessThanOrEqual(1);
+    // exactly one dynamic-text node, and it asks for dynamic hydration.
+    const dynText = insp.nodes.filter((n) => n.dynamicText);
+    expect(dynText).toHaveLength(1);
+    expect(dynText[0]!.hydration).toBe('verify-dynamic');
+
+    const report = formatInspection(insp);
+    expect(report).toContain('compiler inspection — diag-demo v3.4.0');
+    expect(report).toContain('{text}');
+
+    // analyzeGraph is the lower-level primitive, also exposed for diagnostics.
+    const analysis = analyzeGraph(graph);
+    expect(analysis.summary.totalNodes).toBe(insp.nodes.length);
+  });
+
+  it('keeps diagnostics OFF the runtime barrel (tree-shakeable)', async () => {
+    // eslint-disable-next-line import/no-unresolved
+    const runtime = await import('streetui');
+    expect('inspectCompilation' in runtime).toBe(false);
+    expect('analyzeGraph' in runtime).toBe(false);
+    expect('formatInspection' in runtime).toBe(false);
+  });
+});

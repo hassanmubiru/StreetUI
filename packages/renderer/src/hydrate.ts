@@ -70,7 +70,14 @@ function hydrateNode(
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
       wireEvents(dom, graph, graphNode, domNode, instance);
-      wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, domNode, textNode as Text));
+      // Only build the per-type update closure when the node actually has
+      // reactive bindings. wireSignalBindings early-returns on an empty
+      // stateRefs list, so for a static node the `textUpdate(...)` closure would
+      // be allocated and immediately discarded — pure GC pressure on the hot
+      // hydration path, where the vast majority of nodes are static.
+      if (graphNode.stateRefs.length !== 0) {
+        wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, domNode, textNode as Text));
+      }
       return instance;
     }
 
@@ -78,7 +85,9 @@ function hydrateNode(
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
       wireEvents(dom, graph, graphNode, domNode, instance);
-      wireSignalBindings(ctx, graphNode, instance, headingUpdate(dom, domNode));
+      if (graphNode.stateRefs.length !== 0) {
+        wireSignalBindings(ctx, graphNode, instance, headingUpdate(dom, domNode));
+      }
       return instance;
     }
 
@@ -91,7 +100,9 @@ function hydrateNode(
       const value = graphNode.getProp('value');
       if (value !== undefined) dom.setProperty(domNode, 'value', String(value));
       wireEvents(dom, graph, graphNode, domNode, instance);
-      wireSignalBindings(ctx, graphNode, instance, inputUpdate(dom, domNode));
+      if (graphNode.stateRefs.length !== 0) {
+        wireSignalBindings(ctx, graphNode, instance, inputUpdate(dom, domNode));
+      }
       return instance;
     }
 
@@ -99,7 +110,9 @@ function hydrateNode(
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
       wireEvents(dom, graph, graphNode, domNode, instance);
-      wireSignalBindings(ctx, graphNode, instance, buttonUpdate(dom, domNode));
+      if (graphNode.stateRefs.length !== 0) {
+        wireSignalBindings(ctx, graphNode, instance, buttonUpdate(dom, domNode));
+      }
       return instance;
     }
 
@@ -168,10 +181,19 @@ function hydrateChildren(
   const actual = elementChildren(ctx, parentDom);
   let cursor = 0;
 
+  // The human-readable `path` is only ever consumed by hydration diagnostics,
+  // which are inert unless a sink is attached. Building the
+  // `${parentPath} / ${type}[${i}]` string for every child would allocate one
+  // throwaway string per node on the hot path (10k+ on a large tree) for output
+  // that is discarded in production. Gate the construction on the sink being
+  // present; when it is absent, thread the (meaningless-but-unused) parent path
+  // through unchanged so nested calls stay allocation-free too.
+  const diag = ctx.hydrationDiagnostics !== undefined;
+
   for (let i = 0; i < expected.length; i++) {
     const childNode = expected[i]!;
     const want = expectedTag(ctx, childNode);
-    const childPath = `${parentPath} / ${childNode.type}[${i}]`;
+    const childPath = diag ? `${parentPath} / ${childNode.type}[${i}]` : parentPath;
     const actualEl = actual[cursor];
 
     if (

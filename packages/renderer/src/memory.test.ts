@@ -18,6 +18,8 @@ import { compile } from '@streetui/compiler';
 import { BrowserDOMAdapter } from '@streetui/dom';
 import { createRenderContext } from './render-context.js';
 import { mountGraph } from './mount.js';
+import { hydrateGraph } from './hydrate.js';
+import { renderToString } from './ssr.js';
 import { StreetRenderHandle } from './render-handle.js';
 
 beforeEach(() => resetIdCounter());
