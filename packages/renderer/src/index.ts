@@ -8,6 +8,7 @@ export * from './reconciliation.js';
 export * from './renderer.js';
 export * from './render-handle.js';
 export * from './hydrate.js';
+export * from './hydration-diagnostics.js';
 export * from './dehydrate.js';
 export * from './ssr.js';
 export * from './tag-map.js';
