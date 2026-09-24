@@ -1,0 +1,10 @@
+{
+  "status": "BLOCKED",
+  "reason": "Playwright is not installed (no npm registry access) and no Chromium binary is available in this environment. Real-browser scenarios (A initial render / time-to-interactive, G hydration) cannot be measured. Install playwright + chromium (npx playwright install chromium) on a machine with registry access and re-run `node scripts/browser-harness.mjs`.",
+  "scenarios": {
+    "A_initialRender": null,
+    "G_hydration": null
+  },
+  "fallback": "Node/happy-dom relative measurements for these workloads are in benchmarks/results/baseline.json and results/streetui.json.",
+  "timestamp": "2026-09-24T12:05:51.817Z"
+}

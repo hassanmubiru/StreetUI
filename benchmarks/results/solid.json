@@ -1,0 +1,16 @@
+{
+  "framework": "solid",
+  "version": "see ../framework-versions.json",
+  "status": "BLOCKED",
+  "blockedReason": "Cannot install solid offline (npm registry returns 403) and cannot run in-browser scenarios without Chromium/Playwright. Scenario implementations exist under benchmarks/competitors/solid and the runner (benchmarks/run-competitors.mjs) will populate this file once dependencies and a real browser are available.",
+  "benchmarks": {
+    "A_initialRender": null,
+    "B_singleUpdate": null,
+    "C_largeList": null,
+    "D_fanOut": null,
+    "E_deepState": null,
+    "F_ssr": null,
+    "G_hydration": null,
+    "H_bundleSize": null
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "//": "Pinned versions for the competitor benchmark harness. These are BENCHMARK DEVELOPMENT DEPENDENCIES ONLY and MUST NEVER be added to the `streetui` runtime dependencies. Every framework performs the same conceptual workload (scenarios A-H, see methodology.md).",
+  "status": "PINS DECLARED; INSTALL BLOCKED",
+  "blockedReason": "This environment has no reachable npm registry (GET registry.npmjs.org → 403 Forbidden) and no Chromium/Playwright. Competitor frameworks cannot be installed or benchmarked here. The harness, scenario implementations, and result schema are complete and will run once a registry and a real browser are available; competitor result files are marked BLOCKED rather than fabricated.",
+  "streetui": {
+    "version": "1.1.0",
+    "source": "workspace (this repo, single public package)"
+  },
+  "competitors": {
+    "react": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
+    },
+    "vue": {
+      "vue": "3.5.13"
+    },
+    "svelte": {
+      "svelte": "5.19.0"
+    },
+    "solid": {
+      "solid-js": "1.9.3"
+    }
+  },
+  "sharedTooling": {
+    "vite": "6.0.7",
+    "playwright": "1.49.1",
+    "note": "Chromium is driven through Playwright for the in-browser scenarios (A initial render, G hydration). Node-only scenarios (F SSR) do not require a browser."
+  },
+  "pinPolicy": "Exact versions (no ^ or ~). Regenerate this file and the lockfile together when the registry becomes reachable; record the resolved integrity hashes in the lockfile, not here."
+}

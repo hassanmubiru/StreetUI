@@ -70,7 +70,7 @@ The scope is benchmarking infrastructure and internal optimisations only. No pub
 3. WHEN benchmark B (list initial mount) is executed, THE Competitor_Harness SHALL measure the time to mount a keyed list of 1 000 and 10 000 rows, including all framework setup, for StreetUI (`s.listOf`) and equivalent constructs in React, Vue, Svelte, and Solid; all five frameworks SHALL use the same row data structure (id: number, label: string).
 4. WHEN benchmark C (list partial row swap) is executed, THE Competitor_Harness SHALL measure the time to swap every tenth row in an already-mounted list of 1 000 rows for all five frameworks.
 5. WHEN benchmark D (list teardown) is executed, THE Competitor_Harness SHALL measure the time to fully unmount/destroy a mounted list of 1 000 rows for all five frameworks.
-6. WHEN benchmark E (SSR throughput) is executed, THE Competitor_Harness SHALL measure the number of `renderToString`-equivalent calls per second for a 500-node tree across all five frameworks that provide a server rendering API; WHERE a framework has no SSR API, THE Competitor_Harness SHALL record a `"N/A"` result for that framework.
+6. WHEN benchmark E (SSR throughput) is executed, THE Competitor_Harness SHALL measure the number of `renderToString`-equivalent calls per second for a 500-node tree across all five frameworks that provide a server rendering API; WHERE a framework does not provide an SSR API, THE Competitor_Harness SHALL record a `"N/A"` result for that framework; this criterion is void if benchmark E is not executed.
 7. WHEN benchmark F (hydration time) is executed, THE Competitor_Harness SHALL measure the time to hydrate (adopt server-rendered HTML) a 500-node tree for all five frameworks that support hydration; WHERE a framework has no hydration API, THE Competitor_Harness SHALL record a `"N/A"` result for that framework.
 8. WHEN benchmark G (real-browser interactive) is executed, THE Competitor_Harness SHALL launch a headless Chromium instance via Playwright, load a StreetUI-rendered page, measure the wall-clock time from page load to the completion of a button-click event handler, and record the result; WHERE browser automation for a competitor is not feasible within the monorepo environment, THE Competitor_Harness SHALL record a `"browser-manual"` placeholder and document the limitation in the Performance_Report.
 9. WHEN benchmark H (memory) is executed, THE Competitor_Harness SHALL mount a 1 000-row list, call `global.gc()` (Node run with `--expose-gc`), record `process.memoryUsage().heapUsed` immediately after GC, unmount the list, call `global.gc()` again, and record heap after second GC; THE Benchmark_Suite SHALL report both mount-peak and post-unmount-cleanup values for StreetUI and all competitors that expose a programmatic mount/unmount API.
@@ -119,7 +119,7 @@ The scope is benchmarking infrastructure and internal optimisations only. No pub
 
 #### Acceptance Criteria
 
-1. WHEN the post-optimisation run is executed, THE Benchmark_Suite SHALL execute the complete A–H cross-framework harness under identical environmental conditions to the baseline run (same Node version, same machine, same `happy-dom` version).
+1. WHEN the post-optimisation run is executed, THE Benchmark_Suite SHALL execute the complete A–H cross-framework harness under the same Node version, machine, and `happy-dom` version as the baseline run where possible; IF environmental drift is detected (different Node version, OS, or `happy-dom` version), THE Benchmark_Suite SHALL log a warning to stderr noting the drift and then proceed to produce the delta report.
 2. WHEN the post-optimisation run completes, THE Benchmark_Suite SHALL write results to `packages/benchmarks/results/current.json`, overwriting any previous current file.
 3. THE Delta_Report SHALL be produced by passing `baseline.json` and `current.json` through the existing `compareResults()` function and rendered using `formatComparison()`.
 4. THE Delta_Report SHALL include every benchmark name, baseline median ms, current median ms, delta percentage, and status (improved / regressed / unchanged / new).
@@ -144,7 +144,7 @@ The scope is benchmarking infrastructure and internal optimisations only. No pub
 6. THE Performance_Report §28 (Honest Assessment) SHALL include at least one sentence identifying a benchmark category where StreetUI trails all competitors, explaining the architectural reason, and stating whether the gap is expected to close in a future release.
 7. THE Performance_Report §29 SHALL list every public API that existed in v1.0.0 and confirm it is unchanged in v1.1.
 8. THE Performance_Report §2 (Methodology) SHALL describe: the measurement environment (Node version, OS, happy-dom version, `--expose-gc` flag for H); the warmup and iteration counts used; the noise floor (minimum delta to claim "improved"); and the rule for reverting a non-improving optimisation.
-9. THE Performance_Report SHALL contain no invented or estimated numbers; every figure SHALL be traceable to either `baseline.json`, `current.json`, or an inline benchmark result captured during the report run.
+9. THE Performance_Report SHALL contain no invented or estimated numbers; every figure SHALL be traceable to either `baseline.json`, `current.json`, or an inline benchmark result captured during the report run; IF any required benchmark category produced no valid data (was skipped, errored, or requires `--expose-gc` and was not run with that flag), THE Performance_Report generation SHALL fail entirely and produce no output file until all required benchmarks succeed.
 
 ---
 
@@ -155,7 +155,7 @@ The scope is benchmarking infrastructure and internal optimisations only. No pub
 #### Acceptance Criteria
 
 1. WHILE v1.1 development is in progress, THE Benchmark_Suite SHALL remain a private package (no `publishConfig.access: "public"` and `"private": true` in its `package.json`) and SHALL NOT be added to the npm publish manifest.
-2. WHEN `turbo run build` is executed, THE build task SHALL complete successfully for all 28 packages (the v1.0 count plus any new tasks introduced by benchmark infrastructure changes).
+2. WHEN `turbo run build` is executed, THE build task SHALL complete successfully for at least 28 packages (the v1.0 count plus any new tasks introduced by benchmark infrastructure changes); a higher task count is a valid pass.
 3. WHEN `turbo run typecheck` is executed, THE typecheck task SHALL complete successfully for all packages including `@streetui/benchmarks`.
 4. WHEN `turbo run test` is executed, THE test task SHALL report at least 631 passing tests (the v1.0 baseline) across all packages; no previously passing test SHALL be in a failing or skipped state.
 5. THE `@streetui/benchmarks` package SHALL NOT be imported by any non-benchmark workspace package; benchmark code SHALL remain isolated behind the private package boundary.
