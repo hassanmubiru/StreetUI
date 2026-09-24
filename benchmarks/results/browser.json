@@ -1,9 +1,31 @@
 {
-  "status": "ERROR",
-  "reason": "Playwright is present but Chromium failed to launch: browserType.launch: Executable doesn't exist at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell\n╔════════════════════════════════════════════════════════════╗\n║ Looks like Playwright was just installed or updated.       ║\n║ Please run the following command to download new browsers: ║\n║                                                            ║\n║     npx playwright install                                 ║\n║                                                            ║\n║ <3 Playwright Team                                         ║\n╚════════════════════════════════════════════════════════════╝",
-  "scenarios": {
-    "A_initialRender": null,
-    "G_hydration": null
+  "schema": "streetui-browser/v1.3",
+  "status": "BLOCKED",
+  "reason": "No Playwright driver with a launchable Chromium binary is available in this environment (no `playwright`/`playwright-core` package resolves to a runnable browser, and no ms-playwright browser cache is present). The npm registry is unreachable offline (E403), so `npx playwright install chromium` cannot fetch a binary. Real-browser metrics (paint, layout, long tasks, true TTI, frame pacing, JS heap) therefore cannot be measured and are NOT fabricated.",
+  "remediation": "On a machine with npm registry access: `npm i -D playwright && npx playwright install chromium`, then re-run `node scripts/browser-harness.mjs`. The harness will bundle bench-browser.ts, serve it, launch Chromium, and populate the fields below with real numbers.",
+  "target": "examples/streetui-performance-app (via window.__bench in src/bench-browser.ts)",
+  "scenarioCatalogue": {
+    "initialMountUsers10k": "performance.now around mounting the 10,000-row users route; DOM node count.",
+    "reactiveSearch": "MutationObserver-counted DOM mutations + time for query narrow then clear over 10k rows.",
+    "reverse": "MutationObserver-counted mutations + time to reverse sort direction (worst-case reorder).",
+    "fineGrainedToggle1of1000": "MutationObserver mutation count when toggling exactly one of 1,000 controls.",
+    "routerNavigationMs": "performance.now per navigation across /dashboard, /users, /settings, /.",
+    "hydrateUsers10k": "MutationObserver-verified DOM adoption (added nodes must be 0) + hydration time.",
+    "frames": "requestAnimationFrame pacing vs 16.67ms (60Hz) / 8.33ms (120Hz) reference budgets — reference points, NOT a frame-rate guarantee.",
+    "memory": "performance.memory usedJSHeapSize across repeated mount→interact→unmount cycles (indicative, no explicit GC).",
+    "longTasks": "PerformanceObserver longtask entries over the whole run."
   },
-  "timestamp": "2026-09-24T15:59:17.854Z"
+  "scenarios": {
+    "initialMountUsers10k": null,
+    "reactiveSearch": null,
+    "reverse": null,
+    "fineGrainedToggle1of1000": null,
+    "routerNavigationMs": null,
+    "hydrateUsers10k": null,
+    "frames": null,
+    "memory": null,
+    "longTasks": null
+  },
+  "nodeFallback": "Node/happy-dom relative measurements + DOM-mutation-count invariants for these workloads are in benchmarks/results/v1.3/streetui-node.json (a different runtime; not a browser substitute).",
+  "timestamp": "2026-09-24T17:33:43.395Z"
 }
