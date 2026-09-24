@@ -38,29 +38,27 @@ const app = streetui.app({ name: 'browser-validation' });
 
 app.page('test', (page) => {
   page.heading('Browser Validation Suite');
-  
-  page.section((sec) => {
+
+  page.section('reactivity', (sec) => {
     sec.heading('Signal Reactivity Test', { level: 2 });
     sec.text('Counter: ');
     sec.text(count);
-    sec.button('Increment', { 
-      onClick: () => count.value++ 
-    });
+    sec.button('Increment', { onClick: () => count.value++ });
   });
-  
-  page.section((sec) => {
+
+  page.section('structure', (sec) => {
     sec.heading('DOM Structure Test', { level: 2 });
-    sec.paragraph('This paragraph tests text rendering.');
-    sec.list(['Item 1', 'Item 2', 'Item 3']);
-  });
-  
-  page.section((sec) => {
-    sec.heading('Input Test', { level: 2 });
-    sec.input({ 
-      type: 'text', 
-      placeholder: 'Type here...',
-      id: 'test-input'
+    sec.text('This paragraph tests text rendering.', { id: 'test-paragraph' });
+    sec.list('items', (lst) => {
+      lst.item('i1', (c) => c.text('Item 1'));
+      lst.item('i2', (c) => c.text('Item 2'));
+      lst.item('i3', (c) => c.text('Item 3'));
     });
+  });
+
+  page.section('inputsec', (sec) => {
+    sec.heading('Input Test', { level: 2 });
+    sec.input({ type: 'text', placeholder: 'Type here...', id: 'test-input' });
   });
 });
 
