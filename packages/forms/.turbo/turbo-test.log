@@ -6,11 +6,11 @@
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/forms
 
  ✓ src/validators.test.ts  (7 tests) 9ms
- ✓ src/public-api.stability.test.ts  (6 tests) 8ms
- ✓ src/form.test.ts  (11 tests) 9ms
+ ✓ src/form.test.ts  (11 tests) 8ms
+ ✓ src/public-api.stability.test.ts  (6 tests) 10ms
 
  Test Files  3 passed (3)
       Tests  24 passed (24)
-   Start at  10:40:54
-   Duration  441ms (transform 162ms, setup 0ms, collect 220ms, tests 27ms, environment 1ms, prepare 342ms)
+   Start at  10:41:58
+   Duration  488ms (transform 165ms, setup 0ms, collect 233ms, tests 27ms, environment 1ms, prepare 337ms)
 

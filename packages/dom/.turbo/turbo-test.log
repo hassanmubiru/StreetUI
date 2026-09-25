@@ -5,12 +5,12 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dom
 
- ✓ src/focus.test.ts  (5 tests) 18ms
- ✓ src/public-api.stability.test.ts  (3 tests) 8ms
- ✓ src/dom.test.ts  (15 tests) 20ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 6ms
+ ✓ src/focus.test.ts  (5 tests) 22ms
+ ✓ src/dom.test.ts  (15 tests) 17ms
 
  Test Files  3 passed (3)
       Tests  23 passed (23)
-   Start at  10:40:45
-   Duration  835ms (transform 116ms, setup 0ms, collect 148ms, tests 46ms, environment 991ms, prepare 411ms)
+   Start at  10:41:50
+   Duration  762ms (transform 109ms, setup 0ms, collect 157ms, tests 45ms, environment 897ms, prepare 314ms)
 
