@@ -9,8 +9,8 @@ CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/benchmarks/tsup
 CLI Target: node20
 CLI Cleaning output folder
 ESM Build start
-ESM dist/index.js     22.29 KB
 ESM dist/run.js       27.51 KB
-ESM dist/index.js.map 55.38 KB
+ESM dist/index.js     22.29 KB
 ESM dist/run.js.map   59.75 KB
-ESM ⚡️ Build success in 23ms
+ESM dist/index.js.map 55.38 KB
+ESM ⚡️ Build success in 18ms
