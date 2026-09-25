@@ -1,0 +1,5 @@
+
+> @streetui/playground@0.1.0 test /home/error51/Downloads/StreetUI/apps/playground
+> echo "no tests in playground" && exit 0
+
+no tests in playground
