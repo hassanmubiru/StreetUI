@@ -3,7 +3,7 @@
   "version": "1.9.3",
   "nodeVersion": "v24.18.0",
   "browserVersion": null,
-  "timestamp": "2026-09-25T06:00:11.894Z",
+  "timestamp": "2026-09-25T07:47:38.284Z",
   "environment": {
     "domEnvironment": "chromium (Playwright)",
     "arch": "x64",
@@ -15,10 +15,10 @@
   "benchmarks": {
     "A_initialRender": {
       "nodes": 10000,
-      "medianMs": 11.4,
-      "p95Ms": 27.6,
-      "minMs": 7.3,
-      "maxMs": 27.6,
+      "medianMs": 11.7,
+      "p95Ms": 29.4,
+      "minMs": 9.9,
+      "maxMs": 29.4,
       "samples": 15,
       "domNodesCreated": 20002,
       "note": "time to create DOM; synchronous render == interactive"
@@ -28,7 +28,7 @@
       "medianMs": 0,
       "p95Ms": 0.1,
       "minMs": 0,
-      "maxMs": 0.2,
+      "maxMs": 0.1,
       "samples": 40,
       "domMutations": 1,
       "note": "one signal write in a 10k tree; domMutations MUST be 1 (fine-grained)"
@@ -36,17 +36,7 @@
     "C_largeList": {
       "append": {
         "items": 10000,
-        "medianMs": 0.3,
-        "p95Ms": 3.2,
-        "minMs": 0.2,
-        "maxMs": 3.2,
-        "samples": 12,
-        "domNodesCreated": 1,
-        "domNodesRemoved": 0
-      },
-      "prepend": {
-        "items": 10000,
-        "medianMs": 0.4,
+        "medianMs": 0.5,
         "p95Ms": 0.8,
         "minMs": 0.2,
         "maxMs": 0.8,
@@ -54,7 +44,27 @@
         "domNodesCreated": 1,
         "domNodesRemoved": 0
       },
+      "prepend": {
+        "items": 10000,
+        "medianMs": 0.8,
+        "p95Ms": 1,
+        "minMs": 0.4,
+        "maxMs": 1,
+        "samples": 12,
+        "domNodesCreated": 1,
+        "domNodesRemoved": 0
+      },
       "remove-first": {
+        "items": 10000,
+        "medianMs": 0.6,
+        "p95Ms": 0.9,
+        "minMs": 0.4,
+        "maxMs": 0.9,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-middle": {
         "items": 10000,
         "medianMs": 0.4,
         "p95Ms": 0.6,
@@ -64,52 +74,42 @@
         "domNodesCreated": 0,
         "domNodesRemoved": 1
       },
-      "remove-middle": {
-        "items": 10000,
-        "medianMs": 0.3,
-        "p95Ms": 0.5,
-        "minMs": 0.2,
-        "maxMs": 0.5,
-        "samples": 12,
-        "domNodesCreated": 0,
-        "domNodesRemoved": 1
-      },
       "remove-last": {
         "items": 10000,
         "medianMs": 0.2,
-        "p95Ms": 0.3,
+        "p95Ms": 0.4,
         "minMs": 0.1,
-        "maxMs": 0.3,
+        "maxMs": 0.4,
         "samples": 12,
         "domNodesCreated": 0,
         "domNodesRemoved": 1
       },
       "reorder": {
         "items": 10000,
-        "medianMs": 0.9,
-        "p95Ms": 1.8,
-        "minMs": 0.6,
-        "maxMs": 1.8,
+        "medianMs": 1.1,
+        "p95Ms": 2.4,
+        "minMs": 0.9,
+        "maxMs": 2.4,
         "samples": 12,
         "domNodesCreated": 2,
         "domNodesRemoved": 2
       },
       "reverse": {
         "items": 10000,
-        "medianMs": 15.9,
-        "p95Ms": 58.4,
-        "minMs": 15.1,
-        "maxMs": 58.4,
+        "medianMs": 20.5,
+        "p95Ms": 54.4,
+        "minMs": 18.9,
+        "maxMs": 54.4,
         "samples": 12,
         "domNodesCreated": 10000,
         "domNodesRemoved": 10000
       },
       "update-item": {
         "items": 10000,
-        "medianMs": 0.3,
-        "p95Ms": 0.4,
+        "medianMs": 0.4,
+        "p95Ms": 0.6,
         "minMs": 0.2,
-        "maxMs": 0.4,
+        "maxMs": 0.6,
         "samples": 12,
         "domNodesCreated": 1,
         "domNodesRemoved": 1
@@ -118,10 +118,10 @@
     "D_fanOut": {
       "subscribers=1000": {
         "subscribers": 1000,
-        "medianMs": 0.5,
-        "p95Ms": 0.7,
-        "minMs": 0.4,
-        "maxMs": 0.7,
+        "medianMs": 0.6,
+        "p95Ms": 1.1,
+        "minMs": 0.5,
+        "maxMs": 1.4,
         "samples": 25,
         "domMutations": 1000,
         "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
@@ -129,9 +129,9 @@
       "subscribers=10000": {
         "subscribers": 10000,
         "medianMs": 5.3,
-        "p95Ms": 8,
-        "minMs": 4.7,
-        "maxMs": 8.9,
+        "p95Ms": 7.1,
+        "minMs": 5,
+        "maxMs": 9.4,
         "samples": 25,
         "domMutations": 10000,
         "note": "one write updates exactly `subscribers` text nodes; no wasted computation"

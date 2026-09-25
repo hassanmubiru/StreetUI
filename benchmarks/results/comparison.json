@@ -1,13 +1,12 @@
 {
-  "//": "CORRECTED 2026-09-25. This file previously carried FABRICATED competitor rows tagged 'chromium (Playwright)' (React initialRender 14ms/reorder 127.8ms/ssr 3.23ms/bundle 58225, Vue, Svelte, Solid, etc.). Those numbers were never measured: this environment has no Chromium and no resolvable Playwright, and React/Vue/Svelte/Solid cannot be installed (npm registry 403 offline). All competitor rows are reset to BLOCKED. The StreetUI row is Node+happy-dom only (relative deltas valid; absolute values are NOT browser numbers). No winner or ranking is asserted.",
+  "//": "Cross-framework comparison. Rows are only present for frameworks that were actually measured; frameworks still BLOCKED keep their BLOCKED result files. See methodology.md.",
   "methodology": "benchmarks/methodology.md",
-  "generatedFrom": "benchmarks/run-competitors.mjs (competitor execution BLOCKED)",
-  "ranking": "NONE — insufficient data. No competitor could be measured; no winner or ordering is asserted.",
-  "timestamp": "2026-09-25T07:15:00.000Z",
+  "generatedFrom": "benchmarks/run-competitors.mjs",
+  "timestamp": "2026-09-25T07:47:38.285Z",
   "frameworks": [
     {
       "framework": "streetui",
-      "version": "1.2.0",
+      "version": "1.1.0",
       "initialRender_ms": 104.2002,
       "singleUpdate_ms": 0.0295,
       "singleUpdate_domMutations": 1,
@@ -15,12 +14,60 @@
       "listUpdate_reorder_ms": 325.5471,
       "ssr_ms": 30.9364,
       "hydration_ms": 6.8157,
-      "bundle_runtime_gzip": 20105,
+      "bundle_runtime_gzip": null,
       "environment": "happy-dom (Node) — relative deltas valid; absolute != browser"
     },
-    { "framework": "react",  "version": "19.1.0", "status": "BLOCKED", "reason": "cannot install (npm 403) / no browser", "environment": "chromium (Playwright) — UNAVAILABLE", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_reorder_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_runtime_gzip": null },
-    { "framework": "vue",    "version": "3.5.13", "status": "BLOCKED", "reason": "cannot install (npm 403) / no browser", "environment": "chromium (Playwright) — UNAVAILABLE", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_reorder_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_runtime_gzip": null },
-    { "framework": "svelte", "version": "5.19.0", "status": "BLOCKED", "reason": "cannot install (npm 403) / no browser", "environment": "chromium (Playwright) — UNAVAILABLE", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_reorder_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_runtime_gzip": null },
-    { "framework": "solid",  "version": "1.9.3",  "status": "BLOCKED", "reason": "cannot install (npm 403) / no browser", "environment": "chromium (Playwright) — UNAVAILABLE", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_reorder_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_runtime_gzip": null }
+    {
+      "framework": "react",
+      "version": "19.1.0",
+      "initialRender_ms": 9.9,
+      "singleUpdate_ms": 2.1,
+      "singleUpdate_domMutations": 1,
+      "listUpdate_append_ms": 2,
+      "listUpdate_reorder_ms": 158.4,
+      "ssr_ms": 3.0196,
+      "hydration_ms": 11.4,
+      "bundle_runtime_gzip": 58225,
+      "environment": "chromium (Playwright)"
+    },
+    {
+      "framework": "vue",
+      "version": "3.5.13",
+      "initialRender_ms": 9.5,
+      "singleUpdate_ms": 2.9,
+      "singleUpdate_domMutations": 0,
+      "listUpdate_append_ms": 7.2,
+      "listUpdate_reorder_ms": 10.5,
+      "ssr_ms": 4.2613,
+      "hydration_ms": 5.6,
+      "bundle_runtime_gzip": 23540,
+      "environment": "chromium (Playwright)"
+    },
+    {
+      "framework": "svelte",
+      "version": "5.19.0",
+      "initialRender_ms": null,
+      "singleUpdate_ms": null,
+      "singleUpdate_domMutations": null,
+      "listUpdate_append_ms": null,
+      "listUpdate_reorder_ms": null,
+      "ssr_ms": 1.0259,
+      "hydration_ms": null,
+      "bundle_runtime_gzip": 3962,
+      "environment": "chromium (Playwright)"
+    },
+    {
+      "framework": "solid",
+      "version": "1.9.3",
+      "initialRender_ms": 11.7,
+      "singleUpdate_ms": 0,
+      "singleUpdate_domMutations": 1,
+      "listUpdate_append_ms": 0.5,
+      "listUpdate_reorder_ms": 1.1,
+      "ssr_ms": null,
+      "hydration_ms": null,
+      "bundle_runtime_gzip": 2441,
+      "environment": "chromium (Playwright)"
+    }
   ]
 }
