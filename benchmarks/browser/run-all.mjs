@@ -70,15 +70,34 @@ const FRAMEWORKS = [
 ];
 
 // ── Detection (proves the environment BEFORE any number is claimed) ────────────────────
+const PINNED_PLAYWRIGHT = '1.49.1';
 function detectPlaywright() {
-  try { require.resolve('playwright'); return { ok: true }; }
-  catch { return { ok: false, reason: 'the "playwright" package is not installed (pinned 1.49.1); npm registry returns 403 / offline, so it cannot be fetched' }; }
+  // The PACKAGE resolving is not enough — a browser number requires that Playwright can
+  // actually drive a browser. So we ALSO require its Chromium binary to exist on disk, and
+  // we surface a version-pin mismatch (§3 pins the version) rather than silently running
+  // under whatever happens to be installed.
+  let pkgPath, version;
+  try { pkgPath = require.resolve('playwright'); }
+  catch { return { ok: false, reason: `the "playwright" package is not installed (pinned ${PINNED_PLAYWRIGHT}); npm registry returns 403 / offline, so it cannot be fetched` }; }
+  try { version = require('playwright/package.json').version; } catch { version = 'unknown'; }
+  let binPath = null, binExists = false;
+  try { const { chromium } = require('playwright'); binPath = chromium.executablePath(); binExists = fs.existsSync(binPath); }
+  catch (e) { return { ok: false, version, reason: `playwright ${version} is installed but its browser API is unusable: ${e.message.split('\n')[0]}` }; }
+  const pinNote = version === PINNED_PLAYWRIGHT ? '' : ` NOTE: installed playwright ${version} does NOT match the pinned ${PINNED_PLAYWRIGHT} (§3 requires the pin).`;
+  if (!binExists) {
+    return { ok: false, version, reason: `playwright ${version} package is present, but its Chromium browser binary is NOT downloaded (executable absent at ${binPath}); a real chromium.launch() fails. \`playwright install chromium\` needs cdn.playwright.dev, which is unreachable offline (npm/registry 403).${pinNote}` };
+  }
+  return { ok: true, version, binPath, note: pinNote.trim() || undefined };
 }
 function detectChromium() {
+  // Check env overrides, system paths, AND the Playwright browser cache. A NAME match in
+  // /etc or bash-completion is not a browser; only an existing executable counts.
   const envPath = process.env.CHROMIUM_PATH || process.env.PLAYWRIGHT_CHROMIUM_PATH;
-  const candidates = [envPath, '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable'].filter(Boolean);
+  let pwBin = null;
+  try { pwBin = require('playwright').chromium.executablePath(); } catch { /* playwright absent */ }
+  const candidates = [envPath, pwBin, '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable'].filter(Boolean);
   const found = candidates.find((p) => { try { return fs.existsSync(p); } catch { return false; } });
-  return found ? { ok: true, path: found } : { ok: false, reason: 'no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline' };
+  return found ? { ok: true, path: found } : { ok: false, reason: 'no Chromium/Chrome executable found (checked CHROMIUM_PATH, the Playwright browser cache, and standard /usr/bin paths); none installable offline (apt has no candidate; cdn.playwright.dev / npm registry 403)' };
 }
 function detectFramework(fw) {
   const missing = fw.pkgs.filter((p) => { try { require.resolve(p); return false; } catch { return true; } });

@@ -146,7 +146,7 @@
       "note": "BLOCKED — no measurement produced"
     }
   ],
-  "reason": "Chromium: no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline; Framework: not installed: react, react-dom (pinned 19.1.0); npm registry 403 so it cannot be fetched",
+  "reason": "Playwright: playwright 1.49.1 package is present, but its Chromium browser binary is NOT downloaded (executable absent at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium-1148/chrome-linux/chrome); a real chromium.launch() fails. `playwright install chromium` needs cdn.playwright.dev, which is unreachable offline (npm/registry 403).; Chromium: no Chromium/Chrome executable found (checked CHROMIUM_PATH, the Playwright browser cache, and standard /usr/bin paths); none installable offline (apt has no candidate; cdn.playwright.dev / npm registry 403); Framework: not installed: react, react-dom (pinned 19.1.0); npm registry 403 so it cannot be fetched",
   "fabricationNote": "No browser numbers estimated or substituted. Node/happy-dom numbers (streetui-node.json, ssr.json) are NEVER presented as browser numbers. Missing Svelte/Solid numbers are NOT filled in.",
   "data": null
 }

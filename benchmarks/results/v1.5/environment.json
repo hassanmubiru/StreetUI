@@ -16,9 +16,10 @@
   },
   "browserGate": {
     "status": "BLOCKED",
-    "chromium": "none — no Chromium/Chrome binary present (checked CHROMIUM_PATH and /usr/bin/{chromium,chromium-browser,google-chrome}); none installable offline",
-    "playwright": "not installed (pinned target 1.49.1); npm registry returns 403 so it cannot be fetched",
-    "consequence": "v1.5 §3/§5/§7/§8/§18 real-browser scenarios cannot execute here. The unified runner detects this and writes BLOCKED result files with the exact reason; it never fabricates or substitutes a happy-dom number for a browser number."
+    "chromium": "none — no Chromium/Chrome browser binary present anywhere. Checked CHROMIUM_PATH, /usr/bin/{chromium,chromium-browser,google-chrome,google-chrome-stable}, the Playwright browser cache (~/.cache/ms-playwright), and a full filesystem sweep: no executable found (only apparmor/bash-completion text files match the name). apt has no chromium install candidate offline; the Playwright-bundled build cannot be downloaded (cdn.playwright.dev unreachable, npm/registry 403).",
+    "playwright": "PACKAGE now installed, version 1.63.0 — but this does NOT match the pinned target 1.49.1 (§3 requires the pin), and more importantly its browser binary is absent: playwright's chromium.executablePath() points at ~/.cache/ms-playwright/chromium_headless_shell-1243/... which does not exist, and an actual chromium.launch() FAILS with 'Executable doesn't exist'. `playwright install chromium` would fetch Chrome Headless Shell 153.0.8010.12 from cdn.playwright.dev, which is network-blocked here.",
+    "fabricationCrossReference": "The bundled build that Playwright 1.63.0 WOULD download is Chrome Headless Shell 153.0.8010.12 (aka 'Chromium 153'). This is exactly the 'Chromium 153 / Playwright 1.63.0' pair that a prior fabricated report revision cited as if a browser had run. It never ran: the binary was never downloaded and a real launch fails. Those version strings came from Playwright's version manifest, not from any executed benchmark.",
+    "consequence": "v1.5 §3/§5/§7/§8/§18 real-browser scenarios still cannot execute. The unified runner detects the missing browser binary (not merely the package) and writes BLOCKED result files with the exact reason; it never fabricates or substitutes a happy-dom number for a browser number."
   },
   "competitorGate": {
     "status": "BLOCKED",

@@ -17,35 +17,35 @@
   },
   "scenarios": {
     "initialMountUsers10k": {
-      "ms": 364.4,
+      "ms": 197.2,
       "domNodeCount": 80031
     },
     "reactiveSearch": {
       "narrow": {
-        "ms": 182.5,
+        "ms": 129.89999997615814,
         "domMutations": 10004
       },
       "clear": {
-        "ms": 286.8000000715256,
+        "ms": 185.60000002384186,
         "domMutations": 10004
       }
     },
     "reverse": {
-      "ms": 150.70000004768372,
+      "ms": 56,
       "domMutations": 20002
     },
     "fineGrainedToggle1of1000": {
-      "ms": 0.10000002384185791,
+      "ms": 0,
       "domMutations": 0
     },
     "routerNavigationMs": [
-      31.7,
-      565.9,
-      65.5,
-      34.9
+      28.3,
+      400,
+      50,
+      33.2
     ],
     "hydrateUsers10k": {
-      "ms": 370.6,
+      "ms": 150.8,
       "nodesBefore": 80029,
       "nodesAfter": 80029,
       "addedDuringHydration": 0,
@@ -57,30 +57,30 @@
         "frame120Ms": 8.33
       },
       "bigListReorder": {
-        "frames": 2,
-        "maxFrameMs": 704,
+        "frames": 3,
+        "maxFrameMs": 391.8,
         "longFrames60": 2,
-        "longFrames120": 2
+        "longFrames120": 3
       }
     },
     "memory": {
       "available": true,
-      "usedJSHeapBefore": 239000000,
-      "usedJSHeapAfter": 239000000,
+      "usedJSHeapBefore": 254000000,
+      "usedJSHeapAfter": 254000000,
       "perCycle": [
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000
+        254000000,
+        254000000,
+        254000000,
+        254000000,
+        254000000,
+        254000000
       ],
       "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
     },
     "longTasks": {
-      "count": 15,
-      "totalMs": 5689
+      "count": 10,
+      "totalMs": 3062
     }
   },
-  "timestamp": "2026-09-25T11:45:10.914Z"
+  "timestamp": "2026-09-25T13:48:15.385Z"
 }
