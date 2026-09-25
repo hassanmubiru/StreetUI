@@ -5,30 +5,31 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/cli
 
- ✓ src/args.test.ts  (10 tests) 6ms
- ✓ src/env.test.ts  (5 tests) 5ms
- ✓ src/templates.test.ts  (8 tests) 7ms
- ✓ src/diagnostics.test.ts  (7 tests) 7ms
- ✓ src/create.test.ts  (6 tests) 30ms
- ✓ src/public-api.stability.test.ts  (3 tests) 4ms
- ✓ src/cli.test.ts  (5 tests) 6ms
+ ✓ src/args.test.ts  (10 tests) 8ms
+ ✓ src/env.test.ts  (5 tests) 6ms
+ ✓ src/templates.test.ts  (8 tests) 14ms
+ ✓ src/diagnostics.test.ts  (7 tests) 15ms
+ ✓ src/create.test.ts  (6 tests) 97ms
+ ✓ src/cli.test.ts  (5 tests) 10ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 9ms
 stderr | src/serve.test.ts > serve — error disclosure boundary > production hides the stack and returns a generic 500
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-ClzOYZ/server.mjs:1:32)
+    at render (/tmp/streetui-serve-shhdHN/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
 stderr | src/serve.test.ts > serve — error disclosure boundary > dev exposes the error detail for debugging
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-Gp07hj/server.mjs:1:32)
+    at render (/tmp/streetui-serve-7lDSXy/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
- ✓ src/serve.test.ts  (8 tests) 184ms
- ✓ src/e2e.test.ts  (1 test) 223ms
+ ✓ src/serve.test.ts  (8 tests) 367ms
+ ✓ src/e2e.test.ts  (1 test) 470ms
+   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 463ms
 
  Test Files  9 passed (9)
       Tests  53 passed (53)
-   Start at  10:38:02
-   Duration  629ms (transform 520ms, setup 0ms, collect 883ms, tests 472ms, environment 2ms, prepare 693ms)
+   Start at  10:39:29
+   Duration  1.16s (transform 810ms, setup 0ms, collect 1.55s, tests 996ms, environment 3ms, prepare 1.30s)
 
