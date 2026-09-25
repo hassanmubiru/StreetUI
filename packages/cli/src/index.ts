@@ -35,7 +35,7 @@ export { createLogger } from './logger.js';
 export type { Logger } from './logger.js';
 
 /** The CLI version, read from the compiled package. Kept in one place. */
-export const CLI_VERSION = '1.4.0';
+export const CLI_VERSION = '1.5.0';
 
 /** Options for `runCli`, all injectable so tests can drive it in-process. */
 export interface RunCliOptions {

@@ -21,7 +21,7 @@ describe('@streetui/cli — public API contract (v1.0 frozen surface)', () => {
   });
 
   it('CLI_VERSION is aligned to the coordinated 1.3.0 release', () => {
-    expect(CLI_VERSION).toBe('1.4.0');
+    expect(CLI_VERSION).toBe('1.5.0');
   });
 
   it('parseArgs recognizes commands and flags', () => {
