@@ -37,7 +37,10 @@ if (!appDist) throw new Error('perf-app dist not found — build examples/street
 const { renderIsland } = await import(path.join(appDist, 'server-entry.js'));
 const { compilePage, createDeps } = await import(path.join(appDist, 'index.js'));
 const streetui = await import('streetui');
-const { renderToString, serializeState } = streetui;
+const {
+  renderToString, serializeState,
+  ServerDOMAdapter, createRenderContext, mountGraph, serializeChildren,
+} = streetui;
 
 const gc = () => { try { globalThis.gc?.(); } catch { /* no --expose-gc */ } };
 const round = (x) => Math.round(x * 1e4) / 1e4;
@@ -221,6 +224,35 @@ const escWholeCandidateMs = measure(() => escapeHtmlText_candidate(usersBody), {
 const usersRenderMedian = routeResults.find((r) => r.route === 'users').renderToStringMs.medianMs;
 const runsWithSpecial = textRuns.filter((s) => TEXT_RE.test(s)).length;
 
+// ── Phase split for /users (§13) ────────────────────────────────────────────────
+// renderToString = build the ServerDOM tree (mountGraph) + serialize it to a
+// string. Split the two so we know which phase dominates before proposing any
+// "static fast path". Uses the SAME public building blocks renderToString uses.
+const usersCompiled = compileFor({ view: 'users' }).compiled;
+const mountPhaseMs = measure(() => {
+  const dom = new ServerDOMAdapter();
+  const container = dom.createElement('div');
+  const ctx = createRenderContext(dom, usersCompiled.graph, container);
+  const root = mountGraph(ctx);
+  root.dispose();
+  ctx.instances.clear();
+}, { warmup: 3, iterations: 15 });
+
+// Serialize-only: build the tree once (outside timing), then time serialization
+// of the already-built tree repeatedly.
+let serializePhaseMs;
+{
+  const dom = new ServerDOMAdapter();
+  const container = dom.createElement('div');
+  const ctx = createRenderContext(dom, usersCompiled.graph, container);
+  const root = mountGraph(ctx);
+  serializePhaseMs = measure(() => serializeChildren(container), {
+    warmup: 3, iterations: 15,
+  });
+  root.dispose();
+  ctx.instances.clear();
+}
+
 const out = {
   benchmark: 'ssr-profile',
   version: '1.4-dev',
@@ -231,6 +263,14 @@ const out = {
     note: 'Node measurement. NOT a browser number. Do not compare against Chromium.',
   },
   routes: routeResults,
+  usersPhaseSplit: {
+    note: 'renderToString = mount (build ServerDOM tree) + serialize. /users, 10k rows.',
+    mountTreeMs: mountPhaseMs,
+    serializeTreeMs: serializePhaseMs,
+    renderToStringMedianMs: usersRenderMedian,
+    mountSharePct: round((mountPhaseMs.medianMs / usersRenderMedian) * 100),
+    serializeSharePct: round((serializePhaseMs.medianMs / usersRenderMedian) * 100),
+  },
   escapeMicrobench: {
     target: 'escapeHtmlText over the real per-text-node runs of the 10k-row /users body',
     bodyBytes: Buffer.byteLength(usersBody, 'utf8'),
