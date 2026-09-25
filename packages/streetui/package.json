@@ -1,6 +1,6 @@
 {
   "name": "streetui",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "description": "StreetUI — a complete TypeScript UI framework with its own compiler, semantic application graph, reactivity, DOM renderer, router, resources, forms, context, i18n, SSR, hydration, testing, devtools and CLI. One install, one import.",
   "type": "module",
   "main": "./dist/index.cjs",

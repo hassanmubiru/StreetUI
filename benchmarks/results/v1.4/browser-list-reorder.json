@@ -1,0 +1,10 @@
+{
+  "schema": "browser-list-reorder/v1.4",
+  "status": "BLOCKED",
+  "scope": "isolated 10k keyed-row list reorder (§2): StreetUI + competitors, all ops, recording duration/DOM-mutations/node-count/long-tasks/frame-pacing",
+  "generatedAt": "2026-09-25T11:36:01.017Z",
+  "reason": "Playwright: the \"playwright\" package is not installed (npm registry returns 403 / offline; cannot fetch it); Chromium: no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline",
+  "harness": "benchmarks/scenarios/browser-list-reorder/scenario.mjs (ready-to-run in-page measurement core) + this runner. No code change is needed to execute where a browser exists.",
+  "fabricationNote": "Per the v1.4 anti-fabrication rule, no browser numbers are estimated or substituted. happy-dom node-side numbers for related scenarios live in streetui-node.json and are NEVER presented as browser numbers.",
+  "data": null
+}
