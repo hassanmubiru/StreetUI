@@ -96,7 +96,7 @@ if (playwright === null) {
 let server = null;
 let browser = null;
 try {
-  const esbuild = await import('esbuild');
+  const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
   const build = await esbuild.build({
     entryPoints: [path.join(appDir, 'src', 'bench-browser.ts')],
     bundle: true, format: 'esm', write: false, sourcemap: false, target: 'es2020',
