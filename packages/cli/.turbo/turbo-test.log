@@ -1,35 +1,35 @@
 
-> @streetui/cli@1.3.0 test /home/error51/Downloads/StreetUI/packages/cli
+> @streetui/cli@1.4.0 test /home/error51/Downloads/StreetUI/packages/cli
 > vitest run
 
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/cli
 
- ✓ src/env.test.ts  (5 tests) 9ms
+ ✓ src/env.test.ts  (5 tests) 6ms
  ✓ src/templates.test.ts  (8 tests) 12ms
- ✓ src/args.test.ts  (10 tests) 15ms
- ✓ src/diagnostics.test.ts  (7 tests) 12ms
- ✓ src/create.test.ts  (6 tests) 73ms
+ ✓ src/args.test.ts  (10 tests) 16ms
+ ✓ src/diagnostics.test.ts  (7 tests) 23ms
+ ✓ src/create.test.ts  (6 tests) 104ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 11ms
  ✓ src/cli.test.ts  (5 tests) 11ms
- ✓ src/public-api.stability.test.ts  (3 tests) 12ms
 stderr | src/serve.test.ts > serve — error disclosure boundary > production hides the stack and returns a generic 500
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-USrq2p/server.mjs:1:32)
+    at render (/tmp/streetui-serve-Dvxje3/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
 stderr | src/serve.test.ts > serve — error disclosure boundary > dev exposes the error detail for debugging
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-A5BLgU/server.mjs:1:32)
+    at render (/tmp/streetui-serve-Lu8eX0/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
- ✓ src/serve.test.ts  (8 tests) 410ms
- ✓ src/e2e.test.ts  (1 test) 483ms
-   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 474ms
+ ✓ src/serve.test.ts  (8 tests) 407ms
+ ✓ src/e2e.test.ts  (1 test) 468ms
+   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 462ms
 
  Test Files  9 passed (9)
       Tests  53 passed (53)
-   Start at  10:41:38
-   Duration  1.11s (transform 815ms, setup 0ms, collect 1.43s, tests 1.04s, environment 4ms, prepare 1.21s)
+   Start at  14:41:21
+   Duration  1.16s (transform 1.05s, setup 0ms, collect 1.67s, tests 1.06s, environment 4ms, prepare 1.40s)
 
