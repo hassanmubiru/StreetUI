@@ -1,0 +1,14 @@
+
+> @streetui/example-ssr@0.4.0 test /home/error51/Downloads/StreetUI/examples/streetui-ssr
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-ssr
+
+ ✓ src/ssr-example.test.ts  (7 tests) 32ms
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  10:38:53
+   Duration  997ms (transform 170ms, setup 0ms, collect 175ms, tests 32ms, environment 339ms, prepare 160ms)
+
