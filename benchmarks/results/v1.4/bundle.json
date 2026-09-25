@@ -1,0 +1,139 @@
+{
+  "schema": "streetui-bundle/v1.4",
+  "status": "OK",
+  "target": "public `streetui` package (subpath \".\") + examples/streetui-performance-app",
+  "method": "esbuild bundle+minify+treeShaking, format esm, target es2020, legalComments none. gzip = zlib level 9; brotli = zlib default. CSS measured (framework ships none). HTML = minimal module-boot shell. esbuild is a measurement-only bundler, not a streetui runtime dep.",
+  "esbuildVersion": "0.24.2",
+  "streetuiVersion": "1.2.0",
+  "profiles": {
+    "minimal": {
+      "description": "Reactivity core + client renderer + BrowserDOMAdapter + DSL compile (counter-class app).",
+      "js": {
+        "raw": 25451,
+        "gzip": 7619,
+        "brotli": 6832
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 7077,
+      "totalOverWireGzip": 7864
+    },
+    "typical": {
+      "description": "Representative SPA: reactivity + render + router + forms/validators + i18n + store + resource + hydration.",
+      "js": {
+        "raw": 46848,
+        "gzip": 14377,
+        "brotli": 12966
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 13211,
+      "totalOverWireGzip": 14622
+    },
+    "full": {
+      "description": "Entire public `streetui` barrel (every exported member retained via import *).",
+      "js": {
+        "raw": 65444,
+        "gzip": 20205,
+        "brotli": 18143
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 18388,
+      "totalOverWireGzip": 20450
+    },
+    "realApp": {
+      "description": "The actual built demo application entry (examples/streetui-performance-app browser-entry).",
+      "js": {
+        "raw": 46735,
+        "gzip": 14667,
+        "brotli": 13187
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 13432,
+      "totalOverWireGzip": 14912
+    }
+  },
+  "cssPolicy": {
+    "shipsStylesheet": false,
+    "cssFilesInDist": [],
+    "note": "Framework ships no CSS; app-authored styles are out of scope."
+  },
+  "reconciliation": {
+    "v12BaselineUnminifiedGzip": 28764,
+    "currentUnminifiedFullBarrel": {
+      "raw": 128433,
+      "gzip": 28937,
+      "brotli": 24903
+    },
+    "matchesV12Baseline": false,
+    "note": "The v1.2 baseline (28764) was the UNMINIFIED full-barrel gzip. It is reproduced here for continuity. The §14 profile numbers above are MINIFIED and are the honest download figures."
+  },
+  "timestamp": "2026-09-25T11:18:07.909Z",
+  "version": "1.4-dev",
+  "serverClientBoundary": {
+    "section": "§17/§18/§19",
+    "finding": "The server serializer chain (ServerDOMAdapter → serializeServerNode → escapeHtmlText/escapeHtmlAttr/VOID_ELEMENTS) was leaking into client bundles that never import SSR. Root cause: the top-level convenience singletons `export const serverDOMAdapter = new ServerDOMAdapter()` and `browserDOMAdapter = new BrowserDOMAdapter()` were NOT annotated, so esbuild treated the `new` as an import-time side effect and retained the classes + their serialize methods everywhere. This was a PRE-EXISTING leak (present in v1.3), enlarged ~100B by the §13/§14 escape optimization.",
+    "fix": "Annotated both singleton instantiations `/* @__PURE__ */ new X()` in packages/dom/src/{server-adapter,browser-adapter}.ts. The exports remain (frozen public API preserved, additive-only, nothing removed); only their unused initializers are now droppable, letting the server serializer tree-shake OUT of non-SSR client bundles.",
+    "verification": "A minimal `import { signal } from \"streetui\"` bundle no longer contains \"&quot;\"/\"&amp;\"/VOID tag list/\"<!--\" serializer strings (grep-confirmed post-fix). full profile (import *) legitimately RETAINS SSR via renderToString and is unaffected by the tree-shake, so it reflects the +~100B §13/§14 serializer code as disclosed.",
+    "invariantsPreserved": "build 29/29, typecheck 47/47, tests 657 pass; all 5 SSR route bodies still sha256-identical; frozen v1.0 API (168 values/171 types) intact — exports unchanged."
+  },
+  "comparisonVsV13": {
+    "note": "gzip minified JS, v1.3 bundle.json → v1.4 (this file). Negative = smaller client bundle. minimal/typical/realApp shrink because the server serializer now tree-shakes out; full grows slightly because import * retains SSR and carries the §13/§14 serializer code.",
+    "profiles": {
+      "minimal": {
+        "v13Gzip": 8606,
+        "v14Gzip": 7619,
+        "deltaGzip": -987,
+        "deltaPct": -11.5
+      },
+      "typical": {
+        "v13Gzip": 15365,
+        "v14Gzip": 14377,
+        "deltaGzip": -988,
+        "deltaPct": -6.4
+      },
+      "full": {
+        "v13Gzip": 20105,
+        "v14Gzip": 20205,
+        "deltaGzip": 100,
+        "deltaPct": 0.5
+      },
+      "realApp": {
+        "v13Gzip": 15690,
+        "v14Gzip": 14667,
+        "deltaGzip": -1023,
+        "deltaPct": -6.5
+      }
+    }
+  }
+}

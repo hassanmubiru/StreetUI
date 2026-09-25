@@ -225,4 +225,9 @@ export class ServerDOMAdapter implements DOMAdapter {
   }
 }
 
-export const serverDOMAdapter = new ServerDOMAdapter();
+// `/* @__PURE__ */`: this singleton is a convenience export only (no internal
+// runtime path references it). Marking construction pure lets bundlers drop it —
+// and with it the whole server serializer chain (serializeServerNode/escape/
+// VOID_ELEMENTS) — out of client bundles that never import SSR. Without this,
+// the un-annotated `new` is treated as a side effect and retained everywhere.
+export const serverDOMAdapter = /* @__PURE__ */ new ServerDOMAdapter();

@@ -127,4 +127,7 @@ export class BrowserDOMAdapter implements DOMAdapter {
   }
 }
 
-export const browserDOMAdapter = new BrowserDOMAdapter();
+// `/* @__PURE__ */`: convenience singleton, unreferenced by internal runtime
+// paths. Marking construction pure lets bundlers drop it when unused instead of
+// retaining it (and the BrowserDOMAdapter class) as an import-time side effect.
+export const browserDOMAdapter = /* @__PURE__ */ new BrowserDOMAdapter();
