@@ -253,6 +253,82 @@ let serializePhaseMs;
   ctx.instances.clear();
 }
 
+// ── Same-process serialize A/B (§13/§14) ───────────────────────────────────────
+// Cross-run medians are noisy in a 2-core VM, so isolate the serializer change
+// deterministically: build ONE /users tree, then serialize it with (a) the
+// SHIPPED serializeChildren and (b) a replica of the PRE-optimization serializer
+// (chained-regex escape + per-element Object.entries). Same tree, same process,
+// same run. Assert byte-identical output, then compare timings.
+const VOID = new Set(['area','base','br','col','embed','hr','img','input',
+  'link','meta','param','source','track','wbr']);
+const LEGACY_PROPS = { value: 'attr', checked: 'boolean', selected: 'boolean' };
+function legacyEscText(v) {
+  return v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function legacyEscAttr(v) {
+  return v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function legacyAttrs(el) {
+  const parts = [];
+  for (const [name, value] of el.attributes) {
+    if (value === '') parts.push(` ${name}`);
+    else parts.push(` ${name}="${legacyEscAttr(value)}"`);
+  }
+  for (const [name, kind] of Object.entries(LEGACY_PROPS)) {
+    if (!el.properties.has(name)) continue;
+    if (el.attributes.has(name)) continue;
+    const raw = el.properties.get(name);
+    if (kind === 'boolean') { if (raw === true) parts.push(` ${name}`); }
+    else if (raw !== undefined && raw !== null) parts.push(` ${name}="${legacyEscAttr(String(raw))}"`);
+  }
+  if (!el.style.isEmpty && !el.attributes.has('style')) {
+    parts.push(` style="${legacyEscAttr(el.style.toCss())}"`);
+  }
+  return parts.join('');
+}
+function legacyNode(node) {
+  switch (node.kind) {
+    case 'text': return legacyEscText(node.data);
+    case 'comment': return `<!--${node.data}-->`;
+    case 'fragment': return legacyChildren(node);
+    case 'element': {
+      const tag = node.tagName;
+      const attrs = legacyAttrs(node);
+      if (VOID.has(tag)) return `<${tag}${attrs}>`;
+      return `<${tag}${attrs}>${legacyChildren(node)}</${tag}>`;
+    }
+  }
+  return '';
+}
+function legacyChildren(node) {
+  let out = '';
+  for (const child of node.children) out += legacyNode(child);
+  return out;
+}
+
+let serializeAB;
+{
+  const dom = new ServerDOMAdapter();
+  const container = dom.createElement('div');
+  const ctx = createRenderContext(dom, usersCompiled.graph, container);
+  const root = mountGraph(ctx);
+  const shippedOut = serializeChildren(container);
+  const legacyOut = legacyChildren(container);
+  const abIdentical = shippedOut === legacyOut;
+  const shippedMs = measure(() => serializeChildren(container), { warmup: 5, iterations: 25 });
+  const legacyMs = measure(() => legacyChildren(container), { warmup: 5, iterations: 25 });
+  root.dispose();
+  ctx.instances.clear();
+  serializeAB = {
+    note: 'Same /users tree, same process. legacy = pre-v1.4 serializer replica.',
+    byteIdentical: abIdentical,
+    outputBytes: Buffer.byteLength(shippedOut, 'utf8'),
+    legacySerializeMs: legacyMs,
+    shippedSerializeMs: shippedMs,
+    speedupX: round(legacyMs.medianMs / shippedMs.medianMs),
+  };
+}
+
 const out = {
   benchmark: 'ssr-profile',
   version: '1.4-dev',
@@ -263,6 +339,7 @@ const out = {
     note: 'Node measurement. NOT a browser number. Do not compare against Chromium.',
   },
   routes: routeResults,
+  serializeAB,
   usersPhaseSplit: {
     note: 'renderToString = mount (build ServerDOM tree) + serialize. /users, 10k rows.',
     mountTreeMs: mountPhaseMs,
