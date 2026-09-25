@@ -1,16 +1,198 @@
 {
   "framework": "react",
-  "version": "see ../framework-versions.json",
-  "status": "BLOCKED",
-  "blockedReason": "Cannot install react offline (npm registry returns 403) and cannot run in-browser scenarios without Chromium/Playwright. Scenario implementations exist under benchmarks/competitors/react and the runner (benchmarks/run-competitors.mjs) will populate this file once dependencies and a real browser are available.",
+  "version": "19.1.0",
+  "nodeVersion": "v24.18.0",
+  "browserVersion": null,
+  "timestamp": "2026-09-25T05:58:56.792Z",
+  "environment": {
+    "domEnvironment": "chromium (Playwright)",
+    "arch": "x64",
+    "platform": "linux"
+  },
+  "notes": [],
   "benchmarks": {
-    "A_initialRender": null,
-    "B_singleUpdate": null,
-    "C_largeList": null,
-    "D_fanOut": null,
-    "E_deepState": null,
-    "F_ssr": null,
-    "G_hydration": null,
-    "H_bundleSize": null
+    "A_initialRender": {
+      "nodes": 10000,
+      "medianMs": 14,
+      "p95Ms": 19.8,
+      "minMs": 7.7,
+      "maxMs": 19.8,
+      "samples": 15,
+      "domNodesCreated": 20002,
+      "note": "time to create DOM; synchronous flushSync render == interactive"
+    },
+    "B_singleUpdate": {
+      "nodes": 10000,
+      "medianMs": 2.4,
+      "p95Ms": 6.7,
+      "minMs": 1.3,
+      "maxMs": 9.5,
+      "samples": 40,
+      "domMutations": 1,
+      "note": "one setState in a 10k tree; domMutations MUST be 1 (targeted, no subtree re-render)"
+    },
+    "C_largeList": {
+      "append": {
+        "items": 10000,
+        "medianMs": 3.1,
+        "p95Ms": 9.7,
+        "minMs": 1.4,
+        "maxMs": 9.7,
+        "samples": 12,
+        "domNodesCreated": 1,
+        "domNodesRemoved": 0
+      },
+      "prepend": {
+        "items": 10000,
+        "medianMs": 2.2,
+        "p95Ms": 8.6,
+        "minMs": 1.9,
+        "maxMs": 8.6,
+        "samples": 12,
+        "domNodesCreated": 1,
+        "domNodesRemoved": 0
+      },
+      "remove-first": {
+        "items": 10000,
+        "medianMs": 2.2,
+        "p95Ms": 5.5,
+        "minMs": 1.9,
+        "maxMs": 5.5,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-middle": {
+        "items": 10000,
+        "medianMs": 1.9,
+        "p95Ms": 6.3,
+        "minMs": 1.6,
+        "maxMs": 6.3,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-last": {
+        "items": 10000,
+        "medianMs": 1.8,
+        "p95Ms": 7,
+        "minMs": 1.5,
+        "maxMs": 7,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "reorder": {
+        "items": 10000,
+        "medianMs": 127.8,
+        "p95Ms": 201.1,
+        "minMs": 120.1,
+        "maxMs": 201.1,
+        "samples": 12,
+        "domNodesCreated": 9999,
+        "domNodesRemoved": 9999
+      },
+      "reverse": {
+        "items": 10000,
+        "medianMs": 135.1,
+        "p95Ms": 172.3,
+        "minMs": 120.4,
+        "maxMs": 172.3,
+        "samples": 12,
+        "domNodesCreated": 9999,
+        "domNodesRemoved": 9999
+      },
+      "update-item": {
+        "items": 10000,
+        "medianMs": 1.6,
+        "p95Ms": 4.6,
+        "minMs": 1.4,
+        "maxMs": 4.6,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      }
+    },
+    "D_fanOut": {
+      "subscribers=1000": {
+        "subscribers": 1000,
+        "medianMs": 0.7,
+        "p95Ms": 4.7,
+        "minMs": 0.5,
+        "maxMs": 5.6,
+        "samples": 25,
+        "domMutations": 1000,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      },
+      "subscribers=10000": {
+        "subscribers": 10000,
+        "medianMs": 13.8,
+        "p95Ms": 6301.7,
+        "minMs": 6.1,
+        "maxMs": 10342.2,
+        "samples": 25,
+        "domMutations": 10000,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      }
+    },
+    "E_deepState": {
+      "leaves": 4,
+      "medianMs": 0.1,
+      "p95Ms": 0.2,
+      "minMs": 0,
+      "maxMs": 0.7,
+      "samples": 40,
+      "nodesUpdated": 1,
+      "note": "update one deep branch; nodesUpdated MUST be 1 of 4 leaves (React diffs to the one text node)"
+    },
+    "F_ssr": {
+      "nodes": 10000,
+      "medianMs": 3.2303,
+      "p95Ms": 5.5049,
+      "minMs": 2.8344,
+      "maxMs": 5.5055,
+      "samples": 20,
+      "outputBytes": 318922,
+      "note": "renderToString of a 10k-node app; output size in bytes"
+    },
+    "G_hydration": {
+      "nodes": 10000,
+      "medianMs": 11,
+      "p95Ms": 18.1,
+      "minMs": 6.2,
+      "maxMs": 18.1,
+      "samples": 15,
+      "domNodesCreatedDuringHydration": 0,
+      "environment": "chromium (Playwright)",
+      "note": "adopts server DOM; domNodesCreatedDuringHydration should be ~0 for a matching tree"
+    },
+    "H_bundleSize": {
+      "note": "sizes in bytes; gzip level 9; brotli default. Client bundles are self-contained (framework inlined). routerApp is null — no framework router is in the pinned dep set (StreetUI ships a router in-core).",
+      "runtime": {
+        "file": "benchmarks/competitors/react/dist-bench/runtime/bundle.js",
+        "raw": 185389,
+        "gzip": 58225,
+        "brotli": 50338
+      },
+      "minimalApp": {
+        "file": "benchmarks/competitors/react/dist-bench/minimalApp/bundle.js",
+        "raw": 186298,
+        "gzip": 58455,
+        "brotli": 50479
+      },
+      "fullApp": {
+        "file": "benchmarks/competitors/react/dist-bench/fullApp/bundle.js",
+        "raw": 187713,
+        "gzip": 58901,
+        "brotli": 50958
+      },
+      "ssrSubset": {
+        "file": "benchmarks/competitors/react/dist-bench/ssr/ssr.mjs",
+        "raw": 1195688,
+        "gzip": 221475,
+        "brotli": 79720
+      },
+      "routerApp": null
+    }
   }
 }

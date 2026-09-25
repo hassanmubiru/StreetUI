@@ -1,16 +1,61 @@
 {
   "framework": "svelte",
-  "version": "see ../framework-versions.json",
-  "status": "BLOCKED",
-  "blockedReason": "Cannot install svelte offline (npm registry returns 403) and cannot run in-browser scenarios without Chromium/Playwright. Scenario implementations exist under benchmarks/competitors/svelte and the runner (benchmarks/run-competitors.mjs) will populate this file once dependencies and a real browser are available.",
+  "version": "5.19.0",
+  "nodeVersion": "v24.18.0",
+  "browserVersion": null,
+  "timestamp": "2026-09-25T06:00:08.207Z",
+  "environment": {
+    "domEnvironment": "chromium (Playwright)",
+    "arch": "x64",
+    "platform": "linux"
+  },
+  "notes": [
+    "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of null (reading 'nodes_start')\n    at st (http://localhost:40909/assets/index-Bi84fnm0.js:1:15125)\n    at http://localhost:40909/assets/index-Bi84fnm0.js:1:15368\n    at et (http://localhost:40909/assets/index-Bi84fnm0.js:1:20707)\n    at xr (http://localhost:40909/assets/index-Bi84fnm0.js:1:20321)\n    at Vr (http://localhost:40909/assets/index-Bi84fnm0.js:1:26171)\n    at async eval (eval at evaluate (:1:1), <anonymous>:1:13)\n    at async <anonymous>:260:30"
+  ],
   "benchmarks": {
     "A_initialRender": null,
     "B_singleUpdate": null,
     "C_largeList": null,
     "D_fanOut": null,
     "E_deepState": null,
-    "F_ssr": null,
+    "F_ssr": {
+      "nodes": 10000,
+      "medianMs": 0.8841,
+      "p95Ms": 1.0294,
+      "minMs": 0.8196,
+      "maxMs": 1.1321,
+      "samples": 20,
+      "outputBytes": 318954,
+      "note": "render() of a 10k-node app; output size in bytes"
+    },
     "G_hydration": null,
-    "H_bundleSize": null
+    "H_bundleSize": {
+      "note": "sizes in bytes; gzip level 9; brotli default. Client bundles are self-contained (framework inlined). routerApp is null — no framework router is in the pinned dep set (StreetUI ships a router in-core).",
+      "runtime": {
+        "file": "benchmarks/competitors/svelte/dist-bench/runtime/bundle.js",
+        "raw": 8909,
+        "gzip": 3962,
+        "brotli": 3607
+      },
+      "minimalApp": {
+        "file": "benchmarks/competitors/svelte/dist-bench/minimalApp/bundle.js",
+        "raw": 12667,
+        "gzip": 5473,
+        "brotli": 4984
+      },
+      "fullApp": {
+        "file": "benchmarks/competitors/svelte/dist-bench/fullApp/bundle.js",
+        "raw": 19227,
+        "gzip": 7803,
+        "brotli": 7100
+      },
+      "ssrSubset": {
+        "file": "benchmarks/competitors/svelte/dist-bench/ssr/ssr.mjs",
+        "raw": 3498,
+        "gzip": 1421,
+        "brotli": 1260
+      },
+      "routerApp": null
+    }
   }
 }

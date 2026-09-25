@@ -1,16 +1,185 @@
 {
   "framework": "solid",
-  "version": "see ../framework-versions.json",
-  "status": "BLOCKED",
-  "blockedReason": "Cannot install solid offline (npm registry returns 403) and cannot run in-browser scenarios without Chromium/Playwright. Scenario implementations exist under benchmarks/competitors/solid and the runner (benchmarks/run-competitors.mjs) will populate this file once dependencies and a real browser are available.",
+  "version": "1.9.3",
+  "nodeVersion": "v24.18.0",
+  "browserVersion": null,
+  "timestamp": "2026-09-25T06:00:11.894Z",
+  "environment": {
+    "domEnvironment": "chromium (Playwright)",
+    "arch": "x64",
+    "platform": "linux"
+  },
+  "notes": [
+    "F/SSR failed: Client-only API called on the server side. Run client-only code in onMount, or conditionally run client-only component with <Show>."
+  ],
   "benchmarks": {
-    "A_initialRender": null,
-    "B_singleUpdate": null,
-    "C_largeList": null,
-    "D_fanOut": null,
-    "E_deepState": null,
+    "A_initialRender": {
+      "nodes": 10000,
+      "medianMs": 11.4,
+      "p95Ms": 27.6,
+      "minMs": 7.3,
+      "maxMs": 27.6,
+      "samples": 15,
+      "domNodesCreated": 20002,
+      "note": "time to create DOM; synchronous render == interactive"
+    },
+    "B_singleUpdate": {
+      "nodes": 10000,
+      "medianMs": 0,
+      "p95Ms": 0.1,
+      "minMs": 0,
+      "maxMs": 0.2,
+      "samples": 40,
+      "domMutations": 1,
+      "note": "one signal write in a 10k tree; domMutations MUST be 1 (fine-grained)"
+    },
+    "C_largeList": {
+      "append": {
+        "items": 10000,
+        "medianMs": 0.3,
+        "p95Ms": 3.2,
+        "minMs": 0.2,
+        "maxMs": 3.2,
+        "samples": 12,
+        "domNodesCreated": 1,
+        "domNodesRemoved": 0
+      },
+      "prepend": {
+        "items": 10000,
+        "medianMs": 0.4,
+        "p95Ms": 0.8,
+        "minMs": 0.2,
+        "maxMs": 0.8,
+        "samples": 12,
+        "domNodesCreated": 1,
+        "domNodesRemoved": 0
+      },
+      "remove-first": {
+        "items": 10000,
+        "medianMs": 0.4,
+        "p95Ms": 0.6,
+        "minMs": 0.3,
+        "maxMs": 0.6,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-middle": {
+        "items": 10000,
+        "medianMs": 0.3,
+        "p95Ms": 0.5,
+        "minMs": 0.2,
+        "maxMs": 0.5,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "remove-last": {
+        "items": 10000,
+        "medianMs": 0.2,
+        "p95Ms": 0.3,
+        "minMs": 0.1,
+        "maxMs": 0.3,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 1
+      },
+      "reorder": {
+        "items": 10000,
+        "medianMs": 0.9,
+        "p95Ms": 1.8,
+        "minMs": 0.6,
+        "maxMs": 1.8,
+        "samples": 12,
+        "domNodesCreated": 2,
+        "domNodesRemoved": 2
+      },
+      "reverse": {
+        "items": 10000,
+        "medianMs": 15.9,
+        "p95Ms": 58.4,
+        "minMs": 15.1,
+        "maxMs": 58.4,
+        "samples": 12,
+        "domNodesCreated": 10000,
+        "domNodesRemoved": 10000
+      },
+      "update-item": {
+        "items": 10000,
+        "medianMs": 0.3,
+        "p95Ms": 0.4,
+        "minMs": 0.2,
+        "maxMs": 0.4,
+        "samples": 12,
+        "domNodesCreated": 1,
+        "domNodesRemoved": 1
+      }
+    },
+    "D_fanOut": {
+      "subscribers=1000": {
+        "subscribers": 1000,
+        "medianMs": 0.5,
+        "p95Ms": 0.7,
+        "minMs": 0.4,
+        "maxMs": 0.7,
+        "samples": 25,
+        "domMutations": 1000,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      },
+      "subscribers=10000": {
+        "subscribers": 10000,
+        "medianMs": 5.3,
+        "p95Ms": 8,
+        "minMs": 4.7,
+        "maxMs": 8.9,
+        "samples": 25,
+        "domMutations": 10000,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      }
+    },
+    "E_deepState": {
+      "leaves": 4,
+      "medianMs": 0,
+      "p95Ms": 0.1,
+      "minMs": 0,
+      "maxMs": 0.1,
+      "samples": 40,
+      "nodesUpdated": 1,
+      "note": "update one deep branch; nodesUpdated MUST be 1 of 4 leaves (fine-grained store)"
+    },
     "F_ssr": null,
-    "G_hydration": null,
-    "H_bundleSize": null
+    "G_hydration": {
+      "nodes": 10000,
+      "status": "SKIPPED",
+      "note": "Solid client build cannot server-render; run via benchmarks/run-competitors.mjs which injects __SOLID_SSR_HTML__ from the SSR build. No numbers fabricated."
+    },
+    "H_bundleSize": {
+      "note": "sizes in bytes; gzip level 9; brotli default. Client bundles are self-contained (framework inlined). routerApp is null — no framework router is in the pinned dep set (StreetUI ships a router in-core).",
+      "runtime": {
+        "file": "benchmarks/competitors/solid/dist-bench/runtime/bundle.js",
+        "raw": 5882,
+        "gzip": 2441,
+        "brotli": 2224
+      },
+      "minimalApp": {
+        "file": "benchmarks/competitors/solid/dist-bench/minimalApp/bundle.js",
+        "raw": 7761,
+        "gzip": 3158,
+        "brotli": 2876
+      },
+      "fullApp": {
+        "file": "benchmarks/competitors/solid/dist-bench/fullApp/bundle.js",
+        "raw": 9909,
+        "gzip": 3886,
+        "brotli": 3537
+      },
+      "ssrSubset": {
+        "file": "benchmarks/competitors/solid/dist-bench/ssr/ssr.mjs",
+        "raw": 88543,
+        "gzip": 17720,
+        "brotli": 15468
+      },
+      "routerApp": null
+    }
   }
 }
