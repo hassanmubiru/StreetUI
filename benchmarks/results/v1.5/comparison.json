@@ -1,18 +1,35 @@
 {
   "schema": "comparison/v1.5",
-  "status": "BLOCKED (cross-framework browser comparison); PARTIAL (StreetUI node-only numbers exist)",
-  "environmentRef": "./environment.json",
-  "ranking": "NONE — this release does not rank frameworks (v1.5 §20).",
-  "crossFrameworkBrowser": {
-    "status": "BLOCKED",
-    "reason": "Playwright: playwright 1.49.1 package is present, but its Chromium browser binary is NOT downloaded (executable absent at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium-1148/chrome-linux/chrome); a real chromium.launch() fails. `playwright install chromium` needs cdn.playwright.dev, which is unreachable offline (npm/registry 403).; Chromium: no Chromium/Chrome executable found (checked CHROMIUM_PATH, the Playwright browser cache, and standard /usr/bin paths); none installable offline (apt has no candidate; cdn.playwright.dev / npm registry 403); competitors not installed."
+  "status": "OK",
+  "ranking": "NONE (v1.5 §20)",
+  "environment": {
+    "node": "v24.18.0",
+    "os": "Linux 7.0.0-31-generic x64",
+    "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "cpuCount": 12,
+    "totalMemMB": 16381
   },
-  "streetuiNodeOnly": {
-    "ref": "./streetui-node.json",
-    "ssr": "./ssr.json",
-    "bundle": "./bundle.json",
-    "memory": "./memory.json",
-    "note": "Node + happy-dom. NOT browser numbers. Never cross-compared to any browser framework."
+  "frameworks": {
+    "streetui": {
+      "status": "BLOCKED",
+      "reason": "not installed: streetui (pinned workspace); npm registry 403 so it cannot be fetched"
+    },
+    "react": {
+      "status": "BLOCKED",
+      "reason": "not installed: react, react-dom (pinned 19.1.0); npm registry 403 so it cannot be fetched"
+    },
+    "vue": {
+      "status": "BLOCKED",
+      "reason": "not installed: vue (pinned 3.5.13); npm registry 403 so it cannot be fetched"
+    },
+    "svelte": {
+      "status": "BLOCKED",
+      "reason": "not installed: svelte (pinned 5.19.0); npm registry 403 so it cannot be fetched"
+    },
+    "solid": {
+      "status": "BLOCKED",
+      "reason": "not installed: solid-js (pinned 1.9.3); npm registry 403 so it cannot be fetched"
+    }
   },
-  "note": "A valid comparison requires all frameworks in the SAME Chromium. Until then, no comparison table is emitted — no happy-dom-vs-Chromium mixing, no fabricated competitor rows."
+  "note": "Same Chromium/machine/flags/mode/data/scenario. Side-by-side; reader draws conclusions."
 }
