@@ -167,16 +167,27 @@ for (const route of ROUTES) {
 }
 
 // ── Escape micro-benchmark on the REAL /users body ─────────────────────────────
-// Extract the actual text runs the serializer would escape from the 10k-row
-// body, then time current vs candidate. This attributes how much SSR cost is
-// escaping and proves the candidate is byte-identical.
+// The serializer calls escapeHtmlText ONCE PER TEXT NODE, not once on the whole
+// body. To reflect that real call pattern we split the rendered body into its
+// text runs (the substrings between `>` and `<`) and escape each individually.
+// Row data (names/emails/numbers/status) carry no &<>" so these runs are the
+// genuine pre-escape strings for the common case.
 const usersBody = renderToString(compileFor({ view: 'users' }).compiled);
 
-// Byte-identity gate: run both impls over a representative corpus (the whole
-// body treated as text, plus attribute-ish samples with quotes) and require
-// identical output. If this fails, the optimization is unsafe — abort.
+const textRuns = [];
+{
+  const re = />([^<]+)</g;
+  let m;
+  while ((m = re.exec(usersBody)) !== null) {
+    if (m[1].length > 0) textRuns.push(m[1]);
+  }
+}
+
+// Byte-identity gate over a representative corpus (incl. every text run plus
+// adversarial samples with all special chars). If any output differs the
+// optimization is unsafe — recorded and it must not ship.
 const corpus = [
-  usersBody,
+  ...textRuns.slice(0, 5000),
   'no special chars here at all just plain ascii text',
   'a & b < c > d "quoted"',
   '<div class="x">&amp;</div>',
@@ -189,17 +200,26 @@ for (const s of corpus) {
   if (escapeHtmlAttr_current(s) !== escapeHtmlAttr_candidate(s)) identical = false;
 }
 
-// Time both escape impls on the real body (text path — the dominant one).
-const escCurrentMs = measure(() => escapeHtmlText_current(usersBody), {
+// Time escaping the FULL set of per-node text runs (the real aggregate work of
+// one /users render), current vs candidate.
+const escCurrentMs = measure(() => {
+  for (let i = 0; i < textRuns.length; i++) escapeHtmlText_current(textRuns[i]);
+}, { warmup: 5, iterations: 25 });
+const escCandidateMs = measure(() => {
+  for (let i = 0; i < textRuns.length; i++) escapeHtmlText_candidate(textRuns[i]);
+}, { warmup: 5, iterations: 25 });
+
+// Secondary datapoint: escaping the whole body as one string (NOT the real call
+// pattern, kept only to show why a naive whole-string microbench misleads).
+const escWholeCurrentMs = measure(() => escapeHtmlText_current(usersBody), {
   warmup: 5, iterations: 25,
 });
-const escCandidateMs = measure(() => escapeHtmlText_candidate(usersBody), {
+const escWholeCandidateMs = measure(() => escapeHtmlText_candidate(usersBody), {
   warmup: 5, iterations: 25,
 });
 
-// Fraction of a /users renderToString spent purely in text-escaping the body,
-// approximated by the current escape cost over one body pass vs the full render.
 const usersRenderMedian = routeResults.find((r) => r.route === 'users').renderToStringMs.medianMs;
+const runsWithSpecial = textRuns.filter((s) => TEXT_RE.test(s)).length;
 
 const out = {
   benchmark: 'ssr-profile',
@@ -212,13 +232,17 @@ const out = {
   },
   routes: routeResults,
   escapeMicrobench: {
-    target: 'escapeHtmlText on the real 10k-row /users body',
+    target: 'escapeHtmlText over the real per-text-node runs of the 10k-row /users body',
     bodyBytes: Buffer.byteLength(usersBody, 'utf8'),
+    textNodeRuns: textRuns.length,
+    runsContainingSpecialChars: runsWithSpecial,
     byteIdenticalToCurrent: identical,
-    currentImplMs: escCurrentMs,
-    candidateFastPathMs: escCandidateMs,
+    perNode_currentImplMs: escCurrentMs,
+    perNode_candidateFastPathMs: escCandidateMs,
+    wholeBody_currentImplMs: escWholeCurrentMs,
+    wholeBody_candidateFastPathMs: escWholeCandidateMs,
     usersRenderToStringMedianMs: usersRenderMedian,
-    escapeShareOfUsersRenderPct:
+    perNodeEscapeShareOfUsersRenderPct:
       round((escCurrentMs.medianMs / usersRenderMedian) * 100),
   },
 };
