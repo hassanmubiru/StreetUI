@@ -1,0 +1,10 @@
+{
+  "schema": "competitor-browser/v1.4",
+  "status": "BLOCKED",
+  "generatedAt": "2026-09-25T11:28:36.550Z",
+  "scope": "competitor frameworks in a real browser (§3)",
+  "reason": "No Chromium/Chrome binary is present in this VM and none is installable (npm registry 403 / offline). Real-browser measurement cannot be executed.",
+  "harness": "benchmarks/run-competitors.mjs + scripts/browser-harness.mjs (ready; require a browser + installed competitor frameworks).",
+  "fabricationNote": "Per the v1.4 anti-fabrication rule, NO browser numbers are estimated or invented. This file exists to record the gate as explicitly blocked with its reason.",
+  "data": null
+}

@@ -1,0 +1,10 @@
+{
+  "schema": "streetui-browser/v1.4",
+  "status": "BLOCKED",
+  "generatedAt": "2026-09-25T11:28:36.550Z",
+  "scope": "StreetUI real-Chromium mount / list-reorder / hydration (§2,§8,§10,§16)",
+  "reason": "No Chromium/Chrome binary is present in this VM and none is installable (npm registry 403 / offline). Real-browser measurement cannot be executed.",
+  "harness": "scripts/browser-harness.mjs + §2 isolated list-reorder harness (code ready; require a Chromium binary).",
+  "fabricationNote": "Per the v1.4 anti-fabrication rule, NO browser numbers are estimated or invented. This file exists to record the gate as explicitly blocked with its reason.",
+  "data": null
+}

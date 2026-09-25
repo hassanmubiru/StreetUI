@@ -1,0 +1,38 @@
+{
+  "schema": "streetui-environment/v1.4",
+  "generatedAt": "2026-09-25T11:28:36.550Z",
+  "runtime": {
+    "node": "v22.23.2",
+    "platform": "Linux 6.8.0-138-generic x64",
+    "cpus": 2,
+    "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "totalMemMB": 3916
+  },
+  "domForNodeMeasurements": "happy-dom (in-process). NOT a browser. Used for node-side mount/hydration/list/mutation-count and SSR profiling.",
+  "capabilities": {
+    "chromium": {
+      "available": false,
+      "reason": "No Chromium/Chrome binary present in this VM and none installable (npm registry returns 403 / offline)."
+    },
+    "playwright": {
+      "available": false,
+      "reason": "Not installed; cannot be fetched offline."
+    },
+    "npmRegistry": {
+      "available": false,
+      "reason": "403 / offline — no publish, no dependency install from registry."
+    },
+    "esbuild": {
+      "available": true,
+      "version": "0.24.2",
+      "role": "measurement-only bundler for bundle-size analysis; never a streetui runtime dependency."
+    }
+  },
+  "blockedWork": [
+    "§2/§10 isolated real-Chromium list-reorder + reorder profiling — harness code is ready (scripts/browser-harness.mjs) but cannot execute: no Chromium.",
+    "§3 fair competitor environment — no browser + offline registry; cannot install or run competitor frameworks in a real browser.",
+    "§16 hydration Chromium profiling — no Chromium.",
+    "Publishing — npm registry 403."
+  ],
+  "antiFabricationPolicy": "Every number in the v1.4 result set comes from an actual execution in THIS environment. Browser and competitor measurements are recorded BLOCKED with the exact reason above — never estimated, extrapolated, or copied from elsewhere. happy-dom node numbers are never labeled or compared as browser numbers."
+}

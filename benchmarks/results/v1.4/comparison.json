@@ -1,0 +1,46 @@
+{
+  "schema": "streetui-comparison/v1.4",
+  "generatedAt": "2026-09-25T11:28:36.550Z",
+  "policy": "NO ranking, NO \"winner\", NO cross-framework speed claim. This file compares StreetUI v1.4 ONLY against StreetUI v1.3 (same environment, same harness), plus the within-run SSR serialize A/B. Cross-framework comparison is BLOCKED (see competitor-browser.json) and intentionally absent.",
+  "environment": "Node + happy-dom for node/SSR; esbuild for bundle. NOT browser numbers.",
+  "bundleGzipMinified_v13_to_v14": {
+    "minimal": {
+      "v13Gzip": 8606,
+      "v14Gzip": 7619,
+      "deltaGzip": -987,
+      "deltaPct": -11.5
+    },
+    "typical": {
+      "v13Gzip": 15365,
+      "v14Gzip": 14377,
+      "deltaGzip": -988,
+      "deltaPct": -6.4
+    },
+    "full": {
+      "v13Gzip": 20105,
+      "v14Gzip": 20205,
+      "deltaGzip": 100,
+      "deltaPct": 0.5
+    },
+    "realApp": {
+      "v13Gzip": 15690,
+      "v14Gzip": 14667,
+      "deltaGzip": -1023,
+      "deltaPct": -6.5
+    }
+  },
+  "ssrSerializePhase_sameProcessAB": {
+    "note": "Same /users tree, same process. legacy = pre-v1.4 serializer replica.",
+    "legacyMedianMs": 103.8519,
+    "shippedMedianMs": 64.1257,
+    "speedupX": 1.6195,
+    "byteIdentical": true
+  },
+  "ssrPhaseSplit_users10k": {
+    "mountSharePct": 62.0512,
+    "serializeSharePct": 32.6617,
+    "note": "renderToString = mount (dominant) + serialize. Escape is ~3%; optimization targeted serialize allocation, not escape volume."
+  },
+  "nodeInvariantsHold": true,
+  "caveat": "End-to-end renderToString cross-run medians are too noisy in this 2-core VM to quote a percentage; the SSR speedup is reported as the deterministic same-process serialize A/B only."
+}

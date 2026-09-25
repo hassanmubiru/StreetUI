@@ -1,0 +1,32 @@
+{
+  "schema": "streetui-memory/v1.4",
+  "generatedAt": "2026-09-25T11:28:36.550Z",
+  "method": "Deterministic node-count stability across repeated mount→unmount cycles of the real app, measured at the single BrowserDOMAdapter choke point (each cycle isolated; gc() between cycles). Node-count drift + post-unmount orphan count are the load-bearing leak signals; V8 heapUsed is intentionally NOT used as a pass/fail signal because it is GC-nondeterministic and noisy in this 2-core VM.",
+  "environmentNote": "Node + happy-dom. NOT a browser memory profile.",
+  "cycles": 8,
+  "nodesCreatedPerCycle": [
+    22584,
+    22584,
+    22584,
+    22584,
+    22584,
+    22584,
+    22584,
+    22584
+  ],
+  "orphanNodesAfterUnmount": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "invariants": {
+    "noNodeDriftAcrossCycles": true,
+    "unmountLeavesNoOrphans": true
+  },
+  "interpretation": "nodesCreatedPerCycle is identical every cycle and orphanNodesAfterUnmount is 0 every cycle → mount/unmount neither grows the tree nor strands detached nodes. No accumulation."
+}
