@@ -1,6 +1,6 @@
 {
   "name": "@streetui/dsl",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "StreetUI semantic TypeScript DSL",
   "type": "module",
   "main": "./dist/index.cjs",
