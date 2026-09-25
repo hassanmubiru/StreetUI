@@ -94,21 +94,59 @@ const SERIALIZED_PROPERTIES: Record<string, 'attr' | 'boolean'> = {
   selected: 'boolean',
 };
 
+/**
+ * Precomputed `[name, kind]` pairs of SERIALIZED_PROPERTIES. Hoisted to module
+ * scope so `serializeAttributes` does not allocate a fresh entries array for
+ * every element serialized (measured hot: ~80k elements on the 10k-row route).
+ */
+const SERIALIZED_PROPERTY_ENTRIES: ReadonlyArray<readonly [string, 'attr' | 'boolean']> =
+  Object.entries(SERIALIZED_PROPERTIES) as Array<[string, 'attr' | 'boolean']>;
+
+// Fast-path escaping. The chained `.replace(/…/g, …)` form makes 3–4 full
+// passes and allocates an intermediate string per pass even when nothing needs
+// escaping. These variants scan once and, in the overwhelmingly common case of
+// no special character, return the input unchanged (zero allocation). Output is
+// byte-identical to the chained form (verified over the real SSR corpus).
+const TEXT_SPECIAL = /[&<>]/;
+const ATTR_SPECIAL = /[&<>"]/;
+
 /** Escape text node content. */
 export function escapeHtmlText(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  if (!TEXT_SPECIAL.test(value)) return value;
+  let out = '';
+  let last = 0;
+  for (let i = 0; i < value.length; i++) {
+    let esc: string;
+    switch (value.charCodeAt(i)) {
+      case 38: esc = '&amp;'; break; // &
+      case 60: esc = '&lt;'; break;  // <
+      case 62: esc = '&gt;'; break;  // >
+      default: continue;
+    }
+    out += value.slice(last, i) + esc;
+    last = i + 1;
+  }
+  return out + value.slice(last);
 }
 
 /** Escape a double-quoted attribute value. */
 export function escapeHtmlAttr(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  if (!ATTR_SPECIAL.test(value)) return value;
+  let out = '';
+  let last = 0;
+  for (let i = 0; i < value.length; i++) {
+    let esc: string;
+    switch (value.charCodeAt(i)) {
+      case 38: esc = '&amp;'; break;  // &
+      case 60: esc = '&lt;'; break;   // <
+      case 62: esc = '&gt;'; break;   // >
+      case 34: esc = '&quot;'; break; // "
+      default: continue;
+    }
+    out += value.slice(last, i) + esc;
+    last = i + 1;
+  }
+  return out + value.slice(last);
 }
 
 function serializeAttributes(el: ServerElement): string {
@@ -122,7 +160,7 @@ function serializeAttributes(el: ServerElement): string {
     }
   }
 
-  for (const [name, kind] of Object.entries(SERIALIZED_PROPERTIES)) {
+  for (const [name, kind] of SERIALIZED_PROPERTY_ENTRIES) {
     if (!el.properties.has(name)) continue;
     if (el.attributes.has(name)) continue; // an explicit attribute already won
     const raw = el.properties.get(name);
