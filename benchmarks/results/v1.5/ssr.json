@@ -1,0 +1,186 @@
+{
+  "benchmark": "ssr-profile",
+  "version": "1.4.0",
+  "generatedAt": "2026-09-25T13:22:33.630Z",
+  "environment": {
+    "runtime": "node v22.23.2",
+    "dom": "ServerDOMAdapter (no browser; happy-dom loaded only for module-load globals)",
+    "note": "Node measurement. NOT a browser number. Do not compare against Chromium."
+  },
+  "routes": [
+    {
+      "route": "overview",
+      "bodyBytes": 730,
+      "islandBytes": 899,
+      "renderToStringMs": {
+        "medianMs": 0.1762,
+        "p95Ms": 0.3716,
+        "minMs": 0.1561,
+        "maxMs": 0.3716,
+        "samples": 15
+      },
+      "renderIslandMs": {
+        "medianMs": 5.0715,
+        "p95Ms": 10.6692,
+        "minMs": 3.9124,
+        "maxMs": 10.6692,
+        "samples": 15
+      }
+    },
+    {
+      "route": "dashboard",
+      "bodyBytes": 925,
+      "islandBytes": 1094,
+      "renderToStringMs": {
+        "medianMs": 0.1834,
+        "p95Ms": 0.2746,
+        "minMs": 0.1527,
+        "maxMs": 0.2746,
+        "samples": 15
+      },
+      "renderIslandMs": {
+        "medianMs": 4.5234,
+        "p95Ms": 5.6851,
+        "minMs": 2.7765,
+        "maxMs": 5.6851,
+        "samples": 15
+      }
+    },
+    {
+      "route": "users",
+      "bodyBytes": 3610699,
+      "islandBytes": 3610868,
+      "renderToStringMs": {
+        "medianMs": 199.8142,
+        "p95Ms": 234.2369,
+        "minMs": 180.423,
+        "maxMs": 234.2369,
+        "samples": 15
+      },
+      "renderIslandMs": {
+        "medianMs": 532.915,
+        "p95Ms": 584.7914,
+        "minMs": 391.1279,
+        "maxMs": 584.7914,
+        "samples": 15
+      }
+    },
+    {
+      "route": "controls",
+      "bodyBytes": 36551,
+      "islandBytes": 36720,
+      "renderToStringMs": {
+        "medianMs": 3.358,
+        "p95Ms": 7.4973,
+        "minMs": 1.2272,
+        "maxMs": 7.4973,
+        "samples": 15
+      },
+      "renderIslandMs": {
+        "medianMs": 8.4241,
+        "p95Ms": 16.5694,
+        "minMs": 6.0163,
+        "maxMs": 16.5694,
+        "samples": 15
+      }
+    },
+    {
+      "route": "settings",
+      "bodyBytes": 926,
+      "islandBytes": 1095,
+      "renderToStringMs": {
+        "medianMs": 0.2009,
+        "p95Ms": 0.2406,
+        "minMs": 0.1791,
+        "maxMs": 0.2406,
+        "samples": 15
+      },
+      "renderIslandMs": {
+        "medianMs": 3.1055,
+        "p95Ms": 5.0714,
+        "minMs": 2.6355,
+        "maxMs": 5.0714,
+        "samples": 15
+      }
+    }
+  ],
+  "serializeAB": {
+    "note": "Same /users tree, same process. legacy = pre-v1.4 serializer replica.",
+    "byteIdentical": true,
+    "outputBytes": 3610699,
+    "legacySerializeMs": {
+      "medianMs": 107.3925,
+      "p95Ms": 112.471,
+      "minMs": 95.2614,
+      "maxMs": 130.015,
+      "samples": 25
+    },
+    "shippedSerializeMs": {
+      "medianMs": 65.7043,
+      "p95Ms": 77.0936,
+      "minMs": 53.188,
+      "maxMs": 82.5105,
+      "samples": 25
+    },
+    "speedupX": 1.6345
+  },
+  "usersPhaseSplit": {
+    "note": "renderToString = mount (build ServerDOM tree) + serialize. /users, 10k rows.",
+    "mountTreeMs": {
+      "medianMs": 120.1276,
+      "p95Ms": 133.5818,
+      "minMs": 109.247,
+      "maxMs": 133.5818,
+      "samples": 15
+    },
+    "serializeTreeMs": {
+      "medianMs": 62.9445,
+      "p95Ms": 85.5162,
+      "minMs": 54.4133,
+      "maxMs": 85.5162,
+      "samples": 15
+    },
+    "renderToStringMedianMs": 199.8142,
+    "mountSharePct": 60.1197,
+    "serializeSharePct": 31.5015
+  },
+  "escapeMicrobench": {
+    "target": "escapeHtmlText over the real per-text-node runs of the 10k-row /users body",
+    "bodyBytes": 3610699,
+    "textNodeRuns": 70021,
+    "runsContainingSpecialChars": 0,
+    "byteIdenticalToCurrent": true,
+    "perNode_currentImplMs": {
+      "medianMs": 6.7513,
+      "p95Ms": 9.2931,
+      "minMs": 6.2771,
+      "maxMs": 10.21,
+      "samples": 25
+    },
+    "perNode_candidateFastPathMs": {
+      "medianMs": 1.688,
+      "p95Ms": 3.7149,
+      "minMs": 1.6117,
+      "maxMs": 3.7653,
+      "samples": 25
+    },
+    "wholeBody_currentImplMs": {
+      "medianMs": 15.2249,
+      "p95Ms": 18.9616,
+      "minMs": 14.067,
+      "maxMs": 20.243,
+      "samples": 25
+    },
+    "wholeBody_candidateFastPathMs": {
+      "medianMs": 29.9066,
+      "p95Ms": 30.7247,
+      "minMs": 29.5306,
+      "maxMs": 31.3676,
+      "samples": 25
+    },
+    "usersRenderToStringMedianMs": 199.8142,
+    "perNodeEscapeShareOfUsersRenderPct": 3.3788
+  },
+  "schema": "streetui-ssr/v1.5",
+  "milestone": "v1.5"
+}

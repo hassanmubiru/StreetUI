@@ -1,0 +1,18 @@
+{
+  "schema": "comparison/v1.5",
+  "status": "BLOCKED (cross-framework browser comparison); PARTIAL (StreetUI node-only numbers exist)",
+  "environmentRef": "./environment.json",
+  "ranking": "NONE — this release does not rank frameworks (v1.5 §20).",
+  "crossFrameworkBrowser": {
+    "status": "BLOCKED",
+    "reason": "Chromium: no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline; competitors not installed."
+  },
+  "streetuiNodeOnly": {
+    "ref": "./streetui-node.json",
+    "ssr": "./ssr.json",
+    "bundle": "./bundle.json",
+    "memory": "./memory.json",
+    "note": "Node + happy-dom. NOT browser numbers. Never cross-compared to any browser framework."
+  },
+  "note": "A valid comparison requires all frameworks in the SAME Chromium. Until then, no comparison table is emitted — no happy-dom-vs-Chromium mixing, no fabricated competitor rows."
+}

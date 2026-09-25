@@ -1,0 +1,152 @@
+{
+  "schema": "svelte-browser/v1.5",
+  "framework": "svelte",
+  "version": "5.19.0",
+  "status": "BLOCKED",
+  "environmentRef": "./environment.json",
+  "environment": {
+    "node": "v22.23.2",
+    "os": "Linux 6.8.0-138-generic x64",
+    "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "cpuCount": 2,
+    "totalMemMB": 4107
+  },
+  "browser": "Chromium (REQUIRED — not present)",
+  "mode": "production build (intended)",
+  "sharedModel": {
+    "keyedListRows": 10000,
+    "interactiveControls": 1000,
+    "form": {
+      "fields": [
+        "displayName",
+        "contactEmail",
+        "role",
+        "bio"
+      ]
+    },
+    "routes": [
+      "/",
+      "/dashboard",
+      "/users",
+      "/controls",
+      "/settings"
+    ],
+    "ssrPage": "/users",
+    "hydrationPage": "/users"
+  },
+  "scenarios": [
+    {
+      "scenario": "initial-render",
+      "browser": "Chromium",
+      "hardware": "12th Gen Intel(R) Core(TM) i7-1255U x2",
+      "mode": "prod",
+      "measurement": [
+        "htmlLoad",
+        "domReady",
+        "frameworkMount",
+        "firstMeaningfulUI",
+        "interactive",
+        "jsExecMs",
+        "domConstructionMs",
+        "layoutMs",
+        "paintMs",
+        "longTasks"
+      ],
+      "ops": null,
+      "sampleCount": null,
+      "median": null,
+      "p95": null,
+      "note": "BLOCKED — no measurement produced"
+    },
+    {
+      "scenario": "single-update",
+      "browser": "Chromium",
+      "hardware": "12th Gen Intel(R) Core(TM) i7-1255U x2",
+      "mode": "prod",
+      "measurement": [
+        "durationMs",
+        "domMutations",
+        "nodesCreated",
+        "nodesRemoved",
+        "longTasks"
+      ],
+      "ops": null,
+      "sampleCount": null,
+      "median": null,
+      "p95": null,
+      "note": "BLOCKED — no measurement produced"
+    },
+    {
+      "scenario": "keyed-list",
+      "browser": "Chromium",
+      "hardware": "12th Gen Intel(R) Core(TM) i7-1255U x2",
+      "mode": "prod",
+      "measurement": [
+        "durationMs",
+        "domMutations",
+        "nodeCount",
+        "insertBeforeCount",
+        "longTasks",
+        "frameCount",
+        "maxFrameDurationMs"
+      ],
+      "ops": [
+        "create10k",
+        "append1k",
+        "prepend1k",
+        "removeFirst",
+        "removeMiddle",
+        "removeLast",
+        "updateOne",
+        "swap",
+        "randomReorder",
+        "reverse",
+        "sort"
+      ],
+      "sampleCount": null,
+      "median": null,
+      "p95": null,
+      "note": "BLOCKED — no measurement produced"
+    },
+    {
+      "scenario": "frame-pacing",
+      "browser": "Chromium",
+      "hardware": "12th Gen Intel(R) Core(TM) i7-1255U x2",
+      "mode": "prod",
+      "measurement": [
+        "framesRequested",
+        "framesCompleted",
+        "framesDropped",
+        "maxFrameDurationMs",
+        "longTaskDurationMs"
+      ],
+      "ops": null,
+      "sampleCount": null,
+      "median": null,
+      "p95": null,
+      "note": "BLOCKED — no measurement produced"
+    },
+    {
+      "scenario": "hydration",
+      "browser": "Chromium",
+      "hardware": "12th Gen Intel(R) Core(TM) i7-1255U x2",
+      "mode": "prod",
+      "measurement": [
+        "hydrationDurationMs",
+        "nodesCreated",
+        "firstInteractiveMs",
+        "firstReactiveUpdateMs",
+        "eventRegistrationMs",
+        "resourceActivationMs"
+      ],
+      "ops": null,
+      "sampleCount": null,
+      "median": null,
+      "p95": null,
+      "note": "BLOCKED — no measurement produced"
+    }
+  ],
+  "reason": "Chromium: no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline; Framework: not installed: svelte (pinned 5.19.0); npm registry 403 so it cannot be fetched",
+  "fabricationNote": "No browser numbers estimated or substituted. Node/happy-dom numbers (streetui-node.json, ssr.json) are NEVER presented as browser numbers. Missing Svelte/Solid numbers are NOT filled in.",
+  "data": null
+}

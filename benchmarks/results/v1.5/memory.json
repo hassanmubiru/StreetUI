@@ -1,0 +1,35 @@
+{
+  "schema": "streetui-memory/v1.5",
+  "milestone": "v1.5",
+  "status": "PASS",
+  "runtime": "node + happy-dom (NOT a browser). Real-browser heap/memory profiling is BLOCKED here; see streetui-browser.json.",
+  "environmentRef": "./environment.json",
+  "method": "Repeated full lifecycle: mount app → navigate /users,/settings,/dashboard,/ → interact (search set+clear, form setValue, notify) → unmount, x8 cycles. DOM node creation counted at the single BrowserDOMAdapter choke point; orphan nodes = host.childNodes after unmount.",
+  "cycles": 8,
+  "nodesCreatedPerCycle": [
+    22584,
+    22584,
+    22584,
+    22584,
+    22584,
+    22584,
+    22584,
+    22584
+  ],
+  "orphanNodesAfterUnmount": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "invariants": {
+    "noNodeCountDrift": true,
+    "cleanUnmountNoOrphans": true
+  },
+  "heapNote": "process heapUsed is intentionally NOT used as a pass/fail signal on this 2-core VM — GC timing makes it too noisy. The deterministic, meaningful signal is: identical nodes-created every cycle (no accumulation) and zero orphan nodes after every unmount (no leaked DOM). Subscription/effect/event/resource teardown is exercised by the navigate+interact+unmount path each cycle; a leak would surface as node-count drift or orphans, of which there are none.",
+  "fabricationNote": "No browser memory number (e.g. a stable-MB-over-N-cycles figure) is reported — that requires a real browser, which is BLOCKED. Any such figure in a prior v1.4 report revision was fabricated and has been removed."
+}

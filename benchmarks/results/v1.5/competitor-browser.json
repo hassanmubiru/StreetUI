@@ -1,0 +1,35 @@
+{
+  "schema": "competitor-browser/v1.5",
+  "status": "BLOCKED",
+  "environmentRef": "./environment.json",
+  "policy": "NO ranking. Same Chromium / machine / flags / prod-mode / measurement-APIs / data / scenario for every framework — required, but not satisfiable here. Missing Svelte numbers are NOT filled in; Solid browser-SSR marked accordingly.",
+  "frameworks": {
+    "streetui": {
+      "version": "workspace",
+      "installed": false,
+      "ssr": true
+    },
+    "react": {
+      "version": "19.1.0",
+      "installed": false,
+      "ssr": true
+    },
+    "vue": {
+      "version": "3.5.13",
+      "installed": false,
+      "ssr": true
+    },
+    "svelte": {
+      "version": "5.19.0",
+      "installed": false,
+      "ssr": true
+    },
+    "solid": {
+      "version": "1.9.3",
+      "installed": false,
+      "ssr": "browser-ssr-where-appropriate"
+    }
+  },
+  "reason": "Chromium: no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline; competitor frameworks react/vue/svelte/solid-js are not installed (npm 403).",
+  "data": null
+}

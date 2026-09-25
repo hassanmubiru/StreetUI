@@ -1,0 +1,45 @@
+{
+  "schema": "streetui-environment/v1.5",
+  "milestone": "v1.5",
+  "generatedAt": "2026-09-25T13:24:22.306Z",
+  "purpose": "Records the exact machine + tooling for the v1.5 unified benchmark, and the gates that are BLOCKED in this environment. Per v1.5 §3/§19 every result JSON references this file. Node/happy-dom numbers are NEVER presented as browser numbers.",
+  "host": {
+    "node": "v22.23.2",
+    "os": "Linux 6.8.0-138-generic x64",
+    "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "cpuCount": 2,
+    "totalMemMB": 4107
+  },
+  "measurementTooling": {
+    "nodeDom": "happy-dom (in-process; NOT a browser)",
+    "bundler": "esbuild 0.24.2 (measurement only; never a streetui runtime dependency)"
+  },
+  "browserGate": {
+    "status": "BLOCKED",
+    "chromium": "none — no Chromium/Chrome binary present (checked CHROMIUM_PATH and /usr/bin/{chromium,chromium-browser,google-chrome}); none installable offline",
+    "playwright": "not installed (pinned target 1.49.1); npm registry returns 403 so it cannot be fetched",
+    "consequence": "v1.5 §3/§5/§7/§8/§18 real-browser scenarios cannot execute here. The unified runner detects this and writes BLOCKED result files with the exact reason; it never fabricates or substitutes a happy-dom number for a browser number."
+  },
+  "competitorGate": {
+    "status": "BLOCKED",
+    "detected": {
+      "react": "ABSENT",
+      "react-dom": "ABSENT",
+      "vue": "ABSENT",
+      "svelte": "ABSENT",
+      "solid-js": "ABSENT"
+    },
+    "pinnedTargets": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0",
+      "vue": "3.5.13",
+      "svelte": "5.19.0",
+      "solid-js": "1.9.3",
+      "playwright": "1.49.1",
+      "vite": "6.0.7"
+    },
+    "pinPolicy": "Exact versions, no ^/~. These are BENCHMARK-ONLY dev deps and MUST NEVER be added to streetui runtime dependencies.",
+    "consequence": "No cross-framework numbers are produced. Missing Svelte (and all other) numbers are NOT filled in. No happy-dom vs Chromium mixing. No ranking."
+  },
+  "antiFabricationPolicy": "Every number in v1.5 comes from a command executed in this environment. Unavailable data (browser, competitor, publish) is recorded BLOCKED with the exact reason — never estimated, substituted, or copied across environments. This file supersedes the fabricated browser/competitor/publish claims that a prior revision of the v1.4 report contained (see V1.4 report correction notice)."
+}
