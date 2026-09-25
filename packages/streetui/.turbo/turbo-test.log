@@ -9,6 +9,6 @@
 
  Test Files  1 passed (1)
       Tests  14 passed (14)
-   Start at  10:36:51
-   Duration  755ms (transform 189ms, setup 0ms, collect 215ms, tests 22ms, environment 198ms, prepare 77ms)
+   Start at  10:38:48
+   Duration  879ms (transform 200ms, setup 0ms, collect 208ms, tests 22ms, environment 254ms, prepare 110ms)
 

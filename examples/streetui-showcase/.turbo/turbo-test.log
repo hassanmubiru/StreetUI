@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-showcase
 
- ✓ src/showcase-app.test.ts  (20 tests) 80ms
+ ✓ src/showcase-app.test.ts  (20 tests) 114ms
 
  Test Files  1 passed (1)
       Tests  20 passed (20)
-   Start at  10:32:32
-   Duration  796ms (transform 170ms, setup 0ms, collect 180ms, tests 80ms, environment 195ms, prepare 98ms)
+   Start at  10:38:49
+   Duration  849ms (transform 184ms, setup 0ms, collect 190ms, tests 114ms, environment 196ms, prepare 97ms)
 
