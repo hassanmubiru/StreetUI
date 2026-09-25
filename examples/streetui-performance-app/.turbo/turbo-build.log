@@ -9,16 +9,16 @@ CLI Using tsup config: /home/error51/Downloads/StreetUI/examples/streetui-perfor
 CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
+ESM dist/index.js             14.60 KB
+ESM dist/routed.js            14.59 KB
 ESM dist/bench-support.js     2.43 KB
 ESM dist/bench-browser.js     23.50 KB
-ESM dist/browser-entry.js     14.27 KB
-ESM dist/index.js             14.60 KB
 ESM dist/server-entry.js      14.36 KB
-ESM dist/routed.js            14.59 KB
+ESM dist/browser-entry.js     14.27 KB
+ESM dist/index.js.map         34.58 KB
+ESM dist/routed.js.map        36.38 KB
+ESM dist/server-entry.js.map  36.15 KB
 ESM dist/bench-support.js.map 5.37 KB
 ESM dist/bench-browser.js.map 57.34 KB
-ESM dist/index.js.map         34.58 KB
 ESM dist/browser-entry.js.map 35.90 KB
-ESM dist/server-entry.js.map  36.15 KB
-ESM dist/routed.js.map        36.38 KB
-ESM ⚡️ Build success in 16ms
+ESM ⚡️ Build success in 20ms
