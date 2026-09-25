@@ -5,14 +5,14 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/router
 
- ✓ src/matching.test.ts  (13 tests) 21ms
- ✓ src/router.test.ts  (11 tests) 47ms
- ✓ src/public-api.stability.test.ts  (5 tests) 6ms
- ✓ src/hydrate-router.test.ts  (4 tests) 65ms
- ✓ src/mount-router.test.ts  (7 tests) 70ms
+ ✓ src/router.test.ts  (11 tests) 44ms
+ ✓ src/matching.test.ts  (13 tests) 13ms
+ ✓ src/public-api.stability.test.ts  (5 tests) 30ms
+ ✓ src/mount-router.test.ts  (7 tests) 90ms
+ ✓ src/hydrate-router.test.ts  (4 tests) 103ms
 
  Test Files  5 passed (5)
       Tests  40 passed (40)
-   Start at  10:36:43
-   Duration  1.35s (transform 583ms, setup 0ms, collect 1.22s, tests 210ms, environment 2.90s, prepare 608ms)
+   Start at  10:38:40
+   Duration  1.09s (transform 343ms, setup 0ms, collect 770ms, tests 281ms, environment 2.12s, prepare 546ms)
 
