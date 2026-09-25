@@ -9,7 +9,7 @@
     "bench:competitors": "node run-competitors.mjs"
   },
   "devDependencies": {
-    "playwright": "1.49.1",
+    "playwright": "1.63.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "solid-js": "^1.9.3",

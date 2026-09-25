@@ -146,7 +146,7 @@
       "note": "BLOCKED — no measurement produced"
     }
   ],
-  "reason": "Playwright: playwright 1.49.1 package is present, but its Chromium browser binary is NOT downloaded (executable absent at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium-1148/chrome-linux/chrome); a real chromium.launch() fails. `playwright install chromium` needs cdn.playwright.dev, which is unreachable offline (npm/registry 403).; Chromium: no Chromium/Chrome executable found (checked CHROMIUM_PATH, the Playwright browser cache, and standard /usr/bin paths); none installable offline (apt has no candidate; cdn.playwright.dev / npm registry 403); Framework: not installed: streetui (pinned workspace); npm registry 403 so it cannot be fetched",
+  "reason": "Playwright: playwright 1.49.1 package is present, but its Chromium browser binary is NOT downloaded (executable absent at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium-1148/chrome-linux/chrome); a real chromium.launch() fails. `playwright install chromium` needs cdn.playwright.dev, which is unreachable offline (npm/registry 403). NOTE: installed playwright 1.49.1 does NOT match the pinned 1.63.0 (§3 requires the pin).; Chromium: no Chromium/Chrome executable found (checked CHROMIUM_PATH, the Playwright browser cache, and standard /usr/bin paths); none installable offline (apt has no candidate; cdn.playwright.dev / npm registry 403); Framework: not installed: streetui (pinned workspace); npm registry 403 so it cannot be fetched",
   "fabricationNote": "No browser numbers estimated or substituted. Node/happy-dom numbers (streetui-node.json, ssr.json) are NEVER presented as browser numbers. Missing Svelte/Solid numbers are NOT filled in.",
   "data": null
 }

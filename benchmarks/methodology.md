@@ -108,11 +108,14 @@ byte-for-byte identical across frameworks.
 ## Environment
 
 - Node: `v22.23.2` (see each result file's `nodeVersion`).
-- DOM for A/B/C/D/E/G: **real Chromium via Playwright** (pinned `1.49.1`) — the
+- DOM for A/B/C/D/E/G: **real Chromium via Playwright** (pinned `1.63.0`) — the
   whole point of the competitor harness is a real browser. **BLOCKED here.**
 - Pinned competitor + tooling versions: `benchmarks/framework-versions.json`
   (React 19.1.0 / react-dom 19.1.0, Vue 3.5.13 + @vue/server-renderer 3.5.13,
-  Svelte 5.19.0, solid-js 1.9.3, Vite 6.0.7, Playwright 1.49.1). Framework
+  Svelte 5.19.0, solid-js 1.9.3, Vite 6.0.7, Playwright 1.63.0). Playwright is
+  pinned to ONE version (`1.63.0`) repo-wide — root devDependency, this benchmark
+  tooling (`benchmarks/package.json` + lockfile), and the `PINNED_PLAYWRIGHT`
+  constant in `benchmarks/browser/run-all.mjs` all agree (v1.6 §3). Framework
   compiler plugins (`@vitejs/plugin-react`, `@sveltejs/vite-plugin-svelte`,
   `vite-plugin-solid`) are the required build toolchain and are pinned in each
   competitor `package.json` with a best-known exact version; resolve them to the

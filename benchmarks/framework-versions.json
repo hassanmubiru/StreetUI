@@ -23,8 +23,8 @@
   },
   "sharedTooling": {
     "vite": "6.0.7",
-    "playwright": "1.49.1",
-    "note": "Chromium is driven through Playwright for the in-browser scenarios (A initial render, G hydration). Node-only scenarios (F SSR) do not require a browser."
+    "playwright": "1.63.0",
+    "note": "Chromium is driven through Playwright for the in-browser scenarios (A initial render, G hydration). Node-only scenarios (F SSR) do not require a browser. Playwright is pinned to a SINGLE version (1.63.0) across the whole repo (root devDependency + this benchmark tooling + benchmarks/browser/run-all.mjs PINNED_PLAYWRIGHT) per v1.6 §3."
   },
   "pinPolicy": "Exact versions (no ^ or ~). Regenerate this file and the lockfile together when the registry becomes reachable; record the resolved integrity hashes in the lockfile, not here."
 }

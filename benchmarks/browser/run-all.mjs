@@ -70,7 +70,7 @@ const FRAMEWORKS = [
 ];
 
 // ── Detection (proves the environment BEFORE any number is claimed) ────────────────────
-const PINNED_PLAYWRIGHT = '1.49.1';
+const PINNED_PLAYWRIGHT = '1.63.0';
 function detectPlaywright() {
   // The PACKAGE resolving is not enough — a browser number requires that Playwright can
   // actually drive a browser. So we ALSO require its Chromium binary to exist on disk, and

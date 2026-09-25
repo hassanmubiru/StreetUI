@@ -9,7 +9,7 @@ importers:
   .:
     devDependencies:
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       '@typescript-eslint/eslint-plugin':
         specifier: 8.11.0
@@ -24,7 +24,7 @@ importers:
         specifier: 9.13.0
         version: 9.13.0
       playwright:
-        specifier: ^1.63.0
+        specifier: 1.63.0
         version: 1.63.0
       tsup:
         specifier: 8.3.5

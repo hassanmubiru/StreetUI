@@ -92,6 +92,34 @@ if (playwright === null) {
   process.exit(0);
 }
 
+// A resolvable Playwright package is NOT enough: a real run needs the Chromium
+// binary on disk. Detect its absence up-front and record BLOCKED (mirroring
+// benchmarks/browser/run-all.mjs) rather than letting chromium.launch() throw a
+// raw ERROR — §19 requires "Chromium absent → { status: BLOCKED, reason }".
+let chromiumBin = null;
+try { chromiumBin = playwright.chromium.executablePath(); } catch { /* older API surface */ }
+if (chromiumBin === null || !fs.existsSync(chromiumBin)) {
+  write({
+    schema: 'streetui-browser/v1.3',
+    status: 'BLOCKED',
+    reason:
+      'Playwright resolves, but its Chromium browser binary is NOT downloaded' +
+      (chromiumBin ? ` (executable absent at ${chromiumBin})` : ' (no executable path available)') +
+      '; a real chromium.launch() would fail. `playwright install chromium` needs ' +
+      'cdn.playwright.dev, which is unreachable offline (npm/registry E403). ' +
+      'Real-browser metrics are therefore NOT measured and NOT fabricated.',
+    remediation:
+      'On a machine with npm registry access: `npx playwright install chromium`, then re-run ' +
+      '`node scripts/browser-harness.mjs`.',
+    target: 'examples/streetui-performance-app (via window.__bench in src/bench-browser.ts)',
+    scenarioCatalogue: SCENARIO_CATALOGUE,
+    scenarios: Object.fromEntries(Object.keys(SCENARIO_CATALOGUE).map((k) => [k, null])),
+    timestamp: new Date().toISOString(),
+  });
+  process.stdout.write(`browser-harness: BLOCKED — Chromium binary absent. Wrote ${outPath} (no numbers fabricated).\n`);
+  process.exit(0);
+}
+
 // ── Real-browser path (executes only when Playwright + Chromium are present) ──
 let server = null;
 let browser = null;

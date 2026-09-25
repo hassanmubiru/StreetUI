@@ -1,0 +1,131 @@
+{
+  "note": "Node+happy-dom SSR row-count matrix. NOT a browser number.",
+  "runtime": "node v22.23.2",
+  "rows": [
+    {
+      "rows": 1,
+      "bytes": 1506,
+      "total": {
+        "medianMs": 0.1976,
+        "p95Ms": 0.3104,
+        "minMs": 0.1817,
+        "maxMs": 0.3104,
+        "samples": 15
+      },
+      "mount": {
+        "medianMs": 0.1522,
+        "p95Ms": 0.2966,
+        "minMs": 0.1327,
+        "maxMs": 0.2966,
+        "samples": 15
+      },
+      "serialize": {
+        "medianMs": 0.0448,
+        "p95Ms": 0.0563,
+        "minMs": 0.0422,
+        "maxMs": 0.0563,
+        "samples": 15
+      }
+    },
+    {
+      "rows": 100,
+      "bytes": 36622,
+      "total": {
+        "medianMs": 0.574,
+        "p95Ms": 0.8639,
+        "minMs": 0.5561,
+        "maxMs": 0.8639,
+        "samples": 15
+      },
+      "mount": {
+        "medianMs": 0.2424,
+        "p95Ms": 1.0098,
+        "minMs": 0.2254,
+        "maxMs": 1.0098,
+        "samples": 15
+      },
+      "serialize": {
+        "medianMs": 0.1749,
+        "p95Ms": 0.2261,
+        "minMs": 0.1624,
+        "maxMs": 0.2261,
+        "samples": 15
+      }
+    },
+    {
+      "rows": 1000,
+      "bytes": 359097,
+      "total": {
+        "medianMs": 4.4293,
+        "p95Ms": 6.014,
+        "minMs": 3.7552,
+        "maxMs": 6.014,
+        "samples": 15
+      },
+      "mount": {
+        "medianMs": 2.8833,
+        "p95Ms": 5.2164,
+        "minMs": 2.5889,
+        "maxMs": 5.2164,
+        "samples": 15
+      },
+      "serialize": {
+        "medianMs": 1.6003,
+        "p95Ms": 3.5623,
+        "minMs": 1.5005,
+        "maxMs": 3.5623,
+        "samples": 15
+      }
+    },
+    {
+      "rows": 5000,
+      "bytes": 1803556,
+      "total": {
+        "medianMs": 51.8724,
+        "p95Ms": 62.5963,
+        "minMs": 49.89,
+        "maxMs": 62.5963,
+        "samples": 15
+      },
+      "mount": {
+        "medianMs": 29.2666,
+        "p95Ms": 31.5931,
+        "minMs": 26.5239,
+        "maxMs": 31.5931,
+        "samples": 15
+      },
+      "serialize": {
+        "medianMs": 22.4631,
+        "p95Ms": 26.0822,
+        "minMs": 21.6797,
+        "maxMs": 26.0822,
+        "samples": 15
+      }
+    },
+    {
+      "rows": 10000,
+      "bytes": 3610699,
+      "total": {
+        "medianMs": 121.2337,
+        "p95Ms": 130.1377,
+        "minMs": 118.9672,
+        "maxMs": 130.1377,
+        "samples": 15
+      },
+      "mount": {
+        "medianMs": 75.0776,
+        "p95Ms": 82.7178,
+        "minMs": 71.6504,
+        "maxMs": 82.7178,
+        "samples": 15
+      },
+      "serialize": {
+        "medianMs": 51.3981,
+        "p95Ms": 54.9945,
+        "minMs": 44.2294,
+        "maxMs": 54.9945,
+        "samples": 15
+      }
+    }
+  ]
+}

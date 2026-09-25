@@ -63,13 +63,33 @@ export class ServerElement implements ServerNode {
   parent: ServerParent | null = null;
   readonly tagName: string;
   readonly attributes = new Map<string, string>();
-  /** JS properties set via `setProperty` (e.g. input `value`, `checked`). */
-  readonly properties = new Map<string, unknown>();
   readonly children: ServerNode[] = [];
-  readonly style = new ServerStyle();
+
+  // Lazily-allocated stores. On the 10k-row SSR corpus ~0% of elements carry JS
+  // properties or inline styles (measured, §5: 1 of 80,029 elements uses
+  // `properties`, 0 use `style`), so eagerly allocating a `properties` Map plus
+  // a `ServerStyle` (which itself holds a Map) per element wasted ~240k
+  // allocations per /users render — all in the dominant mount phase. These are
+  // created on first WRITE via the `properties`/`style` getters; the serializer
+  // reads the raw `_properties`/`_style` fields so a READ never forces an
+  // allocation. Output is byte-identical: an unset store previously serialized
+  // to nothing (empty `properties.has(...)` / `style.isEmpty`), and a null store
+  // is skipped the same way.
+  _properties: Map<string, unknown> | null = null;
+  _style: ServerStyle | null = null;
 
   constructor(tagName: string) {
     this.tagName = tagName.toLowerCase();
+  }
+
+  /** JS properties set via `setProperty` (e.g. input `value`, `checked`). Allocated on first access. */
+  get properties(): Map<string, unknown> {
+    return (this._properties ??= new Map());
+  }
+
+  /** Inline-style holder mirroring `element.style`. Allocated on first access. */
+  get style(): ServerStyle {
+    return (this._style ??= new ServerStyle());
   }
 }
 
@@ -160,21 +180,28 @@ function serializeAttributes(el: ServerElement): string {
     }
   }
 
-  for (const [name, kind] of SERIALIZED_PROPERTY_ENTRIES) {
-    if (!el.properties.has(name)) continue;
-    if (el.attributes.has(name)) continue; // an explicit attribute already won
-    const raw = el.properties.get(name);
-    if (kind === 'boolean') {
-      if (raw === true) parts.push(` ${name}`);
-    } else {
-      if (raw !== undefined && raw !== null) {
-        parts.push(` ${name}="${escapeHtmlAttr(String(raw))}"`);
+  // Read the raw backing field (may be null): most elements have no JS
+  // properties, so skipping the whole loop avoids touching a store that was
+  // never allocated (§5).
+  const props = el._properties;
+  if (props !== null) {
+    for (const [name, kind] of SERIALIZED_PROPERTY_ENTRIES) {
+      if (!props.has(name)) continue;
+      if (el.attributes.has(name)) continue; // an explicit attribute already won
+      const raw = props.get(name);
+      if (kind === 'boolean') {
+        if (raw === true) parts.push(` ${name}`);
+      } else {
+        if (raw !== undefined && raw !== null) {
+          parts.push(` ${name}="${escapeHtmlAttr(String(raw))}"`);
+        }
       }
     }
   }
 
-  if (!el.style.isEmpty && !el.attributes.has('style')) {
-    parts.push(` style="${escapeHtmlAttr(el.style.toCss())}"`);
+  const style = el._style;
+  if (style !== null && !style.isEmpty && !el.attributes.has('style')) {
+    parts.push(` style="${escapeHtmlAttr(style.toCss())}"`);
   }
 
   return parts.join('');

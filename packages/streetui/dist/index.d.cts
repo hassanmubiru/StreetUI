@@ -614,11 +614,14 @@ declare class ServerElement implements ServerNode {
     parent: ServerParent | null;
     readonly tagName: string;
     readonly attributes: Map<string, string>;
-    /** JS properties set via `setProperty` (e.g. input `value`, `checked`). */
-    readonly properties: Map<string, unknown>;
     readonly children: ServerNode[];
-    readonly style: ServerStyle;
+    _properties: Map<string, unknown> | null;
+    _style: ServerStyle | null;
     constructor(tagName: string);
+    /** JS properties set via `setProperty` (e.g. input `value`, `checked`). Allocated on first access. */
+    get properties(): Map<string, unknown>;
+    /** Inline-style holder mirroring `element.style`. Allocated on first access. */
+    get style(): ServerStyle;
 }
 /** Escape text node content. */
 declare function escapeHtmlText(value: string): string;
