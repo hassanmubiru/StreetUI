@@ -1,7 +1,7 @@
 {
   "schema": "streetui-browser/v1.3",
   "status": "ERROR",
-  "reason": "Playwright resolved but the browser run failed: Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'esbuild' imported from /home/error51/Downloads/StreetUI/scripts/browser-harness.mjs\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:768:81)\n    at moduleResolve (node:internal/modules/esm/resolve:859:18)\n    at defaultResolve (node:internal/modules/esm/resolve:992:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)\n    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:759:56)\n    at #resolve (node:internal/modules/esm/loader:683:17)\n    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:603:35)\n    at node:internal/modules/esm/loader:632:32",
+  "reason": "Playwright resolved but the browser run failed: page.evaluate: ReferenceError: Buffer is not defined\n    at renderIsland (http://127.0.0.1:44739/:3778:12)\n    at run (http://127.0.0.1:44739/:3864:18)\n    at async eval (eval at evaluate (:311:30), <anonymous>:1:13)\n    at async <anonymous>:337:30\n    at /home/error51/Downloads/StreetUI/scripts/browser-harness.mjs:123:31",
   "target": "examples/streetui-performance-app (window.__bench)",
   "scenarioCatalogue": {
     "initialMountUsers10k": "performance.now around mounting the 10,000-row users route; DOM node count.",
@@ -25,5 +25,5 @@
     "memory": null,
     "longTasks": null
   },
-  "timestamp": "2026-09-25T05:31:12.777Z"
+  "timestamp": "2026-09-25T05:34:01.055Z"
 }
