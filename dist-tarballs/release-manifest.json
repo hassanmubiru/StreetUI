@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-09-24T18:47:51.554Z",
-  "gitCommit": "c835e1a1b5583f130286606136044edd3eb0a83c",
+  "generatedAt": "2026-09-25T11:51:10.406Z",
+  "gitCommit": "05883e139ba0353f1da935dcfd95c47239210b9b",
   "channel": "stable",
   "packageCount": 18,
   "versions": [
-    "1.3.0"
+    "1.4.0"
   ],
   "ok": true,
   "errorCount": 0,
@@ -13,7 +13,7 @@
   "packages": [
     {
       "name": "@streetui/cli",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -41,7 +41,7 @@
     },
     {
       "name": "@streetui/compiler",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -73,19 +73,19 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/graph": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dsl": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -93,7 +93,7 @@
     },
     {
       "name": "@streetui/context",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -118,7 +118,7 @@
     },
     {
       "name": "@streetui/core",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -143,7 +143,7 @@
     },
     {
       "name": "@streetui/devtools",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -165,23 +165,23 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/graph": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/compiler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dsl": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -189,7 +189,7 @@
     },
     {
       "name": "@streetui/dom",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -214,7 +214,7 @@
     },
     {
       "name": "@streetui/dsl",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -236,15 +236,15 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/graph": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -252,7 +252,7 @@
     },
     {
       "name": "@streetui/events",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -277,7 +277,7 @@
     },
     {
       "name": "@streetui/forms",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -299,7 +299,7 @@
       "internalDependencies": {
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -307,7 +307,7 @@
     },
     {
       "name": "@streetui/graph",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -329,7 +329,7 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -337,7 +337,7 @@
     },
     {
       "name": "@streetui/i18n",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -359,7 +359,7 @@
       "internalDependencies": {
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -367,7 +367,7 @@
     },
     {
       "name": "@streetui/renderer",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -389,39 +389,39 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/graph": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/events": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/scheduler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/compiler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dsl": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dom": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/runtime": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -429,7 +429,7 @@
     },
     {
       "name": "@streetui/router",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -451,31 +451,31 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dsl": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/compiler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/runtime": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/renderer": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dom": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -483,7 +483,7 @@
     },
     {
       "name": "@streetui/runtime",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -505,31 +505,31 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/graph": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/events": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/scheduler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/compiler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dsl": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -537,7 +537,7 @@
     },
     {
       "name": "@streetui/scheduler",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -562,7 +562,7 @@
     },
     {
       "name": "@streetui/state",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -587,7 +587,7 @@
     },
     {
       "name": "@streetui/testing",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
@@ -609,39 +609,39 @@
       "internalDependencies": {
         "@streetui/core": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/graph": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/compiler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dsl": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/renderer": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/dom": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/runtime": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/scheduler": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         },
         "@streetui/state": {
           "spec": "workspace:*",
-          "resolvedVersion": "1.3.0"
+          "resolvedVersion": "1.4.0"
         }
       },
       "externalDependencies": {},
@@ -649,7 +649,7 @@
     },
     {
       "name": "streetui",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "private": false,
       "files": [
         "dist",
