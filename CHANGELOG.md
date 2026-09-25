@@ -5,6 +5,69 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.5.0 — Unified browser benchmark & rendering performance
+
+A **measurement, tooling, and hardening** milestone. **No public API change**
+(168 values / 171 types preserved), **no breaking changes**, and **no new runtime
+dependency**. Full detail in
+[`V1.5-UNIFIED-BROWSER-BENCHMARK-REPORT.md`](./V1.5-UNIFIED-BROWSER-BENCHMARK-REPORT.md).
+
+### Added
+
+- **`benchmarks/browser/run-all.mjs`** — unified cross-framework browser runner
+  (StreetUI, React, Vue, Svelte, Solid) through the same Chromium instance, same
+  measurement APIs (performance marks, MutationObserver, PerformanceObserver
+  longtask, rAF frame sampling), same data and scenario script. Ready to execute
+  wherever Chromium + Playwright + pinned frameworks are available.
+- **Shared application model (§4)**: 10k-row keyed list, 1k interactive controls,
+  form (4 fields), router (5 routes), SSR + hydration page — identical for all
+  frameworks.
+- **`scripts/browser-harness.mjs`** now emits a clean `{ status: "BLOCKED" }`
+  instead of a raw launch error when no Chromium browser binary is present.
+- **Playwright standardized** to a single pin `1.63.0` across the repo (root
+  devDeps, `benchmarks/` manifest + lock, `PINNED_PLAYWRIGHT`,
+  `framework-versions.json`, `methodology.md`). Dev/benchmark tooling only —
+  never a `streetui` runtime dependency.
+
+### Fixed
+
+- **`@streetui/example-account` "resources (plans)" test flakiness** — both tests
+  previously waited a fixed 40 ms wall-clock for an async resource fetch, causing
+  races on faster runtimes (Node v24). Tests now await the `onPlansResource` hook
+  (mirroring the existing `await form.submit()` pattern). Deterministic across
+  Node versions; no runtime change.
+- **Corrected fabricated data** from a prior report revision: the v1.4 "browser
+  regression" millisecond figures (initial mount 197.1 → 364.4 ms, hydration
+  162.6 → 370.6 ms, etc.) and the "612/7 live-HTTP" test tally were never
+  produced by an executed run and are retracted. The `example-account` and
+  `example-data` live-HTTP tests are confirmed real (an earlier draft wrongly
+  denied their existence — retracted).
+
+### Measured (Node + happy-dom; not browser numbers)
+
+- **SSR** (`/users`, 10k rows): `renderToString` median 199.8 ms (n=15);
+  mount 60.1% / serialize 31.5% / escape ~3.4%. Serializer A/B: legacy 107.4 ms
+  → shipped 65.7 ms = **1.63× faster**, byte-identical. SSR mount identified as
+  the remaining bottleneck; static-subtree path scoped for a future release.
+- **Hydration**: 88.6 ms median (n=12), **0 nodes created** — zero-node
+  invariant holds on a 10k-row view.
+- **Fine-grained update**: 2 structural writes independent of N (1k or 100
+  controls); form field isolation DOM-verified.
+- **Bundle** unchanged from v1.4: minimal 7,619 B gzip, typical 14,377 B,
+  full 20,205 B, real app 14,667 B.
+
+### Blocked (recorded, not fabricated)
+
+- **Real-browser benchmarks**: BLOCKED — no Chromium binary, npm/CDN 403 offline.
+  Unified runner is written and ready; no browser millisecond figure is reported.
+- **Cross-framework comparison** (React/Vue/Svelte/Solid): BLOCKED — frameworks
+  absent, no browser to run them. No ranking or winner asserted.
+
+### Verification
+
+- Build 29/29, typecheck 47/47, tests **657** — same count as v1.4 on VM
+  (Node v22.23.2); host (Node v24.18.0): 657 after the example-account fix.
+
 ## v1.3 milestone — Real-world application performance & browser validation
 
 A **measurement, real-application, and documentation** milestone. **No public API
