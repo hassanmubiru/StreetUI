@@ -1,23 +1,22 @@
 
-
-> @streetui/events@1.4.0 build /home/error51/Downloads/StreetUI/packages/events
+> @streetui/events@1.5.0 build /home/error51/Downloads/StreetUI/packages/events
 > tsup
 
-[34mCLI[39m Building entry: src/index.ts
-[34mCLI[39m Using tsconfig: tsconfig.json
-[34mCLI[39m tsup v8.3.5
-[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/events/tsup.config.ts
-[34mCLI[39m Target: es2022
-[34mCLI[39m Cleaning output folder
-[34mESM[39m Build start
-[34mCJS[39m Build start
-[32mESM[39m [1mdist/index.js     [22m[32m2.14 KB[39m
-[32mESM[39m [1mdist/index.js.map [22m[32m6.39 KB[39m
-[32mESM[39m ⚡️ Build success in 113ms
-[32mCJS[39m [1mdist/index.cjs     [22m[32m3.30 KB[39m
-[32mCJS[39m [1mdist/index.cjs.map [22m[32m6.58 KB[39m
-[32mCJS[39m ⚡️ Build success in 113ms
+CLI Building entry: src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/events/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
+CJS dist/index.cjs     3.30 KB
+CJS dist/index.cjs.map 6.58 KB
+CJS ⚡️ Build success in 10ms
+ESM dist/index.js     2.14 KB
+ESM dist/index.js.map 6.39 KB
+ESM ⚡️ Build success in 11ms
 DTS Build start
-DTS ⚡️ Build success in 1032ms
+DTS ⚡️ Build success in 339ms
 DTS dist/index.d.ts  2.59 KB
 DTS dist/index.d.cts 2.59 KB

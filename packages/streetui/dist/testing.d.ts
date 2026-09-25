@@ -1,6 +1,6 @@
-import { S as StreetApp } from './compile-Cgx1PjG6.js';
-export { V as VERSION } from './compile-Cgx1PjG6.js';
-import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-e6iDuR1D.js';
+import { S as StreetApp } from './compile-DGHUC0T6.js';
+export { V as VERSION } from './compile-DGHUC0T6.js';
+import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-Cv0Bi9Aj.js';
 export * from 'streetui/diagnostics';
 
 /**

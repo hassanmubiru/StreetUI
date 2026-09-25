@@ -1,28 +1,27 @@
 
-
-> @streetui/compiler@1.4.0 build /home/error51/Downloads/StreetUI/packages/compiler
+> @streetui/compiler@1.5.0 build /home/error51/Downloads/StreetUI/packages/compiler
 > tsup
 
-[34mCLI[39m Building entry: src/diagnostics.ts, src/index.ts
-[34mCLI[39m Using tsconfig: tsconfig.json
-[34mCLI[39m tsup v8.3.5
-[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/compiler/tsup.config.ts
-[34mCLI[39m Target: es2022
-[34mCLI[39m Cleaning output folder
-[34mESM[39m Build start
-[34mCJS[39m Build start
-[32mCJS[39m [1mdist/index.cjs           [22m[32m4.71 KB[39m
-[32mCJS[39m [1mdist/diagnostics.cjs     [22m[32m4.98 KB[39m
-[32mCJS[39m [1mdist/index.cjs.map       [22m[32m8.98 KB[39m
-[32mCJS[39m [1mdist/diagnostics.cjs.map [22m[32m11.88 KB[39m
-[32mCJS[39m ⚡️ Build success in 59ms
-[32mESM[39m [1mdist/diagnostics.js     [22m[32m3.86 KB[39m
-[32mESM[39m [1mdist/index.js           [22m[32m3.60 KB[39m
-[32mESM[39m [1mdist/diagnostics.js.map [22m[32m11.18 KB[39m
-[32mESM[39m [1mdist/index.js.map       [22m[32m8.83 KB[39m
-[32mESM[39m ⚡️ Build success in 72ms
+CLI Building entry: src/diagnostics.ts, src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/compiler/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
+ESM dist/index.js           3.60 KB
+ESM dist/diagnostics.js     3.86 KB
+ESM dist/index.js.map       8.83 KB
+ESM dist/diagnostics.js.map 11.18 KB
+ESM ⚡️ Build success in 10ms
+CJS dist/diagnostics.cjs     4.98 KB
+CJS dist/index.cjs           4.71 KB
+CJS dist/diagnostics.cjs.map 11.88 KB
+CJS dist/index.cjs.map       8.98 KB
+CJS ⚡️ Build success in 11ms
 DTS Build start
-DTS ⚡️ Build success in 537ms
+DTS ⚡️ Build success in 529ms
 DTS dist/diagnostics.d.ts  4.28 KB
 DTS dist/index.d.ts        2.14 KB
 DTS dist/diagnostics.d.cts 4.28 KB
