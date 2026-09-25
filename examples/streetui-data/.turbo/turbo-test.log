@@ -5,16 +5,16 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-data
 
- ❯ src/data-app.test.ts  (6 tests | 5 failed) 10141ms
-   × streetui-data — loading → success against a real HTTP API > shows a loading state, then renders the fetched product list (no hardcoded data) 2017ms
+ ❯ src/data-app.test.ts  (6 tests | 5 failed) 10154ms
+   × streetui-data — loading → success against a real HTTP API > shows a loading state, then renders the fetched product list (no hardcoded data) 2028ms
      → waitFor: condition not met in time
-   × streetui-data — loading → success against a real HTTP API > reflects the server data exactly — swapping the backing data changes the render 2008ms
+   × streetui-data — loading → success against a real HTTP API > reflects the server data exactly — swapping the backing data changes the render 2009ms
      → waitFor: condition not met in time
-   × streetui-data — loading → success against a real HTTP API > renders the empty state when the API returns no products 2004ms
+   × streetui-data — loading → success against a real HTTP API > renders the empty state when the API returns no products 2009ms
      → waitFor: condition not met in time
-   × streetui-data — error → error UI → retry > shows the error fallback with a Retry button, then recovers on retry 2014ms
+   × streetui-data — error → error UI → retry > shows the error fallback with a Retry button, then recovers on retry 2013ms
      → waitFor: condition not met in time
-   × streetui-data — router integration cleans up the previous route resource > creates a fresh resource per navigation and tears down the previous one 2008ms
+   × streetui-data — router integration cleans up the previous route resource > creates a fresh resource per navigation and tears down the previous one 2006ms
      → waitFor: condition not met in time
 
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
@@ -86,7 +86,7 @@ Error: waitFor: condition not met in time
 
  Test Files  1 failed (1)
       Tests  5 failed | 1 passed (6)
-   Start at  21:43:03
-   Duration  10.79s (transform 153ms, setup 0ms, collect 170ms, tests 10.14s, environment 165ms, prepare 80ms)
+   Start at  10:34:36
+   Duration  10.82s (transform 155ms, setup 0ms, collect 166ms, tests 10.15s, environment 195ms, prepare 90ms)
 
  ELIFECYCLE  Test failed. See above for more details.

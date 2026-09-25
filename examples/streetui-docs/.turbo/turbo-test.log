@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-docs
 
- ✓ src/docs-app.test.ts  (9 tests) 28ms
+ ✓ src/docs-app.test.ts  (9 tests) 35ms
 
  Test Files  1 passed (1)
       Tests  9 passed (9)
-   Start at  21:43:00
-   Duration  663ms (transform 130ms, setup 0ms, collect 133ms, tests 28ms, environment 181ms, prepare 115ms)
+   Start at  10:34:32
+   Duration  763ms (transform 152ms, setup 0ms, collect 158ms, tests 35ms, environment 208ms, prepare 119ms)
 

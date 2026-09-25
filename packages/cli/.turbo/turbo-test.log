@@ -5,30 +5,30 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/cli
 
- ✓ src/args.test.ts  (10 tests) 7ms
- ✓ src/diagnostics.test.ts  (7 tests) 4ms
- ✓ src/env.test.ts  (5 tests) 6ms
- ✓ src/templates.test.ts  (8 tests) 7ms
- ✓ src/create.test.ts  (6 tests) 47ms
- ✓ src/cli.test.ts  (5 tests) 9ms
- ✓ src/public-api.stability.test.ts  (3 tests) 12ms
+ ✓ src/args.test.ts  (10 tests) 6ms
+ ✓ src/env.test.ts  (5 tests) 7ms
+ ✓ src/diagnostics.test.ts  (7 tests) 12ms
+ ✓ src/templates.test.ts  (8 tests) 6ms
+ ✓ src/create.test.ts  (6 tests) 54ms
+ ✓ src/cli.test.ts  (5 tests) 6ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 7ms
 stderr | src/serve.test.ts > serve — error disclosure boundary > production hides the stack and returns a generic 500
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-AtCf5X/server.mjs:1:32)
+    at render (/tmp/streetui-serve-sYMUu2/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
 stderr | src/serve.test.ts > serve — error disclosure boundary > dev exposes the error detail for debugging
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-lQuef0/server.mjs:1:32)
+    at render (/tmp/streetui-serve-82dH3R/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
- ✓ src/serve.test.ts  (8 tests) 226ms
- ✓ src/e2e.test.ts  (1 test) 258ms
+ ✓ src/serve.test.ts  (8 tests) 236ms
+ ✓ src/e2e.test.ts  (1 test) 299ms
 
  Test Files  9 passed (9)
       Tests  53 passed (53)
-   Start at  21:45:08
-   Duration  683ms (transform 502ms, setup 0ms, collect 913ms, tests 576ms, environment 2ms, prepare 829ms)
+   Start at  10:35:09
+   Duration  768ms (transform 567ms, setup 0ms, collect 954ms, tests 633ms, environment 2ms, prepare 850ms)
 

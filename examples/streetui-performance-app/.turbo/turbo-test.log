@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-performance-app
 
- ✓ src/perf-app.test.ts  (5 tests) 115ms
+ ✓ src/perf-app.test.ts  (5 tests) 64ms
 
  Test Files  1 passed (1)
       Tests  5 passed (5)
-   Start at  21:45:42
-   Duration  1.12s (transform 227ms, setup 0ms, collect 243ms, tests 115ms, environment 243ms, prepare 180ms)
+   Start at  10:32:31
+   Duration  770ms (transform 180ms, setup 0ms, collect 200ms, tests 64ms, environment 201ms, prepare 107ms)
 

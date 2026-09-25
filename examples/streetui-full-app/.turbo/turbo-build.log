@@ -13,6 +13,6 @@ ESM dist/browser-entry.js     4.28 KB
 ESM dist/index.js             3.64 KB
 ESM dist/routed.js            4.10 KB
 ESM dist/browser-entry.js.map 11.11 KB
-ESM dist/index.js.map         9.31 KB
 ESM dist/routed.js.map        10.62 KB
-ESM ⚡️ Build success in 12ms
+ESM dist/index.js.map         9.31 KB
+ESM ⚡️ Build success in 10ms

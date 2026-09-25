@@ -5,19 +5,19 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/renderer
 
- ✓ src/ssr.test.ts  (13 tests) 27ms
- ✓ src/batch-render.test.ts  (3 tests) 16ms
- ✓ src/a11y.test.ts  (6 tests) 20ms
- ✓ src/public-api.stability.test.ts  (4 tests) 28ms
- ✓ src/error-boundary.test.ts  (7 tests) 32ms
- ✓ src/api-improvements.test.ts  (27 tests) 54ms
- ✓ src/hydrate.test.ts  (19 tests) 74ms
- ✓ src/renderer.test.ts  (42 tests) 79ms
- ✓ src/reconcile-perf.test.ts  (7 tests) 299ms
- ✓ src/memory.test.ts  (7 tests) 380ms
+ ✓ src/ssr.test.ts  (13 tests) 26ms
+ ✓ src/batch-render.test.ts  (3 tests) 18ms
+ ✓ src/error-boundary.test.ts  (7 tests) 41ms
+ ✓ src/a11y.test.ts  (6 tests) 44ms
+ ✓ src/public-api.stability.test.ts  (4 tests) 47ms
+ ✓ src/api-improvements.test.ts  (27 tests) 89ms
+ ✓ src/hydrate.test.ts  (19 tests) 101ms
+ ✓ src/renderer.test.ts  (42 tests) 115ms
+ ✓ src/reconcile-perf.test.ts  (7 tests) 263ms
+ ✓ src/memory.test.ts  (7 tests) 366ms
 
  Test Files  10 passed (10)
       Tests  135 passed (135)
-   Start at  21:45:24
-   Duration  1.65s (transform 976ms, setup 0ms, collect 3.36s, tests 1.01s, environment 5.44s, prepare 1.23s)
+   Start at  10:35:24
+   Duration  1.41s (transform 731ms, setup 0ms, collect 2.74s, tests 1.11s, environment 4.32s, prepare 1.01s)
 
