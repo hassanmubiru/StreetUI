@@ -5,11 +5,11 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dsl
 
- ✓ src/public-api.stability.test.ts  (2 tests) 6ms
- ✓ src/dsl.test.ts  (17 tests) 21ms
+ ✓ src/public-api.stability.test.ts  (2 tests) 3ms
+ ✓ src/dsl.test.ts  (17 tests) 18ms
 
  Test Files  2 passed (2)
       Tests  19 passed (19)
-   Start at  10:36:30
-   Duration  618ms (transform 202ms, setup 0ms, collect 293ms, tests 27ms, environment 1ms, prepare 210ms)
+   Start at  10:38:25
+   Duration  466ms (transform 164ms, setup 0ms, collect 235ms, tests 21ms, environment 1ms, prepare 208ms)
 
