@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/streetui
 
- ✓ src/streetui.public.test.ts  (14 tests) 23ms
+ ✓ src/streetui.public.test.ts  (14 tests) 29ms
 
  Test Files  1 passed (1)
       Tests  14 passed (14)
-   Start at  14:42:19
-   Duration  1.20s (transform 218ms, setup 0ms, collect 203ms, tests 23ms, environment 453ms, prepare 174ms)
+   Start at  14:43:34
+   Duration  933ms (transform 233ms, setup 0ms, collect 243ms, tests 29ms, environment 277ms, prepare 126ms)
 
