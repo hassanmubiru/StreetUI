@@ -1,0 +1,73 @@
+{
+  "//": "StreetUI v1.4 BASELINE — spec §1. Every value here comes from an actual execution in THIS environment on 2026-09-25 (build/typecheck/test re-run in the /work tree; node+happy-dom harness; esbuild bundle measurement). Real-browser and competitor rows are BLOCKED with the exact reason — they were NOT measured because no Chromium/Playwright binary exists here and the npm registry is offline (E403). This baseline INTENTIONALLY overrides the on-disk V1.3-REAL-WORLD-PERFORMANCE-REPORT.md, which contained fabricated real-Chromium and competitor numbers (197.1ms mount, 510.9ms frame, 30.9ms SSR vs React 3.2ms, Chromium 153.0.8010.12, npm publish, '602 tests'). None of those are reproducible here; see integrityNote.",
+  "schema": "streetui-baseline/v1.4",
+  "milestone": "v1.4 (rendering engine & SSR performance) — baseline capture",
+  "capturedAt": "2026-09-25T07:15:00.000Z",
+  "capturedBy": "re-run of turbo build/typecheck/test + node harness + esbuild bundle in /work",
+
+  "environment": {
+    "node": "v22.23.2",
+    "os": "Linux (x64)",
+    "cpuModel": "12th Gen Intel Core i7-1255U",
+    "cpusVisible": 2,
+    "totalMemMB": 4107,
+    "domImplementation": "happy-dom (NOT a browser)",
+    "chromium": "ABSENT — no chromium/chrome/google-chrome binary, no ~/.cache/ms-playwright",
+    "playwright": "NOT RESOLVABLE — neither 'playwright' nor 'playwright-core' resolves",
+    "npmRegistry": "UNREACHABLE — GET registry.npmjs.org -> 403 (offline)"
+  },
+
+  "verification": {
+    "build":     { "status": "PASS", "tasks": "29/29", "command": "turbo run build --force --concurrency=1" },
+    "typecheck": { "status": "PASS", "tasks": "47/47", "command": "turbo run typecheck --force --concurrency=1" },
+    "test":      { "status": "PASS", "totalTests": 657, "failures": 0, "testTaskFilesReporting": 27, "totalTestTasks": "47/47", "command": "turbo run test --force --concurrency=1" }
+  },
+
+  "testCountReconciliation": {
+    "actualExecutedTotal": 657,
+    "derivation": "v1.2 baseline 652 + 5 new tests in examples/streetui-performance-app (src/perf-app.test.ts) = 657. Summed from 27 vitest tasks that report a 'Tests N passed' line; the other 20 test tasks are pass-through packages with no test files.",
+    "reportClaim_602": "FALSE — the on-disk V1.3 report's '602 tests' is not produced by any execution here.",
+    "reportClaim_plus5_over_652": "The '+5 over 652' phrasing IS correct (652+5=657); it is inconsistent with the same report's '602' figure. The two cannot both be right; 657 is the executed truth.",
+    "resolution": "657 is authoritative."
+  },
+
+  "nodeHappyDom": {
+    "//": "Indicative RELATIVE timings (happy-dom is ~10x slower than a real browser and is NOT a paint/layout measurement). DOM-mutation/structural-write counts are EXACT (counted at the single BrowserDOMAdapter choke point).",
+    "runtime": "node + happy-dom",
+    "initialMountUsers10k": { "medianMs": 2072.1931, "domNodesCreated": 150032, "note": "indicative timing; exact node count" },
+    "routerFourNavigations": { "medianMs": 408.8566, "allTransitionsCorrect": true },
+    "hydrateUsers10k": { "medianMs": 101.10, "nodesCreatedDuringHydration": 0, "invariant_zeroNode": "HOLDS" },
+    "fineGrainedToggle": { "writesAt1000Controls": 2, "writesAt100Controls": 2, "invariant_independentOfN": "HOLDS" },
+    "formsFieldIsolation": { "structuralWrites": 7, "unrelatedInputTouched": false, "invariant_isolated": "HOLDS" },
+    "keyedListOps": { "searchNarrow_structuralWrites": 10004, "reverse_structuralWrites": 10002, "sortReorder_structuralWrites": 9803 },
+    "lifecycle8Cycles": { "nodesPerCycle": 22584, "orphanNodesAfterUnmount": 0, "invariant_noDrift": "HOLDS", "invariant_cleanUnmount": "HOLDS" },
+    "ssrBodyBytes": { "overview": 899, "dashboard": 1094, "users10k": 3610868, "controls1000": 36720, "settings": 1095 }
+  },
+
+  "bundleMinifiedGzip": {
+    "//": "esbuild 0.24.2 bundle+minify+treeshake, esm/es2020; gzip zlib level 9. Shipped (minified) figures.",
+    "minimal": 8606,
+    "typical": 15365,
+    "full": 20105,
+    "realApp": 15690,
+    "frameworkCssBytes": 0,
+    "diagnostic_unminifiedFullBarrelGzip": 28765,
+    "diagnostic_unminifiedFullBarrelGzip_v12": 28764,
+    "diagnostic_deltaBytes": 1,
+    "shippedMinifiedFullUnchanged": true
+  },
+
+  "package": {
+    "authoritativeStreetuiVersion_shouldBe": "1.2.0",
+    "reason": "No publish is possible (npm E403). The honest v1.3 decision was to keep 1.2.0 until the release/publish gate is unblocked. NOTE: packages/streetui/package.json was found on disk bumped to 1.3.0 and is being corrected back to 1.2.0 — a 1.3.0 tag would imply a publish that did not happen."
+  },
+
+  "blockedGates": {
+    "realBrowser": { "status": "BLOCKED", "reason": "no Chromium/Chrome binary and no resolvable Playwright in this environment", "affectsSpecSections": ["§2","§4","§9","§10","§16(chromium)"] },
+    "competitors": { "status": "BLOCKED", "reason": "React/Vue/Svelte/Solid cannot be installed (npm registry 403 offline) and there is no browser to run them", "affectsSpecSections": ["§3","§12(cross-framework)"] },
+    "npmPublish":  { "status": "BLOCKED", "reason": "registry unreachable (403); nothing has been published; no 'live on npm' claim is valid" },
+    "ranking":     { "status": "N/A", "reason": "no competitor could be measured; no winner/ranking is asserted (§24)" }
+  },
+
+  "integrityNote": "The on-disk V1.3 deliverables were found in an INCONSISTENT state at baseline capture: V1.3-REAL-WORLD-PERFORMANCE-REPORT.md and streetui-browser.json contained fabricated real-Chromium PASS numbers (Chromium 153.0.8010.12 / Playwright 1.63.0; mount 197.1ms; frame 510.9ms; SSR 30.9ms; a full React/Vue/Svelte/Solid comparison table) and a claimed npm publish, while the sibling honest files (streetui-node.json, bundle.json, comparison.json, competitors.json) all correctly record happy-dom-only numbers and BLOCKED browser/competitor status. The fabricated numbers cannot be genuine: this environment has no Chromium, no Playwright, and no registry access (re-verified 2026-09-25). Those three fabricated artifacts are being corrected to their honest BLOCKED state. v1.4 must NOT be built on any of the fabricated numbers."
+}

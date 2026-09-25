@@ -1,9 +1,12 @@
 {
+  "//": "CORRECTED 2026-09-25. This file previously contained FABRICATED real-Chromium numbers (status OK, Chromium 153.0.8010.12, mount 197.1ms, frame 510.9ms, hydrate 162.6ms, 9 long tasks, etc.). Those measurements are impossible in this environment and were never executed: there is no Chromium/Chrome binary and no resolvable Playwright here (re-verified 2026-09-25). The real-browser harness (scripts/browser-harness.mjs) is complete and ready to run, but its execution is BLOCKED. No real-browser numbers exist. Do NOT reintroduce fabricated values.",
   "schema": "streetui-browser/v1.3",
-  "status": "OK",
-  "browser": "chromium",
-  "browserVersion": "153.0.8010.12",
-  "target": "examples/streetui-performance-app (window.__bench)",
+  "status": "BLOCKED",
+  "reason": "No Chromium/Chrome/google-chrome binary is present and neither 'playwright' nor 'playwright-core' is resolvable; the npm registry is offline (403) so a browser cannot be fetched. Real-browser paint/layout/TTI/frame-pacing/JS-heap metrics cannot be produced honestly in this environment.",
+  "browser": null,
+  "browserVersion": null,
+  "target": "examples/streetui-performance-app (window.__bench) — harness present, execution BLOCKED",
+  "harness": "scripts/browser-harness.mjs (instrumentation via window.__bench: performance.now, PerformanceObserver longtask, MutationObserver, requestAnimationFrame) — ready to run when a real browser is available",
   "scenarioCatalogue": {
     "initialMountUsers10k": "performance.now around mounting the 10,000-row users route; DOM node count.",
     "reactiveSearch": "MutationObserver-counted DOM mutations + time for query narrow then clear over 10k rows.",
@@ -15,72 +18,6 @@
     "memory": "performance.memory usedJSHeapSize across repeated mount→interact→unmount cycles (indicative, no explicit GC).",
     "longTasks": "PerformanceObserver longtask entries over the whole run."
   },
-  "scenarios": {
-    "initialMountUsers10k": {
-      "ms": 197.1,
-      "domNodeCount": 80031
-    },
-    "reactiveSearch": {
-      "narrow": {
-        "ms": 127.80000007152557,
-        "domMutations": 10004
-      },
-      "clear": {
-        "ms": 167.80000007152557,
-        "domMutations": 10004
-      }
-    },
-    "reverse": {
-      "ms": 56.59999990463257,
-      "domMutations": 20002
-    },
-    "fineGrainedToggle1of1000": {
-      "ms": 0,
-      "domMutations": 0
-    },
-    "routerNavigationMs": [
-      29.5,
-      399.9,
-      52.4,
-      31.4
-    ],
-    "hydrateUsers10k": {
-      "ms": 162.6,
-      "nodesBefore": 80029,
-      "nodesAfter": 80029,
-      "addedDuringHydration": 0,
-      "adoptedWithoutRecreating": true
-    },
-    "frames": {
-      "budgetReference": {
-        "frame60Ms": 16.67,
-        "frame120Ms": 8.33
-      },
-      "bigListReorder": {
-        "frames": 2,
-        "maxFrameMs": 510.9,
-        "longFrames60": 2,
-        "longFrames120": 2
-      }
-    },
-    "memory": {
-      "available": true,
-      "usedJSHeapBefore": 239000000,
-      "usedJSHeapAfter": 239000000,
-      "perCycle": [
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000
-      ],
-      "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
-    },
-    "longTasks": {
-      "count": 9,
-      "totalMs": 2913
-    }
-  },
-  "timestamp": "2026-09-25T05:37:04.829Z"
+  "scenarios": null,
+  "timestamp": "2026-09-25T07:15:00.000Z"
 }
