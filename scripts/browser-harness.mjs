@@ -101,6 +101,14 @@ try {
     entryPoints: [path.join(appDir, 'src', 'bench-browser.ts')],
     bundle: true, format: 'esm', write: false, sourcemap: false, target: 'es2020',
     absWorkingDir: appDir,
+    define: {
+      // Buffer.byteLength is used in server-entry.ts for byte measurement.
+      // In the browser bundle we use TextEncoder instead.
+      'Buffer.byteLength': '__bufferByteLength',
+    },
+    banner: {
+      js: 'const __bufferByteLength = (s, enc) => new TextEncoder().encode(s).length;',
+    },
   });
   const js = build.outputFiles[0].text;
   const htmlPage =
