@@ -11,22 +11,22 @@
     },
     "react": {
       "version": "19.1.0",
-      "installed": false,
+      "installed": true,
       "ssr": true
     },
     "vue": {
       "version": "3.5.13",
-      "installed": false,
+      "installed": true,
       "ssr": true
     },
     "svelte": {
       "version": "5.19.0",
-      "installed": false,
+      "installed": true,
       "ssr": true
     },
     "solid": {
       "version": "1.9.3",
-      "installed": false,
+      "installed": true,
       "ssr": "browser-ssr-where-appropriate"
     }
   },

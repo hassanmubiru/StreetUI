@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
-import { resetIdCounter } from 'streetui';
+import { resetIdCounter, effect, type Resource } from 'streetui';
 import { createMemoryHistory } from 'streetui';
 import type { Form } from 'streetui';
-import { createAccountApi, type AccountApi } from './api-server.js';
+import { createAccountApi, type AccountApi, type Plan } from './api-server.js';
 import {
   mountAccountApp,
   createAccountI18n,
@@ -12,6 +12,26 @@ import {
 
 const tick = (ms = 25): Promise<void> => new Promise((r) => setTimeout(r, ms));
 const text = (el: Element | null): string => el?.textContent?.trim() ?? '';
+
+/**
+ * Resolve when a resource next reaches `target`, driven by the real request
+ * settling — not a wall-clock sleep. `resource()` auto-load and `refetch()` set
+ * status to 'loading' *synchronously*, so a retry that has already been fired
+ * cannot resolve early on a previously-settled state: we always observe the
+ * loading→target transition. This is the deterministic completion signal the
+ * flaky `tick(40)` waits were standing in for.
+ */
+function waitForStatus<T>(res: Resource<T>, target: 'success' | 'error'): Promise<void> {
+  return new Promise((resolve) => {
+    const dispose = effect(() => {
+      if (res.status.get() === target) {
+        resolve();
+        // Defer unsubscribe so we never dispose mid-notification.
+        queueMicrotask(() => dispose());
+      }
+    });
+  });
+}
 
 let api: AccountApi;
 let baseUrl: string;
@@ -32,6 +52,7 @@ interface Harness {
   container: HTMLDivElement;
   i18n: AccountI18n;
   form?: Form<SignupValues>;
+  plans?: Resource<Plan[]>;
   unmount(): void;
 }
 
@@ -47,6 +68,9 @@ function mount(path: string, locale = 'en'): Harness {
     history: createMemoryHistory(path),
     onForm: (f) => {
       harness.form = f;
+    },
+    onPlansResource: (r) => {
+      harness.plans = r;
     },
   });
   harness.unmount = () => {
@@ -109,7 +133,8 @@ describe('account app — forms + validation', () => {
 describe('account app — resources (plans)', () => {
   it('loads plans from the real API and renders them', async () => {
     const h = mount('/signup');
-    await tick(40);
+    // Await the real request settling (auto-load on mount), not a fixed sleep.
+    await waitForStatus(h.plans!, 'success');
     expect(text(h.container.querySelector('#plan-free'))).toBe('Free');
     expect(text(h.container.querySelector('#plan-pro'))).toBe('Pro');
     h.unmount();
@@ -118,12 +143,14 @@ describe('account app — resources (plans)', () => {
   it('shows an error + retry when the plans request fails', async () => {
     api.setFail(true);
     const h = mount('/signup');
-    await tick(40);
+    // Await the failing request actually resolving into the error state.
+    await waitForStatus(h.plans!, 'error');
     expect(text(h.container.querySelector('#plans-error'))).toBe('Could not load plans.');
-    // Recover and retry via the live button.
+    // Recover and retry via the live button; the click fires refetch()
+    // (status → 'loading' synchronously), then we await the real success.
     api.setFail(false);
     (h.container.querySelector('#plans-retry') as HTMLElement).dispatchEvent(new Event('click'));
-    await tick(40);
+    await waitForStatus(h.plans!, 'success');
     expect(text(h.container.querySelector('#plan-free'))).toBe('Free');
     h.unmount();
   });
