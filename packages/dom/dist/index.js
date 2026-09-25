@@ -85,7 +85,7 @@ var BrowserDOMAdapter = class {
     return Array.from(node.childNodes);
   }
 };
-var browserDOMAdapter = new BrowserDOMAdapter();
+var browserDOMAdapter = /* @__PURE__ */ new BrowserDOMAdapter();
 
 // src/server-node.ts
 var ServerStyle = class {
@@ -155,11 +155,66 @@ var SERIALIZED_PROPERTIES = {
   checked: "boolean",
   selected: "boolean"
 };
+var SERIALIZED_PROPERTY_ENTRIES = Object.entries(SERIALIZED_PROPERTIES);
+var TEXT_SPECIAL = /[&<>]/;
+var ATTR_SPECIAL = /[&<>"]/;
 function escapeHtmlText(value) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  if (!TEXT_SPECIAL.test(value)) return value;
+  let out = "";
+  let last = 0;
+  for (let i = 0; i < value.length; i++) {
+    let esc;
+    switch (value.charCodeAt(i)) {
+      case 38:
+        esc = "&amp;";
+        break;
+      // &
+      case 60:
+        esc = "&lt;";
+        break;
+      // <
+      case 62:
+        esc = "&gt;";
+        break;
+      // >
+      default:
+        continue;
+    }
+    out += value.slice(last, i) + esc;
+    last = i + 1;
+  }
+  return out + value.slice(last);
 }
 function escapeHtmlAttr(value) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  if (!ATTR_SPECIAL.test(value)) return value;
+  let out = "";
+  let last = 0;
+  for (let i = 0; i < value.length; i++) {
+    let esc;
+    switch (value.charCodeAt(i)) {
+      case 38:
+        esc = "&amp;";
+        break;
+      // &
+      case 60:
+        esc = "&lt;";
+        break;
+      // <
+      case 62:
+        esc = "&gt;";
+        break;
+      // >
+      case 34:
+        esc = "&quot;";
+        break;
+      // "
+      default:
+        continue;
+    }
+    out += value.slice(last, i) + esc;
+    last = i + 1;
+  }
+  return out + value.slice(last);
 }
 function serializeAttributes(el) {
   const parts = [];
@@ -170,7 +225,7 @@ function serializeAttributes(el) {
       parts.push(` ${name}="${escapeHtmlAttr(value)}"`);
     }
   }
-  for (const [name, kind] of Object.entries(SERIALIZED_PROPERTIES)) {
+  for (const [name, kind] of SERIALIZED_PROPERTY_ENTRIES) {
     if (!el.properties.has(name)) continue;
     if (el.attributes.has(name)) continue;
     const raw = el.properties.get(name);
@@ -384,7 +439,7 @@ var ServerDOMAdapter = class {
     return serializeServerNode(asServer(node));
   }
 };
-var serverDOMAdapter = new ServerDOMAdapter();
+var serverDOMAdapter = /* @__PURE__ */ new ServerDOMAdapter();
 
 // src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';

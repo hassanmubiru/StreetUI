@@ -769,7 +769,7 @@ async function createProject(options) {
 }
 
 // src/index.ts
-var CLI_VERSION = "1.3.0";
+var CLI_VERSION = "1.4.0";
 var HELP = `streetui \u2014 the StreetUI application CLI
 
 Usage:
