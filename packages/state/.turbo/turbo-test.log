@@ -1,16 +1,30 @@
 
+
 > @streetui/state@1.4.0 test /home/error51/Downloads/StreetUI/packages/state
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/state
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/state[39m
 
- ✓ src/public-api.stability.test.ts  (8 tests) 11ms
- ✓ src/state.test.ts  (25 tests) 25ms
- ✓ src/resource.test.ts  (19 tests) 32ms
+[?25l [90m·[39m [2msrc/[22mresource[2m.test.ts[22m[2m (19)[22m
+ [90m·[39m [2msrc/[22mstate[2m.test.ts[22m[2m (25)[22m
+ [90m·[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (8)[22m
+[?25l[2K[1A[2K[1A[2K[1A[2K[G [90m·[39m [2msrc/[22mresource[2m.test.ts[22m[2m (19)[22m
+ [32m✓[39m [2msrc/[22mstate[2m.test.ts[22m[2m (25)[22m
+ [90m·[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (8)[22m
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[G [90m·[39m [2msrc/[22mresource[2m.test.ts[22m[2m (19)[22m
+ [32m✓[39m [2msrc/[22mstate[2m.test.ts[22m[2m (25)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (8)[22m
+[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mresource[2m.test.ts[22m[2m (19)[22m
+ [32m✓[39m [2msrc/[22mstate[2m.test.ts[22m[2m (25)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (8)[22m
+[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (8)[22m
+ [32m✓[39m [2msrc/[22mresource[2m.test.ts[22m[2m (19)[22m
+ [32m✓[39m [2msrc/[22mstate[2m.test.ts[22m[2m (25)[22m
 
- Test Files  3 passed (3)
-      Tests  52 passed (52)
-   Start at  14:43:47
-   Duration  514ms (transform 162ms, setup 0ms, collect 288ms, tests 68ms, environment 1ms, prepare 331ms)
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m52 passed[39m[22m[90m (52)[39m
+[2m   Start at [22m 17:35:41
+[2m   Duration [22m 1.26s[2m (transform 440ms, setup 0ms, collect 631ms, tests 105ms, environment 1ms, prepare 801ms)[22m
 
+[?25h[?25h

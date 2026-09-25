@@ -1,14 +1,61 @@
 
+
 > @streetui/example-docs@0.2.0 test /home/error51/Downloads/StreetUI/examples/streetui-docs
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-docs
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/streetui-docs[39m
 
- ✓ src/docs-app.test.ts  (9 tests) 41ms
+[?25l [90m·[39m [2msrc/[22mdocs-app[2m.test.ts[22m[2m (9)[22m
+   [90m·[39m docs app — shell & home[2m (2)[22m
+     [90m·[39m renders the persistent shell and the home route
+     [90m·[39m marks the active nav link and keeps the shell across navigation
+   [90m·[39m docs app — routing[2m (4)[22m
+     [90m·[39m navigates to the docs index and lists sections
+     [90m·[39m resolves a dynamic docs section via :section param
+     [90m·[39m shows a graceful message for an unknown docs section (still a matched rou
+te)
+     [90m·[39m renders a 404 page for unknown top-level paths
+   [90m·[39m docs app — examples: query param, bound input, reactive list, when()[2m (2)[22m
+     [90m·[39m seeds the filter from ?q= and filters the reactive list
+     [90m·[39m updating the bound filter signal reconciles the list and toggles the empt
+y state
+   [90m·[39m docs app — route lifecycle cleanup[2m (1)[22m
+     [90m·[39m does not leak the examples filter subscription after navigating away
+[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdocs-app[2m.test.ts[22m[2m (9)[22m
+   [32m✓[39m docs app — shell & home[2m (2)[22m
+     [32m✓[39m renders the persistent shell and the home route
+     [32m✓[39m marks the active nav link and keeps the shell across navigation
+   [32m✓[39m docs app — routing[2m (4)[22m
+     [32m✓[39m navigates to the docs index and lists sections
+     [32m✓[39m resolves a dynamic docs section via :section param
+     [32m✓[39m shows a graceful message for an unknown docs section (still a matched rou
+te)
+     [32m✓[39m renders a 404 page for unknown top-level paths
+   [32m✓[39m docs app — examples: query param, bound input, reactive list, when()[2m (2)[22m
+     [32m✓[39m seeds the filter from ?q= and filters the reactive list
+     [32m✓[39m updating the bound filter signal reconciles the list and toggles the empt
+y state
+   [32m✓[39m docs app — route lifecycle cleanup[2m (1)[22m
+     [32m✓[39m does not leak the examples filter subscription after navigating away
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdocs-app[2m.test.ts[22m[2m (9)[22m
+   [32m✓[39m docs app — shell & home[2m (2)[22m
+     [32m✓[39m renders the persistent shell and the home route
+     [32m✓[39m marks the active nav link and keeps the shell across navigation
+   [32m✓[39m docs app — routing[2m (4)[22m
+     [32m✓[39m navigates to the docs index and lists sections
+     [32m✓[39m resolves a dynamic docs section via :section param
+     [32m✓[39m shows a graceful message for an unknown docs section (still a matched route)
+     [32m✓[39m renders a 404 page for unknown top-level paths
+   [32m✓[39m docs app — examples: query param, bound input, reactive list, when()[2m (2)[22m
+     [32m✓[39m seeds the filter from ?q= and filters the reactive list
+     [32m✓[39m updating the bound filter signal reconciles the list and toggles the empty state
+   [32m✓[39m docs app — route lifecycle cleanup[2m (1)[22m
+     [32m✓[39m does not leak the examples filter subscription after navigating away
 
- Test Files  1 passed (1)
-      Tests  9 passed (9)
-   Start at  14:44:43
-   Duration  737ms (transform 142ms, setup 0ms, collect 149ms, tests 41ms, environment 197ms, prepare 101ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m9 passed[39m[22m[90m (9)[39m
+[2m   Start at [22m 17:35:58
+[2m   Duration [22m 2.10s[2m (transform 504ms, setup 0ms, collect 503ms, tests 62ms, environment 454ms, prepare 195ms)[22m
 
+[?25h[?25h

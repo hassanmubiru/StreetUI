@@ -1,16 +1,28 @@
 
+
 > @streetui/forms@1.4.0 test /home/error51/Downloads/StreetUI/packages/forms
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/forms
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/forms[39m
 
- ✓ src/validators.test.ts  (7 tests) 6ms
- ✓ src/public-api.stability.test.ts  (6 tests) 9ms
- ✓ src/form.test.ts  (11 tests) 17ms
+[?25l [90m·[39m [2msrc/[22mvalidators[2m.test.ts[22m[2m (7)[22m
+[?25l[2K[1A[2K[G [32m✓[39m [2msrc/[22mvalidators[2m.test.ts[22m[2m (7)[22m
+[?25l[?25l[2K[1A[2K[G [32m✓[39m [2msrc/[22mvalidators[2m.test.ts[22m[2m (7)[22m
+ [90m·[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (6)[22m
+[?25l[2K[1A[2K[1A[2K[G [90m·[39m [2msrc/[22mform[2m.test.ts[22m[2m (11)[22m
+ [32m✓[39m [2msrc/[22mvalidators[2m.test.ts[22m[2m (7)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (6)[22m
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mform[2m.test.ts[22m[2m (11)[22m
+ [32m✓[39m [2msrc/[22mvalidators[2m.test.ts[22m[2m (7)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (6)[22m
+[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mform[2m.test.ts[22m[2m (11)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (6)[22m
+ [32m✓[39m [2msrc/[22mvalidators[2m.test.ts[22m[2m (7)[22m
 
- Test Files  3 passed (3)
-      Tests  24 passed (24)
-   Start at  14:44:15
-   Duration  495ms (transform 189ms, setup 0ms, collect 279ms, tests 32ms, environment 1ms, prepare 340ms)
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m24 passed[39m[22m[90m (24)[39m
+[2m   Start at [22m 17:35:43
+[2m   Duration [22m 876ms[2m (transform 356ms, setup 0ms, collect 589ms, tests 44ms, environment 1ms, prepare 662ms)[22m
 
+[?25h[?25h

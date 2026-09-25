@@ -1,14 +1,45 @@
 
+
 > @streetui/example-full-app@0.8.0 test /home/error51/Downloads/StreetUI/examples/streetui-full-app
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-full-app
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/streetui-full-app[39m
 
- ✓ src/full-app.test.ts  (5 tests) 46ms
+[?25l [90m·[39m [2msrc/[22mfull-app[2m.test.ts[22m[2m (5)[22m
+   [90m·[39m full-app — server render[2m (1)[22m
+     [90m·[39m renders i18n title, seeded count, context theme and seeded resource
+   [90m·[39m full-app — hydration + interactivity[2m (2)[22m
+     [90m·[39m adopts the server DOM (identity) and drives it live
+     [90m·[39m forms: validation error appears after a touched, invalid field
+   [90m·[39m full-app — resource async load[2m (1)[22m
+     [90m·[39m loads a user through the resource when not server-seeded
+   [90m·[39m full-app — router[2m (1)[22m
+     [90m·[39m mounts a shell + route and navigates client-side
+[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mfull-app[2m.test.ts[22m[2m (5)[22m
+   [32m✓[39m full-app — server render[2m (1)[22m
+     [32m✓[39m renders i18n title, seeded count, context theme and seeded resource
+   [32m✓[39m full-app — hydration + interactivity[2m (2)[22m
+     [32m✓[39m adopts the server DOM (identity) and drives it live
+     [32m✓[39m forms: validation error appears after a touched, invalid field
+   [32m✓[39m full-app — resource async load[2m (1)[22m
+     [32m✓[39m loads a user through the resource when not server-seeded
+   [32m✓[39m full-app — router[2m (1)[22m
+     [32m✓[39m mounts a shell + route and navigates client-side
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mfull-app[2m.test.ts[22m[2m (5)[22m
+   [32m✓[39m full-app — server render[2m (1)[22m
+     [32m✓[39m renders i18n title, seeded count, context theme and seeded resource
+   [32m✓[39m full-app — hydration + interactivity[2m (2)[22m
+     [32m✓[39m adopts the server DOM (identity) and drives it live
+     [32m✓[39m forms: validation error appears after a touched, invalid field
+   [32m✓[39m full-app — resource async load[2m (1)[22m
+     [32m✓[39m loads a user through the resource when not server-seeded
+   [32m✓[39m full-app — router[2m (1)[22m
+     [32m✓[39m mounts a shell + route and navigates client-side
 
- Test Files  1 passed (1)
-      Tests  5 passed (5)
-   Start at  10:44:00
-   Duration  957ms (transform 200ms, setup 0ms, collect 212ms, tests 46ms, environment 239ms, prepare 143ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m5 passed[39m[22m[90m (5)[39m
+[2m   Start at [22m 17:35:58
+[2m   Duration [22m 2.73s[2m (transform 559ms, setup 0ms, collect 531ms, tests 63ms, environment 546ms, prepare 762ms)[22m
 
+[?25h[?25h

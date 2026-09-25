@@ -1,19 +1,40 @@
 
+
 > @streetui/devtools@1.4.0 test /home/error51/Downloads/StreetUI/packages/devtools
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/devtools
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/devtools[39m
 
- ✓ src/inspect-reactive.test.ts  (10 tests) 21ms
- ✓ src/devtools.test.ts  (10 tests) 18ms
- ✓ src/application.test.ts  (10 tests) 15ms
- ✓ src/public-api.stability.test.ts  (1 test) 5ms
- ✓ src/diagnostics.test.ts  (4 tests) 12ms
- ✓ src/panels.test.ts  (11 tests) 27ms
+[?25l [90m·[39m [2msrc/[22minspect-reactive[2m.test.ts[22m[2m (10)[22m
+[?25l[?25l[2K[1A[2K[G [32m✓[39m [2msrc/[22minspect-reactive[2m.test.ts[22m[2m (10)[22m
+[?25l[2K[1A[2K[G [90m·[39m [2msrc/[22mapplication[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22minspect-reactive[2m.test.ts[22m[2m (10)[22m
+ [90m·[39m [2msrc/[22mdevtools[2m.test.ts[22m[2m (10)[22m
+ [90m·[39m [2msrc/[22mdiagnostics[2m.test.ts[22m[2m (4)[22m
+ [90m·[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [90m·[39m [2msrc/[22mpanels[2m.test.ts[22m[2m (11)[22m
+ [32m✓[39m [2msrc/[22mapplication[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22minspect-reactive[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mdevtools[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mdiagnostics[2m.test.ts[22m[2m (4)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mpanels[2m.test.ts[22m[2m (11)[22m
+ [32m✓[39m [2msrc/[22mapplication[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22minspect-reactive[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mdevtools[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mdiagnostics[2m.test.ts[22m[2m (4)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mapplication[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mdevtools[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mdiagnostics[2m.test.ts[22m[2m (4)[22m
+ [32m✓[39m [2msrc/[22minspect-reactive[2m.test.ts[22m[2m (10)[22m
+ [32m✓[39m [2msrc/[22mpanels[2m.test.ts[22m[2m (11)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
 
- Test Files  6 passed (6)
-      Tests  46 passed (46)
-   Start at  14:44:26
-   Duration  582ms (transform 410ms, setup 0ms, collect 939ms, tests 98ms, environment 2ms, prepare 776ms)
+[2m Test Files [22m [1m[32m6 passed[39m[22m[90m (6)[39m
+[2m      Tests [22m [1m[32m46 passed[39m[22m[90m (46)[39m
+[2m   Start at [22m 17:35:48
+[2m   Duration [22m 736ms[2m (transform 547ms, setup 0ms, collect 1.08s, tests 76ms, environment 1ms, prepare 1.04s)[22m
 
+[?25h[?25h

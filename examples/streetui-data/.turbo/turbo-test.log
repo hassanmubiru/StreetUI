@@ -1,92 +1,485 @@
 
+
 > @streetui/example-data@0.3.0 test /home/error51/Downloads/StreetUI/examples/streetui-data
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-data
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/streetui-data[39m
 
- ❯ src/data-app.test.ts  (6 tests | 5 failed) 10162ms
-   × streetui-data — loading → success against a real HTTP API > shows a loading state, then renders the fetched product list (no hardcoded data) 2026ms
-     → waitFor: condition not met in time
-   × streetui-data — loading → success against a real HTTP API > reflects the server data exactly — swapping the backing data changes the render 2005ms
-     → waitFor: condition not met in time
-   × streetui-data — loading → success against a real HTTP API > renders the empty state when the API returns no products 2008ms
-     → waitFor: condition not met in time
-   × streetui-data — error → error UI → retry > shows the error fallback with a Retry button, then recovers on retry 2020ms
-     → waitFor: condition not met in time
-   × streetui-data — router integration cleans up the previous route resource > creates a fresh resource per navigation and tears down the previous one 2007ms
-     → waitFor: condition not met in time
-
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
-
- FAIL  src/data-app.test.ts > streetui-data — loading → success against a real HTTP API > shows a loading state, then renders the fetched product list (no hardcoded data)
-Error: waitFor: condition not met in time
- ❯ waitFor src/data-app.test.ts:14:47
-     12|   const start = Date.now();
-     13|   while (!predicate()) {
-     14|     if (Date.now() - start > timeoutMs) throw new Error('waitFor: cond…
-       |                                               ^
-     15|     await new Promise((r) => setTimeout(r, 5));
-     16|   }
- ❯ src/data-app.test.ts:47:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
-
- FAIL  src/data-app.test.ts > streetui-data — loading → success against a real HTTP API > reflects the server data exactly — swapping the backing data changes the render
-Error: waitFor: condition not met in time
- ❯ waitFor src/data-app.test.ts:14:47
-     12|   const start = Date.now();
-     13|   while (!predicate()) {
-     14|     if (Date.now() - start > timeoutMs) throw new Error('waitFor: cond…
-       |                                               ^
-     15|     await new Promise((r) => setTimeout(r, 5));
-     16|   }
- ❯ src/data-app.test.ts:59:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
-
- FAIL  src/data-app.test.ts > streetui-data — loading → success against a real HTTP API > renders the empty state when the API returns no products
-Error: waitFor: condition not met in time
- ❯ waitFor src/data-app.test.ts:14:47
-     12|   const start = Date.now();
-     13|   while (!predicate()) {
-     14|     if (Date.now() - start > timeoutMs) throw new Error('waitFor: cond…
-       |                                               ^
-     15|     await new Promise((r) => setTimeout(r, 5));
-     16|   }
- ❯ src/data-app.test.ts:67:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
-
- FAIL  src/data-app.test.ts > streetui-data — error → error UI → retry > shows the error fallback with a Retry button, then recovers on retry
-Error: waitFor: condition not met in time
- ❯ waitFor src/data-app.test.ts:14:47
-     12|   const start = Date.now();
-     13|   while (!predicate()) {
-     14|     if (Date.now() - start > timeoutMs) throw new Error('waitFor: cond…
-       |                                               ^
-     15|     await new Promise((r) => setTimeout(r, 5));
-     16|   }
- ❯ src/data-app.test.ts:91:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
-
- FAIL  src/data-app.test.ts > streetui-data — router integration cleans up the previous route resource > creates a fresh resource per navigation and tears down the previous one
-Error: waitFor: condition not met in time
- ❯ waitFor src/data-app.test.ts:14:47
-     12|   const start = Date.now();
-     13|   while (!predicate()) {
-     14|     if (Date.now() - start > timeoutMs) throw new Error('waitFor: cond…
-       |                                               ^
-     15|     await new Promise((r) => setTimeout(r, 5));
-     16|   }
- ❯ src/data-app.test.ts:138:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
-
- Test Files  1 failed (1)
-      Tests  5 failed | 1 passed (6)
-   Start at  14:44:45
-   Duration  10.85s (transform 145ms, setup 0ms, collect 165ms, tests 10.16s, environment 199ms, prepare 96ms)
-
- ELIFECYCLE  Test failed. See above for more details.
+[?25l [90m·[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [90m·[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [90m·[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠙[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠹[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠸[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠼[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠴[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠦[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠧[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠇[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠏[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠋[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠙[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠹[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠸[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠼[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠴[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠦[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠧[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠇[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠏[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠋[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠙[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠹[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠸[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠼[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠴[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠦[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠧[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠇[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠏[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠋[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠙[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠹[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22mdata-app[2m.test.ts[22m[2m (6)[22m
+   [33m❯[39m streetui-data — loading → success against a real HTTP API[2m (3)[22m
+     [33m⠸[39m shows a loading state, then renders the fetched product list (no hardcode
+d data)
+     [90m·[39m reflects the server data exactly — swapping the backing data changes the 
+render
+     [90m·[39m renders the empty state when the API returns no products
+   [90m·[39m streetui-data — error → error UI → retry[2m (1)[22m
+     [90m·[39m shows the error fallback with a Retry button, then recovers on retry
+   [90m·[39m streetui-data — router integration cleans up the previous route resource[2m (2[22m
+[2m)[22m
+     [90m·[39m does not update detached UI when navigating away while a fetch is in flig
+ht
+     [90m·[39m creates a fresh resource per navigation and tears down the previous one
+[?25h

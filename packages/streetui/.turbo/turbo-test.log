@@ -1,14 +1,87 @@
 
+
 > streetui@1.4.0 test /home/error51/Downloads/StreetUI/packages/streetui
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/streetui
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/streetui[39m
 
- ✓ src/streetui.public.test.ts  (14 tests) 21ms
+[?25l     [90m·[39m exposes every headline API from one import (no @streetui/* needed)
+   [90m·[39m streetui — reactivity[2m (1)[22m
+     [90m·[39m signal/derived/effect/batch work through the public entry
+   [90m·[39m streetui — DSL + compiler + SSR[2m (2)[22m
+     [90m·[39m builds, compiles and renders an app to HTML with reactive initial values
+     [90m·[39m serializeState produces a serialized state payload; readState is exposed
+   [90m·[39m streetui — hydration (SSR markup adopted, then reactive)[2m (1)[22m
+     [90m·[39m hydrates server HTML in place and stays reactive
+   [90m·[39m streetui — router[2m (1)[22m
+     [90m·[39m matches routes, captures params and query, and navigates
+   [90m·[39m streetui — forms[2m (1)[22m
+     [90m·[39m validates fields with built-in validators (reactively)
+   [90m·[39m streetui — i18n[2m (1)[22m
+     [90m·[39m translates reactively and switches locale
+   [90m·[39m streetui — context[2m (1)[22m
+     [90m·[39m provides and consumes the nearest value
+   [90m·[39m streetui/server — curated SSR subset[2m (1)[22m
+     [90m·[39m renders to a string from the server subpath
+   [90m·[39m streetui/testing — testing helpers[2m (1)[22m
+     [90m·[39m renders an app and finds elements by role
+   [90m·[39m streetui/testing — compiler diagnostics (v1.2 §14)[2m (2)[22m
+     [90m·[39m inspects a compiled graph through the public testing subpath
+     [90m·[39m keeps diagnostics OFF the runtime barrel (tree-shakeable)
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m exposes every headline API from one import (no @streetui/* needed)
+   [32m✓[39m streetui — reactivity[2m (1)[22m
+     [32m✓[39m signal/derived/effect/batch work through the public entry
+   [32m✓[39m streetui — DSL + compiler + SSR[2m (2)[22m
+     [32m✓[39m builds, compiles and renders an app to HTML with reactive initial values
+     [32m✓[39m serializeState produces a serialized state payload; readState is exposed
+   [32m✓[39m streetui — hydration (SSR markup adopted, then reactive)[2m (1)[22m
+     [32m✓[39m hydrates server HTML in place and stays reactive
+   [32m✓[39m streetui — router[2m (1)[22m
+     [32m✓[39m matches routes, captures params and query, and navigates
+   [32m✓[39m streetui — forms[2m (1)[22m
+     [32m✓[39m validates fields with built-in validators (reactively)
+   [32m✓[39m streetui — i18n[2m (1)[22m
+     [32m✓[39m translates reactively and switches locale
+   [32m✓[39m streetui — context[2m (1)[22m
+     [32m✓[39m provides and consumes the nearest value
+   [32m✓[39m streetui/server — curated SSR subset[2m (1)[22m
+     [32m✓[39m renders to a string from the server subpath
+   [32m✓[39m streetui/testing — testing helpers[2m (1)[22m
+     [32m✓[39m renders an app and finds elements by role
+   [32m✓[39m streetui/testing — compiler diagnostics (v1.2 §14)[2m (2)[22m
+     [32m✓[39m inspects a compiled graph through the public testing subpath
+     [32m✓[39m keeps diagnostics OFF the runtime barrel (tree-shakeable)
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mstreetui[2m.public.test.ts[22m[2m (14)[22m
+   [32m✓[39m streetui — single import surface[2m (2)[22m
+     [32m✓[39m exposes the framework version
+     [32m✓[39m exposes every headline API from one import (no @streetui/* needed)
+   [32m✓[39m streetui — reactivity[2m (1)[22m
+     [32m✓[39m signal/derived/effect/batch work through the public entry
+   [32m✓[39m streetui — DSL + compiler + SSR[2m (2)[22m
+     [32m✓[39m builds, compiles and renders an app to HTML with reactive initial values
+     [32m✓[39m serializeState produces a serialized state payload; readState is exposed
+   [32m✓[39m streetui — hydration (SSR markup adopted, then reactive)[2m (1)[22m
+     [32m✓[39m hydrates server HTML in place and stays reactive
+   [32m✓[39m streetui — router[2m (1)[22m
+     [32m✓[39m matches routes, captures params and query, and navigates
+   [32m✓[39m streetui — forms[2m (1)[22m
+     [32m✓[39m validates fields with built-in validators (reactively)
+   [32m✓[39m streetui — i18n[2m (1)[22m
+     [32m✓[39m translates reactively and switches locale
+   [32m✓[39m streetui — context[2m (1)[22m
+     [32m✓[39m provides and consumes the nearest value
+   [32m✓[39m streetui/server — curated SSR subset[2m (1)[22m
+     [32m✓[39m renders to a string from the server subpath
+   [32m✓[39m streetui/testing — testing helpers[2m (1)[22m
+     [32m✓[39m renders an app and finds elements by role
+   [32m✓[39m streetui/testing — compiler diagnostics (v1.2 §14)[2m (2)[22m
+     [32m✓[39m inspects a compiled graph through the public testing subpath
+     [32m✓[39m keeps diagnostics OFF the runtime barrel (tree-shakeable)
 
- Test Files  1 passed (1)
-      Tests  14 passed (14)
-   Start at  14:44:42
-   Duration  789ms (transform 188ms, setup 0ms, collect 207ms, tests 21ms, environment 215ms, prepare 105ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m14 passed[39m[22m[90m (14)[39m
+[2m   Start at [22m 17:35:54
+[2m   Duration [22m 722ms[2m (transform 174ms, setup 0ms, collect 190ms, tests 19ms, environment 204ms, prepare 101ms)[22m
 
+[?25h[?25h

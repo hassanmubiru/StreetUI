@@ -1,57 +1,501 @@
 
+
 > @streetui/example-account@0.5.0 test /home/error51/Downloads/StreetUI/examples/streetui-account
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-account
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/streetui-account[39m
 
- ❯ src/account-app.test.ts  (10 tests | 2 failed) 421ms
-   × account app — resources (plans) > loads plans from the real API and renders them 53ms
-     → expected '' to be 'Free' // Object.is equality
-   × account app — resources (plans) > shows an error + retry when the plans request fails 85ms
-     → expected '' to be 'Free' // Object.is equality
+[?25l [90m·[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [90m·[39m account app — forms + validation[2m (4)[22m
+     [90m·[39m shows a field error after an invalid, touched submit and does not create
+     [90m·[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [33m⠙[39m shows a field error after an invalid, touched submit and does not create
+     [90m·[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [33m⠹[39m shows a field error after an invalid, touched submit and does not create
+     [90m·[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [33m⠙[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [33m⠹[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [33m⠸[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [33m⠼[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [33m⠴[39m creates an account against the real API and navigates to /welcome
+     [90m·[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [33m⠙[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [33m⠹[39m enters the error state when the API rejects a duplicate email (409)
+     [90m·[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [33m⠙[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [33m⠹[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [33m⠸[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [33m⠼[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [33m❯[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [33m⠴[39m submits via the native form submit event (Enter / submit button)
+   [90m·[39m account app — resources (plans)[2m (2)[22m
+     [90m·[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [33m⠙[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [33m⠹[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [33m⠸[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [33m⠼[39m loads plans from the real API and renders them
+     [90m·[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [33m⠙[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [33m⠹[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [33m⠸[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [33m⠼[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [33m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [33m⠴[39m shows an error + retry when the plans request fails
+   [90m·[39m account app — i18n (reactive locale)[2m (2)[22m
+     [90m·[39m re-renders every binding when the locale toggle flips en↔fr
+     [90m·[39m starts in the requested locale
+   [90m·[39m account app — accessibility[2m (1)[22m
+     [90m·[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [31m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [31m×[39m shows an error + retry when the plans request fails
+   [32m✓[39m account app — i18n (reactive locale)[2m (2)[22m
+     [32m✓[39m re-renders every binding when the locale toggle flips en↔fr
+     [32m✓[39m starts in the requested locale
+   [33m❯[39m account app — accessibility[2m (1)[22m
+     [33m⠙[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [33m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [31m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [31m×[39m shows an error + retry when the plans request fails
+   [32m✓[39m account app — i18n (reactive locale)[2m (2)[22m
+     [32m✓[39m re-renders every binding when the locale toggle flips en↔fr
+     [32m✓[39m starts in the requested locale
+   [33m❯[39m account app — accessibility[2m (1)[22m
+     [33m⠹[39m wires deterministic label/description ids and required state on fields
+   [90m·[39m account app — SSR + hydration[2m (1)[22m
+     [90m·[39m adopts server markup and runs live client navigation afterwards
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [31m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m[33m 461[2mms[22m[39m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [31m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [31m×[39m shows an error + retry when the plans request fails
+   [32m✓[39m account app — i18n (reactive locale)[2m (2)[22m
+     [32m✓[39m re-renders every binding when the locale toggle flips en↔fr
+     [32m✓[39m starts in the requested locale
+   [32m✓[39m account app — accessibility[2m (1)[22m
+     [32m✓[39m wires deterministic label/description ids and required state on fields
+   [32m✓[39m account app — SSR + hydration[2m (1)[22m
+     [32m✓[39m adopts server markup and runs live client navigation afterwards
+[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [31m❯[39m [2msrc/[22maccount-app[2m.test.ts[22m[2m (10)[22m[33m 461[2mms[22m[39m
+   [32m✓[39m account app — forms + validation[2m (4)[22m
+     [32m✓[39m shows a field error after an invalid, touched submit and does not create
+     [32m✓[39m creates an account against the real API and navigates to /welcome
+     [32m✓[39m enters the error state when the API rejects a duplicate email (409)
+     [32m✓[39m submits via the native form submit event (Enter / submit button)
+   [31m❯[39m account app — resources (plans)[2m (2)[22m
+     [31m×[39m loads plans from the real API and renders them
+     [31m×[39m shows an error + retry when the plans request fails
+   [32m✓[39m account app — i18n (reactive locale)[2m (2)[22m
+     [32m✓[39m re-renders every binding when the locale toggle flips en↔fr
+     [32m✓[39m starts in the requested locale
+   [32m✓[39m account app — accessibility[2m (1)[22m
+     [32m✓[39m wires deterministic label/description ids and required state on fields
+   [32m✓[39m account app — SSR + hydration[2m (1)[22m
+     [32m✓[39m adopts server markup and runs live client navigation afterwards
 
-⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+[31m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 2 [27m[22m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[39m
 
- FAIL  src/account-app.test.ts > account app — resources (plans) > loads plans from the real API and renders them
-AssertionError: expected '' to be 'Free' // Object.is equality
+[31m[1m[7m FAIL [27m[22m[39m src/account-app.test.ts[2m > [22maccount app — resources (plans)[2m > [22mloads plans from the real API and renders them
+[31m[1mAssertionError[22m: expected '' to be 'Free' // Object.is equality[39m
 
 - Expected
 + Received
 
 - Free
 
- ❯ src/account-app.test.ts:113:59
-    111|     const h = mount('/signup');
-    112|     await tick(40);
-    113|     expect(text(h.container.querySelector('#plan-free'))).toBe('Free');
-       |                                                           ^
-    114|     expect(text(h.container.querySelector('#plan-pro'))).toBe('Pro');
-    115|     h.unmount();
+[36m [2m❯[22m src/account-app.test.ts:[2m113:59[22m[39m
+    [90m111| [39m    [35mconst[39m h [33m=[39m [34mmount[39m([32m'/signup'[39m)[33m;[39m
+    [90m112| [39m    [35mawait[39m [34mtick[39m([34m40[39m)[33m;[39m
+    [90m113| [39m    [34mexpect[39m([34mtext[39m(h[33m.[39mcontainer[33m.[39m[34mquerySelector[39m([32m'#plan-free'[39m)))[33m.[39m[34mtoBe[39m([32m'Free'[39m)[33m;[39m
+    [90m   | [39m                                                          [31m^[39m
+    [90m114| [39m    [34mexpect[39m([34mtext[39m(h[33m.[39mcontainer[33m.[39m[34mquerySelector[39m([32m'#plan-pro'[39m)))[33m.[39m[34mtoBe[39m([32m'Pro'[39m)[33m;[39m
+    [90m115| [39m    h[33m.[39m[34munmount[39m()[33m;[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
 
- FAIL  src/account-app.test.ts > account app — resources (plans) > shows an error + retry when the plans request fails
-AssertionError: expected '' to be 'Free' // Object.is equality
+[31m[1m[7m FAIL [27m[22m[39m src/account-app.test.ts[2m > [22maccount app — resources (plans)[2m > [22mshows an error + retry when the plans request fails
+[31m[1mAssertionError[22m: expected '' to be 'Free' // Object.is equality[39m
 
 - Expected
 + Received
 
 - Free
 
- ❯ src/account-app.test.ts:127:59
-    125|     (h.container.querySelector('#plans-retry') as HTMLElement).dispatc…
-    126|     await tick(40);
-    127|     expect(text(h.container.querySelector('#plan-free'))).toBe('Free');
-       |                                                           ^
-    128|     h.unmount();
-    129|   });
+[36m [2m❯[22m src/account-app.test.ts:[2m127:59[22m[39m
+    [90m125| [39m    (h[33m.[39mcontainer[33m.[39m[34mquerySelector[39m([32m'#plans-retry'[39m) [35mas[39m [33mHTMLElement[39m)[33m.[39m[34mdispatc[39m…
+    [90m126| [39m    [35mawait[39m [34mtick[39m([34m40[39m)[33m;[39m
+    [90m127| [39m    [34mexpect[39m([34mtext[39m(h[33m.[39mcontainer[33m.[39m[34mquerySelector[39m([32m'#plan-free'[39m)))[33m.[39m[34mtoBe[39m([32m'Free'[39m)[33m;[39m
+    [90m   | [39m                                                          [31m^[39m
+    [90m128| [39m    h[33m.[39m[34munmount[39m()[33m;[39m
+    [90m129| [39m  })[33m;[39m
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
 
- Test Files  1 failed (1)
-      Tests  2 failed | 8 passed (10)
-   Start at  14:43:36
-   Duration  1.26s (transform 230ms, setup 0ms, collect 260ms, tests 421ms, environment 230ms, prepare 122ms)
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m8 passed[39m[22m[90m (10)[39m
+[2m   Start at [22m 17:35:58
+[2m   Duration [22m 2.55s[2m (transform 497ms, setup 0ms, collect 479ms, tests 461ms, environment 503ms, prepare 303ms)[22m
 
- ELIFECYCLE  Test failed. See above for more details.
+[?25h[?25h[41m[30m ELIFECYCLE [39m[49m [31mTest failed. See above for more details.[39m

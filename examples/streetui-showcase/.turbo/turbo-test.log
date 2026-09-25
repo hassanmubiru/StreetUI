@@ -1,14 +1,90 @@
 
+
 > @streetui/example-showcase@0.1.0 test /home/error51/Downloads/StreetUI/examples/streetui-showcase
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-showcase
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/streetui-showcase[39m
 
- ✓ src/showcase-app.test.ts  (20 tests) 99ms
+[?25l     [90m·[39m increments, decrements and resets via real button clicks
+   [90m·[39m 3. reactive list — add / remove / update / clear[2m (6)[22m
+     [90m·[39m adds an item
+     [90m·[39m removes the last item
+     [90m·[39m removes a specific item via its per-item button
+     [90m·[39m updates an item in place (data change, identity unchanged)
+     [90m·[39m clears the list
+     [90m·[39m repopulates after a clear
+   [90m·[39m 4. keyed reorder preserves DOM identity[2m (1)[22m
+     [90m·[39m rotating the list reuses the exact same <li> and <span> elements
+   [90m·[39m 5. form interaction, validation and submitted state[2m (4)[22m
+     [90m·[39m controlled inputs update their signals on input/change
+     [90m·[39m shows a validation message that updates reactively
+     [90m·[39m submitting a valid form sets the submitted state
+     [90m·[39m submitting an invalid form does not set submitted
+   [90m·[39m 6. state-controlled conditional rendering[2m (1)[22m
+     [90m·[39m toggles the details region on and off
+   [90m·[39m 7. event handlers fire through the graph registry[2m (1)[22m
+     [90m·[39m records the last event for each interaction type
+   [90m·[39m 8. unmount and cleanup[2m (3)[22m
+     [90m·[39m empties the container on unmount
+     [90m·[39m signal updates after unmount are safe no-ops
+     [90m·[39m list churn leaves no stale graph click-handlers (bounded registry)
+[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G     [32m✓[39m increments, decrements and resets via real button clicks
+   [32m✓[39m 3. reactive list — add / remove / update / clear[2m (6)[22m
+     [32m✓[39m adds an item
+     [32m✓[39m removes the last item
+     [32m✓[39m removes a specific item via its per-item button
+     [32m✓[39m updates an item in place (data change, identity unchanged)
+     [32m✓[39m clears the list
+     [32m✓[39m repopulates after a clear
+   [32m✓[39m 4. keyed reorder preserves DOM identity[2m (1)[22m
+     [32m✓[39m rotating the list reuses the exact same <li> and <span> elements
+   [32m✓[39m 5. form interaction, validation and submitted state[2m (4)[22m
+     [32m✓[39m controlled inputs update their signals on input/change
+     [32m✓[39m shows a validation message that updates reactively
+     [32m✓[39m submitting a valid form sets the submitted state
+     [32m✓[39m submitting an invalid form does not set submitted
+   [32m✓[39m 6. state-controlled conditional rendering[2m (1)[22m
+     [32m✓[39m toggles the details region on and off
+   [32m✓[39m 7. event handlers fire through the graph registry[2m (1)[22m
+     [32m✓[39m records the last event for each interaction type
+   [32m✓[39m 8. unmount and cleanup[2m (3)[22m
+     [32m✓[39m empties the container on unmount
+     [32m✓[39m signal updates after unmount are safe no-ops
+     [32m✓[39m list churn leaves no stale graph click-handlers (bounded registry)
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mshowcase-app[2m.test.ts[22m[2m (20)[22m
+   [32m✓[39m 1. initial rendering[2m (3)[22m
+     [32m✓[39m renders navigation, hero, sections and footer
+     [32m✓[39m renders the initial reactive list with three items
+     [32m✓[39m external nav link gets target/rel attributes
+   [32m✓[39m 2. counter updates reactively[2m (1)[22m
+     [32m✓[39m increments, decrements and resets via real button clicks
+   [32m✓[39m 3. reactive list — add / remove / update / clear[2m (6)[22m
+     [32m✓[39m adds an item
+     [32m✓[39m removes the last item
+     [32m✓[39m removes a specific item via its per-item button
+     [32m✓[39m updates an item in place (data change, identity unchanged)
+     [32m✓[39m clears the list
+     [32m✓[39m repopulates after a clear
+   [32m✓[39m 4. keyed reorder preserves DOM identity[2m (1)[22m
+     [32m✓[39m rotating the list reuses the exact same <li> and <span> elements
+   [32m✓[39m 5. form interaction, validation and submitted state[2m (4)[22m
+     [32m✓[39m controlled inputs update their signals on input/change
+     [32m✓[39m shows a validation message that updates reactively
+     [32m✓[39m submitting a valid form sets the submitted state
+     [32m✓[39m submitting an invalid form does not set submitted
+   [32m✓[39m 6. state-controlled conditional rendering[2m (1)[22m
+     [32m✓[39m toggles the details region on and off
+   [32m✓[39m 7. event handlers fire through the graph registry[2m (1)[22m
+     [32m✓[39m records the last event for each interaction type
+   [32m✓[39m 8. unmount and cleanup[2m (3)[22m
+     [32m✓[39m empties the container on unmount
+     [32m✓[39m signal updates after unmount are safe no-ops
+     [32m✓[39m list churn leaves no stale graph click-handlers (bounded registry)
 
- Test Files  1 passed (1)
-      Tests  20 passed (20)
-   Start at  10:44:25
-   Duration  1.08s (transform 216ms, setup 0ms, collect 218ms, tests 99ms, environment 314ms, prepare 157ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m20 passed[39m[22m[90m (20)[39m
+[2m   Start at [22m 17:35:58
+[2m   Duration [22m 2.73s[2m (transform 476ms, setup 0ms, collect 514ms, tests 272ms, environment 1.06s, prepare 274ms)[22m
 
+[?25h[?25h

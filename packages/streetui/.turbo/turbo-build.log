@@ -1,17 +1,18 @@
 
+
 > streetui@1.4.0 build /home/error51/Downloads/StreetUI/packages/streetui
 > tsup && node scripts/scrub-dts.mjs
 
-CLI Building entry: {"index":"src/index.ts","server":"src/server.ts","testing":"src/testing.ts","bin":"src/bin.ts","create-bin":"src/create-bin.ts"}
-CLI Using tsconfig: tsconfig.build.json
-CLI tsup v8.3.5
-CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/streetui/tsup.config.ts
-CLI Target: es2022
-CLI Cleaning output folder
-ESM Build start
-CJS Build start
+[34mCLI[39m Building entry: {"index":"src/index.ts","server":"src/server.ts","testing":"src/testing.ts","bin":"src/bin.ts","create-bin":"src/create-bin.ts"}
+[34mCLI[39m Using tsconfig: tsconfig.build.json
+[34mCLI[39m tsup v8.3.5
+[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/streetui/tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+[34mCJS[39m Build start
 
- WARN  [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m"import.meta" is not available with the "cjs" output format and will be empty[0m [empty-import-meta]
+[90m[[90m5:35:54 PM[90m][39m [43m[30m WARN [39m[49m [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m"import.meta" is not available with the "cjs" output format and will be empty[0m [empty-import-meta]
 
     ../cli/src/templates.ts:41:37:
 [37m      41 │   const here = dirname(fileURLToPath([32mimport.meta[37m.url));
@@ -21,30 +22,30 @@ CJS Build start
 
 
 
-CJS dist/index.cjs          130.54 KB
-CJS dist/bin.cjs            30.58 KB
-CJS dist/server.cjs         33.68 KB
-CJS dist/testing.cjs        59.98 KB
-CJS dist/create-bin.cjs     30.69 KB
-CJS dist/bin.cjs.map        75.28 KB
-CJS dist/index.cjs.map      349.34 KB
-CJS dist/server.cjs.map     88.24 KB
-CJS dist/testing.cjs.map    163.29 KB
-CJS dist/create-bin.cjs.map 75.41 KB
-CJS ⚡️ Build success in 104ms
-ESM dist/server.js         32.48 KB
-ESM dist/testing.js        58.58 KB
-ESM dist/index.js          124.11 KB
-ESM dist/create-bin.js     29.52 KB
-ESM dist/bin.js            29.41 KB
-ESM dist/server.js.map     87.08 KB
-ESM dist/testing.js.map    162.19 KB
-ESM dist/create-bin.js.map 75.66 KB
-ESM dist/index.js.map      345.20 KB
-ESM dist/bin.js.map        75.53 KB
-ESM ⚡️ Build success in 105ms
+[32mESM[39m [1mdist/server.js         [22m[32m32.48 KB[39m
+[32mESM[39m [1mdist/index.js          [22m[32m124.11 KB[39m
+[32mESM[39m [1mdist/create-bin.js     [22m[32m29.52 KB[39m
+[32mESM[39m [1mdist/testing.js        [22m[32m58.58 KB[39m
+[32mESM[39m [1mdist/bin.js            [22m[32m29.41 KB[39m
+[32mESM[39m [1mdist/server.js.map     [22m[32m87.08 KB[39m
+[32mESM[39m [1mdist/create-bin.js.map [22m[32m75.66 KB[39m
+[32mESM[39m [1mdist/bin.js.map        [22m[32m75.53 KB[39m
+[32mESM[39m [1mdist/testing.js.map    [22m[32m162.19 KB[39m
+[32mESM[39m [1mdist/index.js.map      [22m[32m345.20 KB[39m
+[32mESM[39m ⚡️ Build success in 247ms
+[32mCJS[39m [1mdist/index.cjs          [22m[32m130.54 KB[39m
+[32mCJS[39m [1mdist/bin.cjs            [22m[32m30.58 KB[39m
+[32mCJS[39m [1mdist/server.cjs         [22m[32m33.68 KB[39m
+[32mCJS[39m [1mdist/testing.cjs        [22m[32m59.98 KB[39m
+[32mCJS[39m [1mdist/create-bin.cjs     [22m[32m30.69 KB[39m
+[32mCJS[39m [1mdist/index.cjs.map      [22m[32m349.34 KB[39m
+[32mCJS[39m [1mdist/server.cjs.map     [22m[32m88.24 KB[39m
+[32mCJS[39m [1mdist/bin.cjs.map        [22m[32m75.28 KB[39m
+[32mCJS[39m [1mdist/create-bin.cjs.map [22m[32m75.41 KB[39m
+[32mCJS[39m [1mdist/testing.cjs.map    [22m[32m163.29 KB[39m
+[32mCJS[39m ⚡️ Build success in 248ms
 DTS Build start
-DTS ⚡️ Build success in 2633ms
+DTS ⚡️ Build success in 2268ms
 DTS dist/bin.d.ts                             20.00 B
 DTS dist/testing.d.ts                         5.16 KB
 DTS dist/index.d.ts                           82.00 KB

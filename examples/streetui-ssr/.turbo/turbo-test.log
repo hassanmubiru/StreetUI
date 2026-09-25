@@ -1,14 +1,45 @@
 
+
 > @streetui/example-ssr@0.4.0 test /home/error51/Downloads/StreetUI/examples/streetui-ssr
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-ssr
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/examples/streetui-ssr[39m
 
- ✓ src/ssr-example.test.ts  (7 tests) 29ms
+[?25l [90m·[39m [2msrc/[22mssr-example[2m.test.ts[22m[2m (7)[22m
+   [90m·[39m renderDocument — pure server render[2m (1)[22m
+     [90m·[39m produces a full HTML document with markup and a state island
+   [90m·[39m SSR → hydration (universal rendering)[2m (6)[22m
+     [90m·[39m adopts the server DOM (same nodes) and seeds state from the island
+     [90m·[39m increment button updates the count text in place after hydration
+     [90m·[39m two-way input propagates typing into the signal and updates the greeting
+     [90m·[39m toggles a when() branch that was absent in the server HTML
+     [90m·[39m reactive list is keyed after hydration — reorder reuses server nodes
+     [90m·[39m unmount tears the app down and stops reacting
+[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mssr-example[2m.test.ts[22m[2m (7)[22m
+   [32m✓[39m renderDocument — pure server render[2m (1)[22m
+     [32m✓[39m produces a full HTML document with markup and a state island
+   [32m✓[39m SSR → hydration (universal rendering)[2m (6)[22m
+     [32m✓[39m adopts the server DOM (same nodes) and seeds state from the island
+     [32m✓[39m increment button updates the count text in place after hydration
+     [32m✓[39m two-way input propagates typing into the signal and updates the greeting
+     [32m✓[39m toggles a when() branch that was absent in the server HTML
+     [32m✓[39m reactive list is keyed after hydration — reorder reuses server nodes
+     [32m✓[39m unmount tears the app down and stops reacting
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mssr-example[2m.test.ts[22m[2m (7)[22m
+   [32m✓[39m renderDocument — pure server render[2m (1)[22m
+     [32m✓[39m produces a full HTML document with markup and a state island
+   [32m✓[39m SSR → hydration (universal rendering)[2m (6)[22m
+     [32m✓[39m adopts the server DOM (same nodes) and seeds state from the island
+     [32m✓[39m increment button updates the count text in place after hydration
+     [32m✓[39m two-way input propagates typing into the signal and updates the greeting
+     [32m✓[39m toggles a when() branch that was absent in the server HTML
+     [32m✓[39m reactive list is keyed after hydration — reorder reuses server nodes
+     [32m✓[39m unmount tears the app down and stops reacting
 
- Test Files  1 passed (1)
-      Tests  7 passed (7)
-   Start at  10:43:38
-   Duration  779ms (transform 172ms, setup 0ms, collect 185ms, tests 29ms, environment 199ms, prepare 129ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 17:35:58
+[2m   Duration [22m 1.95s[2m (transform 504ms, setup 0ms, collect 460ms, tests 80ms, environment 529ms, prepare 266ms)[22m
 
+[?25h[?25h

@@ -1,14 +1,51 @@
 
+
 > @streetui/benchmarks@0.7.0 test /home/error51/Downloads/StreetUI/packages/benchmarks
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/benchmarks
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/benchmarks[39m
 
- ✓ src/harness.test.ts  (7 tests) 5ms
+[?25l [90m·[39m [2msrc/[22mharness[2m.test.ts[22m[2m (7)[22m
+   [90m·[39m summarize[2m (4)[22m
+     [90m·[39m computes median/min/max/mean/p95 for an odd sample set
+     [90m·[39m averages the two middle samples for an even sample set
+     [90m·[39m derives opsPerSec from the median
+     [90m·[39m is order-independent (sorts internally)
+   [90m·[39m bench[2m (1)[22m
+     [90m·[39m runs setup/run/teardown the expected number of times and returns stats
+   [90m·[39m environment[2m (1)[22m
+     [90m·[39m captures a populated environment header
+   [90m·[39m compareResults[2m (1)[22m
+     [90m·[39m flags improvement, regression, unchanged, and new benchmarks
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mharness[2m.test.ts[22m[2m (7)[22m
+   [32m✓[39m summarize[2m (4)[22m
+     [32m✓[39m computes median/min/max/mean/p95 for an odd sample set
+     [32m✓[39m averages the two middle samples for an even sample set
+     [32m✓[39m derives opsPerSec from the median
+     [32m✓[39m is order-independent (sorts internally)
+   [32m✓[39m bench[2m (1)[22m
+     [32m✓[39m runs setup/run/teardown the expected number of times and returns stats
+   [32m✓[39m environment[2m (1)[22m
+     [32m✓[39m captures a populated environment header
+   [32m✓[39m compareResults[2m (1)[22m
+     [32m✓[39m flags improvement, regression, unchanged, and new benchmarks
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mharness[2m.test.ts[22m[2m (7)[22m
+   [32m✓[39m summarize[2m (4)[22m
+     [32m✓[39m computes median/min/max/mean/p95 for an odd sample set
+     [32m✓[39m averages the two middle samples for an even sample set
+     [32m✓[39m derives opsPerSec from the median
+     [32m✓[39m is order-independent (sorts internally)
+   [32m✓[39m bench[2m (1)[22m
+     [32m✓[39m runs setup/run/teardown the expected number of times and returns stats
+   [32m✓[39m environment[2m (1)[22m
+     [32m✓[39m captures a populated environment header
+   [32m✓[39m compareResults[2m (1)[22m
+     [32m✓[39m flags improvement, regression, unchanged, and new benchmarks
 
- Test Files  1 passed (1)
-      Tests  7 passed (7)
-   Start at  14:44:35
-   Duration  613ms (transform 57ms, setup 0ms, collect 51ms, tests 5ms, environment 207ms, prepare 85ms)
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m7 passed[39m[22m[90m (7)[39m
+[2m   Start at [22m 17:35:52
+[2m   Duration [22m 1.03s[2m (transform 133ms, setup 0ms, collect 105ms, tests 44ms, environment 451ms, prepare 180ms)[22m
 
+[?25h[?25h

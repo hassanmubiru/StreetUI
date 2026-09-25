@@ -1,16 +1,43 @@
 
+
 > @streetui/testing@1.4.0 test /home/error51/Downloads/StreetUI/packages/testing
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/testing
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/testing[39m
 
- ✓ src/public-api.stability.test.ts  (1 test) 5ms
- ✓ src/testing.test.ts  (13 tests) 22ms
- ✓ src/helpers.test.ts  (9 tests) 63ms
+[?25l [90m·[39m [2msrc/[22mtesting[2m.test.ts[22m[2m (13)[22m
+[?25l[2K[1A[2K[G [32m✓[39m [2msrc/[22mtesting[2m.test.ts[22m[2m (13)[22m
+ [90m·[39m [2msrc/[22mhelpers[2m.test.ts[22m[2m (9)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mtesting[2m.test.ts[22m[2m (13)[22m
+ [33m❯[39m [2msrc/[22mhelpers[2m.test.ts[22m[2m (9)[22m
+   [32m✓[39m findByText / findByRole[2m (4)[22m
+   [33m❯[39m flushUpdates / waitFor[2m (3)[22m
+     [32m✓[39m waitFor resolves once an async resource settles
+     [32m✓[39m flushUpdates applies a scheduled signal change to the DOM
+     [33m⠙[39m waitFor rejects after the timeout when the condition never holds
+   [90m·[39m renderServerThenHydrate[2m (2)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mtesting[2m.test.ts[22m[2m (13)[22m
+ [33m❯[39m [2msrc/[22mhelpers[2m.test.ts[22m[2m (9)[22m
+   [32m✓[39m findByText / findByRole[2m (4)[22m
+   [33m❯[39m flushUpdates / waitFor[2m (3)[22m
+     [32m✓[39m waitFor resolves once an async resource settles
+     [32m✓[39m flushUpdates applies a scheduled signal change to the DOM
+     [33m⠹[39m waitFor rejects after the timeout when the condition never holds
+   [90m·[39m renderServerThenHydrate[2m (2)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mtesting[2m.test.ts[22m[2m (13)[22m
+ [32m✓[39m [2msrc/[22mhelpers[2m.test.ts[22m[2m (9)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mhelpers[2m.test.ts[22m[2m (9)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+ [32m✓[39m [2msrc/[22mtesting[2m.test.ts[22m[2m (13)[22m
 
- Test Files  3 passed (3)
-      Tests  23 passed (23)
-   Start at  14:44:37
-   Duration  923ms (transform 254ms, setup 0ms, collect 483ms, tests 90ms, environment 974ms, prepare 350ms)
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m23 passed[39m[22m[90m (23)[39m
+[2m   Start at [22m 17:35:52
+[2m   Duration [22m 1.21s[2m (transform 269ms, setup 0ms, collect 400ms, tests 88ms, environment 1.14s, prepare 334ms)[22m
 
+[?25h[?25h

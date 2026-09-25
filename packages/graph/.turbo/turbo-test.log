@@ -1,15 +1,21 @@
 
+
 > @streetui/graph@1.4.0 test /home/error51/Downloads/StreetUI/packages/graph
 > vitest run
 
 
- RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/graph
+[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/graph[39m
 
- ✓ src/public-api.stability.test.ts  (1 test) 5ms
- ✓ src/graph.test.ts  (26 tests) 15ms
+[?25l [90m·[39m [2msrc/[22mgraph[2m.test.ts[22m[2m (26)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[?25l[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mgraph[2m.test.ts[22m[2m (26)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
+[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mgraph[2m.test.ts[22m[2m (26)[22m
+ [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (1)[22m
 
- Test Files  2 passed (2)
-      Tests  27 passed (27)
-   Start at  14:44:09
-   Duration  542ms (transform 156ms, setup 0ms, collect 221ms, tests 20ms, environment 0ms, prepare 250ms)
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m27 passed[39m[22m[90m (27)[39m
+[2m   Start at [22m 17:35:44
+[2m   Duration [22m 764ms[2m (transform 200ms, setup 0ms, collect 288ms, tests 26ms, environment 0ms, prepare 264ms)[22m
 
+[?25h[?25h
