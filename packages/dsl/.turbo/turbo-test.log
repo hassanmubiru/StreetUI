@@ -1,0 +1,15 @@
+
+> @streetui/dsl@1.4.0 test /home/error51/Downloads/StreetUI/packages/dsl
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dsl
+
+ ✓ src/public-api.stability.test.ts  (2 tests) 8ms
+ ✓ src/dsl.test.ts  (17 tests) 25ms
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  14:43:05
+   Duration  577ms (transform 195ms, setup 0ms, collect 261ms, tests 33ms, environment 1ms, prepare 272ms)
+
