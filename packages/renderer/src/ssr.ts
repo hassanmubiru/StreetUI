@@ -20,6 +20,7 @@ import { ServerDOMAdapter } from '@streetui/dom';
 import type { CompiledApplication } from '@streetui/compiler';
 import { createRenderContext } from './render-context.js';
 import { mountGraph } from './mount.js';
+import { getStaticSSRPlan } from './static-ssr-plan.js';
 
 export interface RenderToStringOptions {
   /**
@@ -27,6 +28,18 @@ export interface RenderToStringOptions {
    * `ServerDOMAdapter` per call so concurrent renders never share state.
    */
   readonly domAdapter?: ServerDOMAdapter;
+  /**
+   * @internal — testing/benchmark knob for the v1.7 static SSR plan.
+   *
+   * `undefined` (default): use the per-app cached plan (build once, reuse).
+   * `null`: disable the plan entirely — the exact v1.6 runtime mount path, used
+   *   by the byte-identity gate and A/B benchmark as the "legacy" baseline.
+   * a map: use this explicit plan.
+   *
+   * Not part of the supported public API; output is byte-identical regardless
+   * of this value (§8).
+   */
+  readonly staticPlan?: ReadonlyMap<string, string> | null;
 }
 
 /**
@@ -42,11 +55,20 @@ export function renderToString(
 ): string {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
 
+  // Resolve the v1.7 static SSR plan: cached-by-default, `null` forces the v1.6
+  // path, an explicit map is used as-is. Only maximal static-subtree roots are
+  // collapsed; dynamic regions still mount through the runtime path (§5).
+  const plan =
+    options.staticPlan === null
+      ? undefined
+      : (options.staticPlan ?? getStaticSSRPlan(compiled));
+  const staticHTML = plan !== undefined && plan.size > 0 ? plan : undefined;
+
   // Synthetic container — the application root maps onto it, and the app's
   // top-level nodes are appended directly into it (mirroring browser mount).
   const container = dom.createElement('div');
 
-  const ctx = createRenderContext(dom, compiled.graph, container);
+  const ctx = createRenderContext(dom, compiled.graph, container, undefined, staticHTML);
   const rootInstance = mountGraph(ctx);
 
   const html = dom.serializeInner(container);
