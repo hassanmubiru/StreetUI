@@ -1,5 +1,5 @@
 
-> @streetui/devtools@1.5.0 build /home/error51/Downloads/StreetUI/packages/devtools
+> @streetui/devtools@1.6.0 build /home/error51/Downloads/StreetUI/packages/devtools
 > tsup
 
 CLI Building entry: src/index.ts
@@ -12,11 +12,11 @@ ESM Build start
 CJS Build start
 ESM dist/index.js     12.50 KB
 ESM dist/index.js.map 42.73 KB
-ESM ⚡️ Build success in 13ms
+ESM ⚡️ Build success in 14ms
 CJS dist/index.cjs     14.04 KB
 CJS dist/index.cjs.map 42.97 KB
-CJS ⚡️ Build success in 13ms
+CJS ⚡️ Build success in 14ms
 DTS Build start
-DTS ⚡️ Build success in 413ms
+DTS ⚡️ Build success in 451ms
 DTS dist/index.d.ts  18.05 KB
 DTS dist/index.d.cts 18.05 KB
