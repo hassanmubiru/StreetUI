@@ -142,7 +142,7 @@ for (const pkgName of PUBLISH_ORDER) {
   const shortName = pkgName.replace('@streetui/', '');
 
   if (DRY_RUN) {
-    console.log(`  [dry-run] would publish ${pkgName}@1.6.0 from ${tgz}`);
+    console.log(`  [dry-run] would publish ${pkgName}@1.6.1 from ${tgz}`);
     results.push({ name: pkgName, status: 'dry-run' });
     continue;
   }
