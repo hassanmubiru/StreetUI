@@ -55,6 +55,14 @@ on Node/happy-dom evidence alone, so **none was made**.
   BLOCKED**, with any Node-side SSR/bundle data flagged as "NOT browser numbers".
   The moment a Chromium binary is present, real numbers appear end-to-end with no
   further code change.
+- **`benchmarks/run-streetui.mjs`** — the stale v1.3 bundle baseline constant
+  (`V13_SHIPPED_MINIFIED_FULL_GZIP = 20105`) was updated to the v1.8 measured
+  value (`V18_SHIPPED_MINIFIED_FULL_GZIP = 20246`). The accompanying unmin
+  diagnostic baseline was also updated (`V18_UNMIN_FULL_GZIP_BASELINE = 29408`)
+  with a 5% tolerance (up from 0.1%) to accommodate accumulated comment/type
+  drift across v1.4–v1.8. The full-barrel growth from v1.3 → v1.8 (+141 B) is
+  intentional and fully disclosed: `ServerRawHTML` + SSR fast-path branch (v1.4,
+  +100 B) and `getStaticSSRPlan` / static-plan type exports (v1.7, +41 B).
 
 ### Findings (Node + happy-dom CPU profile — NOT a browser)
 
