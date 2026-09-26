@@ -1,51 +1,36 @@
 /**
- * StreetUI browser benchmark orchestrator (spec §21/§26).
+ * StreetUI browser benchmark orchestrator (spec §5/§19/§21/§26).
  *
  *   node benchmarks/browser/run-all.mjs
  *
- * This is the single entry the release gate calls to run ALL real-browser
- * benchmarks (StreetUI in-page scenarios + competitor scenarios) under one
- * Chromium methodology. Real browser numbers require a real engine: a Chromium
- * binary driven through Playwright. Node + happy-dom is NOT a browser and is
- * never substituted for browser numbers (§21).
+ * This is the SINGLE entry the release gate calls to run ALL real-browser
+ * benchmarks under one Chromium methodology:
+ *   - StreetUI in-page scenarios            (scripts/browser-harness.mjs)
+ *   - isolated 10k keyed-list reorder (§5)  (benchmarks/scenarios/browser-list-reorder/run.mjs)
+ *   - cross-framework competitors (§19)     (benchmarks/run-competitors.mjs)
  *
- * Behaviour:
- *   1. Detect whether Playwright + a Chromium binary are available.
- *   2. If available: delegate to scripts/browser-harness.mjs (StreetUI) and the
- *      competitor harnesses, all under the identical browser methodology, and
- *      aggregate their JSON results.
- *   3. If NOT available: write a BLOCKED marker with the exact environmental
- *      reason and the catalogue of suites that WOULD run, then exit 0 WITHOUT
- *      fabricating any numbers.
- *
- * No browser or competitor claim is valid without actual execution here.
+ * Real browser numbers require a real engine: a Chromium binary driven through
+ * Playwright. Node + happy-dom is NOT a browser and is never substituted for
+ * browser numbers (§21). Each sub-runner is itself BLOCKED-aware: it produces a
+ * real result only when a browser exists and otherwise writes an honest BLOCKED
+ * marker with the exact reason. This orchestrator therefore ALWAYS delegates to
+ * all three, then aggregates whatever honest output they produced — so the
+ * moment a Chromium exists in this environment, real numbers appear end-to-end
+ * with no further code change. No number is ever fabricated here.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..', '..');
-const outDir = path.join(repo, 'benchmarks', 'results', 'v1.7');
+const outDir = path.join(repo, 'benchmarks', 'results', 'v1.8');
 const outPath = path.join(outDir, 'browser-run-all.json');
 fs.mkdirSync(outDir, { recursive: true });
 
 const require = createRequire(import.meta.url);
-
-// The full catalogue of suites this orchestrator runs when a browser exists.
-const SUITES = {
-  streetui: {
-    driver: 'scripts/browser-harness.mjs',
-    scenarios: ['initial-render', 'hydration', 'reactive-search-10k',
-      'keyed-list-append/prepend/reorder/update', 'route-transitions'],
-  },
-  competitors: {
-    driver: 'benchmarks/run-competitors.mjs',
-    frameworks: ['react', 'vue', 'svelte', 'solid'],
-    note: 'Identical scenarios + identical Chromium methodology as the StreetUI suite (§22).',
-  },
-};
 
 function detectBrowser() {
   let playwright = false;
@@ -54,7 +39,7 @@ function detectBrowser() {
   catch (e) { playwrightReason = e.code ?? String(e); }
 
   const candidates = [
-    process.env.CHROMIUM_PATH, process.env.CHROME_PATH,
+    process.env.CHROMIUM_PATH, process.env.CHROME_PATH, process.env.PLAYWRIGHT_CHROMIUM_PATH,
     '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome',
     '/usr/bin/google-chrome-stable',
   ].filter(Boolean);
@@ -63,31 +48,97 @@ function detectBrowser() {
   return { playwright, playwrightReason, chromium };
 }
 
+// The three real sub-runners this orchestrator drives. Each writes its own
+// honest JSON (real when a browser exists, BLOCKED otherwise) to `resultPath`.
+const listReorderOut = path.join(outDir, 'browser-list-reorder.json');
+const SUB_RUNNERS = [
+  {
+    id: 'streetui-scenarios',
+    script: path.join(repo, 'scripts', 'browser-harness.mjs'),
+    args: [],
+    resultPath: path.join(repo, 'benchmarks', 'results', 'v1.3', 'streetui-browser.json'),
+    describes: ['initial-render', 'hydration', 'reactive-search-10k',
+      'keyed-list-append/prepend/reorder/update', 'route-transitions'],
+  },
+  {
+    id: 'list-reorder-10k',
+    script: path.join(repo, 'benchmarks', 'scenarios', 'browser-list-reorder', 'run.mjs'),
+    args: [`--out=${listReorderOut}`],
+    resultPath: listReorderOut,
+    describes: ['isolated 10k keyed-row reorder: create/append/prepend/insert/remove/swap/reverse/shuffle/update'],
+  },
+  {
+    id: 'competitors',
+    script: path.join(repo, 'benchmarks', 'run-competitors.mjs'),
+    args: [],
+    resultPath: null, // writes per-framework files: results/{react,vue,svelte,solid}.json
+    frameworkResults: ['react', 'vue', 'svelte', 'solid'].map(
+      (f) => ({ framework: f, path: path.join(repo, 'benchmarks', 'results', `${f}.json`) })),
+    describes: ['react', 'vue', 'svelte', 'solid — identical scenarios + identical Chromium methodology (§22)'],
+  },
+];
+
+function readJsonOrNull(p) {
+  try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; }
+}
+
 const env = detectBrowser();
 const available = env.playwright && env.chromium !== null;
 
-if (!available) {
-  const reasonParts = [];
-  if (!env.playwright) reasonParts.push(`Playwright not installed (require.resolve → ${env.playwrightReason})`);
-  if (env.chromium === null) reasonParts.push('no Chromium binary found on PATH or via CHROMIUM_PATH/CHROME_PATH');
-  const result = {
-    schema: 'streetui-browser-run-all/v1.7',
-    status: 'BLOCKED',
-    reason: reasonParts.join('; '),
-    detectedAt: new Date().toISOString(),
-    environment: { runtime: `node ${process.version}`, playwright: env.playwright, chromium: env.chromium },
-    wouldRun: SUITES,
-    note:
-      'happy-dom is NOT a browser and is never substituted for these numbers. No browser or ' +
-      'competitor performance figures are produced or fabricated while this gate is BLOCKED.',
+console.log(`browser/run-all: playwright=${env.playwright} chromium=${env.chromium ?? 'none'} → ${available ? 'AVAILABLE' : 'BLOCKED'}`);
+console.log('browser/run-all: delegating to all sub-runners (each is BLOCKED-aware; no numbers fabricated).');
+
+const suites = [];
+for (const r of SUB_RUNNERS) {
+  console.log(`  → ${r.id}: node ${path.relative(repo, r.script)} ${r.args.join(' ')}`);
+  const proc = spawnSync(process.execPath, [r.script, ...r.args], {
+    cwd: repo, encoding: 'utf8', timeout: 10 * 60 * 1000,
+  });
+  const entry = {
+    id: r.id,
+    script: path.relative(repo, r.script),
+    describes: r.describes,
+    exitCode: proc.status,
+    spawnError: proc.error ? String(proc.error.code ?? proc.error.message) : null,
   };
-  fs.writeFileSync(outPath, JSON.stringify(result, null, 2) + '\n');
-  console.log(`browser/run-all: BLOCKED — ${result.reason}`);
-  console.log(`wrote ${outPath} (no numbers fabricated).`);
-  process.exit(0);
+  if (r.resultPath) {
+    const j = readJsonOrNull(r.resultPath);
+    entry.resultPath = path.relative(repo, r.resultPath);
+    entry.status = j?.status ?? (j ? 'PRESENT' : 'MISSING');
+    entry.reason = j?.reason ?? null;
+  } else if (r.frameworkResults) {
+    entry.frameworks = r.frameworkResults.map(({ framework, path: fp }) => {
+      const j = readJsonOrNull(fp);
+      return { framework, resultPath: path.relative(repo, fp), status: j?.status ?? (j ? 'PRESENT' : 'MISSING'), reason: j?.reason ?? null };
+    });
+    entry.status = entry.frameworks.every((f) => f.status === 'BLOCKED') ? 'BLOCKED'
+      : entry.frameworks.some((f) => f.status !== 'BLOCKED' && f.status !== 'MISSING') ? 'PARTIAL' : 'MISSING';
+  }
+  suites.push(entry);
 }
 
-// If a browser is available, this is where the StreetUI + competitor suites are
-// driven under one methodology. Reached only when Playwright + Chromium exist.
-console.log('browser/run-all: Chromium detected — delegating to per-suite harnesses.');
-console.log(JSON.stringify({ status: 'AVAILABLE', suites: SUITES, chromium: env.chromium }, null, 2));
+const anyReal = suites.some((s) =>
+  (s.status && s.status !== 'BLOCKED' && s.status !== 'MISSING') ||
+  (s.frameworks ?? []).some((f) => f.status !== 'BLOCKED' && f.status !== 'MISSING'));
+const overall = available && anyReal ? 'AVAILABLE'
+  : available ? 'AVAILABLE-NO-DATA' : 'BLOCKED';
+
+const reasonParts = [];
+if (!env.playwright) reasonParts.push(`Playwright not installed (require.resolve → ${env.playwrightReason})`);
+if (env.chromium === null) reasonParts.push('no Chromium binary found on PATH or via CHROMIUM_PATH/CHROME_PATH (offline registry 403 — not installable here)');
+
+const result = {
+  schema: 'streetui-browser-run-all/v1.8',
+  status: overall,
+  reason: overall === 'BLOCKED' ? reasonParts.join('; ') : null,
+  detectedAt: new Date().toISOString(),
+  environment: { runtime: `node ${process.version}`, playwright: env.playwright, chromium: env.chromium },
+  suites,
+  note:
+    'This orchestrator spawns every sub-runner and aggregates their honest output. happy-dom ' +
+    'is NOT a browser and is never substituted. No browser or competitor figures are produced ' +
+    'or fabricated while the sub-runners report BLOCKED.',
+};
+fs.writeFileSync(outPath, JSON.stringify(result, null, 2) + '\n');
+console.log(`browser/run-all: overall=${overall}. wrote ${path.relative(repo, outPath)} (no numbers fabricated).`);
+process.exit(0);

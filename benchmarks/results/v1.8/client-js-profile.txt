@@ -1,0 +1,37 @@
+
+=== .cpuprofile self-time buckets (Node+happy-dom JS; NOT a browser) ===
+total samples=8881  ~wall=11838ms  (1333us/sample)
+
+  gc                 50.5%   5978.4ms
+  happy-dom          40.4%   4778.7ms
+  streetui            7.2%    847.8ms
+  node-core           1.4%    165.3ms
+  native/builtin      0.4%     44.0ms
+  app/other           0.1%     14.7ms
+  vm                  0.0%      5.3ms
+  other-deps          0.0%      4.0ms
+
+=== StreetUI-controlled JS self-time, by function (the only bucket StreetUI owns) ===
+     4.5%   531.9ms  mountNode @ index.js:2688
+     0.3%    41.3ms  applyNodeProps @ index.js:2886
+     0.3%    41.3ms  dispose @ index.js:2289
+     0.3%    38.7ms  createNode @ index.js:757
+     0.3%    37.3ms  setAttribute @ index.js:1785
+     0.2%    28.0ms  applyProp @ index.js:2331
+     0.2%    24.0ms  setProp @ index.js:697
+     0.2%    21.3ms  _walk @ index.js:838
+     0.1%    16.0ms  run @ index.js:429
+     0.1%    10.7ms  appendChild @ index.js:1773
+     0.1%     9.3ms  text @ index.js:963
+     0.1%     8.0ms  itemValueSignature @ index.js:936
+     0.0%     4.0ms  (anon) @ index.js:826
+     0.0%     2.7ms  listOf @ index.js:1085
+     0.0%     2.7ms  (anon) @ index.js:850
+     0.0%     2.7ms  (anon) @ index.js:1296
+     0.0%     2.7ms  ensureRenderKey @ index.js:1372
+     0.0%     2.7ms  (anon) @ index.js:1343
+     0.0%     2.7ms  getProp @ index.js:700
+     0.0%     2.7ms  addChild @ index.js:2277
+
+StreetUI-controlled JS = 7.2% of JS self-time in THIS Node run.
+happy-dom emulation = 40.4% (becomes native in a real browser; NOT a StreetUI cost).
