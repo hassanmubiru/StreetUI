@@ -1,0 +1,34 @@
+{
+  "schema": "streetui-browser-run-all/v1.7",
+  "status": "BLOCKED",
+  "reason": "no Chromium binary found on PATH or via CHROMIUM_PATH/CHROME_PATH",
+  "detectedAt": "2026-09-26T12:25:30.803Z",
+  "environment": {
+    "runtime": "node v22.23.2",
+    "playwright": true,
+    "chromium": null
+  },
+  "wouldRun": {
+    "streetui": {
+      "driver": "scripts/browser-harness.mjs",
+      "scenarios": [
+        "initial-render",
+        "hydration",
+        "reactive-search-10k",
+        "keyed-list-append/prepend/reorder/update",
+        "route-transitions"
+      ]
+    },
+    "competitors": {
+      "driver": "benchmarks/run-competitors.mjs",
+      "frameworks": [
+        "react",
+        "vue",
+        "svelte",
+        "solid"
+      ],
+      "note": "Identical scenarios + identical Chromium methodology as the StreetUI suite (§22)."
+    }
+  },
+  "note": "happy-dom is NOT a browser and is never substituted for these numbers. No browser or competitor performance figures are produced or fabricated while this gate is BLOCKED."
+}
