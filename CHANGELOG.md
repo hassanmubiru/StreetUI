@@ -5,6 +5,56 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.6.0 — SSR engine, ServerDOM lazy allocation & release hardening
+
+A **SSR performance and correctness** milestone. **No public API change**
+(168 values / 171 types preserved), **no breaking changes**, and **no new runtime
+dependency**. Full detail in
+[`V1.6-SSR-SERVERDOM-REPORT.md`](./V1.6-SSR-SERVERDOM-REPORT.md).
+
+### Changed
+
+- **`ServerElement.properties` and `.style` are now lazily allocated.** Backing
+  fields `_properties` / `_style` default to `null`; the public getters allocate
+  on first write only; the serializer reads raw backing fields so a read never
+  forces allocation. This eliminates ~240,000 wasted allocations per 10k-row
+  `/users` render (80,028 empty `properties` Maps + 80,029 empty `ServerStyle`
+  objects that were eagerly created at construction time).
+
+### Performance (SSR, Node v22.23.2, `/users` 10k rows — 150,050 nodes)
+
+- `renderToString` total: 183.04 ms → **160.62 ms** (−12%)
+- Mount phase: 112.20 ms → **89.48 ms** (−20%); same-process A/B ~112 → ~85 ms
+- Serialize phase: 58.50 ms → 56.47 ms (within noise — v1.4 fast-path intact)
+- SSR output: **SHA-256 identical** on all 5 routes before and after
+- Heap: flat across 50/100/200 renders (~62.8 MB steady, no growth)
+
+### Fixed
+
+- **`@streetui/example-account` "resources (plans)" tests** (carried forward from
+  v1.5): both tests now await `onPlansResource` instead of a fixed 40 ms sleep —
+  10/10 deterministic across Node versions.
+
+### Added
+
+- 12 new locked-in tests in `@streetui/dom`: byte identity (simple text,
+  attributes, nested elements, special chars, boolean attributes, void elements,
+  Unicode, 2k-row static subtree) + lazy allocation behaviour (read never
+  allocates; write allocates on demand; explicit attribute wins over property).
+  Total: **669 tests** (was 657).
+
+### Not changed
+
+- Client runtime, reconciler, signals, scheduler, browser renderer, router,
+  forms, resources — all untouched. All client gates PASS.
+- Public API surface — frozen. `ServerElement.properties`/`.style` still return
+  `Map`/`ServerStyle` via getters; `_properties`/`_style` are internal.
+
+### Blocked (recorded, not fabricated)
+
+- **Real-browser benchmarks**: BLOCKED — no Chromium binary.
+- **Cross-framework comparison**: BLOCKED — frameworks absent.
+
 ## 1.5.0 — Unified browser benchmark & rendering performance
 
 A **measurement, tooling, and hardening** milestone. **No public API change**
