@@ -47,6 +47,28 @@ export function mountNode(
 ): NodeInstance {
   const { dom, graph } = ctx;
 
+  // ── v1.7 static SSR fast path (SSR-only) ──────────────────────────────────
+  // When a compiler-derived static SSR plan is present (server render only)
+  // and this node is a maximal static-subtree root, emit its precomputed HTML
+  // verbatim instead of recursively constructing ServerElement/ServerText/
+  // NodeInstance for the whole subtree. `ctx.staticHTML` is always undefined on
+  // the browser path, so this is a single short-circuiting check there — the
+  // client hot path and its semantics are untouched (§5/§6/§23). The stored
+  // string is produced by this same mount+serialize pipeline, so output is
+  // byte-identical (§8). We still register ONE NodeInstance for the root so the
+  // parent's children bookkeeping and post-render dispose behave normally.
+  const staticHTML = ctx.staticHTML;
+  if (staticHTML !== undefined && dom.createRawHTML !== undefined) {
+    const precomputed = staticHTML.get(graphNode.id);
+    if (precomputed !== undefined) {
+      const raw = dom.createRawHTML(precomputed);
+      dom.appendChild(parentDom, raw);
+      const instance = new NodeInstance(graphNode, raw);
+      ctx.instances.set(graphNode.id, instance);
+      return instance;
+    }
+  }
+
   // The application root node maps to the container itself — don't create a duplicate element
   if (graphNode.type === 'application') {
     const instance = new NodeInstance(graphNode, parentDom);
