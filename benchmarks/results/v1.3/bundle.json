@@ -4,14 +4,14 @@
   "target": "public `streetui` package (subpath \".\") + examples/streetui-performance-app",
   "method": "esbuild bundle+minify+treeShaking, format esm, target es2020, legalComments none. gzip = zlib level 9; brotli = zlib default. CSS measured (framework ships none). HTML = minimal module-boot shell. esbuild is a measurement-only bundler, not a streetui runtime dep.",
   "esbuildVersion": "0.24.2",
-  "streetuiVersion": "1.2.0",
+  "streetuiVersion": "1.6.0",
   "profiles": {
     "minimal": {
       "description": "Reactivity core + client renderer + BrowserDOMAdapter + DSL compile (counter-class app).",
       "js": {
-        "raw": 29205,
-        "gzip": 8606,
-        "brotli": 7742
+        "raw": 25451,
+        "gzip": 7619,
+        "brotli": 6832
       },
       "css": {
         "raw": 0,
@@ -22,15 +22,15 @@
       "html": {
         "raw": 245
       },
-      "totalOverWireBrotli": 7987,
-      "totalOverWireGzip": 8851
+      "totalOverWireBrotli": 7077,
+      "totalOverWireGzip": 7864
     },
     "typical": {
       "description": "Representative SPA: reactivity + render + router + forms/validators + i18n + store + resource + hydration.",
       "js": {
-        "raw": 50603,
-        "gzip": 15365,
-        "brotli": 13855
+        "raw": 46848,
+        "gzip": 14377,
+        "brotli": 12966
       },
       "css": {
         "raw": 0,
@@ -41,15 +41,15 @@
       "html": {
         "raw": 245
       },
-      "totalOverWireBrotli": 14100,
-      "totalOverWireGzip": 15610
+      "totalOverWireBrotli": 13211,
+      "totalOverWireGzip": 14622
     },
     "full": {
       "description": "Entire public `streetui` barrel (every exported member retained via import *).",
       "js": {
-        "raw": 65107,
-        "gzip": 20105,
-        "brotli": 18054
+        "raw": 65587,
+        "gzip": 20246,
+        "brotli": 18165
       },
       "css": {
         "raw": 0,
@@ -60,15 +60,15 @@
       "html": {
         "raw": 245
       },
-      "totalOverWireBrotli": 18299,
-      "totalOverWireGzip": 20350
+      "totalOverWireBrotli": 18410,
+      "totalOverWireGzip": 20491
     },
     "realApp": {
       "description": "The actual built demo application entry (examples/streetui-performance-app browser-entry).",
       "js": {
-        "raw": 50491,
-        "gzip": 15690,
-        "brotli": 14079
+        "raw": 46735,
+        "gzip": 14667,
+        "brotli": 13187
       },
       "css": {
         "raw": 0,
@@ -79,8 +79,8 @@
       "html": {
         "raw": 245
       },
-      "totalOverWireBrotli": 14324,
-      "totalOverWireGzip": 15935
+      "totalOverWireBrotli": 13432,
+      "totalOverWireGzip": 14912
     }
   },
   "cssPolicy": {
@@ -91,12 +91,12 @@
   "reconciliation": {
     "v12BaselineUnminifiedGzip": 28764,
     "currentUnminifiedFullBarrel": {
-      "raw": 127418,
-      "gzip": 28765,
-      "brotli": 24764
+      "raw": 129508,
+      "gzip": 29408,
+      "brotli": 25304
     },
     "matchesV12Baseline": false,
     "note": "The v1.2 baseline (28764) was the UNMINIFIED full-barrel gzip. It is reproduced here for continuity. The §14 profile numbers above are MINIFIED and are the honest download figures."
   },
-  "timestamp": "2026-09-24T18:22:21.885Z"
+  "timestamp": "2026-09-26T20:19:17.821Z"
 }
