@@ -5,6 +5,71 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.7.0 — Static SSR compiler plan & ServerRawHTML
+
+A **SSR performance** milestone. **No public API change** (168 values / 171
+types preserved), **no breaking changes**, **no new dependency**, and **no client
+runtime redesign**. Version held at 1.6.0 (registry offline, no API change).
+Full detail in [`V1.7-STATIC-SSR-COMPILER-REPORT.md`](./V1.7-STATIC-SSR-COMPILER-REPORT.md).
+
+### Added
+
+- **`static-ssr-plan.ts`** (`@streetui/renderer`, internal) — builds a
+  compile-derived static-subtree serialization plan lazily on first
+  `renderToString`, cached per compiled application in a `WeakMap`. Each maximal
+  static subtree is serialized once to a verbatim, already-escaped HTML string.
+  Reuses existing `analyzeGraph` from `@streetui/compiler/diagnostics`; no new
+  analysis runs during `compile()`.
+- **`ServerRawHTML`** — new server-only DOM node (`kind: 'raw'`) holding a
+  precomputed verbatim HTML string. `ServerDOMAdapter.createRawHTML()` creates
+  it; `createRawHTML?` is optional on `DOMAdapter` (browser adapter does not
+  implement it, branch is inert client-side).
+- **`mountNode` fast path** — single guarded dispatch branch: if a cached plan
+  is present and the current node is a static-subtree root, emit precomputed HTML
+  instead of rebuilding `ServerElement`/`ServerText`/attribute-maps. SSR-only.
+
+### Performance (SSR, Node v22.23.2, warm = cached plan)
+
+| Scenario | v1.6 | v1.7 warm | Speedup |
+|---|---|---|---|
+| `/users` 10k rows (median) | 161.1 ms | **11.9 ms** | **13.5×** |
+| `/users` 2k rows (mostly-static A/B) | 44.4 ms | **1.2 ms** | **37×** |
+| `/controls` 1k toggles (mixed) | 3.3 ms | **2.1 ms** | 1.56× |
+| Dashboard (highly-dynamic) | ~sub-noise | ~sub-noise | ~0.93× (by design) |
+
+Cold first render (one-time plan build) ≈ one v1.6 render, amortized over all
+subsequent requests.
+
+### Correctness
+
+- SSR output is **byte-identical** to v1.6 on all 5 routes (exact string,
+  `Buffer.byteLength`, SHA-256 — all three assertions pass per route, and each
+  digest matches the recorded v1.6 baseline).
+- Memory: heap delta converges to ~0 over 200 renders (no per-render leak; plan
+  built once, per-render nodes and output string are transient).
+- Client bundles grew only ~58 B/gzip (+59 B minimal); SSR symbols
+  (`ServerRawHTML`, `buildStaticSSRPlan`, etc.) not present in minified client.
+
+### Tests
+
+15 new tests in `packages/renderer/src/static-ssr-plan.test.ts`, each asserting
+byte identity against the v1.6 path. Total: **684** (was 669).
+
+### Not changed
+
+- `compile()` — unchanged.
+- Public API surface — frozen. `StaticSSRPlan` / `buildStaticSSRPlan` /
+  `getStaticSSRPlan` are internal, not exported from `streetui` or
+  `streetui/server`.
+- Client runtime (reconciler, signals, scheduler, renderer, router, forms,
+  resources) — untouched.
+
+### Blocked
+
+- Real-browser benchmarks: BLOCKED — no Chromium/Playwright.
+- Cross-framework comparison: BLOCKED — frameworks absent.
+- npm publish: BLOCKED — registry offline (E403). Version held at 1.6.0.
+
 ## 1.6.0 — SSR engine, ServerDOM lazy allocation & release hardening
 
 A **SSR performance and correctness** milestone. **No public API change**
