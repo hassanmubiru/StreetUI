@@ -1,9 +1,9 @@
 {
   "schema": "streetui-browser/v1.3",
-  "status": "BLOCKED",
-  "reason": "Playwright resolves, but its Chromium browser binary is NOT downloaded (executable absent at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome); a real chromium.launch() would fail. `playwright install chromium` needs cdn.playwright.dev, which is unreachable offline (npm/registry E403). Real-browser metrics are therefore NOT measured and NOT fabricated.",
-  "remediation": "On a machine with npm registry access: `npx playwright install chromium`, then re-run `node scripts/browser-harness.mjs`.",
-  "target": "examples/streetui-performance-app (via window.__bench in src/bench-browser.ts)",
+  "status": "OK",
+  "browser": "chromium",
+  "browserVersion": "153.0.8010.12",
+  "target": "examples/streetui-performance-app (window.__bench)",
   "scenarioCatalogue": {
     "initialMountUsers10k": "performance.now around mounting the 10,000-row users route; DOM node count.",
     "reactiveSearch": "MutationObserver-counted DOM mutations + time for query narrow then clear over 10k rows.",
@@ -16,15 +16,71 @@
     "longTasks": "PerformanceObserver longtask entries over the whole run."
   },
   "scenarios": {
-    "initialMountUsers10k": null,
-    "reactiveSearch": null,
-    "reverse": null,
-    "fineGrainedToggle1of1000": null,
-    "routerNavigationMs": null,
-    "hydrateUsers10k": null,
-    "frames": null,
-    "memory": null,
-    "longTasks": null
+    "initialMountUsers10k": {
+      "ms": 217.6,
+      "domNodeCount": 80031
+    },
+    "reactiveSearch": {
+      "narrow": {
+        "ms": 130.29999999701977,
+        "domMutations": 10004
+      },
+      "clear": {
+        "ms": 211.39999999850988,
+        "domMutations": 10004
+      }
+    },
+    "reverse": {
+      "ms": 60.69999999552965,
+      "domMutations": 20002
+    },
+    "fineGrainedToggle1of1000": {
+      "ms": 0.10000000149011612,
+      "domMutations": 0
+    },
+    "routerNavigationMs": [
+      35.4,
+      546.8,
+      65.2,
+      33.3
+    ],
+    "hydrateUsers10k": {
+      "ms": 183.7,
+      "nodesBefore": 80029,
+      "nodesAfter": 80029,
+      "addedDuringHydration": 0,
+      "adoptedWithoutRecreating": true
+    },
+    "frames": {
+      "budgetReference": {
+        "frame60Ms": 16.67,
+        "frame120Ms": 8.33
+      },
+      "bigListReorder": {
+        "frames": 2,
+        "maxFrameMs": 500.8,
+        "longFrames60": 1,
+        "longFrames120": 2
+      }
+    },
+    "memory": {
+      "available": true,
+      "usedJSHeapBefore": 225000000,
+      "usedJSHeapAfter": 225000000,
+      "perCycle": [
+        225000000,
+        225000000,
+        225000000,
+        225000000,
+        225000000,
+        225000000
+      ],
+      "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
+    },
+    "longTasks": {
+      "count": 9,
+      "totalMs": 3265
+    }
   },
-  "timestamp": "2026-09-26T12:25:44.002Z"
+  "timestamp": "2026-09-26T20:19:23.094Z"
 }
