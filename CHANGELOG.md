@@ -5,7 +5,49 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
-## 1.8.0 — Client renderer & real-browser performance (UNRELEASED development milestone)
+## 1.6.1 — Patch: benchmark tooling, bundle gate fix, regression suite (2026-09-26)
+
+**Patch release.** No public API change, no breaking changes, no new runtime
+dependency. All 18 packages published to npm at `1.6.1`.
+
+### Fixed
+
+- **`benchmarks/run-streetui.mjs`** — stale v1.3 bundle baseline constant
+  (`20,105 B`) updated to the v1.8 measured value (`20,246 B`); the
+  `bundle_no_regression` regression gate now correctly **PASS**es. The full-barrel
+  growth since v1.3 (+141 B) is intentional and fully disclosed: `ServerRawHTML` +
+  SSR fast-path branch (v1.4, +100 B) and `getStaticSSRPlan` / static-plan type
+  exports (v1.7, +41 B). The gate had been falsely failing since v1.4 due to the
+  stale constant.
+
+### Added
+
+- **`packages/renderer/src/update-independence.test.ts`** (4 tests) — new
+  Node-runnable regression suite pinning the fine-grained update locality
+  invariant (§9): mutating one of N bound signals writes exactly the subscribed
+  node(s) and that count is independent of N (verified at N=100/1000/2000/5000).
+- **`benchmarks/profile-client-js.mjs` + `benchmarks/profile-parse.mjs`** —
+  CPU-profile harness (Node + happy-dom, explicitly NOT a browser) that
+  attributes JS self-time between StreetUI-controlled functions and the DOM
+  adapter. Identifies `mountNode` as the top candidate for future browser-validated
+  optimisation.
+- **`benchmarks/browser/run-all.mjs`** — §26 browser orchestrator now genuinely
+  spawns all three sub-runners and aggregates honest JSON; previously only logged
+  without executing. Browser and competitor results remain BLOCKED (no Chromium
+  binary available).
+
+### Verified
+
+- Build 29/29, typecheck 47/47, all framework package tests pass (renderer
+  **154/154**; core/state/compiler/router/forms/dom/testing all clean).
+- All 7 regression gates **PASS**: hydration creates 0 nodes;
+  fine-grained update independent-of-N; forms field isolation; lifecycle
+  no-drift / clean unmount; router transitions correct; `bundle_no_regression`.
+- SSR byte-identity PASS on all 5 routes, matching the recorded v1.6 digests.
+- Bundle sizes (minified gzip): minimal **7,619 B**, typical **14,377 B**,
+  real-app **14,667 B**, full-barrel **20,246 B**.
+
+## 1.8.0 — Client renderer & real-browser performance (development milestone — shipped as 1.6.1)
 
 An **investigation + harness-completeness** milestone focused on StreetUI's
 real-browser CLIENT behaviour. **No public API change**, **no breaking changes**,
