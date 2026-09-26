@@ -11,6 +11,13 @@ export interface DOMAdapter {
   createTextNode(data: string): Text;
   createComment(data: string): Comment;
   createFragment(): DocumentFragment;
+  /**
+   * Optional, server-only: create a verbatim pre-serialized HTML node used by
+   * the v1.7 static SSR plan. The browser adapter does not implement it; the
+   * renderer only calls it when a static SSR plan is active (i.e. during SSR),
+   * so client builds never reach this path and it stays tree-shakeable.
+   */
+  createRawHTML?(html: string): Node;
 
   // ── Tree mutations ─────────────────────────────────────────────────────────
   appendChild(parent: Node, child: Node): void;

@@ -11,7 +11,7 @@
  * operations on this model.
  */
 
-export type ServerNodeKind = 'element' | 'text' | 'comment' | 'fragment';
+export type ServerNodeKind = 'element' | 'text' | 'comment' | 'fragment' | 'raw';
 
 export interface ServerNode {
   readonly kind: ServerNodeKind;
@@ -56,6 +56,28 @@ export class ServerFragment implements ServerNode {
   readonly kind = 'fragment' as const;
   parent: ServerParent | null = null;
   readonly children: ServerNode[] = [];
+}
+
+/**
+ * A pre-serialized, verbatim HTML fragment (v1.7 static SSR plan).
+ *
+ * Emitted for provably-static subtrees whose HTML the compiler-derived static
+ * SSR plan already computed once. Serializing this node copies its stored
+ * string directly — it allocates no ServerElement/ServerText, no attribute Map
+ * and no children array for the collapsed subtree. The stored `html` is
+ * produced by the exact same mount + serialize pipeline as the runtime path, so
+ * the output is byte-identical (the v1.7 byte-identity gate proves this).
+ *
+ * This node is SSR-only: it is created solely via `ServerDOMAdapter.createRawHTML`
+ * on the server render path and never appears in a browser build.
+ */
+export class ServerRawHTML implements ServerNode {
+  readonly kind = 'raw' as const;
+  parent: ServerParent | null = null;
+  readonly html: string;
+  constructor(html: string) {
+    this.html = html;
+  }
 }
 
 export class ServerElement implements ServerNode {
@@ -207,7 +229,7 @@ function serializeAttributes(el: ServerElement): string {
   return parts.join('');
 }
 
-/** Serialize a single server node (element/text/comment/fragment) to HTML. */
+/** Serialize a single server node (element/text/comment/fragment/raw) to HTML. */
 export function serializeServerNode(node: ServerNode): string {
   switch (node.kind) {
     case 'text':
@@ -216,6 +238,10 @@ export function serializeServerNode(node: ServerNode): string {
       return `<!--${(node as ServerComment).data}-->`;
     case 'fragment':
       return serializeChildren(node as ServerFragment);
+    case 'raw':
+      // Verbatim: the string was produced by this same serializer for a static
+      // subtree, so it is already correctly escaped. Copy it as-is (§8).
+      return (node as ServerRawHTML).html;
     case 'element': {
       const el = node as ServerElement;
       const tag = el.tagName;

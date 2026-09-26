@@ -18,6 +18,7 @@ import {
   ServerText,
   ServerComment,
   ServerFragment,
+  ServerRawHTML,
   serializeChildren,
   serializeServerNode,
   type ServerNode,
@@ -46,6 +47,16 @@ export class ServerDOMAdapter implements DOMAdapter {
 
   createFragment(): DocumentFragment {
     return new ServerFragment() as unknown as DocumentFragment;
+  }
+
+  /**
+   * Create a verbatim pre-serialized HTML node (v1.7 static SSR plan, §6).
+   * Server-only: the browser adapter does not implement this, and the renderer
+   * fast path only invokes it when a static SSR plan is present (SSR). The
+   * stored HTML was produced by this same serializer, so it is emitted as-is.
+   */
+  createRawHTML(html: string): Node {
+    return new ServerRawHTML(html) as unknown as Node;
   }
 
   appendChild(parent: Node, child: Node): void {
