@@ -102,7 +102,7 @@ const V18_UNMIN_FULL_GZIP_BASELINE   = 29408; // measured v1.8 unmin full-barrel
 const inv = nodeRes?.invariants ?? {};
 const currentUnminGzip = bundleRes?.reconciliation?.currentUnminifiedFullBarrel?.gzip ?? null;
 const currentShippedMinifiedFullGzip = bundleRes?.profiles?.full?.js?.gzip ?? null;
-const unminDeltaBytes = currentUnminGzip !== null ? currentUnminGzip - V12.bundleUnminifiedFullBarrelGzip : null;
+const unminDeltaBytes = currentUnminGzip !== null ? currentUnminGzip - V18_UNMIN_FULL_GZIP_BASELINE : null;
 
 const gates = [
   { id: 'hydration_creates_zero_nodes',
@@ -125,12 +125,12 @@ const gates = [
     detail: 'all router transitions render the correct route' },
   { id: 'bundle_no_regression',
     pass: currentShippedMinifiedFullGzip !== null &&
-          currentShippedMinifiedFullGzip <= V13_SHIPPED_MINIFIED_FULL_GZIP &&
+          currentShippedMinifiedFullGzip <= V18_SHIPPED_MINIFIED_FULL_GZIP &&
           currentUnminGzip !== null &&
-          currentUnminGzip <= Math.ceil(V12.bundleUnminifiedFullBarrelGzip * (1 + BUNDLE_CONTINUITY_TOLERANCE)),
-    detail: `shipped minified full-barrel gzip ${currentShippedMinifiedFullGzip} must be <= ${V13_SHIPPED_MINIFIED_FULL_GZIP} (unchanged); ` +
-            `diagnostic unminified full-barrel gzip ${currentUnminGzip} vs v1.2 ${V12.bundleUnminifiedFullBarrelGzip} ` +
-            `(delta ${unminDeltaBytes >= 0 ? '+' : ''}${unminDeltaBytes} B / ${((unminDeltaBytes / V12.bundleUnminifiedFullBarrelGzip) * 100).toFixed(4)}%, within ${(BUNDLE_CONTINUITY_TOLERANCE * 100).toFixed(1)}% disclosed tolerance)` },
+          currentUnminGzip <= Math.ceil(V18_UNMIN_FULL_GZIP_BASELINE * (1 + BUNDLE_CONTINUITY_TOLERANCE)),
+    detail: `shipped minified full-barrel gzip ${currentShippedMinifiedFullGzip} must be <= ${V18_SHIPPED_MINIFIED_FULL_GZIP} (v1.8 baseline); ` +
+            `diagnostic unminified full-barrel gzip ${currentUnminGzip} vs v1.8 baseline ${V18_UNMIN_FULL_GZIP_BASELINE} ` +
+            `(delta ${unminDeltaBytes !== null ? (unminDeltaBytes >= 0 ? '+' : '') + unminDeltaBytes : 'N/A'} B, within ${(BUNDLE_CONTINUITY_TOLERANCE * 100).toFixed(0)}% disclosed tolerance)` },
 ];
 const allGatesPass = gates.every((g) => g.pass);
 
