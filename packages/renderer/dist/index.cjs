@@ -53,13 +53,14 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/render-context.ts
-function createRenderContext(dom, graph, container, hydrationDiagnostics) {
+function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
     graph,
     instances: /* @__PURE__ */ new Map(),
     container,
-    ...hydrationDiagnostics !== void 0 ? { hydrationDiagnostics } : {}
+    ...hydrationDiagnostics !== void 0 ? { hydrationDiagnostics } : {},
+    ...staticHTML !== void 0 ? { staticHTML } : {}
   };
 }
 
@@ -488,6 +489,17 @@ function mountGraph(ctx) {
 }
 function mountNode(ctx, graphNode, parentDom) {
   const { dom, graph } = ctx;
+  const staticHTML = ctx.staticHTML;
+  if (staticHTML !== void 0 && dom.createRawHTML !== void 0) {
+    const precomputed = staticHTML.get(graphNode.id);
+    if (precomputed !== void 0) {
+      const raw = dom.createRawHTML(precomputed);
+      dom.appendChild(parentDom, raw);
+      const instance2 = new NodeInstance(graphNode, raw);
+      ctx.instances.set(graphNode.id, instance2);
+      return instance2;
+    }
+  }
   if (graphNode.type === "application") {
     const instance2 = new NodeInstance(graphNode, parentDom);
     ctx.instances.set(graphNode.id, instance2);
@@ -1079,11 +1091,64 @@ function readState(dom, root) {
 }
 
 // src/ssr.ts
+var import_dom3 = require("@streetui/dom");
+
+// src/static-ssr-plan.ts
+var import_diagnostics = require("@streetui/compiler/diagnostics");
 var import_dom2 = require("@streetui/dom");
-function renderToString(compiled, options = {}) {
-  const dom = options.domAdapter ?? new import_dom2.ServerDOMAdapter();
+function collectMaximalStaticRoots(graph) {
+  const analysis = (0, import_diagnostics.analyzeGraph)(graph);
+  const roots = [];
+  const walk = (node) => {
+    if (node.type !== "application") {
+      const a = analysis.nodes.get(node.id);
+      if (a !== void 0 && a.isStaticSubtree) {
+        roots.push(node);
+        return;
+      }
+    }
+    for (const child of node.children) walk(child);
+  };
+  walk(graph.root);
+  return roots;
+}
+function serializeStaticSubtree(dom, graph, root) {
   const container = dom.createElement("div");
-  const ctx = createRenderContext(dom, compiled.graph, container);
+  const ctx = createRenderContext(dom, graph, container);
+  const instance = mountNode(ctx, root, container);
+  const html = dom.serializeInner(container);
+  instance.dispose();
+  ctx.instances.clear();
+  return html;
+}
+function buildStaticSSRPlan(compiled) {
+  const graph = compiled.graph;
+  const roots = collectMaximalStaticRoots(graph);
+  const plan = /* @__PURE__ */ new Map();
+  if (roots.length === 0) return plan;
+  const dom = new import_dom2.ServerDOMAdapter();
+  for (const root of roots) {
+    plan.set(root.id, serializeStaticSubtree(dom, graph, root));
+  }
+  return plan;
+}
+var PLAN_CACHE = /* @__PURE__ */ new WeakMap();
+function getStaticSSRPlan(compiled) {
+  let plan = PLAN_CACHE.get(compiled);
+  if (plan === void 0) {
+    plan = buildStaticSSRPlan(compiled);
+    PLAN_CACHE.set(compiled, plan);
+  }
+  return plan;
+}
+
+// src/ssr.ts
+function renderToString(compiled, options = {}) {
+  const dom = options.domAdapter ?? new import_dom3.ServerDOMAdapter();
+  const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
+  const staticHTML = plan !== void 0 && plan.size > 0 ? plan : void 0;
+  const container = dom.createElement("div");
+  const ctx = createRenderContext(dom, compiled.graph, container, void 0, staticHTML);
   const rootInstance = mountGraph(ctx);
   const html = dom.serializeInner(container);
   rootInstance.dispose();

@@ -110,8 +110,18 @@ interface RenderContext {
      * DevTools/diagnostics stay off the production runtime path.
      */
     readonly hydrationDiagnostics?: HydrationDiagnosticSink;
+    /**
+     * Optional SSR-only static-subtree plan (v1.7). Maps a maximal
+     * static-subtree root GraphNode.id → its precomputed, verbatim HTML string.
+     * Present only on the server render path when a plan has been built; on the
+     * browser mount path it is always `undefined`, so the client hot path is
+     * unaffected (a single `=== undefined` check short-circuits). When a mounted
+     * node's id is in this map, the renderer emits the precomputed HTML via
+     * `dom.createRawHTML` instead of recursively constructing the subtree.
+     */
+    readonly staticHTML?: ReadonlyMap<string, string>;
 }
-declare function createRenderContext(dom: DOMAdapter, graph: ApplicationGraph, container: Element, hydrationDiagnostics?: HydrationDiagnosticSink): RenderContext;
+declare function createRenderContext(dom: DOMAdapter, graph: ApplicationGraph, container: Element, hydrationDiagnostics?: HydrationDiagnosticSink, staticHTML?: ReadonlyMap<string, string>): RenderContext;
 
 /**
  * Attribute and property application helpers.
@@ -393,6 +403,18 @@ interface RenderToStringOptions {
      * `ServerDOMAdapter` per call so concurrent renders never share state.
      */
     readonly domAdapter?: ServerDOMAdapter;
+    /**
+     * @internal — testing/benchmark knob for the v1.7 static SSR plan.
+     *
+     * `undefined` (default): use the per-app cached plan (build once, reuse).
+     * `null`: disable the plan entirely — the exact v1.6 runtime mount path, used
+     *   by the byte-identity gate and A/B benchmark as the "legacy" baseline.
+     * a map: use this explicit plan.
+     *
+     * Not part of the supported public API; output is byte-identical regardless
+     * of this value (§8).
+     */
+    readonly staticPlan?: ReadonlyMap<string, string> | null;
 }
 /**
  * Render a compiled StreetUI application to an HTML string.

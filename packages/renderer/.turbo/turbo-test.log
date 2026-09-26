@@ -1,84 +1,25 @@
 
-
-> @streetui/renderer@1.4.0 test /home/error51/Downloads/StreetUI/packages/renderer
+> @streetui/renderer@1.6.0 test /home/error51/Downloads/StreetUI/packages/renderer
 > vitest run
 
 
-[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/renderer[39m
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/renderer
 
-[?25l [90m·[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [90m·[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [90m·[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [90m·[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
- [90m·[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [90m·[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
-[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [90m·[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [90m·[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [90m·[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [90m·[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
- [32m✓[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [32m✓[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
- [90m·[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (4)[22m
-[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [90m·[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [32m✓[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [32m✓[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [90m·[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
- [32m✓[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [32m✓[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (4)[22m
-[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [32m✓[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [32m✓[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [90m·[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m
- [90m·[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
- [32m✓[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [32m✓[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (4)[22m
-[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [32m✓[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [32m✓[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [90m·[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
- [32m✓[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [32m✓[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (4)[22m
-[?25l[?25l[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [32m✓[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [32m✓[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [32m✓[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m[33m 335[2mms[22m[39m
- [32m✓[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
- [32m✓[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [32m✓[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (4)[22m
-[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22ma11y[2m.test.ts[22m[2m (6)[22m
- [32m✓[39m [2msrc/[22mapi-improvements[2m.test.ts[22m[2m (27)[22m
- [32m✓[39m [2msrc/[22mbatch-render[2m.test.ts[22m[2m (3)[22m
- [32m✓[39m [2msrc/[22merror-boundary[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mhydrate[2m.test.ts[22m[2m (19)[22m
- [32m✓[39m [2msrc/[22mmemory[2m.test.ts[22m[2m (7)[22m[33m 335[2mms[22m[39m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (4)[22m
- [32m✓[39m [2msrc/[22mreconcile-perf[2m.test.ts[22m[2m (7)[22m
- [32m✓[39m [2msrc/[22mrenderer[2m.test.ts[22m[2m (42)[22m
- [32m✓[39m [2msrc/[22mssr[2m.test.ts[22m[2m (13)[22m
+ ✓ src/batch-render.test.ts  (3 tests) 18ms
+ ✓ src/error-boundary.test.ts  (7 tests) 28ms
+ ✓ src/static-ssr-plan.test.ts  (15 tests) 37ms
+ ✓ src/a11y.test.ts  (6 tests) 26ms
+ ✓ src/ssr.test.ts  (13 tests) 32ms
+ ✓ src/api-improvements.test.ts  (27 tests) 52ms
+ ✓ src/hydrate.test.ts  (19 tests) 57ms
+ ✓ src/renderer.test.ts  (42 tests) 73ms
+ ✓ src/memory.test.ts  (7 tests) 268ms
+ ✓ src/update-independence.test.ts  (4 tests) 294ms
+ ✓ src/reconcile-perf.test.ts  (7 tests) 288ms
+ ✓ src/public-api.stability.test.ts  (4 tests) 14ms
 
-[2m Test Files [22m [1m[32m10 passed[39m[22m[90m (10)[39m
-[2m      Tests [22m [1m[32m135 passed[39m[22m[90m (135)[39m
-[2m   Start at [22m 17:35:50
-[2m   Duration [22m 1.26s[2m (transform 672ms, setup 0ms, collect 2.16s, tests 904ms, environment 3.69s, prepare 952ms)[22m
+ Test Files  12 passed (12)
+      Tests  154 passed (154)
+   Start at  23:31:25
+   Duration  1.54s (transform 968ms, setup 0ms, collect 3.09s, tests 1.19s, environment 4.95s, prepare 1.07s)
 
-[?25h[?25h
