@@ -6335,3 +6335,58 @@
 [31m[1m[7m FAIL [27m[22m[39m src/data-app.test.ts[2m > [22mstreetui-data — loading → success against a real HTTP API[2m > [22mreflects the server data exactly — swapping the backing data changes the render
 [31m[1mError[22m: waitFor: condition not met in time[39m
 [36m [2m❯[22m waitFor src/data-app.test.ts:[2m14:47[22m[39m
+    [90m 12| [39m  [35mconst[39m start [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m 13| [39m  [35mwhile[39m ([33m![39m[34mpredicate[39m()) {
+    [90m 14| [39m    [35mif[39m ([33mDate[39m[33m.[39m[34mnow[39m() [33m-[39m start [33m>[39m timeoutMs) [35mthrow[39m [35mnew[39m [33mError[39m([32m'waitFor: condition not met in time'[39m)[33m;[39m
+    [90m   | [39m                                              [31m^[39m
+    [90m 15| [39m    [35mawait[39m [35mnew[39m [33mPromise[39m((r) [33m=>[39m [34msetTimeout[39m(r[33m,[39m [34m5[39m))[33m;[39m
+    [90m 16| [39m  }
+[90m [2m❯[22m src/data-app.test.ts:[2m59:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/data-app.test.ts[2m > [22mstreetui-data — loading → success against a real HTTP API[2m > [22mrenders the empty state when the API returns no products
+[31m[1mError[22m: waitFor: condition not met in time[39m
+[36m [2m❯[22m waitFor src/data-app.test.ts:[2m14:47[22m[39m
+    [90m 12| [39m  [35mconst[39m start [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m 13| [39m  [35mwhile[39m ([33m![39m[34mpredicate[39m()) {
+    [90m 14| [39m    [35mif[39m ([33mDate[39m[33m.[39m[34mnow[39m() [33m-[39m start [33m>[39m timeoutMs) [35mthrow[39m [35mnew[39m [33mError[39m([32m'waitFor: condition not met in time'[39m)[33m;[39m
+    [90m   | [39m                                              [31m^[39m
+    [90m 15| [39m    [35mawait[39m [35mnew[39m [33mPromise[39m((r) [33m=>[39m [34msetTimeout[39m(r[33m,[39m [34m5[39m))[33m;[39m
+    [90m 16| [39m  }
+[90m [2m❯[22m src/data-app.test.ts:[2m67:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/data-app.test.ts[2m > [22mstreetui-data — error → error UI → retry[2m > [22mshows the error fallback with a Retry button, then recovers on retry
+[31m[1mError[22m: waitFor: condition not met in time[39m
+[36m [2m❯[22m waitFor src/data-app.test.ts:[2m14:47[22m[39m
+    [90m 12| [39m  [35mconst[39m start [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m 13| [39m  [35mwhile[39m ([33m![39m[34mpredicate[39m()) {
+    [90m 14| [39m    [35mif[39m ([33mDate[39m[33m.[39m[34mnow[39m() [33m-[39m start [33m>[39m timeoutMs) [35mthrow[39m [35mnew[39m [33mError[39m([32m'waitFor: condition not met in time'[39m)[33m;[39m
+    [90m   | [39m                                              [31m^[39m
+    [90m 15| [39m    [35mawait[39m [35mnew[39m [33mPromise[39m((r) [33m=>[39m [34msetTimeout[39m(r[33m,[39m [34m5[39m))[33m;[39m
+    [90m 16| [39m  }
+[90m [2m❯[22m src/data-app.test.ts:[2m91:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/data-app.test.ts[2m > [22mstreetui-data — router integration cleans up the previous route resource[2m > [22mcreates a fresh resource per navigation and tears down the previous one
+[31m[1mError[22m: waitFor: condition not met in time[39m
+[36m [2m❯[22m waitFor src/data-app.test.ts:[2m14:47[22m[39m
+    [90m 12| [39m  [35mconst[39m start [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m 13| [39m  [35mwhile[39m ([33m![39m[34mpredicate[39m()) {
+    [90m 14| [39m    [35mif[39m ([33mDate[39m[33m.[39m[34mnow[39m() [33m-[39m start [33m>[39m timeoutMs) [35mthrow[39m [35mnew[39m [33mError[39m([32m'waitFor: condition not met in time'[39m)[33m;[39m
+    [90m   | [39m                                              [31m^[39m
+    [90m 15| [39m    [35mawait[39m [35mnew[39m [33mPromise[39m((r) [33m=>[39m [34msetTimeout[39m(r[33m,[39m [34m5[39m))[33m;[39m
+    [90m 16| [39m  }
+[90m [2m❯[22m src/data-app.test.ts:[2m138:5[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m1 passed[39m[22m[90m (6)[39m
+[2m   Start at [22m 23:33:16
+[2m   Duration [22m 10.72s[2m (transform 138ms, setup 0ms, collect 157ms, tests 10.18s, environment 133ms, prepare 65ms)[22m
+
+[?25h[?25h[41m[30m ELIFECYCLE [39m[49m [31mTest failed. See above for more details.[39m
