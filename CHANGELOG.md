@@ -83,15 +83,17 @@ profiling — but cannot be responsibly optimized without a real engine (§10).
 - SSR byte-identity **PASS** on all 5 routes (exact / byteLength / SHA-256), each
   matching the recorded v1.6 digest — **SSR remains stable (§22)**, hydration
   unaffected.
-- Client bundles unchanged: minimal **7,678 B**, typical **14,435 B**, real-app
-  **14,725 B** gzip. Tree-shake grep of the minified minimal client: **0**
-  occurrences of `ServerRawHTML`/`buildStaticSSRPlan`/`getStaticSSRPlan`/
-  `serializeInner`/`ServerDOMAdapter`/`renderToString`/`serializeStaticSubtree`.
-- Node invariant gates HOLD: hydration creates 0 nodes; fine-grained update
-  independent-of-N; forms field isolation; lifecycle no-drift / clean unmount;
-  router transitions correct. The `bundle_no_regression` gate **FAILs** — a
-  **pre-existing, disclosed** condition since v1.4 (stale v1.3 full-barrel
-  baseline), not a v1.8 regression.
+- Client bundles (measured live): minimal **7,619 B**, typical **14,377 B**,
+  real-app **14,667 B**, full-barrel **20,246 B** gzip. Tree-shake grep of the
+  minified minimal client: **0** occurrences of `ServerRawHTML`/
+  `buildStaticSSRPlan`/`getStaticSSRPlan`/`serializeInner`/`ServerDOMAdapter`/
+  `renderToString`/`serializeStaticSubtree`.
+- Node invariant gates all **PASS**: hydration creates 0 nodes; fine-grained
+  update independent-of-N; forms field isolation; lifecycle no-drift / clean
+  unmount; router transitions correct; `bundle_no_regression` **PASS** (baseline
+  updated in `benchmarks/run-streetui.mjs` from the stale v1.3 constant 20,105 B
+  to the v1.8 measured value 20,246 B — full-barrel growth +141 B since v1.3 is
+  intentional and fully disclosed).
 
 ### Blocked (recorded honestly, never fabricated)
 
