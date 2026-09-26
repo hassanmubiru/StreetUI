@@ -107,19 +107,33 @@ for (const r of SUB_RUNNERS) {
     entry.status = j?.status ?? (j ? 'PRESENT' : 'MISSING');
     entry.reason = j?.reason ?? null;
   } else if (r.frameworkResults) {
+    // A competitor file may carry real NODE-side numbers (F_ssr, H_bundleSize —
+    // measured with Node + node:zlib, never a browser) while every BROWSER
+    // scenario is null because Chromium is absent. Classify the two axes
+    // separately so the record never implies browser numbers exist (§21/§22).
+    const BROWSER_KEYS = ['A_initialRender', 'B_singleUpdate', 'C_largeList', 'D_fanOut', 'E_deepState', 'G_hydration'];
     entry.frameworks = r.frameworkResults.map(({ framework, path: fp }) => {
       const j = readJsonOrNull(fp);
-      return { framework, resultPath: path.relative(repo, fp), status: j?.status ?? (j ? 'PRESENT' : 'MISSING'), reason: j?.reason ?? null };
+      if (!j) return { framework, resultPath: path.relative(repo, fp), status: 'MISSING' };
+      const b = j.benchmarks ?? {};
+      const browserPresent = BROWSER_KEYS.some((k) => b[k] != null);
+      const nodePresent = b.F_ssr != null || b.H_bundleSize != null;
+      return {
+        framework, resultPath: path.relative(repo, fp),
+        browserStatus: browserPresent ? 'MEASURED' : 'BLOCKED',
+        nodeSideData: nodePresent ? 'present (Node SSR/bundle — NOT browser numbers)' : 'none',
+        note: j.notes?.find((n) => /browser scenarios failed|Executable doesn't exist/i.test(n)) ?? null,
+      };
     });
-    entry.status = entry.frameworks.every((f) => f.status === 'BLOCKED') ? 'BLOCKED'
-      : entry.frameworks.some((f) => f.status !== 'BLOCKED' && f.status !== 'MISSING') ? 'PARTIAL' : 'MISSING';
+    const anyBrowser = entry.frameworks.some((f) => f.browserStatus === 'MEASURED');
+    entry.status = anyBrowser ? 'BROWSER-PARTIAL' : 'BROWSER-BLOCKED (Node SSR/bundle present, not browser numbers)';
   }
   suites.push(entry);
 }
 
 const anyReal = suites.some((s) =>
-  (s.status && s.status !== 'BLOCKED' && s.status !== 'MISSING') ||
-  (s.frameworks ?? []).some((f) => f.status !== 'BLOCKED' && f.status !== 'MISSING'));
+  (s.status && !/BLOCKED|MISSING/.test(s.status)) ||
+  (s.frameworks ?? []).some((f) => f.browserStatus === 'MEASURED'));
 const overall = available && anyReal ? 'AVAILABLE'
   : available ? 'AVAILABLE-NO-DATA' : 'BLOCKED';
 
