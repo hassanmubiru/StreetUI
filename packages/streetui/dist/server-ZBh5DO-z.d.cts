@@ -1,4 +1,4 @@
-import { C as CompiledApplication } from './compile-CEom4hkp.js';
+import { C as CompiledApplication } from './compile-CEom4hkp.cjs';
 
 /**
  * DOMAdapter — framework-owned abstraction over DOM operations.
@@ -11,6 +11,13 @@ interface DOMAdapter {
     createTextNode(data: string): Text;
     createComment(data: string): Comment;
     createFragment(): DocumentFragment;
+    /**
+     * Optional, server-only: create a verbatim pre-serialized HTML node used by
+     * the v1.7 static SSR plan. The browser adapter does not implement it; the
+     * renderer only calls it when a static SSR plan is active (i.e. during SSR),
+     * so client builds never reach this path and it stays tree-shakeable.
+     */
+    createRawHTML?(html: string): Node;
     appendChild(parent: Node, child: Node): void;
     insertBefore(parent: Node, child: Node, reference: Node | null): void;
     removeChild(parent: Node, child: Node): void;
@@ -62,6 +69,13 @@ declare class ServerDOMAdapter implements DOMAdapter {
     createTextNode(data: string): Text;
     createComment(data: string): Comment;
     createFragment(): DocumentFragment;
+    /**
+     * Create a verbatim pre-serialized HTML node (v1.7 static SSR plan, §6).
+     * Server-only: the browser adapter does not implement this, and the renderer
+     * fast path only invokes it when a static SSR plan is present (SSR). The
+     * stored HTML was produced by this same serializer, so it is emitted as-is.
+     */
+    createRawHTML(html: string): Node;
     appendChild(parent: Node, child: Node): void;
     insertBefore(parent: Node, child: Node, reference: Node | null): void;
     removeChild(parent: Node, child: Node): void;
@@ -152,6 +166,18 @@ interface RenderToStringOptions {
      * `ServerDOMAdapter` per call so concurrent renders never share state.
      */
     readonly domAdapter?: ServerDOMAdapter;
+    /**
+     * @internal — testing/benchmark knob for the v1.7 static SSR plan.
+     *
+     * `undefined` (default): use the per-app cached plan (build once, reuse).
+     * `null`: disable the plan entirely — the exact v1.6 runtime mount path, used
+     *   by the byte-identity gate and A/B benchmark as the "legacy" baseline.
+     * a map: use this explicit plan.
+     *
+     * Not part of the supported public API; output is byte-identical regardless
+     * of this value (§8).
+     */
+    readonly staticPlan?: ReadonlyMap<string, string> | null;
 }
 /**
  * Render a compiled StreetUI application to an HTML string.

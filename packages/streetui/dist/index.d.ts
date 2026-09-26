@@ -2,8 +2,8 @@ import { a as Signal, b as Subscriber, U as Unsubscribe, R as ReadonlySignal, A 
 export { g as A11yOptions, h as AppBuilder, i as AppDSL, j as AppOptions, k as ApplicationGraphOptions, B as BaseNode, l as Bindable, m as BindableText, n as BoundInputOptions, o as ButtonOptions, p as CompileOptions, q as ContainerBuilder, r as ContainerBuilderImpl, s as ContainerOptions, t as ContentDSL, u as ControlledInputOptions, v as DerivedSignal, w as Diagnostic, x as DiagnosticError, y as DiagnosticLocation, z as DiagnosticSeverity, E as ErrorBoundaryOptions, F as ErrorFallbackBuilder, H as ErrorSource, I as EventDescriptor, J as FormBuilder, K as FormBuilderImpl, L as FormDSL, M as FormOptions, N as GraphNodeData, O as HandlerFn, Q as HeadingOptions, T as ImageOptions, W as InputOptions, X as InputOptionsBase, Y as LinkOptions, Z as ListBuilder, _ as ListBuilderImpl, $ as ListDSL, a0 as ListOptions, a1 as ListPlanEntry, a2 as NodeId, a3 as NodeMetadata, a4 as PageBuilder, a5 as PageBuilderImpl, a6 as PropValue, a7 as Props, a8 as ReactiveConsumer, a9 as ReactiveSource, aa as SectionBuilder, ab as SectionBuilderImpl, ac as SectionDSL, ad as SectionOptions, ae as SerializedGraph, af as SerializedNode, ag as StateRef, S as StreetApp, ah as StreetUI, ai as TextOptions, aj as TextValue, V as VERSION, ak as batch, al as compile, am as compileGraph, an as createNodeId, ao as derived, ap as effect, aq as formatDiagnostic, ar as generateApplicationId, as as generateNodeId, at as isBatching, au as nextId, av as nodeIdPrefix, aw as observerCount, ax as reactiveListItemKey, ay as reactiveListItemSignature, az as resetIdCounter, aA as signal, aB as signalKind, aC as streetui } from './compile-CEom4hkp.js';
 import { R as RenderHandle, S as StreetRenderer, a as HydrationDiagnosticSink } from './hydration-diagnostics-YrG-OJJe.js';
 export { H as HydrationDiagnostic, b as HydrationMismatchType, c as consoleHydrationDiagnosticSink, d as createHydrationDiagnosticCollector, f as formatHydrationDiagnostic } from './hydration-diagnostics-YrG-OJJe.js';
-import { D as DOMAdapter } from './server-xU-BEwAj.js';
-export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-xU-BEwAj.js';
+import { D as DOMAdapter } from './server-jbB-7oN-.js';
+export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-jbB-7oN-.js';
 
 /**
  * A simple reactive store built on top of signals.
@@ -579,7 +579,7 @@ declare const browserDOMAdapter: BrowserDOMAdapter;
  * `DOMAdapter` interface, and `ServerDOMAdapter` translates adapter calls into
  * operations on this model.
  */
-type ServerNodeKind = 'element' | 'text' | 'comment' | 'fragment';
+type ServerNodeKind = 'element' | 'text' | 'comment' | 'fragment' | 'raw';
 interface ServerNode {
     readonly kind: ServerNodeKind;
     parent: ServerParent | null;
@@ -609,6 +609,25 @@ declare class ServerFragment implements ServerNode {
     parent: ServerParent | null;
     readonly children: ServerNode[];
 }
+/**
+ * A pre-serialized, verbatim HTML fragment (v1.7 static SSR plan).
+ *
+ * Emitted for provably-static subtrees whose HTML the compiler-derived static
+ * SSR plan already computed once. Serializing this node copies its stored
+ * string directly — it allocates no ServerElement/ServerText, no attribute Map
+ * and no children array for the collapsed subtree. The stored `html` is
+ * produced by the exact same mount + serialize pipeline as the runtime path, so
+ * the output is byte-identical (the v1.7 byte-identity gate proves this).
+ *
+ * This node is SSR-only: it is created solely via `ServerDOMAdapter.createRawHTML`
+ * on the server render path and never appears in a browser build.
+ */
+declare class ServerRawHTML implements ServerNode {
+    readonly kind: "raw";
+    parent: ServerParent | null;
+    readonly html: string;
+    constructor(html: string);
+}
 declare class ServerElement implements ServerNode {
     readonly kind: "element";
     parent: ServerParent | null;
@@ -627,7 +646,7 @@ declare class ServerElement implements ServerNode {
 declare function escapeHtmlText(value: string): string;
 /** Escape a double-quoted attribute value. */
 declare function escapeHtmlAttr(value: string): string;
-/** Serialize a single server node (element/text/comment/fragment) to HTML. */
+/** Serialize a single server node (element/text/comment/fragment/raw) to HTML. */
 declare function serializeServerNode(node: ServerNode): string;
 /** Serialize the children of an element or fragment (its "inner HTML"). */
 declare function serializeChildren(node: ServerElement | ServerFragment): string;
@@ -698,8 +717,18 @@ interface RenderContext {
      * DevTools/diagnostics stay off the production runtime path.
      */
     readonly hydrationDiagnostics?: HydrationDiagnosticSink;
+    /**
+     * Optional SSR-only static-subtree plan (v1.7). Maps a maximal
+     * static-subtree root GraphNode.id → its precomputed, verbatim HTML string.
+     * Present only on the server render path when a plan has been built; on the
+     * browser mount path it is always `undefined`, so the client hot path is
+     * unaffected (a single `=== undefined` check short-circuits). When a mounted
+     * node's id is in this map, the renderer emits the precomputed HTML via
+     * `dom.createRawHTML` instead of recursively constructing the subtree.
+     */
+    readonly staticHTML?: ReadonlyMap<string, string>;
 }
-declare function createRenderContext(dom: DOMAdapter, graph: ApplicationGraph, container: Element, hydrationDiagnostics?: HydrationDiagnosticSink): RenderContext;
+declare function createRenderContext(dom: DOMAdapter, graph: ApplicationGraph, container: Element, hydrationDiagnostics?: HydrationDiagnosticSink, staticHTML?: ReadonlyMap<string, string>): RenderContext;
 
 /**
  * Attribute and property application helpers.
@@ -1807,4 +1836,4 @@ interface ResolvedConfig {
 /** Identity helper that gives `streetui.config.ts` full type-checking + inference. */
 declare function defineConfig(config: StreetUIConfig): StreetUIConfig;
 
-export { type A11yIds, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedNode, type InspectedPage, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, formatDiagnosticContext, frameworkError, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, routerOutlet, runValidators, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, validateGraph, wireEvents, wireReactiveList, wireSignalBindings };
+export { type A11yIds, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedNode, type InspectedPage, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, formatDiagnosticContext, frameworkError, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, routerOutlet, runValidators, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, validateGraph, wireEvents, wireReactiveList, wireSignalBindings };
