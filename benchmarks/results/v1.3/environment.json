@@ -1,6 +1,6 @@
 {
   "schema": "streetui-environment/v1.3",
-  "timestamp": "2026-09-26T20:19:23.219Z",
+  "timestamp": "2026-09-26T20:29:52.952Z",
   "commit": null,
   "host": {
     "node": "v24.18.0",
@@ -8,7 +8,7 @@
     "cpus": 12,
     "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
     "totalMemMB": 16382,
-    "freeMemMB": 3136
+    "freeMemMB": 8479
   },
   "runs": {
     "nodeRealApp": {
@@ -33,7 +33,7 @@
     }
   },
   "regressionGates": {
-    "status": "FAIL",
+    "status": "PASS",
     "file": "regression-gates.json"
   },
   "steps": [
