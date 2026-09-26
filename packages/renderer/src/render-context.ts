@@ -23,6 +23,16 @@ export interface RenderContext {
    * DevTools/diagnostics stay off the production runtime path.
    */
   readonly hydrationDiagnostics?: HydrationDiagnosticSink;
+  /**
+   * Optional SSR-only static-subtree plan (v1.7). Maps a maximal
+   * static-subtree root GraphNode.id → its precomputed, verbatim HTML string.
+   * Present only on the server render path when a plan has been built; on the
+   * browser mount path it is always `undefined`, so the client hot path is
+   * unaffected (a single `=== undefined` check short-circuits). When a mounted
+   * node's id is in this map, the renderer emits the precomputed HTML via
+   * `dom.createRawHTML` instead of recursively constructing the subtree.
+   */
+  readonly staticHTML?: ReadonlyMap<string, string>;
 }
 
 export function createRenderContext(
@@ -30,6 +40,7 @@ export function createRenderContext(
   graph: ApplicationGraph,
   container: Element,
   hydrationDiagnostics?: HydrationDiagnosticSink,
+  staticHTML?: ReadonlyMap<string, string>,
 ): RenderContext {
   return {
     dom,
@@ -37,5 +48,6 @@ export function createRenderContext(
     instances: new Map(),
     container,
     ...(hydrationDiagnostics !== undefined ? { hydrationDiagnostics } : {}),
+    ...(staticHTML !== undefined ? { staticHTML } : {}),
   };
 }
