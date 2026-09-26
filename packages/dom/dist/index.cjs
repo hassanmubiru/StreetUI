@@ -26,6 +26,7 @@ __export(index_exports, {
   ServerDOMAdapter: () => ServerDOMAdapter,
   ServerElement: () => ServerElement,
   ServerFragment: () => ServerFragment,
+  ServerRawHTML: () => ServerRawHTML,
   ServerStyle: () => ServerStyle,
   ServerText: () => ServerText,
   browserDOMAdapter: () => browserDOMAdapter,
@@ -161,6 +162,14 @@ var ServerFragment = class {
   kind = "fragment";
   parent = null;
   children = [];
+};
+var ServerRawHTML = class {
+  kind = "raw";
+  parent = null;
+  html;
+  constructor(html) {
+    this.html = html;
+  }
 };
 var ServerElement = class {
   kind = "element";
@@ -312,6 +321,8 @@ function serializeServerNode(node) {
       return `<!--${node.data}-->`;
     case "fragment":
       return serializeChildren(node);
+    case "raw":
+      return node.html;
     case "element": {
       const el = node;
       const tag = el.tagName;
@@ -350,6 +361,15 @@ var ServerDOMAdapter = class {
   }
   createFragment() {
     return new ServerFragment();
+  }
+  /**
+   * Create a verbatim pre-serialized HTML node (v1.7 static SSR plan, §6).
+   * Server-only: the browser adapter does not implement this, and the renderer
+   * fast path only invokes it when a static SSR plan is present (SSR). The
+   * stored HTML was produced by this same serializer, so it is emitted as-is.
+   */
+  createRawHTML(html) {
+    return new ServerRawHTML(html);
   }
   appendChild(parent, child) {
     const p = asParent(parent);
@@ -525,6 +545,7 @@ function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
   ServerDOMAdapter,
   ServerElement,
   ServerFragment,
+  ServerRawHTML,
   ServerStyle,
   ServerText,
   browserDOMAdapter,

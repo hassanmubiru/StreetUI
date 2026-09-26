@@ -9,6 +9,13 @@ interface DOMAdapter {
     createTextNode(data: string): Text;
     createComment(data: string): Comment;
     createFragment(): DocumentFragment;
+    /**
+     * Optional, server-only: create a verbatim pre-serialized HTML node used by
+     * the v1.7 static SSR plan. The browser adapter does not implement it; the
+     * renderer only calls it when a static SSR plan is active (i.e. during SSR),
+     * so client builds never reach this path and it stays tree-shakeable.
+     */
+    createRawHTML?(html: string): Node;
     appendChild(parent: Node, child: Node): void;
     insertBefore(parent: Node, child: Node, reference: Node | null): void;
     removeChild(parent: Node, child: Node): void;
@@ -88,7 +95,7 @@ declare const browserDOMAdapter: BrowserDOMAdapter;
  * `DOMAdapter` interface, and `ServerDOMAdapter` translates adapter calls into
  * operations on this model.
  */
-type ServerNodeKind = 'element' | 'text' | 'comment' | 'fragment';
+type ServerNodeKind = 'element' | 'text' | 'comment' | 'fragment' | 'raw';
 interface ServerNode {
     readonly kind: ServerNodeKind;
     parent: ServerParent | null;
@@ -118,6 +125,25 @@ declare class ServerFragment implements ServerNode {
     parent: ServerParent | null;
     readonly children: ServerNode[];
 }
+/**
+ * A pre-serialized, verbatim HTML fragment (v1.7 static SSR plan).
+ *
+ * Emitted for provably-static subtrees whose HTML the compiler-derived static
+ * SSR plan already computed once. Serializing this node copies its stored
+ * string directly — it allocates no ServerElement/ServerText, no attribute Map
+ * and no children array for the collapsed subtree. The stored `html` is
+ * produced by the exact same mount + serialize pipeline as the runtime path, so
+ * the output is byte-identical (the v1.7 byte-identity gate proves this).
+ *
+ * This node is SSR-only: it is created solely via `ServerDOMAdapter.createRawHTML`
+ * on the server render path and never appears in a browser build.
+ */
+declare class ServerRawHTML implements ServerNode {
+    readonly kind: "raw";
+    parent: ServerParent | null;
+    readonly html: string;
+    constructor(html: string);
+}
 declare class ServerElement implements ServerNode {
     readonly kind: "element";
     parent: ServerParent | null;
@@ -136,7 +162,7 @@ declare class ServerElement implements ServerNode {
 declare function escapeHtmlText(value: string): string;
 /** Escape a double-quoted attribute value. */
 declare function escapeHtmlAttr(value: string): string;
-/** Serialize a single server node (element/text/comment/fragment) to HTML. */
+/** Serialize a single server node (element/text/comment/fragment/raw) to HTML. */
 declare function serializeServerNode(node: ServerNode): string;
 /** Serialize the children of an element or fragment (its "inner HTML"). */
 declare function serializeChildren(node: ServerElement | ServerFragment): string;
@@ -160,6 +186,13 @@ declare class ServerDOMAdapter implements DOMAdapter {
     createTextNode(data: string): Text;
     createComment(data: string): Comment;
     createFragment(): DocumentFragment;
+    /**
+     * Create a verbatim pre-serialized HTML node (v1.7 static SSR plan, §6).
+     * Server-only: the browser adapter does not implement this, and the renderer
+     * fast path only invokes it when a static SSR plan is present (SSR). The
+     * stored HTML was produced by this same serializer, so it is emitted as-is.
+     */
+    createRawHTML(html: string): Node;
     appendChild(parent: Node, child: Node): void;
     insertBefore(parent: Node, child: Node, reference: Node | null): void;
     removeChild(parent: Node, child: Node): void;
@@ -215,4 +248,4 @@ declare function focusById(dom: DOMAdapter, root: Element | Document, id: string
  */
 declare function focusFirst(dom: DOMAdapter, container: Element | Document, selector?: string): boolean;
 
-export { BrowserDOMAdapter, type DOMAdapter, FOCUSABLE_SELECTOR, ServerComment, ServerDOMAdapter, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerStyle, ServerText, browserDOMAdapter, escapeHtmlAttr, escapeHtmlText, focusById, focusFirst, serializeChildren, serializeServerNode, serverDOMAdapter };
+export { BrowserDOMAdapter, type DOMAdapter, FOCUSABLE_SELECTOR, ServerComment, ServerDOMAdapter, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, browserDOMAdapter, escapeHtmlAttr, escapeHtmlText, focusById, focusFirst, serializeChildren, serializeServerNode, serverDOMAdapter };

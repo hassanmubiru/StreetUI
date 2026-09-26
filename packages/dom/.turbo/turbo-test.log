@@ -1,28 +1,17 @@
 
-
-> @streetui/dom@1.4.0 test /home/error51/Downloads/StreetUI/packages/dom
+> @streetui/dom@1.6.0 test /home/error51/Downloads/StreetUI/packages/dom
 > vitest run
 
 
-[7m[1m[36m RUN [39m[22m[27m [36mv2.1.4[39m [90m/home/error51/Downloads/StreetUI/packages/dom[39m
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dom
 
-[?25l [90m·[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
-[?25l[2K[1A[2K[G [32m✓[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
-[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[G [32m✓[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
- [90m·[39m [2msrc/[22mfocus[2m.test.ts[22m[2m (5)[22m
-[?25l[?25l[?25l[?25l[?25l[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
- [32m✓[39m [2msrc/[22mfocus[2m.test.ts[22m[2m (5)[22m
- [90m·[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (3)[22m
-[?25l[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
- [32m✓[39m [2msrc/[22mfocus[2m.test.ts[22m[2m (5)[22m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (3)[22m
-[?25l[2K[1A[2K[1A[2K[1A[2K[G [32m✓[39m [2msrc/[22mdom[2m.test.ts[22m[2m (15)[22m
- [32m✓[39m [2msrc/[22mfocus[2m.test.ts[22m[2m (5)[22m
- [32m✓[39m [2msrc/[22mpublic-api[2m.stability.test.ts[22m[2m (3)[22m
+ ✓ src/dom.test.ts  (15 tests) 13ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 6ms
+ ✓ src/server-node.lazy-alloc.test.ts  (12 tests) 15ms
+ ✓ src/focus.test.ts  (5 tests) 16ms
 
-[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
-[2m      Tests [22m [1m[32m23 passed[39m[22m[90m (23)[39m
-[2m   Start at [22m 17:35:41
-[2m   Duration [22m 1.68s[2m (transform 316ms, setup 0ms, collect 462ms, tests 105ms, environment 1.53s, prepare 561ms)[22m
+ Test Files  4 passed (4)
+      Tests  35 passed (35)
+   Start at  23:31:01
+   Duration  524ms (transform 127ms, setup 0ms, collect 186ms, tests 50ms, environment 862ms, prepare 253ms)
 
-[?25h[?25h
