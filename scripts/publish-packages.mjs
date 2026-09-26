@@ -35,7 +35,7 @@ const DRY_RUN = args.includes('--dry-run');
 const tagIdx = args.indexOf('--tag');
 const DIST_TAG = tagIdx >= 0 && args[tagIdx + 1] ? args[tagIdx + 1] : 'latest';
 
-console.log('📦 StreetUI 1.5.0 — npm publish');
+console.log('📦 StreetUI 1.6.0 — npm publish');
 console.log('================================');
 if (DRY_RUN) console.log('⚠️  DRY RUN — no packages will be published\n');
 
@@ -117,7 +117,7 @@ console.log('🔍 Running release check...');
 try {
   execFileSync(
     'node',
-    ['scripts/release-check.mjs', '--release-version', '1.5.0', '--channel', 'stable', '--manifest'],
+    ['scripts/release-check.mjs', '--release-version', '1.6.0', '--channel', 'stable', '--manifest'],
     { cwd: ROOT, stdio: 'inherit' },
   );
   console.log('');
@@ -142,12 +142,12 @@ for (const pkgName of PUBLISH_ORDER) {
   const shortName = pkgName.replace('@streetui/', '');
 
   if (DRY_RUN) {
-    console.log(`  [dry-run] would publish ${pkgName}@1.5.0 from ${tgz}`);
+    console.log(`  [dry-run] would publish ${pkgName}@1.6.0 from ${tgz}`);
     results.push({ name: pkgName, status: 'dry-run' });
     continue;
   }
 
-  process.stdout.write(`  publishing ${pkgName}@1.5.0 ... `);
+  process.stdout.write(`  publishing ${pkgName}@1.6.0 ... `);
   try {
     execFileSync(
       'npm',
