@@ -1,0 +1,64 @@
+
+> streetui@1.6.0 build /home/error51/Downloads/StreetUI/packages/streetui
+> tsup && node scripts/scrub-dts.mjs
+
+CLI Building entry: {"index":"src/index.ts","server":"src/server.ts","testing":"src/testing.ts","bin":"src/bin.ts","create-bin":"src/create-bin.ts"}
+CLI Using tsconfig: tsconfig.build.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/streetui/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
+
+ WARN  [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m"import.meta" is not available with the "cjs" output format and will be empty[0m [empty-import-meta]
+
+    ../cli/src/templates.ts:41:37:
+[37m      41 │   const here = dirname(fileURLToPath([32mimport.meta[37m.url));
+         ╵                                      [32m~~~~~~~~~~~[0m
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+
+
+CJS dist/index.cjs          131.59 KB
+CJS dist/create-bin.cjs     30.69 KB
+CJS dist/testing.cjs        61.03 KB
+CJS dist/bin.cjs            30.58 KB
+CJS dist/server.cjs         34.73 KB
+CJS dist/index.cjs.map      350.86 KB
+CJS dist/create-bin.cjs.map 75.41 KB
+CJS dist/server.cjs.map     89.77 KB
+CJS dist/testing.cjs.map    164.81 KB
+CJS dist/bin.cjs.map        75.28 KB
+CJS ⚡️ Build success in 82ms
+ESM dist/index.js          125.16 KB
+ESM dist/server.js         33.53 KB
+ESM dist/create-bin.js     29.52 KB
+ESM dist/bin.js            29.41 KB
+ESM dist/testing.js        59.63 KB
+ESM dist/server.js.map     88.60 KB
+ESM dist/create-bin.js.map 75.66 KB
+ESM dist/bin.js.map        75.53 KB
+ESM dist/index.js.map      346.72 KB
+ESM dist/testing.js.map    163.71 KB
+ESM ⚡️ Build success in 82ms
+DTS Build start
+DTS ⚡️ Build success in 2343ms
+DTS dist/bin.d.ts                             20.00 B
+DTS dist/testing.d.ts                         5.16 KB
+DTS dist/index.d.ts                           82.18 KB
+DTS dist/create-bin.d.ts                      20.00 B
+DTS dist/server.d.ts                          226.00 B
+DTS dist/hydration-diagnostics-YrG-OJJe.d.ts  4.15 KB
+DTS dist/compile-CEom4hkp.d.ts                27.71 KB
+DTS dist/server-xU-BEwAj.d.ts                 7.84 KB
+DTS dist/bin.d.cts                            20.00 B
+DTS dist/testing.d.cts                        5.17 KB
+DTS dist/index.d.cts                          82.19 KB
+DTS dist/create-bin.d.cts                     20.00 B
+DTS dist/server.d.cts                         228.00 B
+DTS dist/hydration-diagnostics-D286jpZZ.d.cts 4.16 KB
+DTS dist/compile-CEom4hkp.d.cts               27.71 KB
+DTS dist/server-C2xovHHb.d.cts                7.84 KB
+scrub-dts: cleaned 6 declaration file(s); no internal import leaks.
