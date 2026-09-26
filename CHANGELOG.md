@@ -5,6 +5,95 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.8.0 — Client renderer & real-browser performance (UNRELEASED development milestone)
+
+An **investigation + harness-completeness** milestone focused on StreetUI's
+real-browser CLIENT behaviour. **No public API change**, **no breaking changes**,
+**no new dependency**, and **no client runtime redesign**. Per the
+unreleased-milestone convention the coordinated version is **held at 1.6.0**
+(`packages/streetui/package.json` and `CLI_VERSION`): the npm registry is
+unreachable offline (`npm info streetui version` → **E403 Forbidden**), so no
+publication is verified and none is claimed. Full detail in
+[`V1.8-CLIENT-BROWSER-REPORT.md`](./V1.8-CLIENT-BROWSER-REPORT.md).
+
+### Why no client optimization shipped
+
+The mission's hard rule (§7/§10/§24) is that client-renderer optimizations may
+ship **only** with real-browser evidence. A real Chromium engine is **not
+available** in this environment: `npx playwright install chromium` fails with
+`403 Connection blocked by network allowlist`, and no Chromium binary exists on
+`PATH` or via `CHROMIUM_PATH`/`CHROME_PATH`. Browser and competitor measurements
+are therefore recorded as **BLOCKED** with their exact reason — never fabricated,
+never substituted with happy-dom numbers. No client hot-path change is justified
+on Node/happy-dom evidence alone, so **none was made**.
+
+### Added
+
+- **`benchmarks/profile-client-js.mjs` + `benchmarks/profile-parse.mjs`** —
+  CPU-profile harness that attributes JavaScript **self-time** between
+  StreetUI-controlled functions and the happy-dom DOM adapter. Carries an
+  explicit honesty banner: it is Node + happy-dom, **not** a browser, and no
+  number it emits is a browser number. Used to *identify candidate* client hot
+  spots for future real-browser validation — not to justify shipping anything.
+- **`packages/renderer/src/update-independence.test.ts`** (4 tests) — new
+  Node-runnable regression suite pinning the §9 invariant: mutating one of N
+  bound signals writes **exactly** the subscribed node(s) and that write count is
+  **independent of N** (verified equal at N=100 / 1000 / 2000 / 5000), with zero
+  structural churn. Counts flow through the same `DOMAdapter` choke-point every
+  renderer write uses, so the assertion is engine-independent (not a browser
+  substitute).
+
+### Changed
+
+- **`benchmarks/browser/run-all.mjs`** — the §26 orchestrator now **genuinely
+  delegates**: it spawns all three real sub-runners (`scripts/browser-harness.mjs`,
+  `benchmarks/scenarios/browser-list-reorder/run.mjs`,
+  `benchmarks/run-competitors.mjs`) and aggregates their honest JSON into
+  `benchmarks/results/v1.8/browser-run-all.json`. Previously it only logged
+  "delegating…" without executing anything. Competitor results are classified on
+  two axes so the record never implies browser numbers exist: **browser status
+  BLOCKED**, with any Node-side SSR/bundle data flagged as "NOT browser numbers".
+  The moment a Chromium binary is present, real numbers appear end-to-end with no
+  further code change.
+
+### Findings (Node + happy-dom CPU profile — NOT a browser)
+
+Self-time buckets over 6× mount of the 10k-row `/users` route: **GC ~50.5%**,
+**happy-dom DOM emulation ~40.4%**, **StreetUI-controlled JS only ~7.2%**
+(node-core ~1.4%). happy-dom's `createElement`/`appendChild`/etc. are pure-JS
+emulation that becomes **native** in a real browser, so that 40% is **not** a
+StreetUI cost and **not** a browser proxy. Within StreetUI's 7.2%, `mountNode`
+dominates (~4.5%); everything else (`applyNodeProps`, `dispose`, `setAttribute`,
+`applyProp`) is <0.4% each. `mountNode` (initial creation + one `NodeInstance`
+per node) is therefore the top candidate for future **browser-validated**
+profiling — but cannot be responsibly optimized without a real engine (§10).
+
+### Verified (Node v22.23.2 — no browser)
+
+- Build **29/29**, typecheck **47/47**, tests **688/688** (renderer 12 files /
+  154 tests, +4 from `update-independence.test.ts`; examples 74).
+- SSR byte-identity **PASS** on all 5 routes (exact / byteLength / SHA-256), each
+  matching the recorded v1.6 digest — **SSR remains stable (§22)**, hydration
+  unaffected.
+- Client bundles unchanged: minimal **7,678 B**, typical **14,435 B**, real-app
+  **14,725 B** gzip. Tree-shake grep of the minified minimal client: **0**
+  occurrences of `ServerRawHTML`/`buildStaticSSRPlan`/`getStaticSSRPlan`/
+  `serializeInner`/`ServerDOMAdapter`/`renderToString`/`serializeStaticSubtree`.
+- Node invariant gates HOLD: hydration creates 0 nodes; fine-grained update
+  independent-of-N; forms field isolation; lifecycle no-drift / clean unmount;
+  router transitions correct. The `bundle_no_regression` gate **FAILs** — a
+  **pre-existing, disclosed** condition since v1.4 (stale v1.3 full-barrel
+  baseline), not a v1.8 regression.
+
+### Blocked (recorded honestly, never fabricated)
+
+- **Browser** (StreetUI in-page scenarios, isolated 10k list reorder, frame
+  pacing, JS heap): no Chromium binary; Playwright install blocked by network
+  allowlist (403).
+- **Competitors** (React/Vue/Svelte/Solid browser scenarios): same reason. Their
+  Node-side SSR/bundle figures exist but are **not** browser numbers and are
+  **not** ranked against StreetUI (§21).
+
 ## 1.7.0 — Static SSR compiler plan & ServerRawHTML
 
 A **SSR performance** milestone. **No public API change** (168 values / 171
