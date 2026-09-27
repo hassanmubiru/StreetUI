@@ -8,10 +8,9 @@ governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 ## 1.8.0 — Component & Composition Platform (2026-09-28)
 
 **Minor release** — new public API added, no breaking changes. The v1.0 frozen
-surface is untouched; every addition is additive. Prepared locally and verified;
-**not published** — the npm registry is unreachable from this environment
-(`npm info streetui` returns `403 Forbidden`), so no publication is claimed. Full
-detail in [`V1.8.0-COMPONENT-PLATFORM-REPORT.md`](./V1.8.0-COMPONENT-PLATFORM-REPORT.md).
+surface is untouched; every addition is additive. All 18 packages **published to
+npm at `1.8.0`**. Full detail in
+[`V1.8.0-COMPONENT-PLATFORM-REPORT.md`](./V1.8.0-COMPONENT-PLATFORM-REPORT.md).
 
 ### Added
 
