@@ -19,6 +19,7 @@
 import type { RenderContext } from './render-context.js';
 import type { GraphNode } from '@streetui/graph';
 import type { NodeInstance } from './node-instance.js';
+import type { TransitionHooks } from './transition.js';
 import { patchNode } from './patch.js';
 
 export type MountFn = (node: GraphNode, parent: Element) => NodeInstance;
