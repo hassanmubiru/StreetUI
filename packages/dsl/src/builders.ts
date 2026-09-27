@@ -46,6 +46,7 @@ import type {
   ComponentRender,
 } from './component.js';
 import type { TransitionConfig } from './transition.js';
+import { resolveTransition } from './transition.js';
 import type { WhenOptions } from './dsl-types.js';
 import { signal, derived, effect, type Signal, type ReadonlySignal } from '@streetui/state';
 
@@ -135,9 +136,15 @@ function registerTransition(
   config: TransitionConfig | undefined,
 ): void {
   if (config === undefined) return;
+  // Resolve to the pre-split class arrays at wire time so the renderer's
+  // controller consumes a plain `ResolvedTransition` and never re-parses class
+  // strings per run — and so the renderer needs no compile-time dependency on
+  // this DSL package (it reads the descriptor structurally, exactly like
+  // `__overlay__`/`__component__`).
+  const resolved = resolveTransition(config);
   graph.registerHandler(
     `__transition__${node.id}`,
-    (() => config) as unknown as () => unknown,
+    (() => resolved) as unknown as () => unknown,
   );
 }
 
