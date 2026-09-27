@@ -23,22 +23,37 @@ __export(testing_exports, {
   VERSION: () => VERSION,
   analyzeGraph: () => analyzeGraph,
   findAllByRole: () => findAllByRole,
+  findAllComponents: () => findAllComponents,
   findByRole: () => findByRole,
   findByText: () => findByText,
+  findComponent: () => findComponent,
   flushUpdates: () => flushUpdates,
   formatInspection: () => formatInspection,
+  getComponentName: () => getComponentName,
+  hydrateComponent: () => hydrateComponent,
   inspectCompilation: () => inspectCompilation,
   render: () => render,
+  renderComponent: () => renderComponent,
   renderOnce: () => renderOnce,
   renderServerThenHydrate: () => renderServerThenHydrate,
+  trigger: () => trigger,
   waitFor: () => waitFor
 });
 module.exports = __toCommonJS(testing_exports);
 
 // ../core/src/identity.ts
 var _counter = 0;
+function nextId() {
+  return ++_counter;
+}
 function resetIdCounter() {
   _counter = 0;
+}
+function createNodeId(value) {
+  return value;
+}
+function generateNodeId(prefix = "node") {
+  return createNodeId(`${prefix}:${nextId()}`);
 }
 
 // ../core/src/lifecycle.ts
@@ -1420,6 +1435,7 @@ function mountNode(ctx, graphNode, parentDom) {
     instance.addChild(childInstance);
   }
   dom.appendChild(parentDom, el);
+  if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
   return instance;
 }
 function textUpdate(dom, el, textNode) {
@@ -1588,6 +1604,11 @@ function wireOverlayBehavior(ctx, graphNode, instance, target) {
   instance.trackCleanup(teardown);
   if (openSig.peek() === true) onOpenChange(true);
 }
+function wireComponentBehavior(ctx, graphNode, instance) {
+  const fn = ctx.graph.getHandler(`__component__${graphNode.id}`);
+  if (fn === void 0) return;
+  for (const cleanup of fn()) instance.trackCleanup(cleanup);
+}
 
 // ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
@@ -1712,6 +1733,7 @@ function hydrateNode(ctx, graphNode, domNode, path) {
         return instance;
       }
       hydrateChildren(ctx, graphNode, instance, domNode, path);
+      if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
       return instance;
     }
   }
@@ -1910,7 +1932,8 @@ function analyzeGraph(graph) {
     const isList = node.type === "reactive-list";
     const isConditional = node.type === "conditional";
     const isPortal = node.type === "portal";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
+    const isComponent = node.type === "component";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -2335,21 +2358,1084 @@ function renderServerThenHydrate(build, options = {}) {
   };
 }
 
+// ../state/src/signal.ts
+var _activeConsumer = null;
+function withConsumer(consumer, fn) {
+  const prev = _activeConsumer;
+  _activeConsumer = consumer;
+  try {
+    return fn();
+  } finally {
+    _activeConsumer = prev;
+  }
+}
+var _batchDepth = 0;
+var _pendingFlushes = /* @__PURE__ */ new Map();
+function _enqueueBatchFlush(sig, value) {
+  _pendingFlushes.set(sig, { signal: sig, value });
+}
+var Signal = class {
+  _value;
+  _subscribers = /* @__PURE__ */ new Set();
+  _consumers = /* @__PURE__ */ new Set();
+  constructor(initial) {
+    this._value = initial;
+  }
+  get() {
+    if (_activeConsumer !== null) {
+      this._consumers.add(_activeConsumer);
+      _activeConsumer._addSource(this);
+    }
+    return this._value;
+  }
+  peek() {
+    return this._value;
+  }
+  set(value) {
+    if (Object.is(this._value, value)) return;
+    this._value = value;
+    if (_batchDepth > 0) {
+      _enqueueBatchFlush(this, value);
+    } else {
+      this._flush(value);
+    }
+  }
+  update(fn) {
+    this.set(fn(this._value));
+  }
+  subscribe(fn) {
+    this._subscribers.add(fn);
+    return () => {
+      this._subscribers.delete(fn);
+    };
+  }
+  _removeConsumer(consumer) {
+    this._consumers.delete(consumer);
+  }
+  /**
+   * Called by the batch machinery after the batch has completed.
+   * Notifies subscribers with the final coalesced value.
+   */
+  _flushBatch(value) {
+    this._flush(value);
+  }
+  _flush(value) {
+    for (const sub of [...this._subscribers]) sub(value);
+    for (const consumer of [...this._consumers]) consumer._invalidate();
+  }
+  /**
+   * @internal DevTools inspection only. The number of live observers
+   * (direct subscribers plus derived/effect consumers). Read-only; never
+   * mutates reactive state.
+   */
+  _observerCount() {
+    return this._subscribers.size + this._consumers.size;
+  }
+};
+var DerivedSignal = class {
+  _value = void 0;
+  _dirty = true;
+  _disposed = false;
+  _fn;
+  _subscribers = /* @__PURE__ */ new Set();
+  /** All upstream sources this derived currently reads from. */
+  _sources = /* @__PURE__ */ new Set();
+  /** Downstream consumers that depend on this derived. */
+  _consumers = /* @__PURE__ */ new Set();
+  constructor(fn) {
+    this._fn = fn;
+  }
+  get() {
+    if (_activeConsumer !== null) {
+      this._consumers.add(_activeConsumer);
+      _activeConsumer._addSource(this);
+    }
+    if (this._dirty) this._recompute();
+    return this._value;
+  }
+  peek() {
+    if (this._dirty) this._recompute();
+    return this._value;
+  }
+  subscribe(fn) {
+    if (this._dirty) this._recompute();
+    this._subscribers.add(fn);
+    return () => {
+      this._subscribers.delete(fn);
+    };
+  }
+  _addSource(src) {
+    this._sources.add(src);
+  }
+  _removeConsumer(consumer) {
+    this._consumers.delete(consumer);
+  }
+  _invalidate() {
+    if (this._disposed) return;
+    this._dirty = true;
+    const newVal = this.peek();
+    for (const sub of [...this._subscribers]) sub(newVal);
+    for (const consumer of [...this._consumers]) consumer._invalidate();
+  }
+  _recompute() {
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    this._value = withConsumer(this, this._fn);
+    this._dirty = false;
+  }
+  dispose() {
+    this._disposed = true;
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    this._subscribers.clear();
+    this._consumers.clear();
+  }
+  /**
+   * @internal DevTools inspection only. Live observers (subscribers plus
+   * downstream consumers). Read-only.
+   */
+  _observerCount() {
+    return this._subscribers.size + this._consumers.size;
+  }
+};
+var Effect = class {
+  _fn;
+  _cleanup = void 0;
+  _disposed = false;
+  _sources = /* @__PURE__ */ new Set();
+  constructor(fn) {
+    this._fn = fn;
+    this._run();
+  }
+  _addSource(src) {
+    this._sources.add(src);
+  }
+  _invalidate() {
+    if (this._disposed) return;
+    this._run();
+  }
+  _run() {
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    if (typeof this._cleanup === "function") this._cleanup();
+    const result = withConsumer(this, this._fn);
+    this._cleanup = typeof result === "function" ? result : void 0;
+  }
+  dispose() {
+    this._disposed = true;
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    if (typeof this._cleanup === "function") this._cleanup();
+    this._cleanup = void 0;
+  }
+};
+function signal(initial) {
+  return new Signal(initial);
+}
+function derived(fn) {
+  return new DerivedSignal(fn);
+}
+function effect(fn) {
+  const e = new Effect(fn);
+  return () => e.dispose();
+}
+
+// ../dsl/src/builders.ts
+function isSignal(v) {
+  return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
+}
+function bindValue(graph, node, propKey, value) {
+  if (isSignal(value)) {
+    const signalId = `${node.id}:${propKey}`;
+    node.stateRefs.push({ signalId, propKey });
+    graph.registerHandler(`__signal__${signalId}`, value);
+    return value.peek();
+  }
+  return value;
+}
+function applyA11yProps(props, options) {
+  if (options.role !== void 0) props["role"] = options.role;
+  if (options.tabIndex !== void 0) props["tabindex"] = String(options.tabIndex);
+  if (options.ariaLabel !== void 0) props["aria-label"] = options.ariaLabel;
+  if (options.ariaLabelledBy !== void 0) props["aria-labelledby"] = options.ariaLabelledBy;
+  if (options.ariaDescribedBy !== void 0) props["aria-describedby"] = options.ariaDescribedBy;
+  if (options.ariaExpanded !== void 0) props["aria-expanded"] = String(options.ariaExpanded);
+  if (options.ariaControls !== void 0) props["aria-controls"] = options.ariaControls;
+  if (options.ariaHidden !== void 0) props["aria-hidden"] = String(options.ariaHidden);
+  if (options.ariaLive !== void 0) props["aria-live"] = options.ariaLive;
+  if (options.ariaCurrent !== void 0) props["aria-current"] = String(options.ariaCurrent);
+  if (options.ariaInvalid !== void 0) props["aria-invalid"] = String(options.ariaInvalid);
+  if (options.ariaRequired !== void 0) props["aria-required"] = String(options.ariaRequired);
+  if (options.ariaModal !== void 0) props["aria-modal"] = String(options.ariaModal);
+}
+function containerProps(options) {
+  const props = {};
+  if (options.class !== void 0) props["class"] = options.class;
+  if (options.id !== void 0) props["id"] = options.id;
+  if (options.key !== void 0) props["key"] = options.key;
+  applyA11yProps(props, options);
+  return props;
+}
+function itemIdentity(item, index) {
+  if (item !== null && typeof item === "object") {
+    const obj = item;
+    if ("id" in obj) return `id:${String(obj["id"])}`;
+    if ("key" in obj) return `key:${String(obj["key"])}`;
+    return `idx:${index}`;
+  }
+  return `val:${String(item)}`;
+}
+function itemValueSignature(item) {
+  try {
+    return JSON.stringify(item) ?? String(item);
+  } catch {
+    return String(item);
+  }
+}
+function reactiveListItemSignature(item) {
+  return itemValueSignature(item);
+}
+function reactiveListItemKey(item, index) {
+  return itemIdentity(item, index);
+}
+var OVERLAY_KINDS = {
+  dialog: {
+    role: "dialog",
+    modal: true,
+    takesFocus: true,
+    ariaModal: true,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  popover: {
+    role: "dialog",
+    modal: false,
+    takesFocus: true,
+    ariaModal: false,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  tooltip: {
+    role: "tooltip",
+    modal: false,
+    takesFocus: false,
+    ariaModal: false,
+    defaultCloseOnEscape: false,
+    defaultRestoreFocus: false
+  },
+  dropdown: {
+    role: "menu",
+    modal: false,
+    takesFocus: true,
+    ariaModal: false,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  toast: {
+    role: "status",
+    modal: false,
+    takesFocus: false,
+    ariaModal: false,
+    ariaLive: "polite",
+    defaultCloseOnEscape: false,
+    defaultRestoreFocus: false
+  }
+};
+var ContentBuilderBase = class {
+  constructor(_node, _graph) {
+    this._node = _node;
+    this._graph = _graph;
+  }
+  heading(text, options = {}) {
+    const props = { level: options.level ?? 1 };
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("heading", { parent: this._node, props });
+    const resolved = bindValue(this._graph, node, "text", text);
+    node.setProp("text", resolved);
+  }
+  text(content, options = {}) {
+    const props = {};
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("text", { parent: this._node, props });
+    const resolved = bindValue(this._graph, node, "text", content);
+    node.setProp("text", resolved);
+  }
+  button(label, options = {}) {
+    const props = {};
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("button", { parent: this._node, props });
+    const resolved = bindValue(this._graph, node, "label", label);
+    node.setProp("label", resolved);
+    if (options.disabled !== void 0) {
+      const resolvedDisabled = bindValue(this._graph, node, "disabled", options.disabled);
+      node.setProp("disabled", resolvedDisabled);
+    }
+    if (options.onClick !== void 0) {
+      const handlerKey = `click:${node.id}`;
+      this._graph.registerHandler(handlerKey, options.onClick);
+      node.addEvent({ type: "click", handlerKey });
+    }
+  }
+  input(options = {}) {
+    const props = {};
+    props["inputType"] = options.type ?? "text";
+    if (options.placeholder !== void 0) props["placeholder"] = options.placeholder;
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const nodeOpts = {
+      props,
+      parent: this._node
+    };
+    if (options.id !== void 0) nodeOpts.key = options.id;
+    const node = this._graph.createNode("input", nodeOpts);
+    const bindSignal = options.bind;
+    const valueBindable = bindSignal !== void 0 ? bindSignal : options.value;
+    const inputHandler = bindSignal !== void 0 ? (v) => bindSignal.set(v) : options.onInput;
+    if (valueBindable !== void 0) {
+      const resolved = bindValue(this._graph, node, "value", valueBindable);
+      node.setProp("value", resolved);
+    }
+    if (options.disabled !== void 0) {
+      const resolved = bindValue(this._graph, node, "disabled", options.disabled);
+      node.setProp("disabled", resolved);
+    }
+    if (inputHandler !== void 0) {
+      const handlerKey = `input:${node.id}`;
+      this._graph.registerHandler(handlerKey, inputHandler);
+      node.addEvent({ type: "input", handlerKey });
+    }
+    if (options.onChange !== void 0) {
+      const handlerKey = `change:${node.id}`;
+      this._graph.registerHandler(handlerKey, options.onChange);
+      node.addEvent({ type: "change", handlerKey });
+    }
+  }
+  image(options) {
+    const props = {
+      src: options.src,
+      alt: options.alt
+    };
+    if (options.width !== void 0) props["width"] = options.width;
+    if (options.height !== void 0) props["height"] = options.height;
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const nodeOpts = {
+      props,
+      parent: this._node
+    };
+    if (options.id !== void 0) nodeOpts.key = options.id;
+    this._graph.createNode("image", nodeOpts);
+  }
+  link(label, options) {
+    const props = {
+      href: options.href,
+      external: options.external ?? false
+    };
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("link", { parent: this._node, props });
+    const resolved = bindValue(this._graph, node, "label", label);
+    node.setProp("label", resolved);
+    if (options.onClick !== void 0) {
+      const handlerKey = `click:${node.id}`;
+      this._graph.registerHandler(handlerKey, options.onClick);
+      node.addEvent({ type: "click", handlerKey });
+    }
+  }
+};
+var ContainerBuilderBase = class extends ContentBuilderBase {
+  section(key, builder, options = {}) {
+    const node = this._graph.createNode("section", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new SectionBuilderImpl(node, this._graph));
+  }
+  container(key, builder, options = {}) {
+    const node = this._graph.createNode("container", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  list(key, builder, options = {}) {
+    const node = this._graph.createNode("list", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new ListBuilderImpl(node, this._graph));
+  }
+  listOf(key, items, renderItem, options = {}) {
+    const graph = this._graph;
+    const node = graph.createNode("reactive-list", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    const signalId = `${node.id}:items`;
+    node.stateRefs.push({ signalId, propKey: "items" });
+    graph.registerHandler(`__signal__${signalId}`, items);
+    const buildItem = (item, index) => {
+      const itemKey = reactiveListItemKey(item, index);
+      const itemNode = graph.createNode("list-item", {
+        key: itemKey,
+        // `_item` records the source item *reference* so the reconciler can
+        // short-circuit unchanged rows by identity (no signature hashing); `_sig`
+        // is the content signature used to detect an in-place data change when the
+        // reference differs. Both are internal metadata (leading `_`) and never
+        // reach the DOM.
+        props: {
+          key: itemKey,
+          _sig: reactiveListItemSignature(item),
+          // The item reference is stored as opaque internal metadata (never
+          // rendered); cast through `unknown` since `T` is not a `PropValue`.
+          _item: item
+        }
+      });
+      renderItem(item, index, new ContainerBuilderImpl(itemNode, graph));
+      return itemNode;
+    };
+    const buildPlan = (raw) => {
+      const arr = Array.isArray(raw) ? raw : [];
+      const plan = new Array(arr.length);
+      for (let i = 0; i < arr.length; i++) {
+        const item = arr[i];
+        const index = i;
+        plan[i] = {
+          key: reactiveListItemKey(item, index),
+          item,
+          sig: () => reactiveListItemSignature(item),
+          build: () => buildItem(item, index)
+        };
+      }
+      return plan;
+    };
+    graph.registerHandler(`__listplan__${node.id}`, buildPlan);
+    const current = isSignal(items) ? items.peek() : items;
+    const initial = Array.isArray(current) ? current : [];
+    initial.forEach((item, i) => {
+      node.appendChild(buildItem(item, i));
+    });
+  }
+  form(key, builder, options = {}) {
+    const props = containerProps(options);
+    const node = this._graph.createNode("form", {
+      key,
+      parent: this._node,
+      props
+    });
+    if (options.onSubmit !== void 0) {
+      const handlerKey = `submit:${node.id}`;
+      this._graph.registerHandler(handlerKey, options.onSubmit);
+      node.addEvent({ type: "submit", handlerKey });
+    }
+    builder(new FormBuilderImpl(node, this._graph));
+  }
+  when(condition, builder, elseBuilder) {
+    const graph = this._graph;
+    const node = graph.createNode("conditional", {
+      parent: this._node,
+      props: containerProps({})
+    });
+    const buildBranch = (build, tag) => {
+      const branchKey = `when-${tag}:${node.id}`;
+      const branch = graph.createNode("container", {
+        key: branchKey,
+        props: { key: branchKey }
+      });
+      build(new ContainerBuilderImpl(branch, graph));
+      return branch;
+    };
+    const buildAll = (raw) => {
+      if (raw) return [buildBranch(builder, "then")];
+      return elseBuilder !== void 0 ? [buildBranch(elseBuilder, "else")] : [];
+    };
+    if (isSignal(condition)) {
+      const signalId = `${node.id}:items`;
+      node.stateRefs.push({ signalId, propKey: "items" });
+      graph.registerHandler(`__signal__${signalId}`, condition);
+      graph.registerHandler(`__listbuild__${node.id}`, buildAll);
+      const current = condition.peek();
+      for (const child of buildAll(current)) node.appendChild(child);
+    } else {
+      for (const child of buildAll(condition)) node.appendChild(child);
+    }
+  }
+  errorBoundary(id, builder, options) {
+    const sources = options.source === void 0 ? [] : Array.isArray(options.source) ? [...options.source] : [options.source];
+    const localError = signal(void 0);
+    const retryNonce = signal(0);
+    const readError = () => {
+      const local = localError.peek();
+      if (local !== void 0 && local !== null) return local;
+      for (const s of sources) {
+        const e = s.peek();
+        if (e !== void 0 && e !== null) return e;
+      }
+      return void 0;
+    };
+    const hasError = derived(() => {
+      retryNonce.get();
+      localError.get();
+      for (const s of sources) s.get();
+      return readError() !== void 0;
+    });
+    const retry = () => {
+      localError.set(void 0);
+      options.onRetry?.();
+      retryNonce.update((n) => n + 1);
+    };
+    this.container(id, (c) => {
+      c.when(
+        hasError,
+        // Error state → fallback.
+        (fb) => options.fallback(fb, readError(), retry),
+        // Healthy state → body, guarded against synchronous build throws.
+        (body) => {
+          try {
+            builder(body);
+          } catch (err) {
+            queueMicrotask(() => localError.set(err));
+          }
+        }
+      );
+    }, { id });
+  }
+  // ── Portals & overlays ──────────────────────────────────────────────────────
+  portal(key, builder, options = {}) {
+    const node = this._graph.createNode("portal", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  /**
+   * Shared assembly for every overlay kind: a `portal` node whose single child
+   * is a `when(open, panel)` conditional. The panel container carries the
+   * kind's ARIA semantics; `builder` fills it. An `__overlay__<portalId>`
+   * descriptor is registered so the renderer wires focus/keyboard behavior to
+   * the same `open` signal that drives the panel. Reuses existing primitives
+   * (portal + when + container) — no new render path.
+   */
+  _overlay(kind, key, options, builder) {
+    const graph = this._graph;
+    const portalNode = graph.createNode("portal", {
+      key,
+      parent: this._node,
+      props: { key }
+    });
+    const openBindable = options.open;
+    const openSignal = isSignal(openBindable) ? openBindable : signal(openBindable);
+    const panelOptions = {
+      role: options.role ?? kind.role,
+      ...kind.ariaModal ? { ariaModal: true } : {},
+      ...kind.ariaLive !== void 0 ? { ariaLive: kind.ariaLive } : {},
+      ...options.class !== void 0 ? { class: options.class } : {},
+      ...options.ariaLabel !== void 0 ? { ariaLabel: options.ariaLabel } : {},
+      ...options.ariaLabelledBy !== void 0 ? { ariaLabelledBy: options.ariaLabelledBy } : {},
+      ...options.ariaDescribedBy !== void 0 ? { ariaDescribedBy: options.ariaDescribedBy } : {}
+    };
+    const portalBuilder = new ContainerBuilderImpl(portalNode, graph);
+    portalBuilder.when(openSignal, (panelHost) => {
+      panelHost.container(`${key}__panel`, builder, panelOptions);
+    });
+    const descriptor = {
+      open: openSignal,
+      modal: kind.modal,
+      takesFocus: kind.takesFocus,
+      closeOnEscape: options.closeOnEscape ?? kind.defaultCloseOnEscape,
+      restoreFocus: options.restoreFocus ?? kind.defaultRestoreFocus,
+      ...options.initialFocusId !== void 0 ? { initialFocusId: options.initialFocusId } : {},
+      ...options.onClose !== void 0 ? { onClose: options.onClose } : {}
+    };
+    graph.registerHandler(
+      `__overlay__${portalNode.id}`,
+      () => descriptor
+    );
+  }
+  dialog(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.dialog, key, options, builder);
+  }
+  popover(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.popover, key, options, builder);
+  }
+  tooltip(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.tooltip, key, options, builder);
+  }
+  dropdown(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.dropdown, key, options, builder);
+  }
+  toast(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.toast, key, options, builder);
+  }
+  // ── Components ────────────────────────────────────────────────────────────
+  /**
+   * Instantiate a reusable component (§3–§9). Creates a `'component'` node
+   * (rendered as a `<div>` wrapper — preserves the one-node/one-element
+   * positional-hydration invariant), then runs `def.setup(props, ctx)`
+   * synchronously to obtain the render function and fills the component's own
+   * container scope with it — structurally identical to `container`/
+   * `errorBoundary`. Cleanups the setup registers via `ctx.effect`/
+   * `ctx.onCleanup` are collected into a closure and exposed to the renderer
+   * through a `__component__<id>` handler (mirroring `__overlay__`); the mount/
+   * hydrate paths read it and route each into `NodeInstance.trackCleanup`, so
+   * teardown runs (children-first) when the component leaves the graph.
+   *
+   * `setup` runs once per instance here at build time. When this component sits
+   * inside a keyed list / conditional, a rebuild disposes the old instance
+   * (running its cleanups + pruning its `__component__` entry) and re-runs this
+   * method for the new node — so re-invocation is safe and leak-free.
+   */
+  component(key, def, props, children) {
+    const graph = this._graph;
+    const node = graph.createNode("component", {
+      key,
+      parent: this._node,
+      // `data-streetui-component` is a non-underscore prop, so it reaches the
+      // DOM as an attribute and is visible to DevTools (§21) — unlike the
+      // internal `_`-prefixed metadata the renderer hides.
+      props: { key, "data-streetui-component": def.name }
+    });
+    const cleanups = [];
+    const ctx = {
+      key,
+      onCleanup(fn) {
+        cleanups.push(fn);
+      },
+      effect(fn) {
+        cleanups.push(effect(fn));
+      },
+      renderChildren(content) {
+        if (children !== void 0) children(content);
+      }
+    };
+    let render2;
+    try {
+      render2 = def.setup(props, ctx);
+      render2(new ContainerBuilderImpl(node, graph));
+    } catch (err) {
+      queueMicrotask(() => {
+        throw err;
+      });
+    }
+    if (cleanups.length > 0) {
+      graph.registerHandler(
+        `__component__${node.id}`,
+        () => cleanups
+      );
+    }
+  }
+};
+var SectionBuilderImpl = class extends ContainerBuilderBase {
+};
+var ContainerBuilderImpl = class extends ContainerBuilderBase {
+};
+var FormBuilderImpl = class extends ContainerBuilderBase {
+};
+var ListBuilderImpl = class extends ContentBuilderBase {
+  item(key, builder, options = {}) {
+    const node = this._graph.createNode("list-item", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new ContainerBuilderImpl(node, this._graph));
+  }
+};
+var PageBuilderImpl = class extends ContainerBuilderBase {
+};
+var AppBuilder = class {
+  constructor(_graph) {
+    this._graph = _graph;
+  }
+  page(key, builder) {
+    const node = this._graph.createNode("page", {
+      key,
+      parent: this._graph.root,
+      props: { key }
+    });
+    builder(new PageBuilderImpl(node, this._graph));
+  }
+};
+
+// ../graph/src/graph-node.ts
+var GraphNode = class _GraphNode {
+  id;
+  type;
+  key;
+  props;
+  events;
+  stateRefs;
+  children;
+  parent;
+  constructor(type, options = {}) {
+    this.type = type;
+    this.id = options.id ?? generateNodeId(type);
+    this.key = options.key;
+    this.props = options.props ?? {};
+    this.events = options.events ?? [];
+    this.stateRefs = options.stateRefs ?? [];
+    this.children = [];
+    this.parent = null;
+  }
+  // ── Child management ────────────────────────────────────────────────────────
+  appendChild(child) {
+    if (child.parent !== null) {
+      child.parent.removeChild(child);
+    }
+    child.parent = this;
+    this.children.push(child);
+  }
+  insertBefore(child, reference) {
+    const idx = this.children.indexOf(reference);
+    if (idx === -1) {
+      this.appendChild(child);
+      return;
+    }
+    if (child.parent !== null) {
+      child.parent.removeChild(child);
+    }
+    child.parent = this;
+    this.children.splice(idx, 0, child);
+  }
+  removeChild(child) {
+    const idx = this.children.indexOf(child);
+    if (idx === -1) return;
+    this.children.splice(idx, 1);
+    child.parent = null;
+  }
+  replaceChild(newChild, oldChild) {
+    const idx = this.children.indexOf(oldChild);
+    if (idx === -1) {
+      throw new Error(`GraphNode.replaceChild: oldChild is not a child of this node`);
+    }
+    if (newChild.parent !== null) {
+      newChild.parent.removeChild(newChild);
+    }
+    oldChild.parent = null;
+    newChild.parent = this;
+    this.children.splice(idx, 1, newChild);
+  }
+  // ── Prop helpers ────────────────────────────────────────────────────────────
+  setProp(key, value) {
+    this.props = { ...this.props, [key]: value };
+  }
+  getProp(key) {
+    return this.props[key];
+  }
+  // ── Event helpers ───────────────────────────────────────────────────────────
+  addEvent(descriptor) {
+    this.events.push(descriptor);
+  }
+  removeEvent(type) {
+    this.events = this.events.filter((e) => e.type !== type);
+  }
+  // ── Queries ─────────────────────────────────────────────────────────────────
+  get isLeaf() {
+    return this.children.length === 0;
+  }
+  get depth() {
+    let d = 0;
+    let node = this.parent;
+    while (node !== null) {
+      d++;
+      node = node.parent;
+    }
+    return d;
+  }
+  get root() {
+    let node = this;
+    while (node.parent !== null) {
+      node = node.parent;
+    }
+    return node;
+  }
+  /** Shallow clone — does not clone children. */
+  shallowClone() {
+    const opts = {
+      props: { ...this.props },
+      events: [...this.events],
+      stateRefs: [...this.stateRefs]
+    };
+    if (this.key !== void 0) opts.key = this.key;
+    return new _GraphNode(this.type, opts);
+  }
+};
+
+// ../graph/src/graph.ts
+var ApplicationGraph = class {
+  root;
+  name;
+  version;
+  _nodeIndex = /* @__PURE__ */ new Map();
+  /** Handler registry — maps handlerKey → actual function */
+  handlers = /* @__PURE__ */ new Map();
+  constructor(options) {
+    this.name = options.name;
+    this.version = options.version ?? "0.0.1";
+    this.root = new GraphNode("application", { props: { name: options.name } });
+    this._nodeIndex.set(this.root.id, this.root);
+  }
+  // ── Node creation & attachment ────────────────────────────────────────────
+  createNode(type, options = {}) {
+    const nodeOpts = {};
+    if (options.key !== void 0) nodeOpts.key = options.key;
+    if (options.props !== void 0) nodeOpts.props = options.props;
+    const node = new GraphNode(type, nodeOpts);
+    this._nodeIndex.set(node.id, node);
+    if (options.parent !== void 0) {
+      options.parent.appendChild(node);
+    }
+    return node;
+  }
+  attachNode(node, parent) {
+    this._nodeIndex.set(node.id, node);
+    parent.appendChild(node);
+  }
+  detachNode(node) {
+    if (node.parent !== null) {
+      node.parent.removeChild(node);
+    }
+    this._removeFromIndex(node);
+  }
+  _removeFromIndex(node) {
+    this._nodeIndex.delete(node.id);
+    this._unregisterNodeHandlers(node);
+    for (const child of node.children) {
+      this._removeFromIndex(child);
+    }
+  }
+  /**
+   * Remove every handler-registry entry owned by a single node. A node owns:
+   *  - one entry per event descriptor (its `handlerKey`),
+   *  - one `__signal__<signalId>` entry per state ref (signalIds are namespaced
+   *    by node id, so they are never shared between nodes), and
+   *  - a `__listbuild__<id>` entry if it is a reactive-list.
+   * Called for every node in a detached subtree so removing list items (or
+   * discarding freshly-built-but-unadopted item subtrees) leaves no stale
+   * registrations behind.
+   */
+  _unregisterNodeHandlers(node) {
+    for (const event of node.events) {
+      this.handlers.delete(event.handlerKey);
+    }
+    for (const ref of node.stateRefs) {
+      this.handlers.delete(`__signal__${ref.signalId}`);
+    }
+    this.handlers.delete(`__listbuild__${node.id}`);
+    this.handlers.delete(`__listplan__${node.id}`);
+    this.handlers.delete(`__overlay__${node.id}`);
+    this.handlers.delete(`__component__${node.id}`);
+  }
+  // ── Handler registry ──────────────────────────────────────────────────────
+  registerHandler(key, fn) {
+    this.handlers.set(key, fn);
+  }
+  getHandler(key) {
+    return this.handlers.get(key);
+  }
+  /** True if a handler is currently registered under `key`. Inspection helper. */
+  hasHandler(key) {
+    return this.handlers.has(key);
+  }
+  /** Number of currently-registered handlers. Inspection helper. */
+  get handlerCount() {
+    return this.handlers.size;
+  }
+  // ── Lookup ────────────────────────────────────────────────────────────────
+  findById(id) {
+    return this._nodeIndex.get(id);
+  }
+  findAll(predicate) {
+    const results = [];
+    this._walk(this.root, (node) => {
+      if (predicate(node)) results.push(node);
+    });
+    return results;
+  }
+  findByType(type) {
+    return this.findAll((n) => n.type === type);
+  }
+  // ── Traversal ─────────────────────────────────────────────────────────────
+  walk(visitor) {
+    this._walk(this.root, visitor, 0);
+  }
+  _walk(node, visitor, depth = 0) {
+    visitor(node, depth);
+    for (const child of node.children) {
+      this._walk(child, visitor, depth + 1);
+    }
+  }
+  get nodeCount() {
+    return this._nodeIndex.size;
+  }
+  // ── Validation ────────────────────────────────────────────────────────────
+  validate() {
+    const dc = new DiagnosticCollector();
+    this.walk((node) => {
+      for (const event of node.events) {
+        if (!this.handlers.has(event.handlerKey)) {
+          dc.warn(
+            "GRAPH_MISSING_HANDLER",
+            `Node "${node.id}" references handler "${event.handlerKey}" which is not registered`,
+            { nodeId: node.id }
+          );
+        }
+      }
+      if (node.type === "page" && node.parent?.type !== "application") {
+        dc.error(
+          "GRAPH_PAGE_DEPTH",
+          `Page node "${node.id}" must be a direct child of the application root`,
+          { nodeId: node.id }
+        );
+      }
+    });
+    return dc;
+  }
+  // ── Serialization ─────────────────────────────────────────────────────────
+  serialize() {
+    return {
+      name: this.name,
+      version: this.version,
+      root: this._serializeNode(this.root)
+    };
+  }
+  _serializeNode(node) {
+    const result = {
+      id: node.id,
+      type: node.type,
+      key: node.key,
+      props: node.props,
+      events: node.events,
+      stateRefs: node.stateRefs,
+      children: node.children.map((c) => this._serializeNode(c))
+    };
+    return result;
+  }
+};
+
+// ../dsl/src/dsl.ts
+var StreetApp = class {
+  _graph;
+  _builder;
+  constructor(options) {
+    const graphOpts = { name: options.name };
+    if (options.version !== void 0) graphOpts.version = options.version;
+    this._graph = new ApplicationGraph(graphOpts);
+    this._builder = new AppBuilder(this._graph);
+  }
+  page(key, builder) {
+    this._builder.page(key, builder);
+    return this;
+  }
+  /** Compile to ApplicationGraph — validates and returns the graph. */
+  build() {
+    const dc = this._graph.validate();
+    dc.throwIfErrors();
+    return this._graph;
+  }
+  /** Access graph before building (useful for inspection). */
+  get graph() {
+    return this._graph;
+  }
+};
+var streetui = {
+  app(options) {
+    return new StreetApp(options);
+  }
+};
+
+// ../testing/src/component.ts
+var COMPONENT_ATTR = "data-streetui-component";
+function renderComponent(def, props, children) {
+  const app = streetui.app({ name: `test:${def.name}` });
+  app.page("host", (page) => {
+    page.component("root", def, props, children);
+  });
+  const result = render(app);
+  const component = result.container.querySelector(`[${COMPONENT_ATTR}]`);
+  if (component === null) {
+    throw new Error(`[StreetUI Testing] renderComponent: no component element rendered for "${def.name}"`);
+  }
+  return { ...result, component };
+}
+function hydrateComponent(build, options = {}) {
+  return renderServerThenHydrate(() => {
+    const { def, props, children } = build();
+    const app = streetui.app({ name: `test:${def.name}` });
+    app.page("host", (page) => page.component("root", def, props, children));
+    return app;
+  }, options);
+}
+function findAllComponents(container, name) {
+  const selector = name === void 0 ? `[${COMPONENT_ATTR}]` : `[${COMPONENT_ATTR}="${name}"]`;
+  return Array.from(container.querySelectorAll(selector));
+}
+function findComponent(container, name) {
+  const matches = findAllComponents(container, name);
+  const named = name !== void 0 ? ` named "${name}"` : "";
+  if (matches.length === 0) {
+    throw new Error(`[StreetUI Testing] No component${named} found`);
+  }
+  if (matches.length > 1) {
+    throw new Error(
+      `[StreetUI Testing] Found ${matches.length} components${named} \u2014 pass a name to disambiguate`
+    );
+  }
+  return matches[0];
+}
+function getComponentName(el) {
+  return el.getAttribute(COMPONENT_ATTR);
+}
+function trigger(el, type, init = {}) {
+  const base = { bubbles: true, cancelable: true, ...init };
+  let event;
+  if (type.startsWith("key")) {
+    event = new KeyboardEvent(type, base);
+  } else if (type.startsWith("mouse") || type === "click" || type === "dblclick") {
+    event = new MouseEvent(type, base);
+  } else if (type === "input" || type === "change") {
+    event = new Event(type, base);
+  } else {
+    event = new Event(type, base);
+  }
+  el.dispatchEvent(event);
+}
+
 // src/version.ts
-var VERSION = "1.7.0";
+var VERSION = "1.8.0";
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   VERSION,
   analyzeGraph,
   findAllByRole,
+  findAllComponents,
   findByRole,
   findByText,
+  findComponent,
   flushUpdates,
   formatInspection,
+  getComponentName,
+  hydrateComponent,
   inspectCompilation,
   render,
+  renderComponent,
   renderOnce,
   renderServerThenHydrate,
+  trigger,
   waitFor
 });
 //# sourceMappingURL=testing.cjs.map

@@ -1141,6 +1141,7 @@ function mountNode(ctx, graphNode, parentDom) {
     instance.addChild(childInstance);
   }
   dom.appendChild(parentDom, el);
+  if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
   return instance;
 }
 function textUpdate(dom, el, textNode) {
@@ -1309,6 +1310,11 @@ function wireOverlayBehavior(ctx, graphNode, instance, target) {
   instance.trackCleanup(teardown);
   if (openSig.peek() === true) onOpenChange(true);
 }
+function wireComponentBehavior(ctx, graphNode, instance) {
+  const fn = ctx.graph.getHandler(`__component__${graphNode.id}`);
+  if (fn === void 0) return;
+  for (const cleanup of fn()) instance.trackCleanup(cleanup);
+}
 
 // ../renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
@@ -1376,7 +1382,8 @@ function analyzeGraph(graph) {
     const isList = node.type === "reactive-list";
     const isConditional = node.type === "conditional";
     const isPortal = node.type === "portal";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
+    const isComponent = node.type === "component";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -1463,7 +1470,7 @@ function renderToString(compiled, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.7.0";
+var VERSION = "1.8.0";
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   STATE_MARKER_ATTR,

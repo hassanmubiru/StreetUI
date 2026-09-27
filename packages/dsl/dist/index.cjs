@@ -27,6 +27,8 @@ __export(index_exports, {
   PageBuilderImpl: () => PageBuilderImpl,
   SectionBuilderImpl: () => SectionBuilderImpl,
   StreetApp: () => StreetApp,
+  component: () => component,
+  isComponentDefinition: () => isComponentDefinition,
   reactiveListItemKey: () => reactiveListItemKey,
   reactiveListItemSignature: () => reactiveListItemSignature,
   streetui: () => streetui
@@ -475,6 +477,63 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
   toast(key, options, builder) {
     this._overlay(OVERLAY_KINDS.toast, key, options, builder);
   }
+  // ── Components ────────────────────────────────────────────────────────────
+  /**
+   * Instantiate a reusable component (§3–§9). Creates a `'component'` node
+   * (rendered as a `<div>` wrapper — preserves the one-node/one-element
+   * positional-hydration invariant), then runs `def.setup(props, ctx)`
+   * synchronously to obtain the render function and fills the component's own
+   * container scope with it — structurally identical to `container`/
+   * `errorBoundary`. Cleanups the setup registers via `ctx.effect`/
+   * `ctx.onCleanup` are collected into a closure and exposed to the renderer
+   * through a `__component__<id>` handler (mirroring `__overlay__`); the mount/
+   * hydrate paths read it and route each into `NodeInstance.trackCleanup`, so
+   * teardown runs (children-first) when the component leaves the graph.
+   *
+   * `setup` runs once per instance here at build time. When this component sits
+   * inside a keyed list / conditional, a rebuild disposes the old instance
+   * (running its cleanups + pruning its `__component__` entry) and re-runs this
+   * method for the new node — so re-invocation is safe and leak-free.
+   */
+  component(key, def, props, children) {
+    const graph = this._graph;
+    const node = graph.createNode("component", {
+      key,
+      parent: this._node,
+      // `data-streetui-component` is a non-underscore prop, so it reaches the
+      // DOM as an attribute and is visible to DevTools (§21) — unlike the
+      // internal `_`-prefixed metadata the renderer hides.
+      props: { key, "data-streetui-component": def.name }
+    });
+    const cleanups = [];
+    const ctx = {
+      key,
+      onCleanup(fn) {
+        cleanups.push(fn);
+      },
+      effect(fn) {
+        cleanups.push((0, import_state.effect)(fn));
+      },
+      renderChildren(content) {
+        if (children !== void 0) children(content);
+      }
+    };
+    let render;
+    try {
+      render = def.setup(props, ctx);
+      render(new ContainerBuilderImpl(node, graph));
+    } catch (err) {
+      queueMicrotask(() => {
+        throw err;
+      });
+    }
+    if (cleanups.length > 0) {
+      graph.registerHandler(
+        `__component__${node.id}`,
+        () => cleanups
+      );
+    }
+  }
 };
 var SectionBuilderImpl = class extends ContainerBuilderBase {
 };
@@ -507,6 +566,18 @@ var AppBuilder = class {
     builder(new PageBuilderImpl(node, this._graph));
   }
 };
+
+// src/component.ts
+function component(setup, options = {}) {
+  return {
+    __streetui_component: true,
+    name: options.name ?? setup.name ?? "Component",
+    setup
+  };
+}
+function isComponentDefinition(value) {
+  return value !== null && typeof value === "object" && value.__streetui_component === true;
+}
 
 // src/dsl.ts
 var import_graph = require("@streetui/graph");
@@ -548,6 +619,8 @@ var streetui = {
   PageBuilderImpl,
   SectionBuilderImpl,
   StreetApp,
+  component,
+  isComponentDefinition,
   reactiveListItemKey,
   reactiveListItemSignature,
   streetui

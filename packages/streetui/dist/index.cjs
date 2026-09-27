@@ -70,6 +70,7 @@ __export(src_exports, {
   buttonUpdate: () => buttonUpdate,
   compile: () => compile,
   compileGraph: () => compileGraph,
+  component: () => component,
   consoleDiagnosticSink: () => consoleDiagnosticSink,
   consoleHydrationDiagnosticSink: () => consoleHydrationDiagnosticSink,
   containFocus: () => containFocus,
@@ -112,6 +113,7 @@ __export(src_exports, {
   hydrateGraph: () => hydrateGraph,
   inputUpdate: () => inputUpdate,
   inspectApplication: () => inspectApplication,
+  inspectComponents: () => inspectComponents,
   inspectContext: () => inspectContext,
   inspectForm: () => inspectForm,
   inspectGraph: () => inspectGraph,
@@ -121,6 +123,7 @@ __export(src_exports, {
   inspectSignal: () => inspectSignal,
   interpolate: () => interpolate,
   isBatching: () => isBatching,
+  isComponentDefinition: () => isComponentDefinition,
   matchPattern: () => matchPattern,
   matchRoutes: () => matchRoutes,
   maxLength: () => maxLength,
@@ -170,6 +173,7 @@ __export(src_exports, {
   transformGraph: () => transformGraph,
   trapFocus: () => trapFocus,
   validateGraph: () => validateGraph,
+  wireComponentBehavior: () => wireComponentBehavior,
   wireEvents: () => wireEvents,
   wireOverlayBehavior: () => wireOverlayBehavior,
   wireReactiveList: () => wireReactiveList,
@@ -178,7 +182,7 @@ __export(src_exports, {
 module.exports = __toCommonJS(src_exports);
 
 // src/version.ts
-var VERSION = "1.7.0";
+var VERSION = "1.8.0";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;
@@ -982,6 +986,7 @@ var ApplicationGraph = class {
     this.handlers.delete(`__listbuild__${node.id}`);
     this.handlers.delete(`__listplan__${node.id}`);
     this.handlers.delete(`__overlay__${node.id}`);
+    this.handlers.delete(`__component__${node.id}`);
   }
   // ── Handler registry ──────────────────────────────────────────────────────
   registerHandler(key, fn) {
@@ -1511,6 +1516,63 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
   toast(key, options, builder) {
     this._overlay(OVERLAY_KINDS.toast, key, options, builder);
   }
+  // ── Components ────────────────────────────────────────────────────────────
+  /**
+   * Instantiate a reusable component (§3–§9). Creates a `'component'` node
+   * (rendered as a `<div>` wrapper — preserves the one-node/one-element
+   * positional-hydration invariant), then runs `def.setup(props, ctx)`
+   * synchronously to obtain the render function and fills the component's own
+   * container scope with it — structurally identical to `container`/
+   * `errorBoundary`. Cleanups the setup registers via `ctx.effect`/
+   * `ctx.onCleanup` are collected into a closure and exposed to the renderer
+   * through a `__component__<id>` handler (mirroring `__overlay__`); the mount/
+   * hydrate paths read it and route each into `NodeInstance.trackCleanup`, so
+   * teardown runs (children-first) when the component leaves the graph.
+   *
+   * `setup` runs once per instance here at build time. When this component sits
+   * inside a keyed list / conditional, a rebuild disposes the old instance
+   * (running its cleanups + pruning its `__component__` entry) and re-runs this
+   * method for the new node — so re-invocation is safe and leak-free.
+   */
+  component(key, def, props, children) {
+    const graph = this._graph;
+    const node = graph.createNode("component", {
+      key,
+      parent: this._node,
+      // `data-streetui-component` is a non-underscore prop, so it reaches the
+      // DOM as an attribute and is visible to DevTools (§21) — unlike the
+      // internal `_`-prefixed metadata the renderer hides.
+      props: { key, "data-streetui-component": def.name }
+    });
+    const cleanups = [];
+    const ctx = {
+      key,
+      onCleanup(fn) {
+        cleanups.push(fn);
+      },
+      effect(fn) {
+        cleanups.push(effect(fn));
+      },
+      renderChildren(content) {
+        if (children !== void 0) children(content);
+      }
+    };
+    let render;
+    try {
+      render = def.setup(props, ctx);
+      render(new ContainerBuilderImpl(node, graph));
+    } catch (err) {
+      queueMicrotask(() => {
+        throw err;
+      });
+    }
+    if (cleanups.length > 0) {
+      graph.registerHandler(
+        `__component__${node.id}`,
+        () => cleanups
+      );
+    }
+  }
 };
 var SectionBuilderImpl = class extends ContainerBuilderBase {
 };
@@ -1543,6 +1605,18 @@ var AppBuilder = class {
     builder(new PageBuilderImpl(node, this._graph));
   }
 };
+
+// ../dsl/src/component.ts
+function component(setup, options = {}) {
+  return {
+    __streetui_component: true,
+    name: options.name ?? setup.name ?? "Component",
+    setup
+  };
+}
+function isComponentDefinition(value) {
+  return value !== null && typeof value === "object" && value.__streetui_component === true;
+}
 
 // ../dsl/src/dsl.ts
 var StreetApp = class {
@@ -3243,6 +3317,7 @@ function mountNode(ctx, graphNode, parentDom) {
     instance.addChild(childInstance);
   }
   dom.appendChild(parentDom, el);
+  if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
   return instance;
 }
 function textUpdate(dom, el, textNode) {
@@ -3411,6 +3486,11 @@ function wireOverlayBehavior(ctx, graphNode, instance, target) {
   instance.trackCleanup(teardown);
   if (openSig.peek() === true) onOpenChange(true);
 }
+function wireComponentBehavior(ctx, graphNode, instance) {
+  const fn = ctx.graph.getHandler(`__component__${graphNode.id}`);
+  if (fn === void 0) return;
+  for (const cleanup of fn()) instance.trackCleanup(cleanup);
+}
 
 // ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
@@ -3542,6 +3622,7 @@ function hydrateNode(ctx, graphNode, domNode, path) {
         return instance;
       }
       hydrateChildren(ctx, graphNode, instance, domNode, path);
+      if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
       return instance;
     }
   }
@@ -3776,7 +3857,8 @@ function analyzeGraph(graph) {
     const isList = node.type === "reactive-list";
     const isConditional = node.type === "conditional";
     const isPortal = node.type === "portal";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
+    const isComponent = node.type === "component";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -4483,6 +4565,21 @@ function nodeTypeStats(graph) {
   });
   return counts;
 }
+function inspectComponents(graph) {
+  const out = [];
+  graph.walk((node, depth) => {
+    if (node.type !== "component") return;
+    const name = node.props["data-streetui-component"];
+    out.push({
+      id: node.id,
+      key: node.key,
+      name: typeof name === "string" ? name : "Component",
+      depth,
+      childCount: node.children.length
+    });
+  });
+  return out;
+}
 
 // ../devtools/src/application.ts
 function collectPerf(node, distinctSignals, acc) {
@@ -4867,6 +4964,7 @@ function defineConfig(config) {
   buttonUpdate,
   compile,
   compileGraph,
+  component,
   consoleDiagnosticSink,
   consoleHydrationDiagnosticSink,
   containFocus,
@@ -4909,6 +5007,7 @@ function defineConfig(config) {
   hydrateGraph,
   inputUpdate,
   inspectApplication,
+  inspectComponents,
   inspectContext,
   inspectForm,
   inspectGraph,
@@ -4918,6 +5017,7 @@ function defineConfig(config) {
   inspectSignal,
   interpolate,
   isBatching,
+  isComponentDefinition,
   matchPattern,
   matchRoutes,
   maxLength,
@@ -4967,6 +5067,7 @@ function defineConfig(config) {
   transformGraph,
   trapFocus,
   validateGraph,
+  wireComponentBehavior,
   wireEvents,
   wireOverlayBehavior,
   wireReactiveList,

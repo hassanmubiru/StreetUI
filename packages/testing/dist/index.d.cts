@@ -1,4 +1,4 @@
-import { StreetApp } from '@streetui/dsl';
+import { StreetApp, ComponentDefinition, ContainerBuilder } from '@streetui/dsl';
 import { RenderHandle } from '@streetui/runtime';
 import { HydrationDiagnostic } from '@streetui/renderer';
 
@@ -110,4 +110,63 @@ interface HydrateTestResult {
  */
 declare function renderServerThenHydrate(build: () => StreetApp, options?: HydrateTestOptions): HydrateTestResult;
 
-export { type ByRoleOptions, type HydrateTestOptions, type HydrateTestResult, type RenderResult, type WaitForOptions, findAllByRole, findByRole, findByText, flushUpdates, render, renderOnce, renderServerThenHydrate, waitFor };
+/**
+ * Component-focused testing helpers (§22).
+ *
+ * These extend `streetui/testing` for the component model. Following the spec's
+ * "add only the ones that are actually useful" directive, this module ships the
+ * helpers that remove real boilerplate and OMITS the ones that would be
+ * misleading in this architecture:
+ *
+ *   • renderComponent   — mount a single component in a throwaway host app.
+ *   • hydrateComponent  — SSR-then-hydrate that same host (the §11/§12 seam).
+ *   • findComponent / findAllComponents / getComponentName — locate component
+ *     instances by their inspectable `data-streetui-component` name.
+ *   • trigger           — dispatch a bubbling DOM event (click/input/keydown…).
+ *
+ * Deliberately NOT provided:
+ *   • getComponentProps — props are passed to `setup` and captured by closure;
+ *     they are not reified on the node (only the definition *name* is), so a
+ *     prop-reading helper would either lie or require a private-graph backdoor.
+ *     Assert on rendered output (or a signal you own) instead.
+ *   • awaitResource     — `waitFor(...)` and `flushUpdates()` already settle
+ *     async resource state; a resource-specific alias would be redundant.
+ */
+
+interface RenderComponentResult extends RenderResult {
+    /** The component's root `<div>` wrapper element. */
+    readonly component: HTMLElement;
+}
+/**
+ * Build a throwaway single-page host app whose only content is `def` rendered
+ * with `props` (and optional `children`), mount it, and return the usual
+ * `RenderResult` plus the component's root element. Use for unit-testing one
+ * component without hand-writing an app+page wrapper each time.
+ */
+declare function renderComponent<P>(def: ComponentDefinition<P>, props: P, children?: ContainerBuilder): RenderComponentResult;
+/**
+ * SSR-render then hydrate a single component in a host app — the production
+ * server→client seam (§11/§12). `build` must return `{ def, props, children? }`;
+ * it is invoked twice (server then client) with id-counter reset between, so a
+ * component that owns per-instance signals lines up positionally on hydration.
+ */
+declare function hydrateComponent<P>(build: () => {
+    def: ComponentDefinition<P>;
+    props: P;
+    children?: ContainerBuilder;
+}, options?: HydrateTestOptions): HydrateTestResult;
+/** All component instances under `container`, optionally filtered by name. */
+declare function findAllComponents(container: Element, name?: string): HTMLElement[];
+/** The single component instance under `container` (throws if none/ambiguous). */
+declare function findComponent(container: Element, name?: string): HTMLElement;
+/** Read a component element's definition name, or `null` if `el` is not one. */
+declare function getComponentName(el: Element): string | null;
+/**
+ * Dispatch a bubbling, cancelable DOM event of `type` on `el`. Thin wrapper over
+ * `dispatchEvent` so tests read intentfully (`trigger(btn, 'click')`) without
+ * constructing `Event`/`KeyboardEvent` objects by hand. Extra `init` fields
+ * (e.g. `{ key: 'Escape' }`) are forwarded to the appropriate event ctor.
+ */
+declare function trigger(el: Element, type: string, init?: Record<string, unknown>): void;
+
+export { type ByRoleOptions, type HydrateTestOptions, type HydrateTestResult, type RenderComponentResult, type RenderResult, type WaitForOptions, findAllByRole, findAllComponents, findByRole, findByText, findComponent, flushUpdates, getComponentName, hydrateComponent, render, renderComponent, renderOnce, renderServerThenHydrate, trigger, waitFor };

@@ -624,6 +624,7 @@ function mountNode(ctx, graphNode, parentDom) {
     instance.addChild(childInstance);
   }
   dom.appendChild(parentDom, el);
+  if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
   return instance;
 }
 function textUpdate(dom, el, textNode) {
@@ -792,6 +793,11 @@ function wireOverlayBehavior(ctx, graphNode, instance, target) {
   instance.trackCleanup(teardown);
   if (openSig.peek() === true) onOpenChange(true);
 }
+function wireComponentBehavior(ctx, graphNode, instance) {
+  const fn = ctx.graph.getHandler(`__component__${graphNode.id}`);
+  if (fn === void 0) return;
+  for (const cleanup of fn()) instance.trackCleanup(cleanup);
+}
 
 // src/renderer.ts
 import { BrowserDOMAdapter } from "@streetui/dom";
@@ -926,6 +932,7 @@ function hydrateNode(ctx, graphNode, domNode, path) {
         return instance;
       }
       hydrateChildren(ctx, graphNode, instance, domNode, path);
+      if (graphNode.type === "component") wireComponentBehavior(ctx, graphNode, instance);
       return instance;
     }
   }
@@ -1222,6 +1229,7 @@ export {
   resolveTag,
   serializeState,
   textUpdate,
+  wireComponentBehavior,
   wireEvents,
   wireOverlayBehavior,
   wireReactiveList,

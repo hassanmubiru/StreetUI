@@ -39,6 +39,21 @@ function nodeTypeStats(graph) {
   });
   return counts;
 }
+function inspectComponents(graph) {
+  const out = [];
+  graph.walk((node, depth) => {
+    if (node.type !== "component") return;
+    const name = node.props["data-streetui-component"];
+    out.push({
+      id: node.id,
+      key: node.key,
+      name: typeof name === "string" ? name : "Component",
+      depth,
+      childCount: node.children.length
+    });
+  });
+  return out;
+}
 
 // src/application.ts
 import { formatDiagnostic as formatDiagnostic2 } from "@streetui/core";
@@ -376,6 +391,7 @@ export {
   createDevTools,
   diagnosePerformance,
   inspectApplication,
+  inspectComponents,
   inspectContext,
   inspectForm,
   inspectGraph,

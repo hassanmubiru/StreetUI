@@ -7,7 +7,7 @@
  * (`streetui --version`) — the consolidated test-suite pins all three to the
  * same coordinated release so they can never silently drift apart.
  */
-declare const VERSION = "1.7.0";
+declare const VERSION = "1.8.0";
 
 /**
  * StreetUI reactive signals — framework-owned reactivity, no external libraries.
@@ -342,6 +342,111 @@ interface SerializedGraph {
 }
 
 /**
+ * First-class StreetUI-native components (§3–§9).
+ *
+ * A component is a *reusable unit that owns its own local state and lifecycle*.
+ * It is NOT a virtual-DOM element, a second reactive system, or a second
+ * renderer. It compiles into the EXISTING pipeline: `container.component(...)`
+ * creates a reserved `'component'` GraphNode (already a `SemanticNodeType`,
+ * already mapped to `<div>`), runs the component's `setup` synchronously during
+ * the same build-time descent every other builder uses, and routes any cleanups
+ * the setup registers into the node's `NodeInstance` at mount (so they run,
+ * children-first, when the component leaves the graph).
+ *
+ * Design (derived from the existing DSL architecture, not copied from React/Vue):
+ *
+ *   const UserCard = component<{ name: Signal<string> }>((props, ctx) => {
+ *     // ── setup: runs ONCE per instance, at build time ──
+ *     const open = signal(false);
+ *     ctx.effect(() => { ... });            // auto-disposed on unmount
+ *     ctx.onCleanup(() => { ... });         // explicit teardown hook
+ *     // ── render: fills the component's own container scope ──
+ *     return (content) => {
+ *       content.text(props.name);           // fine-grained: signal prop, no re-setup
+ *       content.when(open, (c) => c.text('expanded'));
+ *       ctx.renderChildren(content);        // where slotted children go (§6)
+ *     };
+ *   }, { name: 'UserCard' });
+ *
+ *   page.component('card-1', UserCard, { name }, (slot) => slot.text('child'));
+ *
+ * Props are ordinary typed values (§5 — typing is a TypeScript concern, no
+ * runtime schema). Passing a `Signal<T>` prop and binding it in the render body
+ * gives fine-grained updates (§13) WITHOUT re-running `setup`: only the bound
+ * node mutates when the signal changes. `setup` re-runs only when the component
+ * is genuinely rebuilt (removed + re-created by a keyed list / conditional),
+ * at which point the previous instance is disposed first — so cleanup stays
+ * correct.
+ */
+
+/**
+ * The render half of a component: fills the component's own container scope.
+ * Returned by `setup` so that per-instance state created in `setup` is captured
+ * by closure and the render body can read it.
+ */
+type ComponentRender = (content: ContainerDSL) => void;
+/**
+ * Lifecycle + composition surface handed to a component's `setup`. Local
+ * reactive state is created with the EXISTING `signal`/`derived`/`effect`/
+ * `batch` primitives (§8) — `ctx` only adds ownership: anything registered here
+ * is torn down automatically when the component leaves the graph (§9).
+ */
+interface ComponentContext {
+    /** This instance's stable identity key (the `key` passed at the call site). */
+    readonly key: string;
+    /**
+     * Register a teardown callback. Runs when the component unmounts (children
+     * first, then this — mirroring `NodeInstance.dispose`). Use for resources,
+     * `form.dispose`, subscriptions, timers, etc.
+     */
+    onCleanup(fn: () => void): void;
+    /**
+     * Run a reactive effect owned by this component. Wraps the framework's
+     * `effect()`; the returned unsubscribe is auto-tracked and disposed on
+     * unmount, so component effects never leak (the pain point the audit ranked
+     * #1). The effect may itself return a cleanup, exactly like `effect()`.
+     */
+    effect(fn: () => void | (() => void)): void;
+    /**
+     * Render the caller-supplied children into `content` at this point (§6 native
+     * child composition / slots). No-op when the call site passed no children.
+     * Call it wherever the component wants its slotted content to appear.
+     */
+    renderChildren(content: ContainerDSL): void;
+}
+/**
+ * A component's setup function: receives typed props and the lifecycle context,
+ * creates any local state, and returns the render function. Runs synchronously
+ * during the build-time descent (like `errorBoundary`'s callback), so it must be
+ * SSR-safe — on the server it runs at render time and its cleanups run when the
+ * SSR root is disposed.
+ */
+type ComponentSetup<P> = (props: P, ctx: ComponentContext) => ComponentRender;
+/**
+ * The opaque, reusable definition produced by `component(...)`. Carries the
+ * `setup` and an inspectable `name`; the brand lets the builder method (and
+ * DevTools) recognise a definition at runtime without a class.
+ */
+interface ComponentDefinition<P> {
+    readonly __streetui_component: true;
+    readonly name: string;
+    readonly setup: ComponentSetup<P>;
+}
+/**
+ * Define a reusable component. Returns a `ComponentDefinition` you render with
+ * `container.component(key, def, props, children?)`. This is a pure factory — it
+ * builds no graph and runs no `setup`; instantiation happens per call site.
+ *
+ * @param setup  Runs once per instance: create local state, return the render fn.
+ * @param options.name  Human-readable name for DevTools/`data-streetui-component`.
+ */
+declare function component<P = Record<string, never>>(setup: ComponentSetup<P>, options?: {
+    name?: string;
+}): ComponentDefinition<P>;
+/** Runtime guard: is `value` a component definition? */
+declare function isComponentDefinition(value: unknown): value is ComponentDefinition<unknown>;
+
+/**
  * StreetUI DSL type system.
  * All builder callbacks and option shapes live here.
  */
@@ -577,6 +682,18 @@ interface ContainerDSL extends ContentDSL {
      * `aria-live="polite"`. Non-modal and never steals focus; no Escape handling.
      */
     toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Instantiate a reusable `component()` at this position (§3–§9). Creates a
+     * `'component'` node (rendered as a `<div>` wrapper), runs the definition's
+     * `setup(props, ctx)` synchronously to obtain its render function, and fills
+     * the component's own container scope with it. Any `ctx.effect`/`ctx.onCleanup`
+     * registered by the setup is torn down automatically when the component leaves
+     * the graph. `props` are strongly typed by the definition's generic; pass
+     * `Signal` props for fine-grained updates that do NOT re-run `setup` (§13).
+     * The optional `children` builder is rendered wherever the component calls
+     * `ctx.renderChildren` (§6 native child composition).
+     */
+    component<P>(key: string, def: ComponentDefinition<P>, props: P, children?: ContainerBuilder): void;
 }
 interface SectionDSL extends ContainerDSL {
 }
@@ -653,6 +770,24 @@ declare class ContainerBuilderBase extends ContentBuilderBase implements Contain
     tooltip(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
     dropdown(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
     toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Instantiate a reusable component (§3–§9). Creates a `'component'` node
+     * (rendered as a `<div>` wrapper — preserves the one-node/one-element
+     * positional-hydration invariant), then runs `def.setup(props, ctx)`
+     * synchronously to obtain the render function and fills the component's own
+     * container scope with it — structurally identical to `container`/
+     * `errorBoundary`. Cleanups the setup registers via `ctx.effect`/
+     * `ctx.onCleanup` are collected into a closure and exposed to the renderer
+     * through a `__component__<id>` handler (mirroring `__overlay__`); the mount/
+     * hydrate paths read it and route each into `NodeInstance.trackCleanup`, so
+     * teardown runs (children-first) when the component leaves the graph.
+     *
+     * `setup` runs once per instance here at build time. When this component sits
+     * inside a keyed list / conditional, a rebuild disposes the old instance
+     * (running its cleanups + pruning its `__component__` entry) and re-runs this
+     * method for the new node — so re-invocation is safe and leak-free.
+     */
+    component<P>(key: string, def: ComponentDefinition<P>, props: P, children?: ContainerBuilder): void;
 }
 declare class SectionBuilderImpl extends ContainerBuilderBase implements SectionDSL {
 }
@@ -745,4 +880,4 @@ declare function compile(app: StreetApp, options?: CompileOptions): CompiledAppl
  */
 declare function compileGraph(graph: ApplicationGraph, options?: CompileOptions): CompiledApplication;
 
-export { type ListDSL as $, type ApplicationId as A, BaseNode as B, type CompiledApplication as C, DiagnosticCollector as D, type ErrorBoundaryOptions as E, type ErrorFallbackBuilder as F, GraphNode as G, type ErrorSource as H, type EventDescriptor as I, type FormBuilder as J, FormBuilderImpl as K, type FormDSL as L, type FormOptions as M, type GraphNodeData as N, type HandlerFn as O, type PageDSL as P, type HeadingOptions as Q, type ReadonlySignal as R, StreetApp as S, type ImageOptions as T, type Unsubscribe as U, VERSION as V, type InputOptions as W, type InputOptionsBase as X, type LinkOptions as Y, type ListBuilder as Z, ListBuilderImpl as _, Signal as a, type ListOptions as a0, type ListPlanEntry as a1, type NodeId as a2, type NodeMetadata as a3, type OverlayOptions as a4, type PageBuilder as a5, PageBuilderImpl as a6, type PortalOptions as a7, type PropValue as a8, type Props as a9, reactiveListItemSignature as aA, resetIdCounter as aB, signal as aC, signalKind as aD, streetui as aE, type ReactiveConsumer as aa, type ReactiveSource as ab, type SectionBuilder as ac, SectionBuilderImpl as ad, type SectionDSL as ae, type SectionOptions as af, type SerializedGraph as ag, type SerializedNode as ah, type StateRef as ai, type StreetUI as aj, type TextOptions as ak, type TextValue as al, batch as am, compile as an, compileGraph as ao, createNodeId as ap, derived as aq, effect as ar, formatDiagnostic as as, generateApplicationId as at, generateNodeId as au, isBatching as av, nextId as aw, nodeIdPrefix as ax, observerCount as ay, reactiveListItemKey as az, type Subscriber as b, ApplicationGraph as c, type SemanticNodeType as d, type ContainerDSL as e, type SignalKind as f, type A11yOptions as g, AppBuilder as h, type AppDSL as i, type AppOptions as j, type ApplicationGraphOptions as k, type Bindable as l, type BindableText as m, type BoundInputOptions as n, type ButtonOptions as o, type CompileOptions as p, type ContainerBuilder as q, ContainerBuilderImpl as r, type ContainerOptions as s, type ContentDSL as t, type ControlledInputOptions as u, DerivedSignal as v, type Diagnostic as w, DiagnosticError as x, type DiagnosticLocation as y, type DiagnosticSeverity as z };
+export { type InputOptionsBase as $, type ApplicationId as A, BaseNode as B, type CompiledApplication as C, DiagnosticCollector as D, type Diagnostic as E, DiagnosticError as F, GraphNode as G, type DiagnosticLocation as H, type DiagnosticSeverity as I, type ErrorBoundaryOptions as J, type ErrorFallbackBuilder as K, type ErrorSource as L, type EventDescriptor as M, type FormBuilder as N, FormBuilderImpl as O, type PageDSL as P, type FormDSL as Q, type ReadonlySignal as R, StreetApp as S, type FormOptions as T, type Unsubscribe as U, VERSION as V, type GraphNodeData as W, type HandlerFn as X, type HeadingOptions as Y, type ImageOptions as Z, type InputOptions as _, type ComponentDefinition as a, type LinkOptions as a0, type ListBuilder as a1, ListBuilderImpl as a2, type ListDSL as a3, type ListOptions as a4, type ListPlanEntry as a5, type NodeId as a6, type NodeMetadata as a7, type OverlayOptions as a8, type PageBuilder as a9, isBatching as aA, isComponentDefinition as aB, nextId as aC, nodeIdPrefix as aD, observerCount as aE, reactiveListItemKey as aF, reactiveListItemSignature as aG, resetIdCounter as aH, signal as aI, signalKind as aJ, streetui as aK, PageBuilderImpl as aa, type PortalOptions as ab, type PropValue as ac, type Props as ad, type ReactiveConsumer as ae, type ReactiveSource as af, type SectionBuilder as ag, SectionBuilderImpl as ah, type SectionDSL as ai, type SectionOptions as aj, type SerializedGraph as ak, type SerializedNode as al, type StateRef as am, type StreetUI as an, type TextOptions as ao, type TextValue as ap, batch as aq, compile as ar, compileGraph as as, component as at, createNodeId as au, derived as av, effect as aw, formatDiagnostic as ax, generateApplicationId as ay, generateNodeId as az, type ContainerBuilder as b, Signal as c, type Subscriber as d, ApplicationGraph as e, type SemanticNodeType as f, type ContainerDSL as g, type SignalKind as h, type A11yOptions as i, AppBuilder as j, type AppDSL as k, type AppOptions as l, type ApplicationGraphOptions as m, type Bindable as n, type BindableText as o, type BoundInputOptions as p, type ButtonOptions as q, type CompileOptions as r, type ComponentContext as s, type ComponentRender as t, type ComponentSetup as u, ContainerBuilderImpl as v, type ContainerOptions as w, type ContentDSL as x, type ControlledInputOptions as y, DerivedSignal as z };

@@ -197,14 +197,78 @@ function renderServerThenHydrate(build, options = {}) {
     }
   };
 }
+
+// src/component.ts
+import { streetui } from "@streetui/dsl";
+var COMPONENT_ATTR = "data-streetui-component";
+function renderComponent(def, props, children) {
+  const app = streetui.app({ name: `test:${def.name}` });
+  app.page("host", (page) => {
+    page.component("root", def, props, children);
+  });
+  const result = render(app);
+  const component = result.container.querySelector(`[${COMPONENT_ATTR}]`);
+  if (component === null) {
+    throw new Error(`[StreetUI Testing] renderComponent: no component element rendered for "${def.name}"`);
+  }
+  return { ...result, component };
+}
+function hydrateComponent(build, options = {}) {
+  return renderServerThenHydrate(() => {
+    const { def, props, children } = build();
+    const app = streetui.app({ name: `test:${def.name}` });
+    app.page("host", (page) => page.component("root", def, props, children));
+    return app;
+  }, options);
+}
+function findAllComponents(container, name) {
+  const selector = name === void 0 ? `[${COMPONENT_ATTR}]` : `[${COMPONENT_ATTR}="${name}"]`;
+  return Array.from(container.querySelectorAll(selector));
+}
+function findComponent(container, name) {
+  const matches = findAllComponents(container, name);
+  const named = name !== void 0 ? ` named "${name}"` : "";
+  if (matches.length === 0) {
+    throw new Error(`[StreetUI Testing] No component${named} found`);
+  }
+  if (matches.length > 1) {
+    throw new Error(
+      `[StreetUI Testing] Found ${matches.length} components${named} \u2014 pass a name to disambiguate`
+    );
+  }
+  return matches[0];
+}
+function getComponentName(el) {
+  return el.getAttribute(COMPONENT_ATTR);
+}
+function trigger(el, type, init = {}) {
+  const base = { bubbles: true, cancelable: true, ...init };
+  let event;
+  if (type.startsWith("key")) {
+    event = new KeyboardEvent(type, base);
+  } else if (type.startsWith("mouse") || type === "click" || type === "dblclick") {
+    event = new MouseEvent(type, base);
+  } else if (type === "input" || type === "change") {
+    event = new Event(type, base);
+  } else {
+    event = new Event(type, base);
+  }
+  el.dispatchEvent(event);
+}
 export {
   findAllByRole,
+  findAllComponents,
   findByRole,
   findByText,
+  findComponent,
   flushUpdates,
+  getComponentName,
+  hydrateComponent,
   render,
+  renderComponent,
   renderOnce,
   renderServerThenHydrate,
+  trigger,
   waitFor
 };
 //# sourceMappingURL=index.js.map

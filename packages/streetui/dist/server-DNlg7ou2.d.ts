@@ -1,4 +1,4 @@
-import { C as CompiledApplication } from './compile-Cte0nf06.cjs';
+import { C as CompiledApplication } from './compile-CJJQYi71.js';
 
 /**
  * DOMAdapter — framework-owned abstraction over DOM operations.

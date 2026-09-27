@@ -1,5 +1,5 @@
 
-> @streetui/renderer@1.7.0 build /home/error51/Downloads/StreetUI/packages/renderer
+> @streetui/renderer@1.8.0 build /home/error51/Downloads/StreetUI/packages/renderer
 > tsup
 
 CLI Building entry: src/index.ts
@@ -10,13 +10,13 @@ CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
 CJS Build start
-CJS dist/index.cjs     41.18 KB
-CJS dist/index.cjs.map 111.19 KB
+ESM dist/index.js     39.33 KB
+ESM dist/index.js.map 111.91 KB
+ESM ⚡️ Build success in 23ms
+CJS dist/index.cjs     41.65 KB
+CJS dist/index.cjs.map 112.51 KB
 CJS ⚡️ Build success in 24ms
-ESM dist/index.js     38.92 KB
-ESM dist/index.js.map 110.60 KB
-ESM ⚡️ Build success in 24ms
 DTS Build start
-DTS ⚡️ Build success in 522ms
-DTS dist/index.d.ts  21.03 KB
-DTS dist/index.d.cts 21.03 KB
+DTS ⚡️ Build success in 639ms
+DTS dist/index.d.ts  21.68 KB
+DTS dist/index.d.cts 21.68 KB

@@ -24,6 +24,7 @@ __export(index_exports, {
   createDevTools: () => createDevTools,
   diagnosePerformance: () => diagnosePerformance,
   inspectApplication: () => inspectApplication,
+  inspectComponents: () => inspectComponents,
   inspectContext: () => inspectContext,
   inspectForm: () => inspectForm,
   inspectGraph: () => inspectGraph,
@@ -77,6 +78,21 @@ function nodeTypeStats(graph) {
     counts[node.type] = (counts[node.type] ?? 0) + 1;
   });
   return counts;
+}
+function inspectComponents(graph) {
+  const out = [];
+  graph.walk((node, depth) => {
+    if (node.type !== "component") return;
+    const name = node.props["data-streetui-component"];
+    out.push({
+      id: node.id,
+      key: node.key,
+      name: typeof name === "string" ? name : "Component",
+      depth,
+      childCount: node.children.length
+    });
+  });
+  return out;
 }
 
 // src/application.ts
@@ -413,6 +429,7 @@ function format(value) {
   createDevTools,
   diagnosePerformance,
   inspectApplication,
+  inspectComponents,
   inspectContext,
   inspectForm,
   inspectGraph,

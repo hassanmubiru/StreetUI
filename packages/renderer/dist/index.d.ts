@@ -192,6 +192,16 @@ declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, inst
  * focus. All listeners are tracked on the instance and torn down on unmount.
  */
 declare function wireOverlayBehavior(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, target: Element): void;
+/**
+ * Wire a component instance's lifecycle (§9). Reads the optional
+ * `__component__<id>` descriptor — an array of teardown callbacks the DSL's
+ * `component()` collected from the setup's `ctx.effect`/`ctx.onCleanup` — and
+ * routes each into `NodeInstance.trackCleanup`, so they run (children-first)
+ * when the component leaves the graph. Shared by the mount and hydrate paths so
+ * both attach identical ownership. A `'component'` node with no cleanups (no
+ * effects/resources) registers no descriptor and this is a no-op.
+ */
+declare function wireComponentBehavior(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance): void;
 
 /**
  * Patch — targeted DOM updates driven by signal changes.
@@ -445,4 +455,4 @@ declare function renderToString(compiled: CompiledApplication, options?: RenderT
 
 declare function resolveTag(type: SemanticNodeType): string;
 
-export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, serializeState, textUpdate, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, serializeState, textUpdate, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

@@ -23,6 +23,29 @@ declare function printGraph(graph: ApplicationGraph): string;
 declare function printDiagnostics(compiled: CompiledApplication): string;
 /** Returns node counts per type. */
 declare function nodeTypeStats(graph: ApplicationGraph): Record<string, number>;
+/** A single component instance surfaced for DevTools inspection (§21). */
+interface InspectedComponent {
+    /** The build-order node id (churns across rebuilds — not stable identity). */
+    id: string;
+    /** The stable, author-provided identity key passed at the call site. */
+    key: string | undefined;
+    /** The definition's human-readable name (from `data-streetui-component`). */
+    name: string;
+    /** Depth of the component node in the graph. */
+    depth: number;
+    /** Number of direct child nodes the component rendered. */
+    childCount: number;
+}
+/**
+ * List every `component()` instance in the graph, in document order, with its
+ * stable `key`, human-readable `name` and location. Components are ordinary
+ * `'component'` GraphNodes (they flow through `inspectGraph`/`printGraph`
+ * already); this is the first-class, component-aware view for DevTools — it
+ * reads the inspectable `data-streetui-component` name attribute the DSL sets,
+ * never any internal `_`-prefixed metadata. Names/keys are stable across
+ * fine-grained prop updates (which never rebuild the node).
+ */
+declare function inspectComponents(graph: ApplicationGraph): InspectedComponent[];
 
 /**
  * DevTools foundation (v0.6, Phase 18). A single read-only entry point that
@@ -402,4 +425,4 @@ interface DevToolsSession {
  */
 declare function createDevTools(compiled: CompiledApplication, sources?: DevToolsSources, options?: DevToolsOptions): DevToolsSession;
 
-export { type ApplicationIdentity, type ApplicationInspection, type ApplicationPanel, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, type DiagnosticsSummary, type FormInspection, type FormLike, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedNode, type InspectedPage, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type ResourceInspection, type ResourceLike, type RouteMatchLike, type RouterInspection, type RouterLike, type SignalInspection, type SignalsPanel, createDevTools, diagnosePerformance, inspectApplication, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, nodeTypeStats, printDiagnostics, printGraph };
+export { type ApplicationIdentity, type ApplicationInspection, type ApplicationPanel, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, type DiagnosticsSummary, type FormInspection, type FormLike, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedNode, type InspectedPage, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type ResourceInspection, type ResourceLike, type RouteMatchLike, type RouterInspection, type RouterLike, type SignalInspection, type SignalsPanel, createDevTools, diagnosePerformance, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, nodeTypeStats, printDiagnostics, printGraph };
