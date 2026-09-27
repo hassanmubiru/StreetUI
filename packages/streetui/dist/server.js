@@ -154,6 +154,486 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
+// ../dom/src/server-node.ts
+var ServerStyle = class {
+  declarations = /* @__PURE__ */ new Map();
+  setProperty(name, value) {
+    this.declarations.set(name, value);
+  }
+  get isEmpty() {
+    return this.declarations.size === 0;
+  }
+  toCss() {
+    return [...this.declarations.entries()].map(([k, v]) => `${k}: ${v}`).join("; ");
+  }
+};
+var ServerText = class {
+  kind = "text";
+  parent = null;
+  data;
+  constructor(data) {
+    this.data = data;
+  }
+};
+var ServerComment = class {
+  kind = "comment";
+  parent = null;
+  data;
+  constructor(data) {
+    this.data = data;
+  }
+};
+var ServerFragment = class {
+  kind = "fragment";
+  parent = null;
+  children = [];
+};
+var ServerRawHTML = class {
+  kind = "raw";
+  parent = null;
+  html;
+  constructor(html) {
+    this.html = html;
+  }
+};
+var ServerElement = class {
+  kind = "element";
+  parent = null;
+  tagName;
+  attributes = /* @__PURE__ */ new Map();
+  children = [];
+  // Lazily-allocated stores. On the 10k-row SSR corpus ~0% of elements carry JS
+  // properties or inline styles (measured, §5: 1 of 80,029 elements uses
+  // `properties`, 0 use `style`), so eagerly allocating a `properties` Map plus
+  // a `ServerStyle` (which itself holds a Map) per element wasted ~240k
+  // allocations per /users render — all in the dominant mount phase. These are
+  // created on first WRITE via the `properties`/`style` getters; the serializer
+  // reads the raw `_properties`/`_style` fields so a READ never forces an
+  // allocation. Output is byte-identical: an unset store previously serialized
+  // to nothing (empty `properties.has(...)` / `style.isEmpty`), and a null store
+  // is skipped the same way.
+  _properties = null;
+  _style = null;
+  constructor(tagName) {
+    this.tagName = tagName.toLowerCase();
+  }
+  /** JS properties set via `setProperty` (e.g. input `value`, `checked`). Allocated on first access. */
+  get properties() {
+    return this._properties ??= /* @__PURE__ */ new Map();
+  }
+  /** Inline-style holder mirroring `element.style`. Allocated on first access. */
+  get style() {
+    return this._style ??= new ServerStyle();
+  }
+};
+var VOID_ELEMENTS = /* @__PURE__ */ new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr"
+]);
+var SERIALIZED_PROPERTIES = {
+  value: "attr",
+  checked: "boolean",
+  selected: "boolean"
+};
+var SERIALIZED_PROPERTY_ENTRIES = Object.entries(SERIALIZED_PROPERTIES);
+var TEXT_SPECIAL = /[&<>]/;
+var ATTR_SPECIAL = /[&<>"]/;
+function escapeHtmlText(value) {
+  if (!TEXT_SPECIAL.test(value)) return value;
+  let out = "";
+  let last = 0;
+  for (let i = 0; i < value.length; i++) {
+    let esc;
+    switch (value.charCodeAt(i)) {
+      case 38:
+        esc = "&amp;";
+        break;
+      // &
+      case 60:
+        esc = "&lt;";
+        break;
+      // <
+      case 62:
+        esc = "&gt;";
+        break;
+      // >
+      default:
+        continue;
+    }
+    out += value.slice(last, i) + esc;
+    last = i + 1;
+  }
+  return out + value.slice(last);
+}
+function escapeHtmlAttr(value) {
+  if (!ATTR_SPECIAL.test(value)) return value;
+  let out = "";
+  let last = 0;
+  for (let i = 0; i < value.length; i++) {
+    let esc;
+    switch (value.charCodeAt(i)) {
+      case 38:
+        esc = "&amp;";
+        break;
+      // &
+      case 60:
+        esc = "&lt;";
+        break;
+      // <
+      case 62:
+        esc = "&gt;";
+        break;
+      // >
+      case 34:
+        esc = "&quot;";
+        break;
+      // "
+      default:
+        continue;
+    }
+    out += value.slice(last, i) + esc;
+    last = i + 1;
+  }
+  return out + value.slice(last);
+}
+function serializeAttributes(el) {
+  const parts = [];
+  for (const [name, value] of el.attributes) {
+    if (value === "") {
+      parts.push(` ${name}`);
+    } else {
+      parts.push(` ${name}="${escapeHtmlAttr(value)}"`);
+    }
+  }
+  const props = el._properties;
+  if (props !== null) {
+    for (const [name, kind] of SERIALIZED_PROPERTY_ENTRIES) {
+      if (!props.has(name)) continue;
+      if (el.attributes.has(name)) continue;
+      const raw = props.get(name);
+      if (kind === "boolean") {
+        if (raw === true) parts.push(` ${name}`);
+      } else {
+        if (raw !== void 0 && raw !== null) {
+          parts.push(` ${name}="${escapeHtmlAttr(String(raw))}"`);
+        }
+      }
+    }
+  }
+  const style = el._style;
+  if (style !== null && !style.isEmpty && !el.attributes.has("style")) {
+    parts.push(` style="${escapeHtmlAttr(style.toCss())}"`);
+  }
+  return parts.join("");
+}
+function serializeServerNode(node) {
+  switch (node.kind) {
+    case "text":
+      return escapeHtmlText(node.data);
+    case "comment":
+      return `<!--${node.data}-->`;
+    case "fragment":
+      return serializeChildren(node);
+    case "raw":
+      return node.html;
+    case "element": {
+      const el = node;
+      const tag = el.tagName;
+      const attrs = serializeAttributes(el);
+      if (VOID_ELEMENTS.has(tag)) {
+        return `<${tag}${attrs}>`;
+      }
+      return `<${tag}${attrs}>${serializeChildren(el)}</${tag}>`;
+    }
+  }
+}
+function serializeChildren(node) {
+  let out = "";
+  for (const child of node.children) {
+    out += serializeServerNode(child);
+  }
+  return out;
+}
+
+// ../dom/src/server-adapter.ts
+function asServer(node) {
+  return node;
+}
+function asParent(node) {
+  return node;
+}
+var ServerDOMAdapter = class {
+  createElement(tag, _ns) {
+    return new ServerElement(tag);
+  }
+  createTextNode(data) {
+    return new ServerText(data);
+  }
+  createComment(data) {
+    return new ServerComment(data);
+  }
+  createFragment() {
+    return new ServerFragment();
+  }
+  /**
+   * Create a verbatim pre-serialized HTML node (v1.7 static SSR plan, §6).
+   * Server-only: the browser adapter does not implement this, and the renderer
+   * fast path only invokes it when a static SSR plan is present (SSR). The
+   * stored HTML was produced by this same serializer, so it is emitted as-is.
+   */
+  createRawHTML(html) {
+    return new ServerRawHTML(html);
+  }
+  appendChild(parent, child) {
+    const p = asParent(parent);
+    const c = asServer(child);
+    this._detach(c);
+    c.parent = p;
+    p.children.push(c);
+  }
+  insertBefore(parent, child, reference) {
+    const p = asParent(parent);
+    const c = asServer(child);
+    this._detach(c);
+    c.parent = p;
+    if (reference === null) {
+      p.children.push(c);
+      return;
+    }
+    const ref = asServer(reference);
+    const idx = p.children.indexOf(ref);
+    if (idx === -1) p.children.push(c);
+    else p.children.splice(idx, 0, c);
+  }
+  removeChild(parent, child) {
+    const p = asParent(parent);
+    const c = asServer(child);
+    const idx = p.children.indexOf(c);
+    if (idx !== -1) {
+      p.children.splice(idx, 1);
+      c.parent = null;
+    }
+  }
+  replaceChild(parent, newChild, oldChild) {
+    const p = asParent(parent);
+    const nc = asServer(newChild);
+    const oc = asServer(oldChild);
+    const idx = p.children.indexOf(oc);
+    if (idx === -1) return;
+    this._detach(nc);
+    nc.parent = p;
+    p.children.splice(idx, 1, nc);
+    oc.parent = null;
+  }
+  _detach(node) {
+    if (node.parent !== null) {
+      const siblings = node.parent.children;
+      const idx = siblings.indexOf(node);
+      if (idx !== -1) siblings.splice(idx, 1);
+      node.parent = null;
+    }
+  }
+  setAttribute(element, name, value) {
+    element.attributes.set(name, value);
+  }
+  removeAttribute(element, name) {
+    element.attributes.delete(name);
+  }
+  getAttribute(element, name) {
+    return element.attributes.get(name) ?? null;
+  }
+  setProperty(element, name, value) {
+    element.properties.set(name, value);
+  }
+  setTextContent(node, text) {
+    const n = asServer(node);
+    if (n.kind === "element" || n.kind === "fragment") {
+      const el = n;
+      el.children.length = 0;
+      const t = new ServerText(text);
+      t.parent = el;
+      el.children.push(t);
+    } else if (n.kind === "text") {
+      n.data = text;
+    }
+  }
+  getTextContent(node) {
+    const n = asServer(node);
+    if (n.kind === "text") return n.data;
+    if (n.kind === "element" || n.kind === "fragment") {
+      let out = "";
+      for (const c of n.children) {
+        out += this.getTextContent(c) ?? "";
+      }
+      return out;
+    }
+    return null;
+  }
+  // Server nodes never dispatch events — listeners are a no-op on the server.
+  addEventListener() {
+  }
+  removeEventListener() {
+  }
+  querySelector() {
+    return null;
+  }
+  querySelectorAll() {
+    return [];
+  }
+  getElementById() {
+    return null;
+  }
+  focus() {
+  }
+  body() {
+    return null;
+  }
+  activeElement() {
+    return null;
+  }
+  contains(_ancestor, _node) {
+    return false;
+  }
+  matches(_element, _selector) {
+    return false;
+  }
+  isElement(node) {
+    return asServer(node).kind === "element";
+  }
+  isTextNode(node) {
+    return asServer(node).kind === "text";
+  }
+  tagName(element) {
+    return element.tagName;
+  }
+  parentNode(node) {
+    return asServer(node).parent ?? null;
+  }
+  nextSibling(node) {
+    const n = asServer(node);
+    const parent = n.parent;
+    if (parent === null) return null;
+    const idx = parent.children.indexOf(n);
+    if (idx === -1 || idx + 1 >= parent.children.length) return null;
+    return parent.children[idx + 1];
+  }
+  firstChild(node) {
+    const n = asServer(node);
+    if (n.kind === "element" || n.kind === "fragment") {
+      const el = n;
+      return el.children[0] ?? null;
+    }
+    return null;
+  }
+  childNodes(node) {
+    const n = asServer(node);
+    if (n.kind === "element" || n.kind === "fragment") {
+      return n.children;
+    }
+    return [];
+  }
+  // ── Server-only ────────────────────────────────────────────────────────────
+  /** Serialize a node's children ("inner HTML") to an HTML string. */
+  serializeInner(node) {
+    const n = asServer(node);
+    if (n.kind === "element" || n.kind === "fragment") {
+      return serializeChildren(n);
+    }
+    return "";
+  }
+  /** Serialize a node (including itself) to an HTML string. */
+  serializeOuter(node) {
+    return serializeServerNode(asServer(node));
+  }
+};
+
+// ../dom/src/focus.ts
+var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function focusById(dom, root, id) {
+  const el = dom.querySelector(root, `[id="${id}"]`);
+  if (el === null) return false;
+  dom.focus(el);
+  return true;
+}
+function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
+  const el = dom.querySelector(container, selector);
+  if (el === null) return false;
+  dom.focus(el);
+  return true;
+}
+function getFocusable(dom, container, selector = FOCUSABLE_SELECTOR) {
+  return Array.from(dom.querySelectorAll(container, selector)).filter(
+    (el) => dom.matches(el, selector)
+  );
+}
+function saveFocus(dom) {
+  return dom.activeElement();
+}
+function restoreFocus(dom, saved) {
+  if (saved !== null) dom.focus(saved);
+}
+function focusInitial(dom, container, initialFocusId) {
+  if (initialFocusId !== void 0 && focusById(dom, container, initialFocusId)) return;
+  focusFirst(dom, container);
+}
+function trapFocus(dom, container) {
+  const onKeydown = (event) => {
+    if (event.key !== "Tab") return;
+    const items = getFocusable(dom, container);
+    if (items.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = dom.activeElement();
+    if (active === null || !dom.contains(container, active)) {
+      event.preventDefault();
+      dom.focus(first);
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault();
+      dom.focus(last);
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      dom.focus(first);
+    }
+  };
+  dom.addEventListener(container, "keydown", onKeydown);
+  return () => dom.removeEventListener(container, "keydown", onKeydown);
+}
+function containFocus(dom, container) {
+  const body = dom.body();
+  if (body === null) return () => {
+  };
+  const onFocusIn = (event) => {
+    const target = event.target;
+    if (target !== null && !dom.contains(container, target)) {
+      focusFirst(dom, container);
+    }
+  };
+  dom.addEventListener(body, "focusin", onFocusIn);
+  return () => dom.removeEventListener(body, "focusin", onFocusIn);
+}
+function onEscape(dom, target, handler) {
+  const onKeydown = (event) => {
+    if (event.key === "Escape") handler();
+  };
+  dom.addEventListener(target, "keydown", onKeydown);
+  return () => dom.removeEventListener(target, "keydown", onKeydown);
+}
+
 // ../renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
@@ -172,7 +652,12 @@ var TAG_MAP = {
   component: "div",
   slot: "div",
   fragment: "div",
-  "reactive-list": "ul"
+  "reactive-list": "ul",
+  // A portal renders as a neutral inline anchor <div> at its declaration site;
+  // its children are relocated to a document.body container on the browser
+  // (see the portal branch in mount.ts). On the server (no body) it renders
+  // inline, so the anchor tag is what SSR/hydration positionally match on.
+  portal: "div"
 };
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
@@ -584,6 +1069,28 @@ function mountNode(ctx, graphNode, parentDom) {
     wireReactiveList(ctx, graphNode, instance2, el2);
     return instance2;
   }
+  if (graphNode.type === "portal") {
+    const anchor = dom.createElement(resolveTag("portal"));
+    dom.setAttribute(anchor, "data-streetui-portal", "");
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance2 = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance2);
+    const body = dom.body();
+    let target = anchor;
+    if (body !== null) {
+      const portalContainer = dom.createElement("div");
+      dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+      dom.appendChild(body, portalContainer);
+      instance2.trackCleanup(() => dom.removeChild(body, portalContainer));
+      target = portalContainer;
+    }
+    for (const child of graphNode.children) {
+      instance2.addChild(mountNode(ctx, child, target));
+    }
+    dom.appendChild(parentDom, anchor);
+    wireOverlayBehavior(ctx, graphNode, instance2, target);
+    return instance2;
+  }
   const tag = resolveTag(graphNode.type);
   const el = dom.createElement(tag);
   applyNodeProps(ctx, graphNode, el);
@@ -733,399 +1240,44 @@ function forgetInstance(ctx, instance) {
   ctx.instances.delete(instance.graphNode.id);
   for (const child of instance.children) forgetInstance(ctx, child);
 }
-
-// ../dom/src/server-node.ts
-var ServerStyle = class {
-  declarations = /* @__PURE__ */ new Map();
-  setProperty(name, value) {
-    this.declarations.set(name, value);
-  }
-  get isEmpty() {
-    return this.declarations.size === 0;
-  }
-  toCss() {
-    return [...this.declarations.entries()].map(([k, v]) => `${k}: ${v}`).join("; ");
-  }
-};
-var ServerText = class {
-  kind = "text";
-  parent = null;
-  data;
-  constructor(data) {
-    this.data = data;
-  }
-};
-var ServerComment = class {
-  kind = "comment";
-  parent = null;
-  data;
-  constructor(data) {
-    this.data = data;
-  }
-};
-var ServerFragment = class {
-  kind = "fragment";
-  parent = null;
-  children = [];
-};
-var ServerRawHTML = class {
-  kind = "raw";
-  parent = null;
-  html;
-  constructor(html) {
-    this.html = html;
-  }
-};
-var ServerElement = class {
-  kind = "element";
-  parent = null;
-  tagName;
-  attributes = /* @__PURE__ */ new Map();
-  children = [];
-  // Lazily-allocated stores. On the 10k-row SSR corpus ~0% of elements carry JS
-  // properties or inline styles (measured, §5: 1 of 80,029 elements uses
-  // `properties`, 0 use `style`), so eagerly allocating a `properties` Map plus
-  // a `ServerStyle` (which itself holds a Map) per element wasted ~240k
-  // allocations per /users render — all in the dominant mount phase. These are
-  // created on first WRITE via the `properties`/`style` getters; the serializer
-  // reads the raw `_properties`/`_style` fields so a READ never forces an
-  // allocation. Output is byte-identical: an unset store previously serialized
-  // to nothing (empty `properties.has(...)` / `style.isEmpty`), and a null store
-  // is skipped the same way.
-  _properties = null;
-  _style = null;
-  constructor(tagName) {
-    this.tagName = tagName.toLowerCase();
-  }
-  /** JS properties set via `setProperty` (e.g. input `value`, `checked`). Allocated on first access. */
-  get properties() {
-    return this._properties ??= /* @__PURE__ */ new Map();
-  }
-  /** Inline-style holder mirroring `element.style`. Allocated on first access. */
-  get style() {
-    return this._style ??= new ServerStyle();
-  }
-};
-var VOID_ELEMENTS = /* @__PURE__ */ new Set([
-  "area",
-  "base",
-  "br",
-  "col",
-  "embed",
-  "hr",
-  "img",
-  "input",
-  "link",
-  "meta",
-  "param",
-  "source",
-  "track",
-  "wbr"
-]);
-var SERIALIZED_PROPERTIES = {
-  value: "attr",
-  checked: "boolean",
-  selected: "boolean"
-};
-var SERIALIZED_PROPERTY_ENTRIES = Object.entries(SERIALIZED_PROPERTIES);
-var TEXT_SPECIAL = /[&<>]/;
-var ATTR_SPECIAL = /[&<>"]/;
-function escapeHtmlText(value) {
-  if (!TEXT_SPECIAL.test(value)) return value;
-  let out = "";
-  let last = 0;
-  for (let i = 0; i < value.length; i++) {
-    let esc;
-    switch (value.charCodeAt(i)) {
-      case 38:
-        esc = "&amp;";
-        break;
-      // &
-      case 60:
-        esc = "&lt;";
-        break;
-      // <
-      case 62:
-        esc = "&gt;";
-        break;
-      // >
-      default:
-        continue;
-    }
-    out += value.slice(last, i) + esc;
-    last = i + 1;
-  }
-  return out + value.slice(last);
-}
-function escapeHtmlAttr(value) {
-  if (!ATTR_SPECIAL.test(value)) return value;
-  let out = "";
-  let last = 0;
-  for (let i = 0; i < value.length; i++) {
-    let esc;
-    switch (value.charCodeAt(i)) {
-      case 38:
-        esc = "&amp;";
-        break;
-      // &
-      case 60:
-        esc = "&lt;";
-        break;
-      // <
-      case 62:
-        esc = "&gt;";
-        break;
-      // >
-      case 34:
-        esc = "&quot;";
-        break;
-      // "
-      default:
-        continue;
-    }
-    out += value.slice(last, i) + esc;
-    last = i + 1;
-  }
-  return out + value.slice(last);
-}
-function serializeAttributes(el) {
-  const parts = [];
-  for (const [name, value] of el.attributes) {
-    if (value === "") {
-      parts.push(` ${name}`);
+function wireOverlayBehavior(ctx, graphNode, instance, target) {
+  const { dom, graph } = ctx;
+  if (dom.body() === null) return;
+  const descFn = graph.getHandler(`__overlay__${graphNode.id}`);
+  if (descFn === void 0) return;
+  const desc = descFn();
+  const openSig = desc.open;
+  if (openSig === void 0 || typeof openSig.subscribe !== "function") return;
+  let active = [];
+  let saved = null;
+  const teardown = () => {
+    for (const fn of active) fn();
+    active = [];
+  };
+  const onOpenChange = (isOpen) => {
+    if (isOpen) {
+      if (desc.restoreFocus) saved = saveFocus(dom);
+      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
+      if (desc.modal) {
+        active.push(trapFocus(dom, target));
+        active.push(containFocus(dom, target));
+      }
+      if (desc.closeOnEscape && desc.onClose !== void 0) {
+        active.push(onEscape(dom, target, desc.onClose));
+      }
     } else {
-      parts.push(` ${name}="${escapeHtmlAttr(value)}"`);
-    }
-  }
-  const props = el._properties;
-  if (props !== null) {
-    for (const [name, kind] of SERIALIZED_PROPERTY_ENTRIES) {
-      if (!props.has(name)) continue;
-      if (el.attributes.has(name)) continue;
-      const raw = props.get(name);
-      if (kind === "boolean") {
-        if (raw === true) parts.push(` ${name}`);
-      } else {
-        if (raw !== void 0 && raw !== null) {
-          parts.push(` ${name}="${escapeHtmlAttr(String(raw))}"`);
-        }
+      teardown();
+      if (desc.restoreFocus && saved !== null) {
+        restoreFocus(dom, saved);
+        saved = null;
       }
     }
-  }
-  const style = el._style;
-  if (style !== null && !style.isEmpty && !el.attributes.has("style")) {
-    parts.push(` style="${escapeHtmlAttr(style.toCss())}"`);
-  }
-  return parts.join("");
+  };
+  const unsub = openSig.subscribe(onOpenChange);
+  instance.trackCleanup(unsub);
+  instance.trackCleanup(teardown);
+  if (openSig.peek() === true) onOpenChange(true);
 }
-function serializeServerNode(node) {
-  switch (node.kind) {
-    case "text":
-      return escapeHtmlText(node.data);
-    case "comment":
-      return `<!--${node.data}-->`;
-    case "fragment":
-      return serializeChildren(node);
-    case "raw":
-      return node.html;
-    case "element": {
-      const el = node;
-      const tag = el.tagName;
-      const attrs = serializeAttributes(el);
-      if (VOID_ELEMENTS.has(tag)) {
-        return `<${tag}${attrs}>`;
-      }
-      return `<${tag}${attrs}>${serializeChildren(el)}</${tag}>`;
-    }
-  }
-}
-function serializeChildren(node) {
-  let out = "";
-  for (const child of node.children) {
-    out += serializeServerNode(child);
-  }
-  return out;
-}
-
-// ../dom/src/server-adapter.ts
-function asServer(node) {
-  return node;
-}
-function asParent(node) {
-  return node;
-}
-var ServerDOMAdapter = class {
-  createElement(tag, _ns) {
-    return new ServerElement(tag);
-  }
-  createTextNode(data) {
-    return new ServerText(data);
-  }
-  createComment(data) {
-    return new ServerComment(data);
-  }
-  createFragment() {
-    return new ServerFragment();
-  }
-  /**
-   * Create a verbatim pre-serialized HTML node (v1.7 static SSR plan, §6).
-   * Server-only: the browser adapter does not implement this, and the renderer
-   * fast path only invokes it when a static SSR plan is present (SSR). The
-   * stored HTML was produced by this same serializer, so it is emitted as-is.
-   */
-  createRawHTML(html) {
-    return new ServerRawHTML(html);
-  }
-  appendChild(parent, child) {
-    const p = asParent(parent);
-    const c = asServer(child);
-    this._detach(c);
-    c.parent = p;
-    p.children.push(c);
-  }
-  insertBefore(parent, child, reference) {
-    const p = asParent(parent);
-    const c = asServer(child);
-    this._detach(c);
-    c.parent = p;
-    if (reference === null) {
-      p.children.push(c);
-      return;
-    }
-    const ref = asServer(reference);
-    const idx = p.children.indexOf(ref);
-    if (idx === -1) p.children.push(c);
-    else p.children.splice(idx, 0, c);
-  }
-  removeChild(parent, child) {
-    const p = asParent(parent);
-    const c = asServer(child);
-    const idx = p.children.indexOf(c);
-    if (idx !== -1) {
-      p.children.splice(idx, 1);
-      c.parent = null;
-    }
-  }
-  replaceChild(parent, newChild, oldChild) {
-    const p = asParent(parent);
-    const nc = asServer(newChild);
-    const oc = asServer(oldChild);
-    const idx = p.children.indexOf(oc);
-    if (idx === -1) return;
-    this._detach(nc);
-    nc.parent = p;
-    p.children.splice(idx, 1, nc);
-    oc.parent = null;
-  }
-  _detach(node) {
-    if (node.parent !== null) {
-      const siblings = node.parent.children;
-      const idx = siblings.indexOf(node);
-      if (idx !== -1) siblings.splice(idx, 1);
-      node.parent = null;
-    }
-  }
-  setAttribute(element, name, value) {
-    element.attributes.set(name, value);
-  }
-  removeAttribute(element, name) {
-    element.attributes.delete(name);
-  }
-  getAttribute(element, name) {
-    return element.attributes.get(name) ?? null;
-  }
-  setProperty(element, name, value) {
-    element.properties.set(name, value);
-  }
-  setTextContent(node, text) {
-    const n = asServer(node);
-    if (n.kind === "element" || n.kind === "fragment") {
-      const el = n;
-      el.children.length = 0;
-      const t = new ServerText(text);
-      t.parent = el;
-      el.children.push(t);
-    } else if (n.kind === "text") {
-      n.data = text;
-    }
-  }
-  getTextContent(node) {
-    const n = asServer(node);
-    if (n.kind === "text") return n.data;
-    if (n.kind === "element" || n.kind === "fragment") {
-      let out = "";
-      for (const c of n.children) {
-        out += this.getTextContent(c) ?? "";
-      }
-      return out;
-    }
-    return null;
-  }
-  // Server nodes never dispatch events — listeners are a no-op on the server.
-  addEventListener() {
-  }
-  removeEventListener() {
-  }
-  querySelector() {
-    return null;
-  }
-  querySelectorAll() {
-    return [];
-  }
-  getElementById() {
-    return null;
-  }
-  focus() {
-  }
-  isElement(node) {
-    return asServer(node).kind === "element";
-  }
-  isTextNode(node) {
-    return asServer(node).kind === "text";
-  }
-  tagName(element) {
-    return element.tagName;
-  }
-  parentNode(node) {
-    return asServer(node).parent ?? null;
-  }
-  nextSibling(node) {
-    const n = asServer(node);
-    const parent = n.parent;
-    if (parent === null) return null;
-    const idx = parent.children.indexOf(n);
-    if (idx === -1 || idx + 1 >= parent.children.length) return null;
-    return parent.children[idx + 1];
-  }
-  firstChild(node) {
-    const n = asServer(node);
-    if (n.kind === "element" || n.kind === "fragment") {
-      const el = n;
-      return el.children[0] ?? null;
-    }
-    return null;
-  }
-  childNodes(node) {
-    const n = asServer(node);
-    if (n.kind === "element" || n.kind === "fragment") {
-      return n.children;
-    }
-    return [];
-  }
-  // ── Server-only ────────────────────────────────────────────────────────────
-  /** Serialize a node's children ("inner HTML") to an HTML string. */
-  serializeInner(node) {
-    const n = asServer(node);
-    if (n.kind === "element" || n.kind === "fragment") {
-      return serializeChildren(n);
-    }
-    return "";
-  }
-  /** Serialize a node (including itself) to an HTML string. */
-  serializeOuter(node) {
-    return serializeServerNode(asServer(node));
-  }
-};
 
 // ../renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
@@ -1192,7 +1344,8 @@ function analyzeGraph(graph) {
     const hasEvents = node.events.length > 0;
     const isList = node.type === "reactive-list";
     const isConditional = node.type === "conditional";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional;
+    const isPortal = node.type === "portal";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -1279,7 +1432,7 @@ function renderToString(compiled, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.6.0";
+var VERSION = "1.6.1";
 export {
   STATE_MARKER_ATTR,
   ServerDOMAdapter,

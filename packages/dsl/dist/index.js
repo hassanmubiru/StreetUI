@@ -25,6 +25,7 @@ function applyA11yProps(props, options) {
   if (options.ariaCurrent !== void 0) props["aria-current"] = String(options.ariaCurrent);
   if (options.ariaInvalid !== void 0) props["aria-invalid"] = String(options.ariaInvalid);
   if (options.ariaRequired !== void 0) props["aria-required"] = String(options.ariaRequired);
+  if (options.ariaModal !== void 0) props["aria-modal"] = String(options.ariaModal);
 }
 function containerProps(options) {
   const props = {};
@@ -56,6 +57,49 @@ function reactiveListItemSignature(item) {
 function reactiveListItemKey(item, index) {
   return itemIdentity(item, index);
 }
+var OVERLAY_KINDS = {
+  dialog: {
+    role: "dialog",
+    modal: true,
+    takesFocus: true,
+    ariaModal: true,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  popover: {
+    role: "dialog",
+    modal: false,
+    takesFocus: true,
+    ariaModal: false,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  tooltip: {
+    role: "tooltip",
+    modal: false,
+    takesFocus: false,
+    ariaModal: false,
+    defaultCloseOnEscape: false,
+    defaultRestoreFocus: false
+  },
+  dropdown: {
+    role: "menu",
+    modal: false,
+    takesFocus: true,
+    ariaModal: false,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  toast: {
+    role: "status",
+    modal: false,
+    takesFocus: false,
+    ariaModal: false,
+    ariaLive: "polite",
+    defaultCloseOnEscape: false,
+    defaultRestoreFocus: false
+  }
+};
 var ContentBuilderBase = class {
   constructor(_node, _graph) {
     this._node = _node;
@@ -327,6 +371,74 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
         }
       );
     }, { id });
+  }
+  // ── Portals & overlays ──────────────────────────────────────────────────────
+  portal(key, builder, options = {}) {
+    const node = this._graph.createNode("portal", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  /**
+   * Shared assembly for every overlay kind: a `portal` node whose single child
+   * is a `when(open, panel)` conditional. The panel container carries the
+   * kind's ARIA semantics; `builder` fills it. An `__overlay__<portalId>`
+   * descriptor is registered so the renderer wires focus/keyboard behavior to
+   * the same `open` signal that drives the panel. Reuses existing primitives
+   * (portal + when + container) — no new render path.
+   */
+  _overlay(kind, key, options, builder) {
+    const graph = this._graph;
+    const portalNode = graph.createNode("portal", {
+      key,
+      parent: this._node,
+      props: { key }
+    });
+    const openBindable = options.open;
+    const openSignal = isSignal(openBindable) ? openBindable : signal(openBindable);
+    const panelOptions = {
+      role: options.role ?? kind.role,
+      ...kind.ariaModal ? { ariaModal: true } : {},
+      ...kind.ariaLive !== void 0 ? { ariaLive: kind.ariaLive } : {},
+      ...options.class !== void 0 ? { class: options.class } : {},
+      ...options.ariaLabel !== void 0 ? { ariaLabel: options.ariaLabel } : {},
+      ...options.ariaLabelledBy !== void 0 ? { ariaLabelledBy: options.ariaLabelledBy } : {},
+      ...options.ariaDescribedBy !== void 0 ? { ariaDescribedBy: options.ariaDescribedBy } : {}
+    };
+    const portalBuilder = new ContainerBuilderImpl(portalNode, graph);
+    portalBuilder.when(openSignal, (panelHost) => {
+      panelHost.container(`${key}__panel`, builder, panelOptions);
+    });
+    const descriptor = {
+      open: openSignal,
+      modal: kind.modal,
+      takesFocus: kind.takesFocus,
+      closeOnEscape: options.closeOnEscape ?? kind.defaultCloseOnEscape,
+      restoreFocus: options.restoreFocus ?? kind.defaultRestoreFocus,
+      ...options.initialFocusId !== void 0 ? { initialFocusId: options.initialFocusId } : {},
+      ...options.onClose !== void 0 ? { onClose: options.onClose } : {}
+    };
+    graph.registerHandler(
+      `__overlay__${portalNode.id}`,
+      () => descriptor
+    );
+  }
+  dialog(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.dialog, key, options, builder);
+  }
+  popover(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.popover, key, options, builder);
+  }
+  tooltip(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.tooltip, key, options, builder);
+  }
+  dropdown(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.dropdown, key, options, builder);
+  }
+  toast(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.toast, key, options, builder);
   }
 };
 var SectionBuilderImpl = class extends ContainerBuilderBase {

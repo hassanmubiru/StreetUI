@@ -1,5 +1,5 @@
 // src/version.ts
-var VERSION = "1.6.0";
+var VERSION = "1.6.1";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;
@@ -802,6 +802,7 @@ var ApplicationGraph = class {
     }
     this.handlers.delete(`__listbuild__${node.id}`);
     this.handlers.delete(`__listplan__${node.id}`);
+    this.handlers.delete(`__overlay__${node.id}`);
   }
   // ── Handler registry ──────────────────────────────────────────────────────
   registerHandler(key, fn) {
@@ -916,6 +917,7 @@ function applyA11yProps(props, options) {
   if (options.ariaCurrent !== void 0) props["aria-current"] = String(options.ariaCurrent);
   if (options.ariaInvalid !== void 0) props["aria-invalid"] = String(options.ariaInvalid);
   if (options.ariaRequired !== void 0) props["aria-required"] = String(options.ariaRequired);
+  if (options.ariaModal !== void 0) props["aria-modal"] = String(options.ariaModal);
 }
 function containerProps(options) {
   const props = {};
@@ -947,6 +949,49 @@ function reactiveListItemSignature(item) {
 function reactiveListItemKey(item, index) {
   return itemIdentity(item, index);
 }
+var OVERLAY_KINDS = {
+  dialog: {
+    role: "dialog",
+    modal: true,
+    takesFocus: true,
+    ariaModal: true,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  popover: {
+    role: "dialog",
+    modal: false,
+    takesFocus: true,
+    ariaModal: false,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  tooltip: {
+    role: "tooltip",
+    modal: false,
+    takesFocus: false,
+    ariaModal: false,
+    defaultCloseOnEscape: false,
+    defaultRestoreFocus: false
+  },
+  dropdown: {
+    role: "menu",
+    modal: false,
+    takesFocus: true,
+    ariaModal: false,
+    defaultCloseOnEscape: true,
+    defaultRestoreFocus: true
+  },
+  toast: {
+    role: "status",
+    modal: false,
+    takesFocus: false,
+    ariaModal: false,
+    ariaLive: "polite",
+    defaultCloseOnEscape: false,
+    defaultRestoreFocus: false
+  }
+};
 var ContentBuilderBase = class {
   constructor(_node, _graph) {
     this._node = _node;
@@ -1218,6 +1263,74 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
         }
       );
     }, { id });
+  }
+  // ── Portals & overlays ──────────────────────────────────────────────────────
+  portal(key, builder, options = {}) {
+    const node = this._graph.createNode("portal", {
+      key,
+      parent: this._node,
+      props: containerProps(options)
+    });
+    builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  /**
+   * Shared assembly for every overlay kind: a `portal` node whose single child
+   * is a `when(open, panel)` conditional. The panel container carries the
+   * kind's ARIA semantics; `builder` fills it. An `__overlay__<portalId>`
+   * descriptor is registered so the renderer wires focus/keyboard behavior to
+   * the same `open` signal that drives the panel. Reuses existing primitives
+   * (portal + when + container) — no new render path.
+   */
+  _overlay(kind, key, options, builder) {
+    const graph = this._graph;
+    const portalNode = graph.createNode("portal", {
+      key,
+      parent: this._node,
+      props: { key }
+    });
+    const openBindable = options.open;
+    const openSignal = isSignal(openBindable) ? openBindable : signal(openBindable);
+    const panelOptions = {
+      role: options.role ?? kind.role,
+      ...kind.ariaModal ? { ariaModal: true } : {},
+      ...kind.ariaLive !== void 0 ? { ariaLive: kind.ariaLive } : {},
+      ...options.class !== void 0 ? { class: options.class } : {},
+      ...options.ariaLabel !== void 0 ? { ariaLabel: options.ariaLabel } : {},
+      ...options.ariaLabelledBy !== void 0 ? { ariaLabelledBy: options.ariaLabelledBy } : {},
+      ...options.ariaDescribedBy !== void 0 ? { ariaDescribedBy: options.ariaDescribedBy } : {}
+    };
+    const portalBuilder = new ContainerBuilderImpl(portalNode, graph);
+    portalBuilder.when(openSignal, (panelHost) => {
+      panelHost.container(`${key}__panel`, builder, panelOptions);
+    });
+    const descriptor = {
+      open: openSignal,
+      modal: kind.modal,
+      takesFocus: kind.takesFocus,
+      closeOnEscape: options.closeOnEscape ?? kind.defaultCloseOnEscape,
+      restoreFocus: options.restoreFocus ?? kind.defaultRestoreFocus,
+      ...options.initialFocusId !== void 0 ? { initialFocusId: options.initialFocusId } : {},
+      ...options.onClose !== void 0 ? { onClose: options.onClose } : {}
+    };
+    graph.registerHandler(
+      `__overlay__${portalNode.id}`,
+      () => descriptor
+    );
+  }
+  dialog(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.dialog, key, options, builder);
+  }
+  popover(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.popover, key, options, builder);
+  }
+  tooltip(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.tooltip, key, options, builder);
+  }
+  dropdown(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.dropdown, key, options, builder);
+  }
+  toast(key, options, builder) {
+    this._overlay(OVERLAY_KINDS.toast, key, options, builder);
   }
 };
 var SectionBuilderImpl = class extends ContainerBuilderBase {
@@ -1819,6 +1932,18 @@ var BrowserDOMAdapter = class {
   focus(element) {
     element.focus?.();
   }
+  body() {
+    return document.body ?? null;
+  }
+  activeElement() {
+    return document.activeElement ?? null;
+  }
+  contains(ancestor, node) {
+    return ancestor.contains(node);
+  }
+  matches(element, selector) {
+    return typeof element.matches === "function" && element.matches(selector);
+  }
   isElement(node) {
     return node.nodeType === Node.ELEMENT_NODE;
   }
@@ -2186,6 +2311,18 @@ var ServerDOMAdapter = class {
   }
   focus() {
   }
+  body() {
+    return null;
+  }
+  activeElement() {
+    return null;
+  }
+  contains(_ancestor, _node) {
+    return false;
+  }
+  matches(_element, _selector) {
+    return false;
+  }
   isElement(node) {
     return asServer(node).kind === "element";
   }
@@ -2250,6 +2387,66 @@ function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
   if (el === null) return false;
   dom.focus(el);
   return true;
+}
+function getFocusable(dom, container, selector = FOCUSABLE_SELECTOR) {
+  return Array.from(dom.querySelectorAll(container, selector)).filter(
+    (el) => dom.matches(el, selector)
+  );
+}
+function saveFocus(dom) {
+  return dom.activeElement();
+}
+function restoreFocus(dom, saved) {
+  if (saved !== null) dom.focus(saved);
+}
+function focusInitial(dom, container, initialFocusId) {
+  if (initialFocusId !== void 0 && focusById(dom, container, initialFocusId)) return;
+  focusFirst(dom, container);
+}
+function trapFocus(dom, container) {
+  const onKeydown = (event) => {
+    if (event.key !== "Tab") return;
+    const items = getFocusable(dom, container);
+    if (items.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = dom.activeElement();
+    if (active === null || !dom.contains(container, active)) {
+      event.preventDefault();
+      dom.focus(first);
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault();
+      dom.focus(last);
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      dom.focus(first);
+    }
+  };
+  dom.addEventListener(container, "keydown", onKeydown);
+  return () => dom.removeEventListener(container, "keydown", onKeydown);
+}
+function containFocus(dom, container) {
+  const body = dom.body();
+  if (body === null) return () => {
+  };
+  const onFocusIn = (event) => {
+    const target = event.target;
+    if (target !== null && !dom.contains(container, target)) {
+      focusFirst(dom, container);
+    }
+  };
+  dom.addEventListener(body, "focusin", onFocusIn);
+  return () => dom.removeEventListener(body, "focusin", onFocusIn);
+}
+function onEscape(dom, target, handler) {
+  const onKeydown = (event) => {
+    if (event.key === "Escape") handler();
+  };
+  dom.addEventListener(target, "keydown", onKeydown);
+  return () => dom.removeEventListener(target, "keydown", onKeydown);
 }
 
 // ../renderer/src/render-context.ts
@@ -2409,7 +2606,12 @@ var TAG_MAP = {
   component: "div",
   slot: "div",
   fragment: "div",
-  "reactive-list": "ul"
+  "reactive-list": "ul",
+  // A portal renders as a neutral inline anchor <div> at its declaration site;
+  // its children are relocated to a document.body container on the browser
+  // (see the portal branch in mount.ts). On the server (no body) it renders
+  // inline, so the anchor tag is what SSR/hydration positionally match on.
+  portal: "div"
 };
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
@@ -2821,6 +3023,28 @@ function mountNode(ctx, graphNode, parentDom) {
     wireReactiveList(ctx, graphNode, instance2, el2);
     return instance2;
   }
+  if (graphNode.type === "portal") {
+    const anchor = dom.createElement(resolveTag("portal"));
+    dom.setAttribute(anchor, "data-streetui-portal", "");
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance2 = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance2);
+    const body = dom.body();
+    let target = anchor;
+    if (body !== null) {
+      const portalContainer = dom.createElement("div");
+      dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+      dom.appendChild(body, portalContainer);
+      instance2.trackCleanup(() => dom.removeChild(body, portalContainer));
+      target = portalContainer;
+    }
+    for (const child of graphNode.children) {
+      instance2.addChild(mountNode(ctx, child, target));
+    }
+    dom.appendChild(parentDom, anchor);
+    wireOverlayBehavior(ctx, graphNode, instance2, target);
+    return instance2;
+  }
   const tag = resolveTag(graphNode.type);
   const el = dom.createElement(tag);
   applyNodeProps(ctx, graphNode, el);
@@ -2970,6 +3194,44 @@ function forgetInstance(ctx, instance) {
   ctx.instances.delete(instance.graphNode.id);
   for (const child of instance.children) forgetInstance(ctx, child);
 }
+function wireOverlayBehavior(ctx, graphNode, instance, target) {
+  const { dom, graph } = ctx;
+  if (dom.body() === null) return;
+  const descFn = graph.getHandler(`__overlay__${graphNode.id}`);
+  if (descFn === void 0) return;
+  const desc = descFn();
+  const openSig = desc.open;
+  if (openSig === void 0 || typeof openSig.subscribe !== "function") return;
+  let active = [];
+  let saved = null;
+  const teardown = () => {
+    for (const fn of active) fn();
+    active = [];
+  };
+  const onOpenChange = (isOpen) => {
+    if (isOpen) {
+      if (desc.restoreFocus) saved = saveFocus(dom);
+      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
+      if (desc.modal) {
+        active.push(trapFocus(dom, target));
+        active.push(containFocus(dom, target));
+      }
+      if (desc.closeOnEscape && desc.onClose !== void 0) {
+        active.push(onEscape(dom, target, desc.onClose));
+      }
+    } else {
+      teardown();
+      if (desc.restoreFocus && saved !== null) {
+        restoreFocus(dom, saved);
+        saved = null;
+      }
+    }
+  };
+  const unsub = openSig.subscribe(onOpenChange);
+  instance.trackCleanup(unsub);
+  instance.trackCleanup(teardown);
+  if (openSig.peek() === true) onOpenChange(true);
+}
 
 // ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
@@ -3070,6 +3332,25 @@ function hydrateNode(ctx, graphNode, domNode, path) {
       ctx.instances.set(graphNode.id, instance);
       hydrateChildren(ctx, graphNode, instance, domNode, path);
       wireReactiveList(ctx, graphNode, instance, domNode);
+      return instance;
+    }
+    case "portal": {
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      const body = dom.body();
+      let target = domNode;
+      if (body !== null) {
+        const portalContainer = dom.createElement("div");
+        dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+        for (const child of dom.childNodes(domNode)) {
+          dom.appendChild(portalContainer, child);
+        }
+        dom.appendChild(body, portalContainer);
+        instance.trackCleanup(() => dom.removeChild(body, portalContainer));
+        target = portalContainer;
+      }
+      hydrateChildren(ctx, graphNode, instance, target, path);
+      wireOverlayBehavior(ctx, graphNode, instance, target);
       return instance;
     }
     default: {
@@ -3315,7 +3596,8 @@ function analyzeGraph(graph) {
     const hasEvents = node.events.length > 0;
     const isList = node.type === "reactive-list";
     const isConditional = node.type === "conditional";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional;
+    const isPortal = node.type === "portal";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -4407,6 +4689,7 @@ export {
   compileGraph,
   consoleDiagnosticSink,
   consoleHydrationDiagnosticSink,
+  containFocus,
   createApplication,
   createBrowserHistory,
   createContext,
@@ -4433,12 +4716,14 @@ export {
   flushSync,
   focusById,
   focusFirst,
+  focusInitial,
   formatDiagnostic,
   formatDiagnosticContext,
   formatHydrationDiagnostic,
   frameworkError,
   generateApplicationId,
   generateNodeId,
+  getFocusable,
   globalEventBus,
   headingUpdate,
   hydrateGraph,
@@ -4465,6 +4750,7 @@ export {
   nodeTypeStats,
   normalizePath,
   observerCount,
+  onEscape,
   patchNode,
   patchProp,
   pattern,
@@ -4481,8 +4767,10 @@ export {
   resetIdCounter,
   resolveTag,
   resource,
+  restoreFocus,
   routerOutlet,
   runValidators,
+  saveFocus,
   scheduleImmediate,
   scheduleUpdate,
   scheduler,
@@ -4497,8 +4785,10 @@ export {
   textUpdate,
   toIdToken,
   transformGraph,
+  trapFocus,
   validateGraph,
   wireEvents,
+  wireOverlayBehavior,
   wireReactiveList,
   wireSignalBindings
 };

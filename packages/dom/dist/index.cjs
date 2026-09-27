@@ -30,13 +30,20 @@ __export(index_exports, {
   ServerStyle: () => ServerStyle,
   ServerText: () => ServerText,
   browserDOMAdapter: () => browserDOMAdapter,
+  containFocus: () => containFocus,
   escapeHtmlAttr: () => escapeHtmlAttr,
   escapeHtmlText: () => escapeHtmlText,
   focusById: () => focusById,
   focusFirst: () => focusFirst,
+  focusInitial: () => focusInitial,
+  getFocusable: () => getFocusable,
+  onEscape: () => onEscape,
+  restoreFocus: () => restoreFocus,
+  saveFocus: () => saveFocus,
   serializeChildren: () => serializeChildren,
   serializeServerNode: () => serializeServerNode,
-  serverDOMAdapter: () => serverDOMAdapter
+  serverDOMAdapter: () => serverDOMAdapter,
+  trapFocus: () => trapFocus
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -104,6 +111,18 @@ var BrowserDOMAdapter = class {
   }
   focus(element) {
     element.focus?.();
+  }
+  body() {
+    return document.body ?? null;
+  }
+  activeElement() {
+    return document.activeElement ?? null;
+  }
+  contains(ancestor, node) {
+    return ancestor.contains(node);
+  }
+  matches(element, selector) {
+    return typeof element.matches === "function" && element.matches(selector);
   }
   isElement(node) {
     return node.nodeType === Node.ELEMENT_NODE;
@@ -472,6 +491,18 @@ var ServerDOMAdapter = class {
   }
   focus() {
   }
+  body() {
+    return null;
+  }
+  activeElement() {
+    return null;
+  }
+  contains(_ancestor, _node) {
+    return false;
+  }
+  matches(_element, _selector) {
+    return false;
+  }
   isElement(node) {
     return asServer(node).kind === "element";
   }
@@ -537,6 +568,66 @@ function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
   dom.focus(el);
   return true;
 }
+function getFocusable(dom, container, selector = FOCUSABLE_SELECTOR) {
+  return Array.from(dom.querySelectorAll(container, selector)).filter(
+    (el) => dom.matches(el, selector)
+  );
+}
+function saveFocus(dom) {
+  return dom.activeElement();
+}
+function restoreFocus(dom, saved) {
+  if (saved !== null) dom.focus(saved);
+}
+function focusInitial(dom, container, initialFocusId) {
+  if (initialFocusId !== void 0 && focusById(dom, container, initialFocusId)) return;
+  focusFirst(dom, container);
+}
+function trapFocus(dom, container) {
+  const onKeydown = (event) => {
+    if (event.key !== "Tab") return;
+    const items = getFocusable(dom, container);
+    if (items.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = dom.activeElement();
+    if (active === null || !dom.contains(container, active)) {
+      event.preventDefault();
+      dom.focus(first);
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault();
+      dom.focus(last);
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      dom.focus(first);
+    }
+  };
+  dom.addEventListener(container, "keydown", onKeydown);
+  return () => dom.removeEventListener(container, "keydown", onKeydown);
+}
+function containFocus(dom, container) {
+  const body = dom.body();
+  if (body === null) return () => {
+  };
+  const onFocusIn = (event) => {
+    const target = event.target;
+    if (target !== null && !dom.contains(container, target)) {
+      focusFirst(dom, container);
+    }
+  };
+  dom.addEventListener(body, "focusin", onFocusIn);
+  return () => dom.removeEventListener(body, "focusin", onFocusIn);
+}
+function onEscape(dom, target, handler) {
+  const onKeydown = (event) => {
+    if (event.key === "Escape") handler();
+  };
+  dom.addEventListener(target, "keydown", onKeydown);
+  return () => dom.removeEventListener(target, "keydown", onKeydown);
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   BrowserDOMAdapter,
@@ -549,12 +640,19 @@ function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
   ServerStyle,
   ServerText,
   browserDOMAdapter,
+  containFocus,
   escapeHtmlAttr,
   escapeHtmlText,
   focusById,
   focusFirst,
+  focusInitial,
+  getFocusable,
+  onEscape,
+  restoreFocus,
+  saveFocus,
   serializeChildren,
   serializeServerNode,
-  serverDOMAdapter
+  serverDOMAdapter,
+  trapFocus
 });
 //# sourceMappingURL=index.cjs.map

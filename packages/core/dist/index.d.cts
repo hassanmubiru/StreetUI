@@ -189,7 +189,7 @@ declare function createApplication(options: ApplicationOptions): Application;
  * in the Semantic Application Graph.
  */
 
-type SemanticNodeType = 'application' | 'page' | 'section' | 'container' | 'heading' | 'text' | 'button' | 'input' | 'form' | 'list' | 'list-item' | 'image' | 'link' | 'component' | 'slot' | 'fragment' | 'reactive-list' | 'conditional';
+type SemanticNodeType = 'application' | 'page' | 'section' | 'container' | 'heading' | 'text' | 'button' | 'input' | 'form' | 'list' | 'list-item' | 'image' | 'link' | 'component' | 'slot' | 'fragment' | 'reactive-list' | 'conditional' | 'portal';
 interface NodeMetadata {
     readonly createdAt: number;
     readonly [key: string]: unknown;

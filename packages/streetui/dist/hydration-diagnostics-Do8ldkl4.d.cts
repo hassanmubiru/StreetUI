@@ -1,4 +1,4 @@
-import { C as CompiledApplication } from './compile-CEom4hkp.js';
+import { C as CompiledApplication } from './compile-BNxVIT9e.cjs';
 
 /**
  * The interface the runtime uses to communicate with the renderer.

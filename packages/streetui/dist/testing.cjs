@@ -290,6 +290,18 @@ var BrowserDOMAdapter = class {
   focus(element) {
     element.focus?.();
   }
+  body() {
+    return document.body ?? null;
+  }
+  activeElement() {
+    return document.activeElement ?? null;
+  }
+  contains(ancestor, node) {
+    return ancestor.contains(node);
+  }
+  matches(element, selector) {
+    return typeof element.matches === "function" && element.matches(selector);
+  }
   isElement(node) {
     return node.nodeType === Node.ELEMENT_NODE;
   }
@@ -656,6 +668,18 @@ var ServerDOMAdapter = class {
   }
   focus() {
   }
+  body() {
+    return null;
+  }
+  activeElement() {
+    return null;
+  }
+  contains(_ancestor, _node) {
+    return false;
+  }
+  matches(_element, _selector) {
+    return false;
+  }
   isElement(node) {
     return asServer(node).kind === "element";
   }
@@ -705,6 +729,81 @@ var ServerDOMAdapter = class {
     return serializeServerNode(asServer(node));
   }
 };
+
+// ../dom/src/focus.ts
+var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function focusById(dom, root, id) {
+  const el = dom.querySelector(root, `[id="${id}"]`);
+  if (el === null) return false;
+  dom.focus(el);
+  return true;
+}
+function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
+  const el = dom.querySelector(container, selector);
+  if (el === null) return false;
+  dom.focus(el);
+  return true;
+}
+function getFocusable(dom, container, selector = FOCUSABLE_SELECTOR) {
+  return Array.from(dom.querySelectorAll(container, selector)).filter(
+    (el) => dom.matches(el, selector)
+  );
+}
+function saveFocus(dom) {
+  return dom.activeElement();
+}
+function restoreFocus(dom, saved) {
+  if (saved !== null) dom.focus(saved);
+}
+function focusInitial(dom, container, initialFocusId) {
+  if (initialFocusId !== void 0 && focusById(dom, container, initialFocusId)) return;
+  focusFirst(dom, container);
+}
+function trapFocus(dom, container) {
+  const onKeydown = (event) => {
+    if (event.key !== "Tab") return;
+    const items = getFocusable(dom, container);
+    if (items.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = dom.activeElement();
+    if (active === null || !dom.contains(container, active)) {
+      event.preventDefault();
+      dom.focus(first);
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault();
+      dom.focus(last);
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      dom.focus(first);
+    }
+  };
+  dom.addEventListener(container, "keydown", onKeydown);
+  return () => dom.removeEventListener(container, "keydown", onKeydown);
+}
+function containFocus(dom, container) {
+  const body = dom.body();
+  if (body === null) return () => {
+  };
+  const onFocusIn = (event) => {
+    const target = event.target;
+    if (target !== null && !dom.contains(container, target)) {
+      focusFirst(dom, container);
+    }
+  };
+  dom.addEventListener(body, "focusin", onFocusIn);
+  return () => dom.removeEventListener(body, "focusin", onFocusIn);
+}
+function onEscape(dom, target, handler) {
+  const onKeydown = (event) => {
+    if (event.key === "Escape") handler();
+  };
+  dom.addEventListener(target, "keydown", onKeydown);
+  return () => dom.removeEventListener(target, "keydown", onKeydown);
+}
 
 // ../renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
@@ -863,7 +962,12 @@ var TAG_MAP = {
   component: "div",
   slot: "div",
   fragment: "div",
-  "reactive-list": "ul"
+  "reactive-list": "ul",
+  // A portal renders as a neutral inline anchor <div> at its declaration site;
+  // its children are relocated to a document.body container on the browser
+  // (see the portal branch in mount.ts). On the server (no body) it renders
+  // inline, so the anchor tag is what SSR/hydration positionally match on.
+  portal: "div"
 };
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
@@ -1275,6 +1379,28 @@ function mountNode(ctx, graphNode, parentDom) {
     wireReactiveList(ctx, graphNode, instance2, el2);
     return instance2;
   }
+  if (graphNode.type === "portal") {
+    const anchor = dom.createElement(resolveTag("portal"));
+    dom.setAttribute(anchor, "data-streetui-portal", "");
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance2 = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance2);
+    const body = dom.body();
+    let target = anchor;
+    if (body !== null) {
+      const portalContainer = dom.createElement("div");
+      dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+      dom.appendChild(body, portalContainer);
+      instance2.trackCleanup(() => dom.removeChild(body, portalContainer));
+      target = portalContainer;
+    }
+    for (const child of graphNode.children) {
+      instance2.addChild(mountNode(ctx, child, target));
+    }
+    dom.appendChild(parentDom, anchor);
+    wireOverlayBehavior(ctx, graphNode, instance2, target);
+    return instance2;
+  }
   const tag = resolveTag(graphNode.type);
   const el = dom.createElement(tag);
   applyNodeProps(ctx, graphNode, el);
@@ -1424,6 +1550,44 @@ function forgetInstance(ctx, instance) {
   ctx.instances.delete(instance.graphNode.id);
   for (const child of instance.children) forgetInstance(ctx, child);
 }
+function wireOverlayBehavior(ctx, graphNode, instance, target) {
+  const { dom, graph } = ctx;
+  if (dom.body() === null) return;
+  const descFn = graph.getHandler(`__overlay__${graphNode.id}`);
+  if (descFn === void 0) return;
+  const desc = descFn();
+  const openSig = desc.open;
+  if (openSig === void 0 || typeof openSig.subscribe !== "function") return;
+  let active = [];
+  let saved = null;
+  const teardown = () => {
+    for (const fn of active) fn();
+    active = [];
+  };
+  const onOpenChange = (isOpen) => {
+    if (isOpen) {
+      if (desc.restoreFocus) saved = saveFocus(dom);
+      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
+      if (desc.modal) {
+        active.push(trapFocus(dom, target));
+        active.push(containFocus(dom, target));
+      }
+      if (desc.closeOnEscape && desc.onClose !== void 0) {
+        active.push(onEscape(dom, target, desc.onClose));
+      }
+    } else {
+      teardown();
+      if (desc.restoreFocus && saved !== null) {
+        restoreFocus(dom, saved);
+        saved = null;
+      }
+    }
+  };
+  const unsub = openSig.subscribe(onOpenChange);
+  instance.trackCleanup(unsub);
+  instance.trackCleanup(teardown);
+  if (openSig.peek() === true) onOpenChange(true);
+}
 
 // ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
@@ -1517,6 +1681,25 @@ function hydrateNode(ctx, graphNode, domNode, path) {
       ctx.instances.set(graphNode.id, instance);
       hydrateChildren(ctx, graphNode, instance, domNode, path);
       wireReactiveList(ctx, graphNode, instance, domNode);
+      return instance;
+    }
+    case "portal": {
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      const body = dom.body();
+      let target = domNode;
+      if (body !== null) {
+        const portalContainer = dom.createElement("div");
+        dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+        for (const child of dom.childNodes(domNode)) {
+          dom.appendChild(portalContainer, child);
+        }
+        dom.appendChild(body, portalContainer);
+        instance.trackCleanup(() => dom.removeChild(body, portalContainer));
+        target = portalContainer;
+      }
+      hydrateChildren(ctx, graphNode, instance, target, path);
+      wireOverlayBehavior(ctx, graphNode, instance, target);
       return instance;
     }
     default: {
@@ -1726,7 +1909,8 @@ function analyzeGraph(graph) {
     const hasEvents = node.events.length > 0;
     const isList = node.type === "reactive-list";
     const isConditional = node.type === "conditional";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional;
+    const isPortal = node.type === "portal";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -2152,7 +2336,7 @@ function renderServerThenHydrate(build, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.6.0";
+var VERSION = "1.6.1";
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   VERSION,

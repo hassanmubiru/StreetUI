@@ -1,6 +1,6 @@
-import { S as StreetApp } from './compile-CEom4hkp.cjs';
-export { V as VERSION } from './compile-CEom4hkp.cjs';
-import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-D286jpZZ.cjs';
+import { S as StreetApp } from './compile-BNxVIT9e.cjs';
+export { V as VERSION } from './compile-BNxVIT9e.cjs';
+import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-Do8ldkl4.cjs';
 export * from 'streetui/diagnostics';
 
 /**

@@ -36,6 +36,18 @@ interface DOMAdapter {
      * focus) this is a safe no-op, keeping focus management SSR-compatible.
      */
     focus(element: Element): void;
+    /**
+     * The document body — the default mount target for portals/overlays. Returns
+     * null on the server (no document), which is what makes portal SSR degrade to
+     * inline rendering and focus management degrade to a no-op.
+     */
+    body(): Element | null;
+    /** The currently focused element, or null on the server / when none is focused. */
+    activeElement(): Element | null;
+    /** True if `ancestor` contains `node` (inclusive). Always false on the server. */
+    contains(ancestor: Element, node: Node): boolean;
+    /** True if `element` matches the given CSS selector. Always false on the server. */
+    matches(element: Element, selector: string): boolean;
     isElement(node: Node): node is Element;
     isTextNode(node: Node): node is Text;
     /** Lower-cased tag name of an element (e.g. "div", "h1"). */
@@ -73,6 +85,10 @@ declare class BrowserDOMAdapter implements DOMAdapter {
     querySelectorAll(root: Element | Document, selector: string): NodeListOf<Element>;
     getElementById(id: string): Element | null;
     focus(element: Element): void;
+    body(): Element | null;
+    activeElement(): Element | null;
+    contains(ancestor: Element, node: Node): boolean;
+    matches(element: Element, selector: string): boolean;
     isElement(node: Node): node is Element;
     isTextNode(node: Node): node is Text;
     tagName(element: Element): string;
@@ -210,6 +226,10 @@ declare class ServerDOMAdapter implements DOMAdapter {
     querySelectorAll(): NodeListOf<Element>;
     getElementById(): Element | null;
     focus(): void;
+    body(): Element | null;
+    activeElement(): Element | null;
+    contains(_ancestor: Element, _node: Node): boolean;
+    matches(_element: Element, _selector: string): boolean;
     isElement(node: Node): node is Element;
     isTextNode(node: Node): node is Text;
     tagName(element: Element): string;
@@ -247,5 +267,41 @@ declare function focusById(dom: DOMAdapter, root: Element | Document, id: string
  * Returns true if a focusable element was found and focused.
  */
 declare function focusFirst(dom: DOMAdapter, container: Element | Document, selector?: string): boolean;
+/**
+ * Ordered list of focusable/tabbable descendants of `container`.
+ * Re-checks each candidate against the selector so elements disabled after the
+ * initial query (e.g. a button toggled to `disabled`) are excluded.
+ */
+declare function getFocusable(dom: DOMAdapter, container: Element, selector?: string): Element[];
+/**
+ * Capture the currently-focused element so it can be restored later (e.g. when
+ * a dialog closes). Returns null on the server or when nothing is focused.
+ */
+declare function saveFocus(dom: DOMAdapter): Element | null;
+/** Restore focus to a previously {@link saveFocus}-d element. No-op if null. */
+declare function restoreFocus(dom: DOMAdapter, saved: Element | null): void;
+/**
+ * Move focus into `container` on open: the element with id `initialFocusId` if
+ * given and present, otherwise the first focusable element. Server-safe no-op.
+ */
+declare function focusInitial(dom: DOMAdapter, container: Element, initialFocusId?: string): void;
+/**
+ * Trap Tab / Shift+Tab focus within `container` (wrap-around at both ends).
+ * Attaches a keydown listener to the container and returns a cleanup function
+ * that detaches it. Server-safe: `addEventListener` is a no-op, and the returned
+ * cleanup is still callable.
+ */
+declare function trapFocus(dom: DOMAdapter, container: Element): () => void;
+/**
+ * Modal containment: if focus moves to an element outside `container`, redirect
+ * it back inside. Listens on the document body (focusin bubbles there) and
+ * returns a cleanup function. Server-safe no-op (body() is null).
+ */
+declare function containFocus(dom: DOMAdapter, container: Element): () => void;
+/**
+ * Invoke `handler` when Escape is pressed while focus is within `target`.
+ * Returns a cleanup function. Server-safe no-op.
+ */
+declare function onEscape(dom: DOMAdapter, target: Element, handler: () => void): () => void;
 
-export { BrowserDOMAdapter, type DOMAdapter, FOCUSABLE_SELECTOR, ServerComment, ServerDOMAdapter, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, browserDOMAdapter, escapeHtmlAttr, escapeHtmlText, focusById, focusFirst, serializeChildren, serializeServerNode, serverDOMAdapter };
+export { BrowserDOMAdapter, type DOMAdapter, FOCUSABLE_SELECTOR, ServerComment, ServerDOMAdapter, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, browserDOMAdapter, containFocus, escapeHtmlAttr, escapeHtmlText, focusById, focusFirst, focusInitial, getFocusable, onEscape, restoreFocus, saveFocus, serializeChildren, serializeServerNode, serverDOMAdapter, trapFocus };

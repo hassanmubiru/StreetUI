@@ -45,6 +45,8 @@ interface A11yOptions {
     readonly ariaInvalid?: boolean;
     /** aria-required — mark a form field as required. */
     readonly ariaRequired?: boolean;
+    /** aria-modal — mark a dialog as modal (content outside is inert to AT). */
+    readonly ariaModal?: boolean;
 }
 interface TextOptions extends A11yOptions {
     readonly class?: string;
@@ -116,6 +118,30 @@ interface FormOptions extends ContainerOptions {
 }
 interface ListOptions extends ContainerOptions {
 }
+/** Options for a plain portal (mount children into `document.body`). */
+interface PortalOptions extends ContainerOptions {
+}
+/**
+ * Options shared by every overlay (dialog/popover/tooltip/dropdown/toast).
+ *
+ * An overlay is a portal + a reactive `when(open, …)` panel + focus/keyboard
+ * behavior. `open` drives visibility; the framework never mutates it — closing
+ * is cooperative: `onClose` fires on Escape (when `closeOnEscape`) and the app
+ * flips its own `open` signal there. Per-kind defaults (role, modality, focus,
+ * escape, restore) apply unless overridden here.
+ */
+interface OverlayOptions extends ContainerOptions {
+    /** Reactive open/visibility state. When it flips, the panel mounts/unmounts. */
+    readonly open: Bindable<boolean>;
+    /** Requested-close callback (fired on Escape when `closeOnEscape`). Flip `open` here. */
+    readonly onClose?: () => void;
+    /** Restore focus to the previously-focused element on close. Default: per-kind. */
+    readonly restoreFocus?: boolean;
+    /** id of the element to focus first when the overlay opens (else first focusable). */
+    readonly initialFocusId?: string;
+    /** Escape key invokes `onClose`. Default: per-kind. */
+    readonly closeOnEscape?: boolean;
+}
 type SectionBuilder = (section: SectionDSL) => void;
 type ContainerBuilder = (container: ContainerDSL) => void;
 type PageBuilder = (page: PageDSL) => void;
@@ -175,6 +201,42 @@ interface ContainerDSL extends ContentDSL {
      * removal. It does NOT trap arbitrary global errors; errors remain observable.
      */
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
+    /**
+     * Render `builder`'s subtree into `document.body` instead of inline at this
+     * position (a neutral inline anchor is left behind). On the server there is no
+     * body, so the content renders inline; hydration relocates it to a body
+     * container to match the browser. Use for content that must escape overflow/
+     * stacking contexts (overlays, toasts). Cleanup removes the body container.
+     */
+    portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
+    /**
+     * Modal dialog: portal + `when(open, …)` panel with `role="dialog"`,
+     * `aria-modal="true"`, focus trap + containment, Escape-to-close, and focus
+     * restore on close. `builder` fills the dialog panel.
+     */
+    dialog(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Non-modal popover: portal + `when(open, …)` panel with `role="dialog"`.
+     * Moves focus into the panel on open and restores it on close, but does not
+     * trap or contain focus. Escape closes by default.
+     */
+    popover(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Tooltip: portal + `when(open, …)` panel with `role="tooltip"`. Non-modal
+     * and does not steal focus (tooltips describe another element); no Escape
+     * handling by default.
+     */
+    tooltip(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Dropdown menu: portal + `when(open, …)` panel with `role="menu"`. Non-modal;
+     * moves focus into the menu on open, Escape closes, focus restored on close.
+     */
+    dropdown(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Toast: portal + `when(open, …)` panel with `role="status"` and
+     * `aria-live="polite"`. Non-modal and never steals focus; no Escape handling.
+     */
+    toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
 }
 interface SectionDSL extends ContainerDSL {
 }
@@ -236,6 +298,21 @@ declare class ContainerBuilderBase extends ContentBuilderBase implements Contain
     form(key: string, builder: FormBuilder, options?: FormOptions): void;
     when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder): void;
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
+    portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
+    /**
+     * Shared assembly for every overlay kind: a `portal` node whose single child
+     * is a `when(open, panel)` conditional. The panel container carries the
+     * kind's ARIA semantics; `builder` fills it. An `__overlay__<portalId>`
+     * descriptor is registered so the renderer wires focus/keyboard behavior to
+     * the same `open` signal that drives the panel. Reuses existing primitives
+     * (portal + when + container) — no new render path.
+     */
+    private _overlay;
+    dialog(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    popover(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    tooltip(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    dropdown(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
 }
 declare class SectionBuilderImpl extends ContainerBuilderBase implements SectionDSL {
 }
@@ -290,4 +367,4 @@ interface StreetUI {
 }
 declare const streetui: StreetUI;
 
-export { type A11yOptions, AppBuilder, type AppDSL, type AppOptions, type Bindable, type BindableText, type BoundInputOptions, type ButtonOptions, type ContainerBuilder, ContainerBuilderImpl, type ContainerDSL, type ContainerOptions, type ContentDSL, type ControlledInputOptions, type ErrorBoundaryOptions, type ErrorFallbackBuilder, type ErrorSource, type FormBuilder, FormBuilderImpl, type FormDSL, type FormOptions, type HeadingOptions, type ImageOptions, type InputOptions, type InputOptionsBase, type LinkOptions, type ListBuilder, ListBuilderImpl, type ListDSL, type ListOptions, type ListPlanEntry, type PageBuilder, PageBuilderImpl, type PageDSL, type SectionBuilder, SectionBuilderImpl, type SectionDSL, type SectionOptions, StreetApp, type StreetUI, type TextOptions, type TextValue, reactiveListItemKey, reactiveListItemSignature, streetui };
+export { type A11yOptions, AppBuilder, type AppDSL, type AppOptions, type Bindable, type BindableText, type BoundInputOptions, type ButtonOptions, type ContainerBuilder, ContainerBuilderImpl, type ContainerDSL, type ContainerOptions, type ContentDSL, type ControlledInputOptions, type ErrorBoundaryOptions, type ErrorFallbackBuilder, type ErrorSource, type FormBuilder, FormBuilderImpl, type FormDSL, type FormOptions, type HeadingOptions, type ImageOptions, type InputOptions, type InputOptionsBase, type LinkOptions, type ListBuilder, ListBuilderImpl, type ListDSL, type ListOptions, type ListPlanEntry, type OverlayOptions, type PageBuilder, PageBuilderImpl, type PageDSL, type PortalOptions, type SectionBuilder, SectionBuilderImpl, type SectionDSL, type SectionOptions, StreetApp, type StreetUI, type TextOptions, type TextValue, reactiveListItemKey, reactiveListItemSignature, streetui };

@@ -178,6 +178,20 @@ declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, in
  * eager build factory (it only ever renders 0..1 branch, so eager is fine).
  */
 declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element): void;
+/**
+ * Attach overlay focus/keyboard behavior to a mounted portal. Server-safe: on
+ * the server `dom.body()` is null so this returns immediately (SSR emits inert
+ * markup, no focus concept). A plain portal has no `__overlay__` descriptor, so
+ * this also returns immediately — the behavior is purely additive.
+ *
+ * The panel is mounted/unmounted by the portal's inner `when(open, …)`, whose
+ * signal subscription is registered *before* this one (the conditional child is
+ * mounted earlier in the portal branch). Signal subscribers fire synchronously
+ * in subscription order, so on open→true the panel DOM exists before we move
+ * focus into it, and on open→false the panel is torn down before we restore
+ * focus. All listeners are tracked on the instance and torn down on unmount.
+ */
+declare function wireOverlayBehavior(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, target: Element): void;
 
 /**
  * Patch — targeted DOM updates driven by signal changes.
@@ -431,4 +445,4 @@ declare function renderToString(compiled: CompiledApplication, options?: RenderT
 
 declare function resolveTag(type: SemanticNodeType): string;
 
-export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, serializeState, textUpdate, wireEvents, wireReactiveList, wireSignalBindings };
+export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, serializeState, textUpdate, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

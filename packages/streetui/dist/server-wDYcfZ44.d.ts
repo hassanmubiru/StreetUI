@@ -1,4 +1,4 @@
-import { C as CompiledApplication } from './compile-CEom4hkp.cjs';
+import { C as CompiledApplication } from './compile-BNxVIT9e.js';
 
 /**
  * DOMAdapter — framework-owned abstraction over DOM operations.
@@ -38,6 +38,18 @@ interface DOMAdapter {
      * focus) this is a safe no-op, keeping focus management SSR-compatible.
      */
     focus(element: Element): void;
+    /**
+     * The document body — the default mount target for portals/overlays. Returns
+     * null on the server (no document), which is what makes portal SSR degrade to
+     * inline rendering and focus management degrade to a no-op.
+     */
+    body(): Element | null;
+    /** The currently focused element, or null on the server / when none is focused. */
+    activeElement(): Element | null;
+    /** True if `ancestor` contains `node` (inclusive). Always false on the server. */
+    contains(ancestor: Element, node: Node): boolean;
+    /** True if `element` matches the given CSS selector. Always false on the server. */
+    matches(element: Element, selector: string): boolean;
     isElement(node: Node): node is Element;
     isTextNode(node: Node): node is Text;
     /** Lower-cased tag name of an element (e.g. "div", "h1"). */
@@ -93,6 +105,10 @@ declare class ServerDOMAdapter implements DOMAdapter {
     querySelectorAll(): NodeListOf<Element>;
     getElementById(): Element | null;
     focus(): void;
+    body(): Element | null;
+    activeElement(): Element | null;
+    contains(_ancestor: Element, _node: Node): boolean;
+    matches(_element: Element, _selector: string): boolean;
     isElement(node: Node): node is Element;
     isTextNode(node: Node): node is Text;
     tagName(element: Element): string;

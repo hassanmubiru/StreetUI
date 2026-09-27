@@ -47,6 +47,7 @@ __export(index_exports, {
   serializeState: () => serializeState,
   textUpdate: () => textUpdate,
   wireEvents: () => wireEvents,
+  wireOverlayBehavior: () => wireOverlayBehavior,
   wireReactiveList: () => wireReactiveList,
   wireSignalBindings: () => wireSignalBindings
 });
@@ -192,6 +193,9 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
+// src/mount.ts
+var import_dom = require("@streetui/dom");
+
 // src/tag-map.ts
 var TAG_MAP = {
   application: "div",
@@ -210,7 +214,12 @@ var TAG_MAP = {
   component: "div",
   slot: "div",
   fragment: "div",
-  "reactive-list": "ul"
+  "reactive-list": "ul",
+  // A portal renders as a neutral inline anchor <div> at its declaration site;
+  // its children are relocated to a document.body container on the browser
+  // (see the portal branch in mount.ts). On the server (no body) it renders
+  // inline, so the anchor tag is what SSR/hydration positionally match on.
+  portal: "div"
 };
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
@@ -622,6 +631,28 @@ function mountNode(ctx, graphNode, parentDom) {
     wireReactiveList(ctx, graphNode, instance2, el2);
     return instance2;
   }
+  if (graphNode.type === "portal") {
+    const anchor = dom.createElement(resolveTag("portal"));
+    dom.setAttribute(anchor, "data-streetui-portal", "");
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance2 = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance2);
+    const body = dom.body();
+    let target = anchor;
+    if (body !== null) {
+      const portalContainer = dom.createElement("div");
+      dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+      dom.appendChild(body, portalContainer);
+      instance2.trackCleanup(() => dom.removeChild(body, portalContainer));
+      target = portalContainer;
+    }
+    for (const child of graphNode.children) {
+      instance2.addChild(mountNode(ctx, child, target));
+    }
+    dom.appendChild(parentDom, anchor);
+    wireOverlayBehavior(ctx, graphNode, instance2, target);
+    return instance2;
+  }
   const tag = resolveTag(graphNode.type);
   const el = dom.createElement(tag);
   applyNodeProps(ctx, graphNode, el);
@@ -771,9 +802,47 @@ function forgetInstance(ctx, instance) {
   ctx.instances.delete(instance.graphNode.id);
   for (const child of instance.children) forgetInstance(ctx, child);
 }
+function wireOverlayBehavior(ctx, graphNode, instance, target) {
+  const { dom, graph } = ctx;
+  if (dom.body() === null) return;
+  const descFn = graph.getHandler(`__overlay__${graphNode.id}`);
+  if (descFn === void 0) return;
+  const desc = descFn();
+  const openSig = desc.open;
+  if (openSig === void 0 || typeof openSig.subscribe !== "function") return;
+  let active = [];
+  let saved = null;
+  const teardown = () => {
+    for (const fn of active) fn();
+    active = [];
+  };
+  const onOpenChange = (isOpen) => {
+    if (isOpen) {
+      if (desc.restoreFocus) saved = (0, import_dom.saveFocus)(dom);
+      if (desc.takesFocus) (0, import_dom.focusInitial)(dom, target, desc.initialFocusId);
+      if (desc.modal) {
+        active.push((0, import_dom.trapFocus)(dom, target));
+        active.push((0, import_dom.containFocus)(dom, target));
+      }
+      if (desc.closeOnEscape && desc.onClose !== void 0) {
+        active.push((0, import_dom.onEscape)(dom, target, desc.onClose));
+      }
+    } else {
+      teardown();
+      if (desc.restoreFocus && saved !== null) {
+        (0, import_dom.restoreFocus)(dom, saved);
+        saved = null;
+      }
+    }
+  };
+  const unsub = openSig.subscribe(onOpenChange);
+  instance.trackCleanup(unsub);
+  instance.trackCleanup(teardown);
+  if (openSig.peek() === true) onOpenChange(true);
+}
 
 // src/renderer.ts
-var import_dom = require("@streetui/dom");
+var import_dom2 = require("@streetui/dom");
 
 // src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
@@ -874,6 +943,25 @@ function hydrateNode(ctx, graphNode, domNode, path) {
       ctx.instances.set(graphNode.id, instance);
       hydrateChildren(ctx, graphNode, instance, domNode, path);
       wireReactiveList(ctx, graphNode, instance, domNode);
+      return instance;
+    }
+    case "portal": {
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      const body = dom.body();
+      let target = domNode;
+      if (body !== null) {
+        const portalContainer = dom.createElement("div");
+        dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
+        for (const child of dom.childNodes(domNode)) {
+          dom.appendChild(portalContainer, child);
+        }
+        dom.appendChild(body, portalContainer);
+        instance.trackCleanup(() => dom.removeChild(body, portalContainer));
+        target = portalContainer;
+      }
+      hydrateChildren(ctx, graphNode, instance, target, path);
+      wireOverlayBehavior(ctx, graphNode, instance, target);
       return instance;
     }
     default: {
@@ -1018,7 +1106,7 @@ var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
   constructor(options = {}) {
-    this._dom = options.domAdapter ?? new import_dom.BrowserDOMAdapter();
+    this._dom = options.domAdapter ?? new import_dom2.BrowserDOMAdapter();
     if (options.hydrationDiagnostics !== void 0) {
       this._hydrationDiagnostics = options.hydrationDiagnostics;
     }
@@ -1091,11 +1179,11 @@ function readState(dom, root) {
 }
 
 // src/ssr.ts
-var import_dom3 = require("@streetui/dom");
+var import_dom4 = require("@streetui/dom");
 
 // src/static-ssr-plan.ts
 var import_diagnostics = require("@streetui/compiler/diagnostics");
-var import_dom2 = require("@streetui/dom");
+var import_dom3 = require("@streetui/dom");
 function collectMaximalStaticRoots(graph) {
   const analysis = (0, import_diagnostics.analyzeGraph)(graph);
   const roots = [];
@@ -1126,7 +1214,7 @@ function buildStaticSSRPlan(compiled) {
   const roots = collectMaximalStaticRoots(graph);
   const plan = /* @__PURE__ */ new Map();
   if (roots.length === 0) return plan;
-  const dom = new import_dom2.ServerDOMAdapter();
+  const dom = new import_dom3.ServerDOMAdapter();
   for (const root of roots) {
     plan.set(root.id, serializeStaticSubtree(dom, graph, root));
   }
@@ -1144,7 +1232,7 @@ function getStaticSSRPlan(compiled) {
 
 // src/ssr.ts
 function renderToString(compiled, options = {}) {
-  const dom = options.domAdapter ?? new import_dom3.ServerDOMAdapter();
+  const dom = options.domAdapter ?? new import_dom4.ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
   const staticHTML = plan !== void 0 && plan.size > 0 ? plan : void 0;
   const container = dom.createElement("div");
@@ -1184,6 +1272,7 @@ function renderToString(compiled, options = {}) {
   serializeState,
   textUpdate,
   wireEvents,
+  wireOverlayBehavior,
   wireReactiveList,
   wireSignalBindings
 });

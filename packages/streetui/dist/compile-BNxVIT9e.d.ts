@@ -7,7 +7,7 @@
  * (`streetui --version`) — the consolidated test-suite pins all three to the
  * same coordinated release so they can never silently drift apart.
  */
-declare const VERSION = "1.6.0";
+declare const VERSION = "1.6.1";
 
 /**
  * StreetUI reactive signals — framework-owned reactivity, no external libraries.
@@ -195,7 +195,7 @@ declare function formatDiagnostic(d: Diagnostic): string;
  * in the Semantic Application Graph.
  */
 
-type SemanticNodeType = 'application' | 'page' | 'section' | 'container' | 'heading' | 'text' | 'button' | 'input' | 'form' | 'list' | 'list-item' | 'image' | 'link' | 'component' | 'slot' | 'fragment' | 'reactive-list' | 'conditional';
+type SemanticNodeType = 'application' | 'page' | 'section' | 'container' | 'heading' | 'text' | 'button' | 'input' | 'form' | 'list' | 'list-item' | 'image' | 'link' | 'component' | 'slot' | 'fragment' | 'reactive-list' | 'conditional' | 'portal';
 interface NodeMetadata {
     readonly createdAt: number;
     readonly [key: string]: unknown;
@@ -385,6 +385,8 @@ interface A11yOptions {
     readonly ariaInvalid?: boolean;
     /** aria-required — mark a form field as required. */
     readonly ariaRequired?: boolean;
+    /** aria-modal — mark a dialog as modal (content outside is inert to AT). */
+    readonly ariaModal?: boolean;
 }
 interface TextOptions extends A11yOptions {
     readonly class?: string;
@@ -456,6 +458,30 @@ interface FormOptions extends ContainerOptions {
 }
 interface ListOptions extends ContainerOptions {
 }
+/** Options for a plain portal (mount children into `document.body`). */
+interface PortalOptions extends ContainerOptions {
+}
+/**
+ * Options shared by every overlay (dialog/popover/tooltip/dropdown/toast).
+ *
+ * An overlay is a portal + a reactive `when(open, …)` panel + focus/keyboard
+ * behavior. `open` drives visibility; the framework never mutates it — closing
+ * is cooperative: `onClose` fires on Escape (when `closeOnEscape`) and the app
+ * flips its own `open` signal there. Per-kind defaults (role, modality, focus,
+ * escape, restore) apply unless overridden here.
+ */
+interface OverlayOptions extends ContainerOptions {
+    /** Reactive open/visibility state. When it flips, the panel mounts/unmounts. */
+    readonly open: Bindable<boolean>;
+    /** Requested-close callback (fired on Escape when `closeOnEscape`). Flip `open` here. */
+    readonly onClose?: () => void;
+    /** Restore focus to the previously-focused element on close. Default: per-kind. */
+    readonly restoreFocus?: boolean;
+    /** id of the element to focus first when the overlay opens (else first focusable). */
+    readonly initialFocusId?: string;
+    /** Escape key invokes `onClose`. Default: per-kind. */
+    readonly closeOnEscape?: boolean;
+}
 type SectionBuilder = (section: SectionDSL) => void;
 type ContainerBuilder = (container: ContainerDSL) => void;
 type PageBuilder = (page: PageDSL) => void;
@@ -515,6 +541,42 @@ interface ContainerDSL extends ContentDSL {
      * removal. It does NOT trap arbitrary global errors; errors remain observable.
      */
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
+    /**
+     * Render `builder`'s subtree into `document.body` instead of inline at this
+     * position (a neutral inline anchor is left behind). On the server there is no
+     * body, so the content renders inline; hydration relocates it to a body
+     * container to match the browser. Use for content that must escape overflow/
+     * stacking contexts (overlays, toasts). Cleanup removes the body container.
+     */
+    portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
+    /**
+     * Modal dialog: portal + `when(open, …)` panel with `role="dialog"`,
+     * `aria-modal="true"`, focus trap + containment, Escape-to-close, and focus
+     * restore on close. `builder` fills the dialog panel.
+     */
+    dialog(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Non-modal popover: portal + `when(open, …)` panel with `role="dialog"`.
+     * Moves focus into the panel on open and restores it on close, but does not
+     * trap or contain focus. Escape closes by default.
+     */
+    popover(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Tooltip: portal + `when(open, …)` panel with `role="tooltip"`. Non-modal
+     * and does not steal focus (tooltips describe another element); no Escape
+     * handling by default.
+     */
+    tooltip(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Dropdown menu: portal + `when(open, …)` panel with `role="menu"`. Non-modal;
+     * moves focus into the menu on open, Escape closes, focus restored on close.
+     */
+    dropdown(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    /**
+     * Toast: portal + `when(open, …)` panel with `role="status"` and
+     * `aria-live="polite"`. Non-modal and never steals focus; no Escape handling.
+     */
+    toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
 }
 interface SectionDSL extends ContainerDSL {
 }
@@ -576,6 +638,21 @@ declare class ContainerBuilderBase extends ContentBuilderBase implements Contain
     form(key: string, builder: FormBuilder, options?: FormOptions): void;
     when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder): void;
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
+    portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
+    /**
+     * Shared assembly for every overlay kind: a `portal` node whose single child
+     * is a `when(open, panel)` conditional. The panel container carries the
+     * kind's ARIA semantics; `builder` fills it. An `__overlay__<portalId>`
+     * descriptor is registered so the renderer wires focus/keyboard behavior to
+     * the same `open` signal that drives the panel. Reuses existing primitives
+     * (portal + when + container) — no new render path.
+     */
+    private _overlay;
+    dialog(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    popover(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    tooltip(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    dropdown(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+    toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
 }
 declare class SectionBuilderImpl extends ContainerBuilderBase implements SectionDSL {
 }
@@ -668,4 +745,4 @@ declare function compile(app: StreetApp, options?: CompileOptions): CompiledAppl
  */
 declare function compileGraph(graph: ApplicationGraph, options?: CompileOptions): CompiledApplication;
 
-export { type ListDSL as $, type ApplicationId as A, BaseNode as B, type CompiledApplication as C, DiagnosticCollector as D, type ErrorBoundaryOptions as E, type ErrorFallbackBuilder as F, GraphNode as G, type ErrorSource as H, type EventDescriptor as I, type FormBuilder as J, FormBuilderImpl as K, type FormDSL as L, type FormOptions as M, type GraphNodeData as N, type HandlerFn as O, type PageDSL as P, type HeadingOptions as Q, type ReadonlySignal as R, StreetApp as S, type ImageOptions as T, type Unsubscribe as U, VERSION as V, type InputOptions as W, type InputOptionsBase as X, type LinkOptions as Y, type ListBuilder as Z, ListBuilderImpl as _, Signal as a, type ListOptions as a0, type ListPlanEntry as a1, type NodeId as a2, type NodeMetadata as a3, type PageBuilder as a4, PageBuilderImpl as a5, type PropValue as a6, type Props as a7, type ReactiveConsumer as a8, type ReactiveSource as a9, signal as aA, signalKind as aB, streetui as aC, type SectionBuilder as aa, SectionBuilderImpl as ab, type SectionDSL as ac, type SectionOptions as ad, type SerializedGraph as ae, type SerializedNode as af, type StateRef as ag, type StreetUI as ah, type TextOptions as ai, type TextValue as aj, batch as ak, compile as al, compileGraph as am, createNodeId as an, derived as ao, effect as ap, formatDiagnostic as aq, generateApplicationId as ar, generateNodeId as as, isBatching as at, nextId as au, nodeIdPrefix as av, observerCount as aw, reactiveListItemKey as ax, reactiveListItemSignature as ay, resetIdCounter as az, type Subscriber as b, ApplicationGraph as c, type SemanticNodeType as d, type ContainerDSL as e, type SignalKind as f, type A11yOptions as g, AppBuilder as h, type AppDSL as i, type AppOptions as j, type ApplicationGraphOptions as k, type Bindable as l, type BindableText as m, type BoundInputOptions as n, type ButtonOptions as o, type CompileOptions as p, type ContainerBuilder as q, ContainerBuilderImpl as r, type ContainerOptions as s, type ContentDSL as t, type ControlledInputOptions as u, DerivedSignal as v, type Diagnostic as w, DiagnosticError as x, type DiagnosticLocation as y, type DiagnosticSeverity as z };
+export { type ListDSL as $, type ApplicationId as A, BaseNode as B, type CompiledApplication as C, DiagnosticCollector as D, type ErrorBoundaryOptions as E, type ErrorFallbackBuilder as F, GraphNode as G, type ErrorSource as H, type EventDescriptor as I, type FormBuilder as J, FormBuilderImpl as K, type FormDSL as L, type FormOptions as M, type GraphNodeData as N, type HandlerFn as O, type PageDSL as P, type HeadingOptions as Q, type ReadonlySignal as R, StreetApp as S, type ImageOptions as T, type Unsubscribe as U, VERSION as V, type InputOptions as W, type InputOptionsBase as X, type LinkOptions as Y, type ListBuilder as Z, ListBuilderImpl as _, Signal as a, type ListOptions as a0, type ListPlanEntry as a1, type NodeId as a2, type NodeMetadata as a3, type OverlayOptions as a4, type PageBuilder as a5, PageBuilderImpl as a6, type PortalOptions as a7, type PropValue as a8, type Props as a9, reactiveListItemSignature as aA, resetIdCounter as aB, signal as aC, signalKind as aD, streetui as aE, type ReactiveConsumer as aa, type ReactiveSource as ab, type SectionBuilder as ac, SectionBuilderImpl as ad, type SectionDSL as ae, type SectionOptions as af, type SerializedGraph as ag, type SerializedNode as ah, type StateRef as ai, type StreetUI as aj, type TextOptions as ak, type TextValue as al, batch as am, compile as an, compileGraph as ao, createNodeId as ap, derived as aq, effect as ar, formatDiagnostic as as, generateApplicationId as at, generateNodeId as au, isBatching as av, nextId as aw, nodeIdPrefix as ax, observerCount as ay, reactiveListItemKey as az, type Subscriber as b, ApplicationGraph as c, type SemanticNodeType as d, type ContainerDSL as e, type SignalKind as f, type A11yOptions as g, AppBuilder as h, type AppDSL as i, type AppOptions as j, type ApplicationGraphOptions as k, type Bindable as l, type BindableText as m, type BoundInputOptions as n, type ButtonOptions as o, type CompileOptions as p, type ContainerBuilder as q, ContainerBuilderImpl as r, type ContainerOptions as s, type ContentDSL as t, type ControlledInputOptions as u, DerivedSignal as v, type Diagnostic as w, DiagnosticError as x, type DiagnosticLocation as y, type DiagnosticSeverity as z };

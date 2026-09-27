@@ -1,9 +1,9 @@
-import { a as Signal, b as Subscriber, U as Unsubscribe, R as ReadonlySignal, A as ApplicationId, D as DiagnosticCollector, c as ApplicationGraph, G as GraphNode, C as CompiledApplication, d as SemanticNodeType, P as PageDSL, e as ContainerDSL, f as SignalKind } from './compile-CEom4hkp.js';
-export { g as A11yOptions, h as AppBuilder, i as AppDSL, j as AppOptions, k as ApplicationGraphOptions, B as BaseNode, l as Bindable, m as BindableText, n as BoundInputOptions, o as ButtonOptions, p as CompileOptions, q as ContainerBuilder, r as ContainerBuilderImpl, s as ContainerOptions, t as ContentDSL, u as ControlledInputOptions, v as DerivedSignal, w as Diagnostic, x as DiagnosticError, y as DiagnosticLocation, z as DiagnosticSeverity, E as ErrorBoundaryOptions, F as ErrorFallbackBuilder, H as ErrorSource, I as EventDescriptor, J as FormBuilder, K as FormBuilderImpl, L as FormDSL, M as FormOptions, N as GraphNodeData, O as HandlerFn, Q as HeadingOptions, T as ImageOptions, W as InputOptions, X as InputOptionsBase, Y as LinkOptions, Z as ListBuilder, _ as ListBuilderImpl, $ as ListDSL, a0 as ListOptions, a1 as ListPlanEntry, a2 as NodeId, a3 as NodeMetadata, a4 as PageBuilder, a5 as PageBuilderImpl, a6 as PropValue, a7 as Props, a8 as ReactiveConsumer, a9 as ReactiveSource, aa as SectionBuilder, ab as SectionBuilderImpl, ac as SectionDSL, ad as SectionOptions, ae as SerializedGraph, af as SerializedNode, ag as StateRef, S as StreetApp, ah as StreetUI, ai as TextOptions, aj as TextValue, V as VERSION, ak as batch, al as compile, am as compileGraph, an as createNodeId, ao as derived, ap as effect, aq as formatDiagnostic, ar as generateApplicationId, as as generateNodeId, at as isBatching, au as nextId, av as nodeIdPrefix, aw as observerCount, ax as reactiveListItemKey, ay as reactiveListItemSignature, az as resetIdCounter, aA as signal, aB as signalKind, aC as streetui } from './compile-CEom4hkp.js';
-import { R as RenderHandle, S as StreetRenderer, a as HydrationDiagnosticSink } from './hydration-diagnostics-YrG-OJJe.js';
-export { H as HydrationDiagnostic, b as HydrationMismatchType, c as consoleHydrationDiagnosticSink, d as createHydrationDiagnosticCollector, f as formatHydrationDiagnostic } from './hydration-diagnostics-YrG-OJJe.js';
-import { D as DOMAdapter } from './server-jbB-7oN-.js';
-export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-jbB-7oN-.js';
+import { a as Signal, b as Subscriber, U as Unsubscribe, R as ReadonlySignal, A as ApplicationId, D as DiagnosticCollector, c as ApplicationGraph, G as GraphNode, C as CompiledApplication, d as SemanticNodeType, P as PageDSL, e as ContainerDSL, f as SignalKind } from './compile-BNxVIT9e.js';
+export { g as A11yOptions, h as AppBuilder, i as AppDSL, j as AppOptions, k as ApplicationGraphOptions, B as BaseNode, l as Bindable, m as BindableText, n as BoundInputOptions, o as ButtonOptions, p as CompileOptions, q as ContainerBuilder, r as ContainerBuilderImpl, s as ContainerOptions, t as ContentDSL, u as ControlledInputOptions, v as DerivedSignal, w as Diagnostic, x as DiagnosticError, y as DiagnosticLocation, z as DiagnosticSeverity, E as ErrorBoundaryOptions, F as ErrorFallbackBuilder, H as ErrorSource, I as EventDescriptor, J as FormBuilder, K as FormBuilderImpl, L as FormDSL, M as FormOptions, N as GraphNodeData, O as HandlerFn, Q as HeadingOptions, T as ImageOptions, W as InputOptions, X as InputOptionsBase, Y as LinkOptions, Z as ListBuilder, _ as ListBuilderImpl, $ as ListDSL, a0 as ListOptions, a1 as ListPlanEntry, a2 as NodeId, a3 as NodeMetadata, a4 as OverlayOptions, a5 as PageBuilder, a6 as PageBuilderImpl, a7 as PortalOptions, a8 as PropValue, a9 as Props, aa as ReactiveConsumer, ab as ReactiveSource, ac as SectionBuilder, ad as SectionBuilderImpl, ae as SectionDSL, af as SectionOptions, ag as SerializedGraph, ah as SerializedNode, ai as StateRef, S as StreetApp, aj as StreetUI, ak as TextOptions, al as TextValue, V as VERSION, am as batch, an as compile, ao as compileGraph, ap as createNodeId, aq as derived, ar as effect, as as formatDiagnostic, at as generateApplicationId, au as generateNodeId, av as isBatching, aw as nextId, ax as nodeIdPrefix, ay as observerCount, az as reactiveListItemKey, aA as reactiveListItemSignature, aB as resetIdCounter, aC as signal, aD as signalKind, aE as streetui } from './compile-BNxVIT9e.js';
+import { R as RenderHandle, S as StreetRenderer, a as HydrationDiagnosticSink } from './hydration-diagnostics-A5X95dBB.js';
+export { H as HydrationDiagnostic, b as HydrationMismatchType, c as consoleHydrationDiagnosticSink, d as createHydrationDiagnosticCollector, f as formatHydrationDiagnostic } from './hydration-diagnostics-A5X95dBB.js';
+import { D as DOMAdapter } from './server-wDYcfZ44.js';
+export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-wDYcfZ44.js';
 
 /**
  * A simple reactive store built on top of signals.
@@ -557,6 +557,10 @@ declare class BrowserDOMAdapter implements DOMAdapter {
     querySelectorAll(root: Element | Document, selector: string): NodeListOf<Element>;
     getElementById(id: string): Element | null;
     focus(element: Element): void;
+    body(): Element | null;
+    activeElement(): Element | null;
+    contains(ancestor: Element, node: Node): boolean;
+    matches(element: Element, selector: string): boolean;
     isElement(node: Node): node is Element;
     isTextNode(node: Node): node is Text;
     tagName(element: Element): string;
@@ -674,6 +678,42 @@ declare function focusById(dom: DOMAdapter, root: Element | Document, id: string
  * Returns true if a focusable element was found and focused.
  */
 declare function focusFirst(dom: DOMAdapter, container: Element | Document, selector?: string): boolean;
+/**
+ * Ordered list of focusable/tabbable descendants of `container`.
+ * Re-checks each candidate against the selector so elements disabled after the
+ * initial query (e.g. a button toggled to `disabled`) are excluded.
+ */
+declare function getFocusable(dom: DOMAdapter, container: Element, selector?: string): Element[];
+/**
+ * Capture the currently-focused element so it can be restored later (e.g. when
+ * a dialog closes). Returns null on the server or when nothing is focused.
+ */
+declare function saveFocus(dom: DOMAdapter): Element | null;
+/** Restore focus to a previously {@link saveFocus}-d element. No-op if null. */
+declare function restoreFocus(dom: DOMAdapter, saved: Element | null): void;
+/**
+ * Move focus into `container` on open: the element with id `initialFocusId` if
+ * given and present, otherwise the first focusable element. Server-safe no-op.
+ */
+declare function focusInitial(dom: DOMAdapter, container: Element, initialFocusId?: string): void;
+/**
+ * Trap Tab / Shift+Tab focus within `container` (wrap-around at both ends).
+ * Attaches a keydown listener to the container and returns a cleanup function
+ * that detaches it. Server-safe: `addEventListener` is a no-op, and the returned
+ * cleanup is still callable.
+ */
+declare function trapFocus(dom: DOMAdapter, container: Element): () => void;
+/**
+ * Modal containment: if focus moves to an element outside `container`, redirect
+ * it back inside. Listens on the document body (focusin bubbles there) and
+ * returns a cleanup function. Server-safe no-op (body() is null).
+ */
+declare function containFocus(dom: DOMAdapter, container: Element): () => void;
+/**
+ * Invoke `handler` when Escape is pressed while focus is within `target`.
+ * Returns a cleanup function. Server-safe no-op.
+ */
+declare function onEscape(dom: DOMAdapter, target: Element, handler: () => void): () => void;
 
 /**
  * NodeInstance — the renderer's live counterpart to a GraphNode.
@@ -785,6 +825,20 @@ declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, in
  * eager build factory (it only ever renders 0..1 branch, so eager is fine).
  */
 declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element): void;
+/**
+ * Attach overlay focus/keyboard behavior to a mounted portal. Server-safe: on
+ * the server `dom.body()` is null so this returns immediately (SSR emits inert
+ * markup, no focus concept). A plain portal has no `__overlay__` descriptor, so
+ * this also returns immediately — the behavior is purely additive.
+ *
+ * The panel is mounted/unmounted by the portal's inner `when(open, …)`, whose
+ * signal subscription is registered *before* this one (the conditional child is
+ * mounted earlier in the portal branch). Signal subscribers fire synchronously
+ * in subscription order, so on open→true the panel DOM exists before we move
+ * focus into it, and on open→false the panel is torn down before we restore
+ * focus. All listeners are tracked on the instance and torn down on unmount.
+ */
+declare function wireOverlayBehavior(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, target: Element): void;
 
 /**
  * Patch — targeted DOM updates driven by signal changes.
@@ -1836,4 +1890,4 @@ interface ResolvedConfig {
 /** Identity helper that gives `streetui.config.ts` full type-checking + inference. */
 declare function defineConfig(config: StreetUIConfig): StreetUIConfig;
 
-export { type A11yIds, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedNode, type InspectedPage, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, formatDiagnosticContext, frameworkError, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, routerOutlet, runValidators, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, validateGraph, wireEvents, wireReactiveList, wireSignalBindings };
+export { type A11yIds, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedNode, type InspectedPage, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, restoreFocus, routerOutlet, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
