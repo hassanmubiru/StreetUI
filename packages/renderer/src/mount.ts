@@ -447,6 +447,24 @@ export function wireReactiveList(
     | undefined;
   if (plan === undefined && build === undefined) return;
 
+  // One transition controller per reactive container, created here so its
+  // leaving-instance map survives across every reconcile of this container
+  // (that persistence is what makes leave→enter reclaim and keyed list-leave
+  // correct — §6/§7). `finalize` runs the full deferred teardown chain when a
+  // leave animation completes: DOM-remove + dispose + forget + detach, exactly
+  // the work the synchronous path splits between the reconciler and the two
+  // reconcile* helpers below. On the server (no body) the controller's hooks
+  // no-op, so SSR is unchanged (§21).
+  const controller = new TransitionController(ctx.dom, ctx.graph, (leaving) => {
+    forgetInstance(ctx, leaving);
+    ctx.graph.detachNode(leaving.graphNode);
+  });
+  const hooks = controller.hooks();
+
+  // `appear`: animate any initial child that opted in (fresh browser mount only;
+  // the hydrate path never calls mountNode, so appear never fires on hydration).
+  controller.appear(instance.children);
+
   for (const stateRef of graphNode.stateRefs) {
     if (stateRef.propKey !== 'items') continue;
     const sig = ctx.graph.getHandler(`__signal__${stateRef.signalId}`) as
@@ -456,9 +474,9 @@ export function wireReactiveList(
 
     const unsub = sig.subscribe((value) => {
       if (plan !== undefined) {
-        reconcileReactiveListByPlan(ctx, graphNode, instance, el, plan(value));
+        reconcileReactiveListByPlan(ctx, graphNode, instance, el, plan(value), hooks);
       } else {
-        reconcileReactiveList(ctx, graphNode, instance, el, build!(value));
+        reconcileReactiveList(ctx, graphNode, instance, el, build!(value), hooks);
       }
     });
     instance.trackCleanup(unsub);
@@ -471,6 +489,7 @@ function reconcileReactiveListByPlan(
   listInstance: NodeInstance,
   listEl: Element,
   plan: PlanEntry[],
+  hooks: TransitionHooks,
 ): void {
   const oldInstances = [...listInstance.children];
   const result = reconcileChildrenByPlan(
@@ -479,6 +498,7 @@ function reconcileReactiveListByPlan(
     oldInstances,
     plan,
     (node, parent) => mountNode(ctx, node, parent),
+    hooks,
   );
 
   // Sync the live instance's children to the reconciled order.
