@@ -1,0 +1,226 @@
+/**
+ * Overlay system (v1.9 §5/§6).
+ *
+ * Every overlay (dialog/popover/tooltip/dropdown/toast) is the same composition:
+ * a portal + a `when(open, …)` panel + focus/keyboard behavior wired from an
+ * `__overlay__<portalId>` descriptor. These tests assert the *structural* and
+ * *focus* contract each kind promises — role/modality, focus movement, escape,
+ * and restore — using the real browser adapter against happy-dom. They are
+ * deterministic (no timings): every effect here is synchronous signal fan-out.
+ */
+import { describe, it, expect, beforeEach } from 'vitest';
+import { resetIdCounter } from '@streetui/core';
+import { streetui } from '@streetui/dsl';
+import { signal, type Signal } from '@streetui/state';
+import { compile } from '@streetui/compiler';
+import { BrowserDOMAdapter } from '@streetui/dom';
+import { createRenderer } from './renderer.js';
+import { renderToString } from './ssr.js';
+
+beforeEach(() => {
+  resetIdCounter();
+  document.body.innerHTML = '';
+});
+
+/** Dispatch a bubbling keydown from `target` (mirrors focus.test.ts). */
+function keydown(target: Element, key: string, opts: { shiftKey?: boolean } = {}): void {
+  target.dispatchEvent(
+    new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...opts }),
+  );
+}
+
+function mountApp(build: (page: import('@streetui/dsl').PageDSL) => void) {
+  const app = streetui.app({ name: 'overlay' });
+  app.page('home', build);
+  const compiled = compile(app);
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+  const handle = renderer.mount(compiled, container);
+  return { container, handle };
+}
+
+describe('dialog — modal semantics', () => {
+  it('renders role=dialog + aria-modal, takes focus on open, restores + closes on Escape', () => {
+    const open: Signal<boolean> = signal(false);
+    let closes = 0;
+    mountApp((page) => {
+      page.button('Open', { id: 'opener', onClick: () => open.set(true) });
+      page.dialog('dlg', { open, onClose: () => { open.set(false); closes++; } }, (d) => {
+        d.button('First', { id: 'first' });
+        d.button('Second', { id: 'second' });
+      });
+    });
+
+    // Closed initially — no panel anywhere.
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+
+    // Focus the opener, then open the dialog.
+    const opener = document.getElementById('opener')!;
+    opener.focus();
+    expect(document.activeElement).toBe(opener);
+    open.set(true);
+
+    const panel = document.body.querySelector('[role="dialog"]')!;
+    expect(panel).not.toBeNull();
+    expect(panel.getAttribute('aria-modal')).toBe('true');
+    // Panel lives in a body-level portal container, not inline.
+    expect(document.body.querySelector('[data-streetui-portal-container] [role="dialog"]'))
+      .not.toBeNull();
+    // Focus moved into the panel (first focusable).
+    expect(document.activeElement).toBe(document.getElementById('first'));
+
+    // Escape closes cooperatively (onClose flips `open`) and restores focus.
+    keydown(document.activeElement!, 'Escape');
+    expect(closes).toBe(1);
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.activeElement).toBe(opener);
+  });
+
+  it('traps Tab focus within the panel (wrap-around)', () => {
+    const open: Signal<boolean> = signal(true);
+    mountApp((page) => {
+      page.dialog('dlg', { open }, (d) => {
+        d.button('First', { id: 'first' });
+        d.button('Second', { id: 'second' });
+      });
+    });
+
+    const first = document.getElementById('first')!;
+    const second = document.getElementById('second')!;
+    // From the last item, Tab wraps to the first.
+    second.focus();
+    keydown(second, 'Tab');
+    expect(document.activeElement).toBe(first);
+    // From the first item, Shift+Tab wraps to the last.
+    keydown(first, 'Tab', { shiftKey: true });
+    expect(document.activeElement).toBe(second);
+  });
+});
+
+describe('non-modal overlays take focus without modality', () => {
+  it('popover: role=dialog, no aria-modal, focuses the panel on open', () => {
+    const open: Signal<boolean> = signal(false);
+    mountApp((page) => {
+      page.popover('pop', { open }, (p) => {
+        p.button('Go', { id: 'go' });
+      });
+    });
+    open.set(true);
+    const panel = document.body.querySelector('[role="dialog"]')!;
+    expect(panel).not.toBeNull();
+    expect(panel.hasAttribute('aria-modal')).toBe(false);
+    expect(document.activeElement).toBe(document.getElementById('go'));
+  });
+
+  it('dropdown: role=menu, focuses the menu on open', () => {
+    const open: Signal<boolean> = signal(false);
+    mountApp((page) => {
+      page.dropdown('menu', { open }, (m) => {
+        m.button('Item', { id: 'item' });
+      });
+    });
+    open.set(true);
+    expect(document.body.querySelector('[role="menu"]')).not.toBeNull();
+    expect(document.activeElement).toBe(document.getElementById('item'));
+  });
+});
+
+describe('announcement overlays never steal focus', () => {
+  it('toast: role=status + aria-live=polite, focus stays put', () => {
+    const open: Signal<boolean> = signal(false);
+    mountApp((page) => {
+      page.button('Keep', { id: 'keep' });
+      page.toast('t', { open }, (t) => {
+        t.text('Saved');
+      });
+    });
+    const keep = document.getElementById('keep')!;
+    keep.focus();
+    open.set(true);
+    const toast = document.body.querySelector('[role="status"]')!;
+    expect(toast).not.toBeNull();
+    expect(toast.getAttribute('aria-live')).toBe('polite');
+    expect(document.activeElement).toBe(keep); // not stolen
+  });
+
+  it('tooltip: role=tooltip, focus stays put', () => {
+    const open: Signal<boolean> = signal(false);
+    mountApp((page) => {
+      page.button('Anchor', { id: 'anchor' });
+      page.tooltip('tip', { open }, (t) => {
+        t.text('Hint');
+      });
+    });
+    const anchor = document.getElementById('anchor')!;
+    anchor.focus();
+    open.set(true);
+    expect(document.body.querySelector('[role="tooltip"]')).not.toBeNull();
+    expect(document.activeElement).toBe(anchor); // not stolen
+  });
+});
+
+describe('overlay reactivity + cleanup', () => {
+  it('mounts and unmounts the panel as `open` toggles, and cleans up on unmount', () => {
+    const open: Signal<boolean> = signal(false);
+    const { handle } = mountApp((page) => {
+      page.dialog('dlg', { open }, (d) => {
+        d.button('OK', { id: 'ok' });
+      });
+    });
+
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+    open.set(true);
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    open.set(false);
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+
+    // Open again, then unmount the whole app — no orphaned body container.
+    open.set(true);
+    expect(document.body.querySelector('[data-streetui-portal-container]')).not.toBeNull();
+    handle.unmount();
+    expect(document.body.querySelector('[data-streetui-portal-container]')).toBeNull();
+  });
+});
+
+describe('dialog — SSR renders inline, hydration wires focus', () => {
+  function buildOpenDialog() {
+    const open: Signal<boolean> = signal(true);
+    const app = streetui.app({ name: 'overlay-ssr' });
+    app.page('home', (page) => {
+      page.dialog('dlg', { open }, (d) => {
+        d.button('First', { id: 'first' });
+        d.button('Second', { id: 'second' });
+      });
+    });
+    return compile(app);
+  }
+
+  it('server emits the panel inline; hydration relocates it to body and focuses it', () => {
+    const compiled = buildOpenDialog();
+    const html = renderToString(compiled);
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain('data-streetui-portal');
+    // Body relocation is browser-only.
+    expect(html).not.toContain('data-streetui-portal-container');
+
+    resetIdCounter();
+    const compiled2 = buildOpenDialog();
+    const container = document.createElement('div');
+    container.innerHTML = html;
+    document.body.appendChild(container);
+    const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+    const handle = renderer.hydrate(compiled2, container);
+
+    // Panel now lives in a body-level container …
+    expect(document.body.querySelector('[data-streetui-portal-container] [role="dialog"]'))
+      .not.toBeNull();
+    // … and the anchor left inline is empty.
+    expect(container.querySelector('[data-streetui-portal]')!.textContent).toBe('');
+    // Overlay wired on hydrate (open peeked true) → focus moved into the panel.
+    expect(document.activeElement).toBe(document.getElementById('first'));
+
+    handle.unmount();
+    expect(document.body.querySelector('[data-streetui-portal-container]')).toBeNull();
+  });
+});

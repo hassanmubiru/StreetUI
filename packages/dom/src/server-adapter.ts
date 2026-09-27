@@ -186,11 +186,11 @@ export class ServerDOMAdapter implements DOMAdapter {
     return null;
   }
 
-  contains(): boolean {
+  contains(_ancestor: Element, _node: Node): boolean {
     return false;
   }
 
-  matches(): boolean {
+  matches(_element: Element, _selector: string): boolean {
     return false;
   }
 
