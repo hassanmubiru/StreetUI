@@ -529,6 +529,7 @@ function reconcileReactiveList(
   listInstance: NodeInstance,
   listEl: Element,
   newNodes: GraphNode[],
+  hooks: TransitionHooks,
 ): void {
   const oldInstances = [...listInstance.children];
   const result = reconcileChildren(
@@ -537,6 +538,7 @@ function reconcileReactiveList(
     oldInstances,
     newNodes,
     (node, parent) => mountNode(ctx, node, parent),
+    hooks,
   );
 
   // Sync the live instance's children to the reconciled order.
