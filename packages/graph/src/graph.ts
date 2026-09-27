@@ -90,6 +90,7 @@ export class ApplicationGraph {
     this.handlers.delete(`__listplan__${node.id}`);
     this.handlers.delete(`__overlay__${node.id}`);
     this.handlers.delete(`__component__${node.id}`);
+    this.handlers.delete(`__transition__${node.id}`);
   }
 
   // ── Handler registry ──────────────────────────────────────────────────────
