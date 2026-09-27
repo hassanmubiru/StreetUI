@@ -45,6 +45,8 @@ import type {
   ComponentDefinition,
   ComponentRender,
 } from './component.js';
+import type { TransitionConfig } from './transition.js';
+import type { WhenOptions } from './dsl-types.js';
 import { signal, derived, effect, type Signal, type ReadonlySignal } from '@streetui/state';
 
 /**
@@ -113,6 +115,30 @@ function applyA11yProps(props: Props, options: A11yOptions): void {
   if (options.ariaInvalid !== undefined) props['aria-invalid'] = String(options.ariaInvalid);
   if (options.ariaRequired !== undefined) props['aria-required'] = String(options.ariaRequired);
   if (options.ariaModal !== undefined) props['aria-modal'] = String(options.ariaModal);
+  if (options.ariaOwns !== undefined) props['aria-owns'] = options.ariaOwns;
+  if (options.ariaActiveDescendant !== undefined) props['aria-activedescendant'] = options.ariaActiveDescendant;
+  if (options.ariaHasPopup !== undefined) props['aria-haspopup'] = String(options.ariaHasPopup);
+  if (options.ariaSelected !== undefined) props['aria-selected'] = String(options.ariaSelected);
+}
+
+/**
+ * Register a `__transition__<nodeId>` descriptor for an element that opts into a
+ * CSS class-based enter/leave transition (§2). Mirrors the `__overlay__` /
+ * `__component__` handler pattern: the renderer reads it (browser only) to run
+ * enter on mount and to defer removal/dispose until leave completes. Pure config
+ * — no DOM, no timers — so it is inert on the server and pruned by
+ * `graph._unregisterNodeHandlers` (§23). A no-op when no transition is supplied.
+ */
+function registerTransition(
+  graph: ApplicationGraph,
+  node: GraphNode,
+  config: TransitionConfig | undefined,
+): void {
+  if (config === undefined) return;
+  graph.registerHandler(
+    `__transition__${node.id}`,
+    (() => config) as unknown as () => unknown,
+  );
 }
 
 function containerProps(options: ContainerOptions): Props {
@@ -354,6 +380,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       parent: this._node,
       props: containerProps(options),
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new SectionBuilderImpl(node, this._graph));
   }
 
@@ -363,6 +390,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       parent: this._node,
       props: containerProps(options),
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new ContainerBuilderImpl(node, this._graph));
   }
 
@@ -372,6 +400,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       parent: this._node,
       props: containerProps(options),
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new ListBuilderImpl(node, this._graph));
   }
 
@@ -387,6 +416,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       parent: this._node,
       props: containerProps(options),
     });
+    registerTransition(graph, node, options.transition);
 
     // Register the driving signal so the runtime/renderer can subscribe to it.
     const signalId = `${node.id}:items`;
@@ -415,6 +445,11 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
         },
       });
       renderItem(item, index, new ContainerBuilderImpl(itemNode, graph));
+      // Per-item enter/leave transition (§7). Registered on every item node so a
+      // freshly-built row (append/prepend/change) carries it; keyed identity is
+      // unaffected because the transition descriptor is keyed by node id and the
+      // row's reconciliation key is derived separately.
+      registerTransition(graph, itemNode, options.itemTransition);
       return itemNode;
     };
 
@@ -460,6 +495,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       parent: this._node,
       props,
     });
+    registerTransition(this._graph, node, options.transition);
     if (options.onSubmit !== undefined) {
       const handlerKey = `submit:${node.id}`;
       this._graph.registerHandler(handlerKey, options.onSubmit as () => unknown);

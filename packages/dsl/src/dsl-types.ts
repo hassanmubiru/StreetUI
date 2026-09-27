@@ -5,6 +5,7 @@
 
 import type { Signal, ReadonlySignal } from '@streetui/state';
 import type { ComponentDefinition } from './component.js';
+import type { TransitionConfig } from './transition.js';
 
 // A bound value can be a literal or a reactive signal
 export type Bindable<T> = T | ReadonlySignal<T> | Signal<T>;
@@ -54,6 +55,14 @@ export interface A11yOptions {
   readonly ariaRequired?: boolean;
   /** aria-modal — mark a dialog as modal (content outside is inert to AT). */
   readonly ariaModal?: boolean;
+  /** aria-owns — id(s) of elements owned by this one when the DOM can't express it. */
+  readonly ariaOwns?: string;
+  /** aria-activedescendant — id of the active option in a composite widget (menu/listbox/combobox). */
+  readonly ariaActiveDescendant?: string;
+  /** aria-haspopup — the element opens a popup ('menu' | 'listbox' | 'dialog' | 'grid' | 'tree' | true). */
+  readonly ariaHasPopup?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
+  /** aria-selected — selection state within a composite widget. */
+  readonly ariaSelected?: boolean;
 }
 
 export interface TextOptions extends A11yOptions {
@@ -127,13 +136,39 @@ export interface ContainerOptions extends A11yOptions {
   readonly class?: string;
   readonly id?: string;
   readonly key?: string;
+  /**
+   * Enter/leave transition for this element (§2). CSS class-based and
+   * browser-only: on the server it is ignored (deterministic SSR output). The
+   * enter animation runs when the element is added by a reactive `when`/`listOf`
+   * change (or on initial mount when `appear` is set); the leave animation runs
+   * before the element is removed and disposed — the reconciler defers teardown
+   * until the transition completes.
+   */
+  readonly transition?: TransitionConfig;
 }
 
 export interface SectionOptions extends ContainerOptions {}
 export interface FormOptions extends ContainerOptions {
   readonly onSubmit?: (e: Event) => void;
 }
-export interface ListOptions extends ContainerOptions {}
+export interface ListOptions extends ContainerOptions {
+  /**
+   * Enter/leave transition applied to each list item (§7). Preserves keyed
+   * identity: reordering reuses items (no leave/enter), append/prepend enter,
+   * remove leaves before disposal, and a removed key that reappears mid-leave is
+   * reclaimed (leave→enter). `transition` (inherited) applies to the list
+   * container itself; `itemTransition` applies to its rows.
+   */
+  readonly itemTransition?: TransitionConfig;
+}
+
+/** Options for `when()` (§2 conditional transitions). */
+export interface WhenOptions {
+  /** Transition applied to the active branch as it mounts/unmounts. */
+  readonly transition?: TransitionConfig;
+  /** Also animate the branch present on the initial mount (appear). */
+  readonly appear?: boolean;
+}
 
 /** Options for a plain portal (mount children into `document.body`). */
 export interface PortalOptions extends ContainerOptions {}
@@ -228,6 +263,7 @@ export interface ContainerDSL extends ContentDSL {
     condition: Bindable<boolean>,
     builder: ContainerBuilder,
     elseBuilder?: ContainerBuilder,
+    options?: WhenOptions,
   ): void;
   /**
    * Render `builder`, but swap to `options.fallback` when the boundary enters an
