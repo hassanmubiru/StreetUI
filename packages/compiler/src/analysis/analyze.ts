@@ -90,8 +90,14 @@ export function analyzeGraph(graph: ApplicationGraph): GraphAnalysis {
     // both SSR and hydration always take the real portal mount/hydrate branch
     // (which does the relocation) rather than emitting/adopting a raw HTML blob.
     const isPortal = node.type === 'portal';
+    // A component owns per-instance lifecycle wiring (a `__component__<id>`
+    // cleanup handler read at mount/hydrate). Treating it as dynamic stops the
+    // static-subtree rollup at the component boundary so it always takes the
+    // real mount/hydrate branch (which wires cleanups) instead of collapsing
+    // into a serialized raw-HTML blob that would drop that per-instance wiring.
+    const isComponent = node.type === 'component';
     const isStatic =
-      node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
+      node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
     const isStaticSubtree = isStatic && allChildrenStatic;
 
     nodes.set(node.id, {

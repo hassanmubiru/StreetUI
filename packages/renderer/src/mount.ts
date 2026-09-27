@@ -312,6 +312,7 @@ export function mountNode(
   }
 
   dom.appendChild(parentDom, el);
+  if (graphNode.type === 'component') wireComponentBehavior(ctx, graphNode, instance);
   return instance;
 }
 
@@ -637,4 +638,25 @@ export function wireOverlayBehavior(
   // `subscribe` fires only on change; an overlay that is open on initial mount
   // has its panel already built into the graph, so run the open path now.
   if (openSig.peek() === true) onOpenChange(true);
+}
+
+/**
+ * Wire a component instance's lifecycle (§9). Reads the optional
+ * `__component__<id>` descriptor — an array of teardown callbacks the DSL's
+ * `component()` collected from the setup's `ctx.effect`/`ctx.onCleanup` — and
+ * routes each into `NodeInstance.trackCleanup`, so they run (children-first)
+ * when the component leaves the graph. Shared by the mount and hydrate paths so
+ * both attach identical ownership. A `'component'` node with no cleanups (no
+ * effects/resources) registers no descriptor and this is a no-op.
+ */
+export function wireComponentBehavior(
+  ctx: RenderContext,
+  graphNode: GraphNode,
+  instance: NodeInstance,
+): void {
+  const fn = ctx.graph.getHandler(`__component__${graphNode.id}`) as
+    | (() => Array<() => void>)
+    | undefined;
+  if (fn === undefined) return;
+  for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }

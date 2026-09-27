@@ -40,7 +40,12 @@ import type {
   FormBuilder,
   ListBuilder,
 } from './dsl-types.js';
-import { signal, derived, type Signal, type ReadonlySignal } from '@streetui/state';
+import type {
+  ComponentContext,
+  ComponentDefinition,
+  ComponentRender,
+} from './component.js';
+import { signal, derived, effect, type Signal, type ReadonlySignal } from '@streetui/state';
 
 /**
  * A single reactive-list reconciliation descriptor (spec §15).
@@ -661,6 +666,82 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
 
   toast(key: string, options: OverlayOptions, builder: ContainerBuilderFn): void {
     this._overlay(OVERLAY_KINDS.toast, key, options, builder);
+  }
+
+  // ── Components ────────────────────────────────────────────────────────────
+
+  /**
+   * Instantiate a reusable component (§3–§9). Creates a `'component'` node
+   * (rendered as a `<div>` wrapper — preserves the one-node/one-element
+   * positional-hydration invariant), then runs `def.setup(props, ctx)`
+   * synchronously to obtain the render function and fills the component's own
+   * container scope with it — structurally identical to `container`/
+   * `errorBoundary`. Cleanups the setup registers via `ctx.effect`/
+   * `ctx.onCleanup` are collected into a closure and exposed to the renderer
+   * through a `__component__<id>` handler (mirroring `__overlay__`); the mount/
+   * hydrate paths read it and route each into `NodeInstance.trackCleanup`, so
+   * teardown runs (children-first) when the component leaves the graph.
+   *
+   * `setup` runs once per instance here at build time. When this component sits
+   * inside a keyed list / conditional, a rebuild disposes the old instance
+   * (running its cleanups + pruning its `__component__` entry) and re-runs this
+   * method for the new node — so re-invocation is safe and leak-free.
+   */
+  component<P>(
+    key: string,
+    def: ComponentDefinition<P>,
+    props: P,
+    children?: ContainerBuilderFn,
+  ): void {
+    const graph = this._graph;
+    const node = graph.createNode('component', {
+      key,
+      parent: this._node,
+      // `data-streetui-component` is a non-underscore prop, so it reaches the
+      // DOM as an attribute and is visible to DevTools (§21) — unlike the
+      // internal `_`-prefixed metadata the renderer hides.
+      props: { key, 'data-streetui-component': def.name },
+    });
+
+    // Ownership collector: every teardown the setup registers lands here and is
+    // handed to the NodeInstance at mount.
+    const cleanups: Array<() => void> = [];
+    const ctx: ComponentContext = {
+      key,
+      onCleanup(fn: () => void): void {
+        cleanups.push(fn);
+      },
+      effect(fn: () => void | (() => void)): void {
+        // Reuse the EXISTING reactive engine (§8) — no new reactivity. The
+        // effect runs immediately (build time, like errorBoundary's derived);
+        // its unsubscribe is owned by this component.
+        cleanups.push(effect(fn));
+      },
+      renderChildren(content: ContainerDSL): void {
+        if (children !== undefined) children(content);
+      },
+    };
+
+    // Run setup to get the render function, guarding a synchronous throw the
+    // same way errorBoundary does (defer so we never re-enter reconciliation
+    // during this build). A component wrapped in an errorBoundary still surfaces
+    // the error through the boundary's observed sources.
+    let render: ComponentRender;
+    try {
+      render = def.setup(props, ctx);
+      render(new ContainerBuilderImpl(node, graph));
+    } catch (err) {
+      queueMicrotask(() => {
+        throw err;
+      });
+    }
+
+    if (cleanups.length > 0) {
+      graph.registerHandler(
+        `__component__${node.id}`,
+        (() => cleanups) as unknown as () => unknown,
+      );
+    }
   }
 }
 

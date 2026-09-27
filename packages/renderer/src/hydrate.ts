@@ -28,6 +28,7 @@ import {
   wireSignalBindings,
   wireReactiveList,
   wireOverlayBehavior,
+  wireComponentBehavior,
   textUpdate,
   headingUpdate,
   inputUpdate,
@@ -185,6 +186,7 @@ function hydrateNode(
         return instance;
       }
       hydrateChildren(ctx, graphNode, instance, domNode, path);
+      if (graphNode.type === 'component') wireComponentBehavior(ctx, graphNode, instance);
       return instance;
     }
   }

@@ -4,6 +4,7 @@
  */
 
 import type { Signal, ReadonlySignal } from '@streetui/state';
+import type { ComponentDefinition } from './component.js';
 
 // A bound value can be a literal or a reactive signal
 export type Bindable<T> = T | ReadonlySignal<T> | Signal<T>;
@@ -279,6 +280,23 @@ export interface ContainerDSL extends ContentDSL {
    * `aria-live="polite"`. Non-modal and never steals focus; no Escape handling.
    */
   toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+  /**
+   * Instantiate a reusable `component()` at this position (§3–§9). Creates a
+   * `'component'` node (rendered as a `<div>` wrapper), runs the definition's
+   * `setup(props, ctx)` synchronously to obtain its render function, and fills
+   * the component's own container scope with it. Any `ctx.effect`/`ctx.onCleanup`
+   * registered by the setup is torn down automatically when the component leaves
+   * the graph. `props` are strongly typed by the definition's generic; pass
+   * `Signal` props for fine-grained updates that do NOT re-run `setup` (§13).
+   * The optional `children` builder is rendered wherever the component calls
+   * `ctx.renderChildren` (§6 native child composition).
+   */
+  component<P>(
+    key: string,
+    def: ComponentDefinition<P>,
+    props: P,
+    children?: ContainerBuilder,
+  ): void;
 }
 
 export interface SectionDSL extends ContainerDSL {}
