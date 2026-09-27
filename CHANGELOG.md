@@ -5,11 +5,53 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.8.0 — Component & Composition Platform (2026-09-28)
+
+**Minor release** — new public API added, no breaking changes. The v1.0 frozen
+surface is untouched; every addition is additive. Prepared locally and verified;
+**not published** — the npm registry is unreachable from this environment
+(`npm info streetui` returns `403 Forbidden`), so no publication is claimed. Full
+detail in [`V1.8.0-COMPONENT-PLATFORM-REPORT.md`](./V1.8.0-COMPONENT-PLATFORM-REPORT.md).
+
+### Added
+
+- **`component(setup, { name? })`** — a first-class, StreetUI-native component
+  primitive (exported from `streetui`). It compiles to the reserved
+  `'component'` graph node (a `<div>` wrapper, preserving one-node/one-element
+  positional hydration), runs `setup` once synchronously at build time, and owns
+  its cleanup. `setup(props, ctx)` returns a render function that receives the
+  component's own `ContainerDSL` scope. No virtual DOM, no second reactive
+  system, no second renderer.
+- **`ComponentContext`** (`ctx`) — `onCleanup(fn)`, `effect(fn)` (auto-disposed),
+  `renderChildren(scope)` (native slots), and the stable `key`.
+- **`isComponentDefinition(value)`** — runtime brand check.
+- **`container.component(key, def, props, children?)`** — mount a component from
+  any container scope (page, section, another component). Typed props are a
+  plain TypeScript parameter; `Signal` props drive fine-grained updates without
+  re-running `setup`. Components compose components, work in keyed lists (rows
+  dispose + prune on removal), and integrate overlays, resources, forms, i18n,
+  context, and error boundaries with no special wiring (all via `ctx.onCleanup`
+  + the normal DSL).
+- **DevTools `inspectComponents(graph)`** — lists every component instance in
+  document order with `id`, stable `key`, `name`, `depth`, and `childCount`.
+- **`streetui/testing` component helpers** — `renderComponent`,
+  `hydrateComponent`, `findComponent` / `findAllComponents` / `getComponentName`,
+  and `trigger`.
+
+### Unchanged / verified
+
+- SSR output is byte-identical to the v1.6 baseline on all five reference routes
+  (SHA-256 gate green); no existing route uses components.
+- Single `streetui` package with the existing `.` / `./server` / `./testing`
+  subpaths — no new package, no new subpath (no fragmentation).
+
 ## 1.7.0 — Overlay / Focus Platform (2026-09-27)
 
 **Minor release** — new public API added, no breaking changes. All 18 packages
-published to npm at `1.7.0`. Full detail in
+were bumped to `1.7.0` and prepared for release; **not published** (registry
+access is blocked in this environment — `npm info` returns `403`). Full detail in
 [`V1.9-OVERLAY-FOCUS-REPORT.md`](./V1.9-OVERLAY-FOCUS-REPORT.md).
+
 
 ### Added
 

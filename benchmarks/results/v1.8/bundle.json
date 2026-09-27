@@ -1,0 +1,102 @@
+{
+  "schema": "streetui-bundle/v1.3",
+  "status": "OK",
+  "target": "public `streetui` package (subpath \".\") + examples/streetui-performance-app",
+  "method": "esbuild bundle+minify+treeShaking, format esm, target es2020, legalComments none. gzip = zlib level 9; brotli = zlib default. CSS measured (framework ships none). HTML = minimal module-boot shell. esbuild is a measurement-only bundler, not a streetui runtime dep.",
+  "esbuildVersion": "0.24.2",
+  "streetuiVersion": "1.8.0",
+  "profiles": {
+    "minimal": {
+      "description": "Reactivity core + client renderer + BrowserDOMAdapter + DSL compile (counter-class app).",
+      "js": {
+        "raw": 28603,
+        "gzip": 8500,
+        "brotli": 7651
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 7896,
+      "totalOverWireGzip": 8745
+    },
+    "typical": {
+      "description": "Representative SPA: reactivity + render + router + forms/validators + i18n + store + resource + hydration.",
+      "js": {
+        "raw": 52248,
+        "gzip": 15804,
+        "brotli": 14223
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 14468,
+      "totalOverWireGzip": 16049
+    },
+    "full": {
+      "description": "Entire public `streetui` barrel (every exported member retained via import *).",
+      "js": {
+        "raw": 73047,
+        "gzip": 22369,
+        "brotli": 20005
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 20250,
+      "totalOverWireGzip": 22614
+    },
+    "realApp": {
+      "description": "The actual built demo application entry (examples/streetui-performance-app browser-entry).",
+      "js": {
+        "raw": 52768,
+        "gzip": 16225,
+        "brotli": 14587
+      },
+      "css": {
+        "raw": 0,
+        "gzip": 0,
+        "brotli": 0,
+        "files": []
+      },
+      "html": {
+        "raw": 245
+      },
+      "totalOverWireBrotli": 14832,
+      "totalOverWireGzip": 16470
+    }
+  },
+  "cssPolicy": {
+    "shipsStylesheet": false,
+    "cssFilesInDist": [],
+    "note": "Framework ships no CSS; app-authored styles are out of scope."
+  },
+  "reconciliation": {
+    "v12BaselineUnminifiedGzip": 28764,
+    "currentUnminifiedFullBarrel": {
+      "raw": 147355,
+      "gzip": 33614,
+      "brotli": 28765
+    },
+    "matchesV12Baseline": false,
+    "note": "The v1.2 baseline (28764) was the UNMINIFIED full-barrel gzip. It is reproduced here for continuity. The §14 profile numbers above are MINIFIED and are the honest download figures."
+  },
+  "timestamp": "2026-09-27T21:08:00.474Z"
+}
