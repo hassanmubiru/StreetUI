@@ -815,6 +815,7 @@ export class ListBuilderImpl extends ContentBuilderBase implements ListDSL {
       parent: this._node,
       props: containerProps(options),
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new ContainerBuilderImpl(node, this._graph));
   }
 }
