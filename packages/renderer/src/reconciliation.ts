@@ -65,6 +65,7 @@ export function reconcileChildren(
   oldInstances: NodeInstance[],
   newNodes: readonly GraphNode[],
   mountFn: MountFn,
+  hooks?: TransitionHooks,
 ): ReconcileResult {
   // Build key → old instance map
   const oldByKey = new Map<string, NodeInstance>();
@@ -92,28 +93,36 @@ export function reconcileChildren(
       }
       newInstances.push(existing);
     } else {
-      // New — create and mount
-      const inst = mountFn(newNode, parentDom);
-      newInstances.push(inst);
+      // Leave→enter cancellation (§6): if this key is currently animating out,
+      // reclaim its live instance instead of mounting a duplicate.
+      const reclaimed = hooks?.takeLeaving(key);
+      if (reclaimed !== undefined) {
+        patchExistingInstance(ctx, reclaimed, newNode);
+        reconcileItemChildren(ctx, reclaimed, newNode, mountFn);
+        hooks?.onEnter(reclaimed);
+        newInstances.push(reclaimed);
+      } else {
+        // New — create and mount, then play its enter animation (if any).
+        const inst = mountFn(newNode, parentDom);
+        hooks?.onEnter(inst);
+        newInstances.push(inst);
+      }
     }
   }
 
-  // Determine removed instances
+  // Determine + remove stale instances. A removed instance that carries a
+  // transition has its DOM-remove + dispose deferred to leave-animation end by
+  // `beginLeave` (which then also forgets + detaches it), so it is excluded from
+  // `removed` and the caller does not tear it down (§3/§7).
   const removed: NodeInstance[] = [];
   for (const inst of oldInstances) {
     const key = inst.graphNode.key ?? inst.graphNode.id;
-    if (!usedKeys.has(key)) {
-      removed.push(inst);
-    }
-  }
-
-  // Remove stale DOM nodes
-  for (const inst of removed) {
+    if (usedKeys.has(key)) continue;
+    if (hooks !== undefined && hooks.beginLeave(inst)) continue;
     const parent = ctx.dom.parentNode(inst.domNode);
-    if (parent !== null) {
-      ctx.dom.removeChild(parent, inst.domNode);
-    }
+    if (parent !== null) ctx.dom.removeChild(parent, inst.domNode);
     inst.dispose();
+    removed.push(inst);
   }
 
   // Reorder DOM nodes to match new order
