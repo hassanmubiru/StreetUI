@@ -141,3 +141,22 @@ built on. `diagnosePerformance(compiled, thresholds?)` returns `PerfDiagnostic[]
 (`{ code, message, observed, threshold }`) computed from the same
 `PerfSnapshot`. Both are pure reads of the one graph; DevTools disabled means
 neither is ever called, so there is no hot-path cost in production.
+
+## Component inspection
+
+### `inspectComponents(graph)`
+
+Lists every `component()` instance in the graph, in document order, as
+`InspectedComponent[]` — each entry carries the build-order `id`, the stable
+author-provided `key`, the human-readable `name` (read from the inspectable
+`data-streetui-component` attribute the DSL sets, never any internal
+`_`-prefixed metadata), the `depth`, and the `childCount`. Names and keys are
+stable across fine-grained prop updates, which never rebuild the node. Ordinary
+`component` nodes also flow through `inspectGraph`/`printGraph` already; this is
+the first-class, component-aware view.
+
+```ts
+for (const c of inspectComponents(compiled.graph)) {
+  console.log('  '.repeat(c.depth) + `<${c.name}> key=${c.key} children=${c.childCount}`);
+}
+```

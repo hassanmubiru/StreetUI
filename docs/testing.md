@@ -83,6 +83,52 @@ work settles:
 await waitFor(() => r.getByText('Loaded'));
 ```
 
+## Testing components
+
+For the first-class [`component()`](./components.md#first-class-components-component)
+primitive, `streetui/testing` adds helpers that remove the app+page boilerplate:
+
+### `renderComponent(def, props, children?)`
+
+Mounts a single component in a throwaway one-page host app and returns the usual
+`RenderResult` plus `component` — the component's root `<div>` element.
+
+```ts
+const r = renderComponent(Counter, { start: 0 });
+expect(getComponentName(r.component)).toBe('Counter');
+trigger(r.find('#inc'), 'click');
+r.flush();
+expect(r.find('#count').textContent).toBe('1');
+r.unmount();
+```
+
+### `hydrateComponent(build, options?)`
+
+SSR-renders then hydrates one component in a host app — the production
+server→client seam. `build` returns `{ def, props, children? }` and is invoked
+twice (server then client) with the id counter reset between, so per-instance
+state lines up positionally. Returns the same shape as
+`renderServerThenHydrate`.
+
+### `findComponent` / `findAllComponents` / `getComponentName`
+
+Locate component instances under a container by their `data-streetui-component`
+name. `findComponent(container, name?)` returns exactly one (throws if none or
+ambiguous); `findAllComponents` returns all; `getComponentName(el)` reads the
+name off an element (or `null`).
+
+### `trigger(el, type, init?)`
+
+Dispatches a bubbling, cancelable DOM event so tests read intentfully
+(`trigger(btn, 'click')`, `trigger(input, 'keydown', { key: 'Escape' })`) without
+constructing `Event` objects by hand.
+
+> There is deliberately no `getComponentProps`: props are passed to `setup` and
+> captured by closure, not reified on the node (only the definition *name* is).
+> Assert on rendered output or a signal you own instead. Async resource state is
+> already covered by `waitFor` / `flushUpdates`, so there is no separate
+> `awaitResource`.
+
 ## SSR → hydrate → assert
 
 ### `renderServerThenHydrate(build, options?)`
