@@ -93,10 +93,11 @@ function host(): RafHost {
 /** Schedule a callback for the next frame (falls back to a macrotask). */
 function nextFrame(cb: () => void): void {
   const h = host();
-  if (typeof h.requestAnimationFrame === 'function') {
+  const raf = h.requestAnimationFrame;
+  if (typeof raf === 'function') {
     // Double rAF: ensures the "from" classes have been painted before we flip
     // to the "to" classes, so the transition actually runs in real browsers.
-    h.requestAnimationFrame(() => h.requestAnimationFrame(cb));
+    raf(() => raf(cb));
   } else {
     h.setTimeout(cb, 0);
   }
