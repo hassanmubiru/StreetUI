@@ -5,6 +5,74 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## Unreleased — v1.9 overlay/focus platform: portals + overlays (development milestone)
+
+**Additive feature milestone.** New public DSL surface only — no breaking
+changes, no new runtime dependency, and no new published package. Everything
+ships inside the single `streetui` package (§23): no `@streetui/portal`,
+`@streetui/a11y`, or `@streetui/components` was created. The coordinated
+version is intentionally held (see the release-gate note below); nothing is
+published from this milestone.
+
+### Added
+
+- **Portal primitive** (`ContainerDSL.portal(key, builder, options?)`) — renders
+  its children into `document.body` (escaping overflow/stacking contexts) while
+  leaving a neutral inline anchor (`[data-streetui-portal]`) at the declaration
+  site. One new semantic node type (`'portal'`); no new render path. On the
+  server there is no `body`, so children render inline in the anchor; hydration
+  relocates them into a body container (`[data-streetui-portal-container]`) so
+  the live tree matches the browser mount path exactly. Cleanup removes the body
+  container on unmount — no orphaned DOM.
+- **Overlay system** (`dialog` / `popover` / `tooltip` / `dropdown` / `toast`) —
+  each is the same composition of existing primitives: a portal + a
+  `when(open, …)` panel + focus/keyboard behavior wired from an
+  `__overlay__<portalId>` descriptor through the existing handler registry
+  (§22). Per-kind ARIA and focus defaults: `dialog` (role=dialog,
+  aria-modal, focus trap + containment, Escape-to-close, focus restore);
+  `popover` (role=dialog, non-modal, takes focus, Escape closes);
+  `dropdown` (role=menu, non-modal, takes focus, Escape closes); `tooltip`
+  (role=tooltip, never steals focus); `toast` (role=status, aria-live=polite,
+  never steals focus). `open` is app-owned; closing is cooperative via `onClose`.
+- **Focus utilities** in `streetui/dom` (v1.9 §6): `saveFocus`, `restoreFocus`,
+  `focusInitial`, `trapFocus`, `containFocus`, `onEscape` (added to the frozen
+  value-export surface), plus `body`/`activeElement`/`contains`/`matches`
+  environment methods on both DOM adapters (no-ops/null/false on the server).
+- **`packages/renderer/src/portal.test.ts`** (6 tests) and
+  **`packages/renderer/src/overlay.test.ts`** (8 tests) — browser-mount
+  relocation, unmount cleanup, plain-portal-does-not-move-focus, SSR-inline +
+  hydration relocation, reactive portaled children, dialog focus-trap/restore/
+  Escape, non-modal focus, announcement overlays never stealing focus, open/close
+  reactivity, and dialog SSR→hydration focus wiring.
+
+### Fixed
+
+- **`ServerDOMAdapter.contains` / `.matches`** — declared with their proper
+  `(Element, Node)` / `(Element, string)` parameter signatures (were parameterless),
+  so the environment methods are callable on the concrete server-adapter type.
+
+### Verified
+
+- Build 29/29, typecheck 47/47. Full framework + example test suite green
+  except one **pre-existing, unrelated** failure (see release-gate note):
+  renderer **168/168** (incl. 14 new portal/overlay tests), dom **45/45**.
+- SSR byte-identity **PASS** on all 5 routes, digests unchanged from the v1.6
+  baseline (portals/overlays are excluded from static classification and appear
+  on no SSR route, so existing serialization is untouched — §25).
+- Fine-grained update-independence suite (§26) and keyed-list identity (§27)
+  intact.
+- Browser/competitor harness remains **BLOCKED** (no Chromium) and is reported
+  as such — not fabricated (§24).
+
+### Release-gate note (unresolved, pre-existing)
+
+- A version inconsistency predating this milestone remains open by request:
+  `packages/streetui/package.json` and `packages/cli` `CLI_VERSION` are `1.6.1`,
+  while `packages/streetui/src/version.ts` `VERSION` and the CLI stability test
+  assert `1.6.0`. The CLI stability test (`CLI_VERSION === '1.6.0'`) therefore
+  **fails** (1 test). This is not caused by the overlay/focus work and **must be
+  reconciled before any release gate**.
+
 ## 1.6.1 — Patch: benchmark tooling, bundle gate fix, regression suite (2026-09-26)
 
 **Patch release.** No public API change, no breaking changes, no new runtime
