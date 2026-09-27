@@ -155,6 +155,7 @@ export function reconcileChildrenByPlan(
   oldInstances: NodeInstance[],
   plan: readonly PlanEntry[],
   mountFn: MountFn,
+  hooks?: TransitionHooks,
 ): ReconcileResult {
   const oldByKey = new Map<string, NodeInstance>();
   for (const inst of oldInstances) {
@@ -186,23 +187,39 @@ export function reconcileChildrenByPlan(
       }
       newInstances.push(existing);
     } else {
-      const freshNode = entry.build();
-      built.push(freshNode);
-      const inst = mountFn(freshNode, parentDom);
-      newInstances.push(inst);
+      // Leave→enter reclaim (§6/§7): a key removed then re-added mid-leave keeps
+      // its identity and its live DOM node rather than mounting a duplicate.
+      const reclaimed = hooks?.takeLeaving(entry.key);
+      if (reclaimed !== undefined) {
+        const freshNode = entry.build();
+        built.push(freshNode);
+        patchExistingInstance(ctx, reclaimed, freshNode);
+        reconcileItemChildren(ctx, reclaimed, freshNode, mountFn);
+        reclaimed.graphNode.setProp('_sig', freshNode.getProp('_sig') as never);
+        reclaimed.graphNode.setProp('_item', entry.item as never);
+        hooks?.onEnter(reclaimed);
+        newInstances.push(reclaimed);
+      } else {
+        const freshNode = entry.build();
+        built.push(freshNode);
+        const inst = mountFn(freshNode, parentDom);
+        hooks?.onEnter(inst);
+        newInstances.push(inst);
+      }
     }
   }
 
-  // Determine + remove stale instances.
+  // Determine + remove stale instances. Transitioned rows defer their whole
+  // teardown chain to leave-animation end (§7) and are excluded from `removed`.
   const removed: NodeInstance[] = [];
   for (const inst of oldInstances) {
     const key = inst.graphNode.key ?? inst.graphNode.id;
-    if (!usedKeys.has(key)) removed.push(inst);
-  }
-  for (const inst of removed) {
+    if (usedKeys.has(key)) continue;
+    if (hooks !== undefined && hooks.beginLeave(inst)) continue;
     const parent = ctx.dom.parentNode(inst.domNode);
     if (parent !== null) ctx.dom.removeChild(parent, inst.domNode);
     inst.dispose();
+    removed.push(inst);
   }
 
   // Minimal-move reorder to the desired order.
