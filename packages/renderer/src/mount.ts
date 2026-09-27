@@ -31,6 +31,7 @@ import {
   reconcileChildrenByPlan,
   type PlanEntry,
 } from './reconciliation.js';
+import { TransitionController, type TransitionHooks } from './transition.js';
 
 /**
  * Prop keys handled by the per-type mount branches (or reserved internals), so
