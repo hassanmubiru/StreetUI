@@ -98,6 +98,22 @@ export class BrowserDOMAdapter implements DOMAdapter {
     (element as unknown as { focus?: () => void }).focus?.();
   }
 
+  body(): Element | null {
+    return document.body ?? null;
+  }
+
+  activeElement(): Element | null {
+    return document.activeElement ?? null;
+  }
+
+  contains(ancestor: Element, node: Node): boolean {
+    return ancestor.contains(node);
+  }
+
+  matches(element: Element, selector: string): boolean {
+    return typeof element.matches === 'function' && element.matches(selector);
+  }
+
   isElement(node: Node): node is Element {
     return node.nodeType === Node.ELEMENT_NODE;
   }

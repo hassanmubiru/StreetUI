@@ -177,6 +177,23 @@ export class ServerDOMAdapter implements DOMAdapter {
     // No focus concept on the server — intentional no-op (SSR-safe).
   }
 
+  body(): Element | null {
+    // No document on the server — portals degrade to inline rendering.
+    return null;
+  }
+
+  activeElement(): Element | null {
+    return null;
+  }
+
+  contains(): boolean {
+    return false;
+  }
+
+  matches(): boolean {
+    return false;
+  }
+
   isElement(node: Node): node is Element {
     return asServer(node).kind === 'element';
   }

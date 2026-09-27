@@ -61,6 +61,20 @@ export interface DOMAdapter {
    */
   focus(element: Element): void;
 
+  // ── Document / environment ───────────────────────────────────────────────────
+  /**
+   * The document body — the default mount target for portals/overlays. Returns
+   * null on the server (no document), which is what makes portal SSR degrade to
+   * inline rendering and focus management degrade to a no-op.
+   */
+  body(): Element | null;
+  /** The currently focused element, or null on the server / when none is focused. */
+  activeElement(): Element | null;
+  /** True if `ancestor` contains `node` (inclusive). Always false on the server. */
+  contains(ancestor: Element, node: Node): boolean;
+  /** True if `element` matches the given CSS selector. Always false on the server. */
+  matches(element: Element, selector: string): boolean;
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   isElement(node: Node): node is Element;
   isTextNode(node: Node): node is Text;

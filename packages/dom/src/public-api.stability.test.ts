@@ -10,6 +10,9 @@ const FROZEN_VALUE_EXPORTS = [
   'FOCUSABLE_SELECTOR', 'focusById', 'focusFirst', 'serializeChildren',
   'serializeServerNode', 'ServerComment', 'serverDOMAdapter', 'ServerDOMAdapter',
   'ServerElement', 'ServerFragment', 'ServerStyle', 'ServerText',
+  // v1.9 focus platform (overlay/dialog focus management)
+  'getFocusable', 'saveFocus', 'restoreFocus', 'focusInitial', 'trapFocus',
+  'containFocus', 'onEscape',
 ] as const;
 
 describe('@streetui/dom — public API contract (v1.0 frozen surface)', () => {
