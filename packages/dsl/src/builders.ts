@@ -508,6 +508,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
     condition: Bindable<boolean>,
     builder: ContainerBuilderFn,
     elseBuilder?: ContainerBuilderFn,
+    options: WhenOptions = {},
   ): void {
     const graph = this._graph;
     // A dedicated 'conditional' node reuses the reactive-list reconciliation
@@ -518,6 +519,15 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       props: containerProps({}),
     });
 
+    // A transition on a `when` applies to whichever branch is mounted/removed
+    // (§2). `appear` promotes the transition to a config that also animates the
+    // branch present on the very first mount; the renderer distinguishes appear
+    // from a reactive enter via the descriptor's `appear` flag.
+    const branchTransition: TransitionConfig | undefined =
+      options.transition !== undefined && options.appear === true
+        ? { ...options.transition, appear: true }
+        : options.transition;
+
     // Build the active branch as a single keyed container. Distinct keys for the
     // then/else branches make a flip a clean swap under the keyed reconciler.
     const buildBranch = (build: ContainerBuilderFn, tag: 'then' | 'else'): GraphNode => {
@@ -526,6 +536,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
         key: branchKey,
         props: { key: branchKey },
       });
+      registerTransition(graph, branch, branchTransition);
       build(new ContainerBuilderImpl(branch, graph));
       return branch;
     };
