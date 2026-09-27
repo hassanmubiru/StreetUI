@@ -676,9 +676,19 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
     };
 
     const portalBuilder = new ContainerBuilderImpl(portalNode, graph);
-    portalBuilder.when(openSignal, (panelHost) => {
-      panelHost.container(`${key}__panel`, builder, panelOptions);
-    });
+    portalBuilder.when(
+      openSignal,
+      (panelHost) => {
+        panelHost.container(`${key}__panel`, builder, panelOptions);
+      },
+      undefined,
+      // Overlay open/close rides the panel's `when`; a transition animates the
+      // panel in on open and — via the reconciler's deferred-leave — plays the
+      // leave before the panel is removed (§10). Focus is restored at close-
+      // request time (see wireOverlayBehavior), so it never stays trapped inside
+      // a panel that is animating away.
+      options.transition !== undefined ? { transition: options.transition } : {},
+    );
 
     const descriptor: OverlayBehaviorDescriptor = {
       open: openSignal,
