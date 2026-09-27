@@ -5,6 +5,61 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.7.0 — Overlay / Focus Platform (2026-09-27)
+
+**Minor release** — new public API added, no breaking changes. All 18 packages
+published to npm at `1.7.0`. Full detail in
+[`V1.9-OVERLAY-FOCUS-REPORT.md`](./V1.9-OVERLAY-FOCUS-REPORT.md).
+
+### Added
+
+- **`container.portal(key, builder, options?)`** — new `'portal'` semantic node
+  type. Browser: mounts children into a `document.body`-level container
+  (`[data-streetui-portal-container]`) with an inline anchor at the declaration
+  site; cleans up on unmount. SSR: renders inline. Hydration: relocates
+  server-inline children to the body container before positional adoption.
+  Portals are excluded from static-subtree classification.
+
+- **`container.dialog(key, options, builder)`** — modal dialog overlay. Renders
+  `role=dialog aria-modal=true`, takes focus on open, traps/contains Tab focus,
+  restores focus on close, closes on Escape. Built as portal + `when(open)` +
+  handler-registry descriptor — no new render path.
+
+- **`container.popover(key, options, builder)`** — non-modal popover.
+  `role=dialog`, no `aria-modal`, takes focus, closes on Escape, restores focus.
+
+- **`container.tooltip(key, options, builder)`** — `role=tooltip`, no focus
+  steal, no Escape binding.
+
+- **`container.dropdown(key, options, builder)`** — `role=menu`, takes focus,
+  closes on Escape, restores focus.
+
+- **`container.toast(key, options, builder)`** — `role=status aria-live=polite`,
+  no focus steal.
+
+- **Focus utilities** (`streetui/dom`): `saveFocus`, `restoreFocus`,
+  `focusInitial`, `trapFocus`, `containFocus`, `onEscape`, `FOCUSABLE_SELECTOR`,
+  `focusById`, `focusFirst`, `getFocusable`.
+
+- **`PortalOptions`**, **`OverlayOptions`** types (exported from `streetui`).
+
+- `ariaModal` prop on `A11yOptions`.
+
+### Fixed
+
+- `packages/streetui/src/version.ts` `VERSION` and all version test assertions
+  aligned to the coordinated release version (were stale at `1.6.0`/`1.6.1`
+  after the v1.8 patch bump).
+
+### Verified
+
+- Build 29/29, typecheck 47/47.
+- All framework packages: **475/475** tests pass (renderer 168/168 incl. 14 new
+  portal/overlay tests; dom 45/45; cli 53/53; streetui 14/14).
+- SSR byte-identity PASS on all 5 routes, matching v1.6 recorded digests.
+- All 7 regression gates PASS.
+
+
 ## Unreleased — v1.9 overlay/focus platform: portals + overlays (development milestone)
 
 **Additive feature milestone.** New public DSL surface only — no breaking
