@@ -1432,7 +1432,7 @@ function renderToString(compiled, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.6.1";
+var VERSION = "1.7.0";
 export {
   STATE_MARKER_ATTR,
   ServerDOMAdapter,

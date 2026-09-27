@@ -1463,7 +1463,7 @@ function renderToString(compiled, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.6.1";
+var VERSION = "1.7.0";
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   STATE_MARKER_ATTR,

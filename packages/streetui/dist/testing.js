@@ -2299,7 +2299,7 @@ function renderServerThenHydrate(build, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.6.1";
+var VERSION = "1.7.0";
 export {
   VERSION,
   analyzeGraph,
