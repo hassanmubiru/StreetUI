@@ -51,6 +51,8 @@ export interface A11yOptions {
   readonly ariaInvalid?: boolean;
   /** aria-required — mark a form field as required. */
   readonly ariaRequired?: boolean;
+  /** aria-modal — mark a dialog as modal (content outside is inert to AT). */
+  readonly ariaModal?: boolean;
 }
 
 export interface TextOptions extends A11yOptions {
@@ -131,6 +133,31 @@ export interface FormOptions extends ContainerOptions {
   readonly onSubmit?: (e: Event) => void;
 }
 export interface ListOptions extends ContainerOptions {}
+
+/** Options for a plain portal (mount children into `document.body`). */
+export interface PortalOptions extends ContainerOptions {}
+
+/**
+ * Options shared by every overlay (dialog/popover/tooltip/dropdown/toast).
+ *
+ * An overlay is a portal + a reactive `when(open, …)` panel + focus/keyboard
+ * behavior. `open` drives visibility; the framework never mutates it — closing
+ * is cooperative: `onClose` fires on Escape (when `closeOnEscape`) and the app
+ * flips its own `open` signal there. Per-kind defaults (role, modality, focus,
+ * escape, restore) apply unless overridden here.
+ */
+export interface OverlayOptions extends ContainerOptions {
+  /** Reactive open/visibility state. When it flips, the panel mounts/unmounts. */
+  readonly open: Bindable<boolean>;
+  /** Requested-close callback (fired on Escape when `closeOnEscape`). Flip `open` here. */
+  readonly onClose?: () => void;
+  /** Restore focus to the previously-focused element on close. Default: per-kind. */
+  readonly restoreFocus?: boolean;
+  /** id of the element to focus first when the overlay opens (else first focusable). */
+  readonly initialFocusId?: string;
+  /** Escape key invokes `onClose`. Default: per-kind. */
+  readonly closeOnEscape?: boolean;
+}
 
 // Builder callback types
 export type SectionBuilder = (section: SectionDSL) => void;
@@ -216,6 +243,42 @@ export interface ContainerDSL extends ContentDSL {
     builder: ContainerBuilder,
     options: ErrorBoundaryOptions,
   ): void;
+  /**
+   * Render `builder`'s subtree into `document.body` instead of inline at this
+   * position (a neutral inline anchor is left behind). On the server there is no
+   * body, so the content renders inline; hydration relocates it to a body
+   * container to match the browser. Use for content that must escape overflow/
+   * stacking contexts (overlays, toasts). Cleanup removes the body container.
+   */
+  portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
+  /**
+   * Modal dialog: portal + `when(open, …)` panel with `role="dialog"`,
+   * `aria-modal="true"`, focus trap + containment, Escape-to-close, and focus
+   * restore on close. `builder` fills the dialog panel.
+   */
+  dialog(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+  /**
+   * Non-modal popover: portal + `when(open, …)` panel with `role="dialog"`.
+   * Moves focus into the panel on open and restores it on close, but does not
+   * trap or contain focus. Escape closes by default.
+   */
+  popover(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+  /**
+   * Tooltip: portal + `when(open, …)` panel with `role="tooltip"`. Non-modal
+   * and does not steal focus (tooltips describe another element); no Escape
+   * handling by default.
+   */
+  tooltip(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+  /**
+   * Dropdown menu: portal + `when(open, …)` panel with `role="menu"`. Non-modal;
+   * moves focus into the menu on open, Escape closes, focus restored on close.
+   */
+  dropdown(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
+  /**
+   * Toast: portal + `when(open, …)` panel with `role="status"` and
+   * `aria-live="polite"`. Non-modal and never steals focus; no Escape handling.
+   */
+  toast(key: string, options: OverlayOptions, builder: ContainerBuilder): void;
 }
 
 export interface SectionDSL extends ContainerDSL {}

@@ -27,6 +27,7 @@ import {
   mountNode,
   wireSignalBindings,
   wireReactiveList,
+  wireOverlayBehavior,
   textUpdate,
   headingUpdate,
   inputUpdate,
@@ -136,6 +137,34 @@ function hydrateNode(
       ctx.instances.set(graphNode.id, instance);
       hydrateChildren(ctx, graphNode, instance, domNode, path);
       wireReactiveList(ctx, graphNode, instance, domNode);
+      return instance;
+    }
+
+    case 'portal': {
+      // The server rendered the portal's children INLINE inside the anchor
+      // (no body on the server). Adopt the anchor, then — before positional
+      // child hydration — relocate those inline children into a fresh
+      // document.body container so their live location matches the browser
+      // mount path exactly (and there is no positional mismatch). Hydrate the
+      // children against the body container, then wire any overlay behavior.
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      const body = dom.body();
+      let target: Element = domNode;
+      if (body !== null) {
+        const portalContainer = dom.createElement('div');
+        dom.setAttribute(portalContainer, 'data-streetui-portal-container', '');
+        // `childNodes` returns a snapshot array, so moving during iteration is
+        // safe. appendChild re-parents each node out of the anchor.
+        for (const child of dom.childNodes(domNode)) {
+          dom.appendChild(portalContainer, child);
+        }
+        dom.appendChild(body, portalContainer);
+        instance.trackCleanup(() => dom.removeChild(body, portalContainer));
+        target = portalContainer;
+      }
+      hydrateChildren(ctx, graphNode, instance, target, path);
+      wireOverlayBehavior(ctx, graphNode, instance, target);
       return instance;
     }
 

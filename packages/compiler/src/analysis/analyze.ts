@@ -84,8 +84,14 @@ export function analyzeGraph(graph: ApplicationGraph): GraphAnalysis {
     const hasEvents = node.events.length > 0;
     const isList = node.type === 'reactive-list';
     const isConditional = node.type === 'conditional';
+    // A portal relocates its children to a different DOM location (document.body)
+    // at mount time, so its subtree is never a contiguous inline static blob.
+    // Treating it as dynamic stops the static-subtree rollup at the portal, so
+    // both SSR and hydration always take the real portal mount/hydrate branch
+    // (which does the relocation) rather than emitting/adopting a raw HTML blob.
+    const isPortal = node.type === 'portal';
     const isStatic =
-      node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional;
+      node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal;
     const isStaticSubtree = isStatic && allChildrenStatic;
 
     nodes.set(node.id, {

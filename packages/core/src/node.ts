@@ -23,7 +23,8 @@ export type SemanticNodeType =
   | 'slot'
   | 'fragment'
   | 'reactive-list'
-  | 'conditional';
+  | 'conditional'
+  | 'portal';
 
 export interface NodeMetadata {
   readonly createdAt: number;

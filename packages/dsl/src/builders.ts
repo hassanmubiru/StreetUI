@@ -26,6 +26,8 @@ import type {
   SectionOptions,
   FormOptions,
   ListOptions,
+  PortalOptions,
+  OverlayOptions,
   A11yOptions,
   Bindable,
   BindableText,
@@ -105,6 +107,7 @@ function applyA11yProps(props: Props, options: A11yOptions): void {
   if (options.ariaCurrent !== undefined) props['aria-current'] = String(options.ariaCurrent);
   if (options.ariaInvalid !== undefined) props['aria-invalid'] = String(options.ariaInvalid);
   if (options.ariaRequired !== undefined) props['aria-required'] = String(options.ariaRequired);
+  if (options.ariaModal !== undefined) props['aria-modal'] = String(options.ariaModal);
 }
 
 function containerProps(options: ContainerOptions): Props {
@@ -150,6 +153,64 @@ export function reactiveListItemSignature(item: unknown): string {
 /** Stable, identity-only reconciliation key for a reactive-list item. */
 export function reactiveListItemKey(item: unknown, index: number): string {
   return itemIdentity(item, index);
+}
+
+// ── Overlay kind configuration ──────────────────────────────────────────────────
+//
+// Each overlay builder (dialog/popover/tooltip/dropdown/toast) is the same
+// portal + `when(open, …)` panel + focus/keyboard behavior, differing only in
+// ARIA role, modality, whether it takes focus, and its escape/restore defaults.
+// This table captures those differences; `_overlay` does the shared assembly.
+
+interface OverlayKindConfig {
+  /** Default ARIA role for the panel. */
+  readonly role: string;
+  /** Trap + contain focus (modal semantics). */
+  readonly modal: boolean;
+  /** Move focus into the panel when it opens. */
+  readonly takesFocus: boolean;
+  /** Emit `aria-modal="true"` on the panel. */
+  readonly ariaModal: boolean;
+  /** Emit an `aria-live` region on the panel (announcements). */
+  readonly ariaLive?: 'polite' | 'assertive';
+  /** Default for `closeOnEscape` when the caller does not specify it. */
+  readonly defaultCloseOnEscape: boolean;
+  /** Default for `restoreFocus` when the caller does not specify it. */
+  readonly defaultRestoreFocus: boolean;
+}
+
+const OVERLAY_KINDS = {
+  dialog: {
+    role: 'dialog', modal: true, takesFocus: true, ariaModal: true,
+    defaultCloseOnEscape: true, defaultRestoreFocus: true,
+  },
+  popover: {
+    role: 'dialog', modal: false, takesFocus: true, ariaModal: false,
+    defaultCloseOnEscape: true, defaultRestoreFocus: true,
+  },
+  tooltip: {
+    role: 'tooltip', modal: false, takesFocus: false, ariaModal: false,
+    defaultCloseOnEscape: false, defaultRestoreFocus: false,
+  },
+  dropdown: {
+    role: 'menu', modal: false, takesFocus: true, ariaModal: false,
+    defaultCloseOnEscape: true, defaultRestoreFocus: true,
+  },
+  toast: {
+    role: 'status', modal: false, takesFocus: false, ariaModal: false,
+    ariaLive: 'polite', defaultCloseOnEscape: false, defaultRestoreFocus: false,
+  },
+} as const satisfies Record<string, OverlayKindConfig>;
+
+/** The opaque descriptor the renderer reads from `__overlay__<portalId>`. */
+interface OverlayBehaviorDescriptor {
+  readonly open: ReadonlySignal<boolean>;
+  readonly modal: boolean;
+  readonly takesFocus: boolean;
+  readonly closeOnEscape: boolean;
+  readonly restoreFocus: boolean;
+  readonly initialFocusId?: string;
+  readonly onClose?: () => void;
 }
 
 // ── Base content builder ──────────────────────────────────────────────────────
@@ -509,6 +570,97 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
         },
       );
     }, { id });
+  }
+
+  // ── Portals & overlays ──────────────────────────────────────────────────────
+
+  portal(key: string, builder: ContainerBuilderFn, options: PortalOptions = {}): void {
+    const node = this._graph.createNode('portal', {
+      key,
+      parent: this._node,
+      props: containerProps(options),
+    });
+    builder(new ContainerBuilderImpl(node, this._graph));
+  }
+
+  /**
+   * Shared assembly for every overlay kind: a `portal` node whose single child
+   * is a `when(open, panel)` conditional. The panel container carries the
+   * kind's ARIA semantics; `builder` fills it. An `__overlay__<portalId>`
+   * descriptor is registered so the renderer wires focus/keyboard behavior to
+   * the same `open` signal that drives the panel. Reuses existing primitives
+   * (portal + when + container) — no new render path.
+   */
+  private _overlay(
+    kind: OverlayKindConfig,
+    key: string,
+    options: OverlayOptions,
+    builder: ContainerBuilderFn,
+  ): void {
+    const graph = this._graph;
+    const portalNode = graph.createNode('portal', {
+      key,
+      parent: this._node,
+      props: { key },
+    });
+
+    // Resolve `open` to a signal we can both bind (drives the panel's `when`)
+    // and hand to the renderer (drives focus behavior). A literal is wrapped so
+    // the panel still mounts/unmounts through the same reactive path.
+    const openBindable = options.open;
+    const openSignal: ReadonlySignal<boolean> = isSignal(openBindable)
+      ? (openBindable as ReadonlySignal<boolean>)
+      : signal(openBindable as boolean);
+
+    // Panel a11y semantics (kind defaults, overridable via options).
+    const panelOptions: ContainerOptions = {
+      role: options.role ?? kind.role,
+      ...(kind.ariaModal ? { ariaModal: true } : {}),
+      ...(kind.ariaLive !== undefined ? { ariaLive: kind.ariaLive } : {}),
+      ...(options.class !== undefined ? { class: options.class } : {}),
+      ...(options.ariaLabel !== undefined ? { ariaLabel: options.ariaLabel } : {}),
+      ...(options.ariaLabelledBy !== undefined ? { ariaLabelledBy: options.ariaLabelledBy } : {}),
+      ...(options.ariaDescribedBy !== undefined ? { ariaDescribedBy: options.ariaDescribedBy } : {}),
+    };
+
+    const portalBuilder = new ContainerBuilderImpl(portalNode, graph);
+    portalBuilder.when(openSignal, (panelHost) => {
+      panelHost.container(`${key}__panel`, builder, panelOptions);
+    });
+
+    const descriptor: OverlayBehaviorDescriptor = {
+      open: openSignal,
+      modal: kind.modal,
+      takesFocus: kind.takesFocus,
+      closeOnEscape: options.closeOnEscape ?? kind.defaultCloseOnEscape,
+      restoreFocus: options.restoreFocus ?? kind.defaultRestoreFocus,
+      ...(options.initialFocusId !== undefined ? { initialFocusId: options.initialFocusId } : {}),
+      ...(options.onClose !== undefined ? { onClose: options.onClose } : {}),
+    };
+    graph.registerHandler(
+      `__overlay__${portalNode.id}`,
+      (() => descriptor) as unknown as () => unknown,
+    );
+  }
+
+  dialog(key: string, options: OverlayOptions, builder: ContainerBuilderFn): void {
+    this._overlay(OVERLAY_KINDS.dialog, key, options, builder);
+  }
+
+  popover(key: string, options: OverlayOptions, builder: ContainerBuilderFn): void {
+    this._overlay(OVERLAY_KINDS.popover, key, options, builder);
+  }
+
+  tooltip(key: string, options: OverlayOptions, builder: ContainerBuilderFn): void {
+    this._overlay(OVERLAY_KINDS.tooltip, key, options, builder);
+  }
+
+  dropdown(key: string, options: OverlayOptions, builder: ContainerBuilderFn): void {
+    this._overlay(OVERLAY_KINDS.dropdown, key, options, builder);
+  }
+
+  toast(key: string, options: OverlayOptions, builder: ContainerBuilderFn): void {
+    this._overlay(OVERLAY_KINDS.toast, key, options, builder);
   }
 }
 

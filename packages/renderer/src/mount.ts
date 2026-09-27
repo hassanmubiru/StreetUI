@@ -13,6 +13,14 @@
 
 import type { GraphNode, ApplicationGraph } from '@streetui/graph';
 import type { DOMAdapter } from '@streetui/dom';
+import {
+  focusInitial,
+  trapFocus,
+  containFocus,
+  onEscape,
+  saveFocus,
+  restoreFocus,
+} from '@streetui/dom';
 import type { RenderContext } from './render-context.js';
 import { NodeInstance } from './node-instance.js';
 import { applyProp } from './attributes.js';
@@ -235,6 +243,40 @@ export function mountNode(
 
     dom.appendChild(parentDom, el);
     wireReactiveList(ctx, graphNode, instance, el);
+    return instance;
+  }
+
+  // Portal — a container whose children are relocated to a different DOM
+  // location (document.body) on the browser, while a neutral inline anchor
+  // stays at the declaration site. On the server there is no body, so the
+  // children render inline in the anchor (deterministic HTML; hydration then
+  // relocates them). This is the substrate for overlays (dialog/popover/…):
+  // `wireOverlayBehavior` reads an optional `__overlay__<id>` descriptor and,
+  // when present, wires focus trap/restore/containment/escape to the open
+  // signal. A plain portal has no descriptor, so overlay wiring is a no-op.
+  if (graphNode.type === 'portal') {
+    const anchor = dom.createElement(resolveTag('portal'));
+    dom.setAttribute(anchor, 'data-streetui-portal', '');
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance);
+
+    const body = dom.body();
+    let target: Element = anchor; // SSR / no body → render inline in the anchor
+    if (body !== null) {
+      const portalContainer = dom.createElement('div');
+      dom.setAttribute(portalContainer, 'data-streetui-portal-container', '');
+      dom.appendChild(body, portalContainer);
+      instance.trackCleanup(() => dom.removeChild(body, portalContainer));
+      target = portalContainer;
+    }
+
+    for (const child of graphNode.children) {
+      instance.addChild(mountNode(ctx, child, target));
+    }
+
+    dom.appendChild(parentDom, anchor);
+    wireOverlayBehavior(ctx, graphNode, instance, target);
     return instance;
   }
 
@@ -499,4 +541,100 @@ function reconcileReactiveList(
 function forgetInstance(ctx: RenderContext, instance: NodeInstance): void {
   ctx.instances.delete(instance.graphNode.id);
   for (const child of instance.children) forgetInstance(ctx, child);
+}
+
+// ── Overlay behavior wiring ─────────────────────────────────────────────────────
+
+/**
+ * Opaque overlay descriptor, read from the `__overlay__<portalId>` handler that
+ * the DSL registers for dialog/popover/tooltip/dropdown/toast. Declared here as
+ * a local structural type (mirroring the list plan/build handler pattern) so the
+ * renderer never takes a compile-time dependency on the DSL package.
+ */
+interface OverlayBehavior {
+  /** Reactive open/visibility state — the same signal that drives the panel's `when()`. */
+  readonly open: {
+    subscribe: (fn: (v: boolean) => void) => () => void;
+    peek: () => unknown;
+  };
+  /** Trap Tab focus within, and redirect escaped focus back inside (modal semantics). */
+  readonly modal: boolean;
+  /** Move focus into the panel when it opens. */
+  readonly takesFocus: boolean;
+  /** Escape key invokes `onClose`. */
+  readonly closeOnEscape: boolean;
+  /** Restore focus to the pre-open element on close. */
+  readonly restoreFocus: boolean;
+  /** id of the element to focus first when opening. */
+  readonly initialFocusId?: string;
+  /** Requested-close callback (Escape). The app flips its own open signal here. */
+  readonly onClose?: () => void;
+}
+
+/**
+ * Attach overlay focus/keyboard behavior to a mounted portal. Server-safe: on
+ * the server `dom.body()` is null so this returns immediately (SSR emits inert
+ * markup, no focus concept). A plain portal has no `__overlay__` descriptor, so
+ * this also returns immediately — the behavior is purely additive.
+ *
+ * The panel is mounted/unmounted by the portal's inner `when(open, …)`, whose
+ * signal subscription is registered *before* this one (the conditional child is
+ * mounted earlier in the portal branch). Signal subscribers fire synchronously
+ * in subscription order, so on open→true the panel DOM exists before we move
+ * focus into it, and on open→false the panel is torn down before we restore
+ * focus. All listeners are tracked on the instance and torn down on unmount.
+ */
+export function wireOverlayBehavior(
+  ctx: RenderContext,
+  graphNode: GraphNode,
+  instance: NodeInstance,
+  target: Element,
+): void {
+  const { dom, graph } = ctx;
+  if (dom.body() === null) return; // server / no DOM environment
+
+  const descFn = graph.getHandler(`__overlay__${graphNode.id}`) as
+    | (() => OverlayBehavior)
+    | undefined;
+  if (descFn === undefined) return; // plain portal — no overlay behavior
+
+  const desc = descFn();
+  const openSig = desc.open;
+  if (openSig === undefined || typeof openSig.subscribe !== 'function') return;
+
+  let active: Array<() => void> = [];
+  let saved: Element | null = null;
+
+  const teardown = (): void => {
+    for (const fn of active) fn();
+    active = [];
+  };
+
+  const onOpenChange = (isOpen: boolean): void => {
+    if (isOpen) {
+      if (desc.restoreFocus) saved = saveFocus(dom);
+      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
+      if (desc.modal) {
+        active.push(trapFocus(dom, target));
+        active.push(containFocus(dom, target));
+      }
+      if (desc.closeOnEscape && desc.onClose !== undefined) {
+        active.push(onEscape(dom, target, desc.onClose));
+      }
+    } else {
+      teardown();
+      if (desc.restoreFocus && saved !== null) {
+        restoreFocus(dom, saved);
+        saved = null;
+      }
+    }
+  };
+
+  const unsub = openSig.subscribe(onOpenChange);
+  instance.trackCleanup(unsub);
+  instance.trackCleanup(teardown);
+
+  // `subscribe` fires only on change; an overlay that is open on initial mount
+  // has its panel already built into the graph, so run the open path now.
+  if (openSig.peek() === true) onOpenChange(true);
 }
