@@ -243,7 +243,7 @@ export function mountNode(
     }
 
     dom.appendChild(parentDom, el);
-    wireReactiveList(ctx, graphNode, instance, el);
+    wireReactiveList(ctx, graphNode, instance, el, true);
     return instance;
   }
 
@@ -438,6 +438,7 @@ export function wireReactiveList(
   graphNode: GraphNode,
   instance: NodeInstance,
   el: Element,
+  runAppear = false,
 ): void {
   const plan = ctx.graph.getHandler(`__listplan__${graphNode.id}`) as
     | ListPlanFn
@@ -461,9 +462,11 @@ export function wireReactiveList(
   });
   const hooks = controller.hooks();
 
-  // `appear`: animate any initial child that opted in (fresh browser mount only;
-  // the hydrate path never calls mountNode, so appear never fires on hydration).
-  controller.appear(instance.children);
+  // `appear`: animate any initial child that opted in — but ONLY on a fresh
+  // browser mount, never on hydration (§22: the DOM is already present and
+  // correct, so appear must not run). The hydrate path calls this with
+  // `runAppear` omitted (false).
+  if (runAppear) controller.appear(instance.children);
 
   for (const stateRef of graphNode.stateRefs) {
     if (stateRef.propKey !== 'items') continue;
