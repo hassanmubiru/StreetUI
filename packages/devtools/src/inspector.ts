@@ -70,3 +70,43 @@ export function nodeTypeStats(graph: ApplicationGraph): Record<string, number> {
   });
   return counts;
 }
+
+/** A single component instance surfaced for DevTools inspection (§21). */
+export interface InspectedComponent {
+  /** The build-order node id (churns across rebuilds — not stable identity). */
+  id: string;
+  /** The stable, author-provided identity key passed at the call site. */
+  key: string | undefined;
+  /** The definition's human-readable name (from `data-streetui-component`). */
+  name: string;
+  /** Depth of the component node in the graph. */
+  depth: number;
+  /** Number of direct child nodes the component rendered. */
+  childCount: number;
+}
+
+/**
+ * List every `component()` instance in the graph, in document order, with its
+ * stable `key`, human-readable `name` and location. Components are ordinary
+ * `'component'` GraphNodes (they flow through `inspectGraph`/`printGraph`
+ * already); this is the first-class, component-aware view for DevTools — it
+ * reads the inspectable `data-streetui-component` name attribute the DSL sets,
+ * never any internal `_`-prefixed metadata. Names/keys are stable across
+ * fine-grained prop updates (which never rebuild the node).
+ */
+export function inspectComponents(graph: ApplicationGraph): InspectedComponent[] {
+  const out: InspectedComponent[] = [];
+  graph.walk((node, depth) => {
+    if (node.type !== 'component') return;
+    const name = node.props['data-streetui-component'];
+    out.push({
+      id: node.id,
+      key: node.key,
+      name: typeof name === 'string' ? name : 'Component',
+      depth,
+      childCount: node.children.length,
+    });
+  });
+  return out;
+}
+
