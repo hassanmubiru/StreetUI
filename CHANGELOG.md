@@ -5,6 +5,39 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 1.9.0 — Transitions, Accessibility & Production Interaction Platform (2026-09-28)
+
+**Minor release** — additive public API, no breaking changes. All 18 packages
+**published to npm at `1.9.0`**. Full detail in
+[`V1.9.0-TRANSITIONS-A11Y-INTERACTION-PLATFORM-REPORT.md`](./V1.9.0-TRANSITIONS-A11Y-INTERACTION-PLATFORM-REPORT.md).
+
+### Added
+
+- **CSS transition engine** — `enter-from/-active/-to`, `leave-*` class-based
+  transitions on `when()` branches, list items (`itemTransition`), overlays, and
+  router navigation. No WAAPI, no browser API at module scope; SSR is inert.
+- **Router transitions** — cross-fade with leave-deferral; rapid navigation
+  cancels in-flight enter. Initial mount/hydrate never animated.
+- **Dialog keyboard** — Tab/Shift+Tab trap+wrap, focus-in on open, Escape to
+  close, focus restore. Nested modals via containment stack.
+- **Menu keyboard** (`rovingMenu`) — Arrow/Home/End/Enter/Space, re-queries items
+  each key for live disabled/reactive items.
+- **Live regions** (`createAnnouncer`) — one polite + one assertive region, clear-
+  then-set microtask so repeats re-announce; SSR-inert.
+- **`inspectInteractions(graph)`** — prod-safe overlay + transition inspection.
+- **Interaction testing helpers** — `focus`, `blur`, `pressKey`, `clickOutside`,
+  `openOverlay`, `closeOverlay`, `waitForTransition`.
+- Deterministic `a11yIds` extended with trigger/controls/owns relationship ids.
+
+### Verified
+
+- Build 29/29, typecheck 47/47.
+- Tests: renderer **196**, devtools **51**, dom **51**, router **45**, cli **53**,
+  testing **34**, streetui **21**, dsl **19**, core **41**, state **52**,
+  compiler **15**, forms **24**.
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+- All regression gates PASS; memory stress (50/100/200 items) no leaks.
+
 ## 1.8.0 — Component & Composition Platform (2026-09-28)
 
 **Minor release** — new public API added, no breaking changes. The v1.0 frozen
