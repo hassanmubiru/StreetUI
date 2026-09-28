@@ -23,6 +23,7 @@ __export(index_exports, {
   DEFAULT_PERF_THRESHOLDS: () => DEFAULT_PERF_THRESHOLDS,
   createDevTools: () => createDevTools,
   diagnosePerformance: () => diagnosePerformance,
+  escapeHtml: () => escapeHtml,
   inspectApplication: () => inspectApplication,
   inspectComponents: () => inspectComponents,
   inspectContext: () => inspectContext,
@@ -35,7 +36,8 @@ __export(index_exports, {
   inspectSignal: () => inspectSignal,
   nodeTypeStats: () => nodeTypeStats,
   printDiagnostics: () => printDiagnostics,
-  printGraph: () => printGraph
+  printGraph: () => printGraph,
+  renderDevToolsHTML: () => renderDevToolsHTML
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -366,11 +368,22 @@ function capture(compiled, sources, options) {
     snapshot: app.perf,
     diagnostics: diagnosePerformance(compiled, options.perfThresholds)
   };
+  const components = inspectComponents(compiled.graph);
+  const interactions = inspectInteractions(compiled.graph);
+  const diagnostics = {
+    errors: app.diagnostics.errors,
+    warnings: app.diagnostics.warnings,
+    messages: app.diagnostics.messages
+  };
   const snapshot = {
     application,
     graph: app.graph,
     signals,
     performance,
+    components,
+    overlays: interactions.overlays,
+    transitions: interactions.transitions,
+    diagnostics,
     ...sources.router !== void 0 ? { router: inspectRouter(sources.router) } : {},
     ...sources.resources !== void 0 ? { resources: mapInspect(sources.resources, (r) => inspectResource(r)) } : {},
     ...sources.forms !== void 0 ? { forms: mapInspect(sources.forms, (f) => inspectForm(f)) } : {},
@@ -411,6 +424,25 @@ function formatSnapshot(s) {
   for (const [label, sig] of Object.entries(s.signals.live)) {
     lines.push(`  ${label} [${sig.kind}] = ${format(sig.value)} \xB7 observers ${sig.observerCount ?? "?"}`);
   }
+  if (s.components.length > 0) {
+    lines.push(`Components: ${s.components.length}`);
+    for (const c of s.components) {
+      lines.push(`  ${"  ".repeat(c.depth)}${c.name}${c.key !== void 0 ? ` (#${c.key})` : ""} \xB7 children ${c.childCount}`);
+    }
+  }
+  if (s.overlays.length > 0) {
+    lines.push(`Overlays: ${s.overlays.length}`);
+    for (const o of s.overlays) {
+      const kind = o.modal ? "modal" : o.menu ? "menu" : o.takesFocus ? "focusable" : "non-modal";
+      lines.push(`  ${o.key ?? o.id} [${kind}] ${o.open ? "open" : "closed"}`);
+    }
+  }
+  if (s.transitions.length > 0) {
+    lines.push(`Transitions: ${s.transitions.length}`);
+    for (const t of s.transitions) {
+      lines.push(`  ${t.key ?? t.id} on <${t.nodeType}> \xB7 ${t.duration}ms${t.appear ? " \xB7 appear" : ""}`);
+    }
+  }
   if (s.router !== void 0) {
     lines.push(`Router: ${s.router.path} (${s.router.pattern})${s.router.isFallback ? " [fallback]" : ""}`);
   }
@@ -444,6 +476,12 @@ function formatSnapshot(s) {
   for (const d of s.performance.diagnostics) {
     lines.push(`  ${d.code}: ${d.message}`);
   }
+  lines.push(
+    `Diagnostics: ${s.diagnostics.errors} error(s), ${s.diagnostics.warnings} warning(s)`
+  );
+  for (const m of s.diagnostics.messages) {
+    lines.push(`  ${m}`);
+  }
   return lines.join("\n");
 }
 function format(value) {
@@ -458,11 +496,182 @@ function format(value) {
   }
   return String(value);
 }
+
+// src/view.ts
+function escapeHtml(value) {
+  const s = typeof value === "string" ? value : stringifyValue(value);
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function stringifyValue(value) {
+  if (value === null || value === void 0) return String(value);
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "[object]";
+    }
+  }
+  return String(value);
+}
+function section(title, count, body) {
+  const badge = count === void 0 ? "" : ` <span class="st-count">${count}</span>`;
+  return `<section class="st-panel"><h2>${escapeHtml(title)}${badge}</h2>${body}</section>`;
+}
+function ul(items) {
+  if (items.length === 0) return '<p class="st-empty">(none)</p>';
+  return `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+}
+function renderDevToolsHTML(s) {
+  const app = s.application;
+  const parts = [];
+  parts.push(
+    section(
+      "Application",
+      void 0,
+      `<p>${escapeHtml(app.identity.name)} <span class="st-dim">v${escapeHtml(app.identity.version)}</span></p><p class="st-dim">${app.nodeCount} nodes \xB7 depth ${app.maxDepth} \xB7 ${app.pages.length} page(s) \xB7 ${app.signalCount} signals \xB7 ${app.eventHandlers} handlers \xB7 ${app.stateBindings} bindings</p>`
+    )
+  );
+  parts.push(
+    section(
+      "Components",
+      s.components.length,
+      ul(
+        s.components.map(
+          (c) => `<span class="st-depth" style="--d:${c.depth}"></span><code>${escapeHtml(c.name)}</code>` + (c.key !== void 0 ? ` <span class="st-key">#${escapeHtml(c.key)}</span>` : "") + ` <span class="st-dim">${c.childCount} child(ren)</span>`
+        )
+      )
+    )
+  );
+  parts.push(section("Graph", void 0, `<pre class="st-tree">${escapeHtml(renderNodeTree(s.graph))}</pre>`));
+  parts.push(
+    section(
+      "Signals",
+      s.signals.boundSignalIds.length,
+      `<p class="st-dim">${s.signals.boundSignalIds.length} bound in graph \xB7 effects shown as observer counts (no global effect registry)</p>` + ul(
+        Object.entries(s.signals.live).map(
+          ([label, sig]) => `<code>${escapeHtml(label)}</code> <span class="st-key">[${escapeHtml(sig.kind)}]</span> = <code>${escapeHtml(sig.value)}</code> <span class="st-dim">observers ${escapeHtml(sig.observerCount ?? "?")}</span>`
+        )
+      )
+    )
+  );
+  if (s.router !== void 0) {
+    parts.push(
+      section(
+        "Router",
+        void 0,
+        `<p><code>${escapeHtml(s.router.path)}</code> <span class="st-dim">(${escapeHtml(s.router.pattern)})${s.router.isFallback ? " \xB7 fallback" : ""}</span></p>`
+      )
+    );
+  }
+  if (s.resources !== void 0) {
+    parts.push(
+      section(
+        "Resources",
+        Object.keys(s.resources).length,
+        ul(
+          Object.entries(s.resources).map(
+            ([label, r]) => `<code>${escapeHtml(label)}</code>: ${escapeHtml(r.status)}` + (r.loading ? ' <span class="st-dim">(loading)</span>' : "") + (r.hasError ? ` <span class="st-err">!${escapeHtml(r.errorName)}</span>` : "")
+          )
+        )
+      )
+    );
+  }
+  parts.push(
+    section(
+      "Overlays",
+      s.overlays.length,
+      ul(
+        s.overlays.map((o) => {
+          const kind = o.modal ? "modal" : o.menu ? "menu" : o.takesFocus ? "focusable" : "non-modal";
+          return `<code>${escapeHtml(o.key ?? o.id)}</code> <span class="st-key">[${kind}]</span> <span class="st-dim">${o.open ? "open" : "closed"}${o.closeOnEscape ? " \xB7 esc" : ""}${o.restoreFocus ? " \xB7 restore" : ""}</span>`;
+        })
+      )
+    )
+  );
+  parts.push(
+    section(
+      "Transitions",
+      s.transitions.length,
+      ul(
+        s.transitions.map(
+          (t) => `<code>${escapeHtml(t.key ?? t.id)}</code> on <code>&lt;${escapeHtml(t.nodeType)}&gt;</code> <span class="st-dim">${t.duration}ms${t.appear ? " \xB7 appear" : ""}</span>`
+        )
+      )
+    )
+  );
+  if (s.forms !== void 0) {
+    parts.push(
+      section(
+        "Forms",
+        Object.keys(s.forms).length,
+        ul(
+          Object.entries(s.forms).map(
+            ([label, f]) => `<code>${escapeHtml(label)}</code>: ${f.valid ? "valid" : "invalid"} \xB7 ${escapeHtml(f.status)} \xB7 ${f.fields.length} field(s)`
+          )
+        )
+      )
+    );
+  }
+  if (s.i18n !== void 0) {
+    const missing = s.i18n.missingKeys;
+    parts.push(
+      section(
+        "i18n",
+        void 0,
+        `<p><code>${escapeHtml(s.i18n.locale)}</code> of [${s.i18n.locales.map(escapeHtml).join(", ")}]${missing !== void 0 ? ` <span class="st-dim">\xB7 missing ${missing.length}</span>` : ""}</p>`
+      )
+    );
+  }
+  parts.push(
+    section(
+      "Performance",
+      s.performance.diagnostics.length,
+      `<p class="st-dim">Structural counts, not runtime timings \u2014 not a production profiler.</p>` + ul(s.performance.diagnostics.map((d) => `<code>${escapeHtml(d.code)}</code>: ${escapeHtml(d.message)}`))
+    )
+  );
+  parts.push(
+    section(
+      "Diagnostics",
+      s.diagnostics.errors + s.diagnostics.warnings,
+      `<p class="st-dim">${s.diagnostics.errors} error(s) \xB7 ${s.diagnostics.warnings} warning(s)</p>` + ul(s.diagnostics.messages.map((m) => escapeHtml(m)))
+    )
+  );
+  const title = `StreetUI DevTools \u2014 ${escapeHtml(app.identity.name)}`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title><style>${DEVTOOLS_CSS}</style></head><body class="st-devtools"><header class="st-header"><h1>${title} <span class="st-dim">v${escapeHtml(app.identity.version)}</span></h1></header><main>${parts.join("")}</main></body></html>`;
+}
+function renderNodeTree(node) {
+  const lines = [];
+  const walk = (n) => {
+    const indent = "  ".repeat(n.depth);
+    const key = n.key !== void 0 ? ` #${n.key}` : "";
+    lines.push(`${indent}<${n.type}${key}> ${n.id}`);
+    for (const c of n.children) walk(c);
+  };
+  walk(node);
+  return lines.join("\n");
+}
+var DEVTOOLS_CSS = [
+  ".st-devtools{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0;color:#e6e6e6;background:#1e1e28}",
+  ".st-header{padding:12px 16px;border-bottom:1px solid #333;background:#15151c}",
+  ".st-header h1{font-size:14px;margin:0}",
+  "main{padding:8px 16px}",
+  ".st-panel{margin:12px 0;border:1px solid #2c2c38;border-radius:6px;overflow:hidden}",
+  ".st-panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin:0;padding:6px 10px;background:#23232e}",
+  ".st-panel ul{list-style:none;margin:0;padding:6px 10px}",
+  ".st-panel li{padding:1px 0}",
+  ".st-panel p{margin:6px 10px}",
+  ".st-count{background:#3a3a4a;border-radius:10px;padding:0 7px;font-size:11px;float:right}",
+  ".st-dim{color:#8a8a9a}.st-key{color:#7db4ff}.st-err{color:#ff8a8a}.st-empty{color:#6a6a7a}",
+  ".st-tree{margin:6px 10px;white-space:pre;overflow:auto;color:#c8c8d4}",
+  ".st-depth{display:inline-block}.st-depth{width:calc(var(--d,0)*12px)}",
+  "code{color:#d7d7e0}"
+].join("");
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DEFAULT_PERF_THRESHOLDS,
   createDevTools,
   diagnosePerformance,
+  escapeHtml,
   inspectApplication,
   inspectComponents,
   inspectContext,
@@ -475,6 +684,7 @@ function format(value) {
   inspectSignal,
   nodeTypeStats,
   printDiagnostics,
-  printGraph
+  printGraph,
+  renderDevToolsHTML
 });
 //# sourceMappingURL=index.cjs.map

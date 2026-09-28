@@ -335,15 +335,211 @@ function resource(loader, options = {}) {
     dispose
   };
 }
+
+// src/mutation.ts
+function mutation(mutator, options = {}) {
+  const status = signal("idle");
+  const data = signal(void 0);
+  const error = signal(void 0);
+  const pending = derived(() => status.get() === "loading");
+  let disposed = false;
+  let runId = 0;
+  const mutate = async (args) => {
+    if (disposed) {
+      return await mutator(args);
+    }
+    const myRun = ++runId;
+    batch(() => {
+      error.set(void 0);
+      status.set("loading");
+    });
+    try {
+      const result = await mutator(args);
+      if (!disposed && myRun === runId) {
+        batch(() => {
+          data.set(result);
+          error.set(void 0);
+          status.set("success");
+        });
+      }
+      if (!disposed && myRun === runId) {
+        await options.onSuccess?.(result, args);
+        await options.onSettled?.(args);
+      }
+      return result;
+    } catch (err) {
+      if (!disposed && myRun === runId) {
+        batch(() => {
+          error.set(err);
+          status.set("error");
+        });
+        await options.onError?.(err, args);
+        await options.onSettled?.(args);
+      }
+      throw err;
+    }
+  };
+  const reset = () => {
+    batch(() => {
+      status.set("idle");
+      data.set(void 0);
+      error.set(void 0);
+    });
+  };
+  const dispose = () => {
+    disposed = true;
+  };
+  if (options.onCleanup !== void 0) options.onCleanup(dispose);
+  return { status, data, error, pending, mutate, reset, dispose };
+}
+
+// src/client.ts
+var HttpError = class extends Error {
+  status;
+  statusText;
+  url;
+  body;
+  constructor(status, statusText, url, body) {
+    super(`HTTP ${status} ${statusText} for ${url}`);
+    this.name = "HttpError";
+    this.status = status;
+    this.statusText = statusText;
+    this.url = url;
+    this.body = body;
+  }
+};
+function joinUrl(baseUrl, path) {
+  if (baseUrl === void 0 || baseUrl === "") return path;
+  const b = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${b}${p}`;
+}
+function withQuery(url, query) {
+  if (query === void 0) return url;
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(query)) params.set(k, String(v));
+  const qs = params.toString();
+  if (qs === "") return url;
+  return url.includes("?") ? `${url}&${qs}` : `${url}?${qs}`;
+}
+function createClient(config = {}) {
+  const doFetch = config.fetch ?? ((input, init) => {
+    if (typeof fetch === "undefined") {
+      throw new Error("createClient: no global fetch; pass { fetch } explicitly");
+    }
+    return fetch(input, init);
+  });
+  async function request(method, path, body, reqConfig = {}) {
+    const url = withQuery(joinUrl(config.baseUrl, path), reqConfig.query);
+    const headers = { ...config.headers, ...reqConfig.headers };
+    const init = { method, headers };
+    if (reqConfig.signal !== void 0) init.signal = reqConfig.signal;
+    if (body !== void 0) {
+      if (headers["Content-Type"] === void 0) headers["Content-Type"] = "application/json";
+      init.body = JSON.stringify(body);
+    }
+    const response = await doFetch(url, init);
+    const parsed = await parseBody(response);
+    if (!response.ok) {
+      throw new HttpError(response.status, response.statusText, url, parsed);
+    }
+    return parsed;
+  }
+  return {
+    request,
+    get: (path, c) => request("GET", path, void 0, c),
+    post: (path, b, c) => request("POST", path, b, c),
+    put: (path, b, c) => request("PUT", path, b, c),
+    patch: (path, b, c) => request("PATCH", path, b, c),
+    del: (path, c) => request("DELETE", path, void 0, c),
+    resource: (path, options = {}) => {
+      const { query, ...resourceOptions } = options;
+      return resource(
+        (ctx) => request("GET", path, void 0, { signal: ctx.signal, ...query !== void 0 ? { query } : {} }),
+        resourceOptions
+      );
+    },
+    mutation: (method, path, options) => mutation((args) => request(method, path, args), options ?? {})
+  };
+}
+async function parseBody(response) {
+  const text = await response.text();
+  if (text === "") return void 0;
+  const type = response.headers.get("content-type") ?? "";
+  if (type.includes("application/json")) {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
+// src/auth.ts
+function createAuthSession(config) {
+  const session = resource(
+    (ctx) => config.loadUser(ctx),
+    {
+      ...config.immediate !== void 0 ? { immediate: config.immediate } : {},
+      ...config.onCleanup !== void 0 ? { onCleanup: config.onCleanup } : {}
+    }
+  );
+  const status = derived(() => {
+    const s = session.status.get();
+    const d = session.data.get();
+    if (s === "error") return "error";
+    if (s === "idle" || s === "loading" && d === void 0) return "loading";
+    return d === null || d === void 0 ? "unauthenticated" : "authenticated";
+  });
+  const user = derived(() => {
+    const d = session.data.get();
+    return d === null ? void 0 : d;
+  });
+  const authenticated = derived(() => status.get() === "authenticated");
+  const unauthenticated = derived(() => status.get() === "unauthenticated");
+  const loading = derived(() => status.get() === "loading");
+  const logoutMutation = mutation(
+    async () => {
+      await config.logout?.();
+    },
+    { onSuccess: () => session.refetch() }
+  );
+  const dispose = () => {
+    session.dispose();
+    status.dispose();
+    user.dispose();
+    authenticated.dispose();
+    unauthenticated.dispose();
+    loading.dispose();
+    logoutMutation.dispose();
+  };
+  return {
+    status,
+    user,
+    error: session.error,
+    authenticated,
+    unauthenticated,
+    loading,
+    loggingOut: logoutMutation.pending,
+    refresh: () => session.refetch(),
+    logout: () => logoutMutation.mutate(void 0),
+    dispose
+  };
+}
 export {
   DerivedSignal,
+  HttpError,
   Signal,
   Store,
   batch,
+  createAuthSession,
+  createClient,
   createStore,
   derived,
   effect,
   isBatching,
+  mutation,
   observerCount,
   resource,
   signal,

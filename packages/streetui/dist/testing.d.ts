@@ -1,6 +1,6 @@
-import { S as StreetApp, a as ComponentDefinition, b as ContainerBuilder } from './compile-DqsMQVJk.js';
-export { V as VERSION } from './compile-DqsMQVJk.js';
-import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-B2FmY05M.js';
+import { S as StreetApp, H as HydrationDiagnostic, a as ComponentDefinition, b as ContainerBuilder } from './hydration-diagnostics-CFYDXBlm.js';
+export { V as VERSION } from './hydration-diagnostics-CFYDXBlm.js';
+import { R as RenderHandle } from './renderer-interface-B_-hWnKk.js';
 export * from 'streetui/diagnostics';
 
 /**

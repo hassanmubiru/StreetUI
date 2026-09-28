@@ -315,6 +315,9 @@ var BrowserDOMAdapter = class {
   body() {
     return document.body ?? null;
   }
+  head() {
+    return document.head ?? null;
+  }
   activeElement() {
     return document.activeElement ?? null;
   }
@@ -693,6 +696,9 @@ var ServerDOMAdapter = class {
   body() {
     return null;
   }
+  head() {
+    return null;
+  }
   activeElement() {
     return null;
   }
@@ -1023,7 +1029,13 @@ var TAG_MAP = {
   // its children are relocated to a document.body container on the browser
   // (see the portal branch in mount.ts). On the server (no body) it renders
   // inline, so the anchor tag is what SSR/hydration positionally match on.
-  portal: "div"
+  portal: "div",
+  // A `head()` node renders as a neutral, empty inline anchor <div> at its
+  // declaration site (like a portal anchor). Its actual contribution — title/
+  // meta/link/etc. — is applied to `document.head` by `wireHeadBehavior` on the
+  // browser, and emitted separately by `renderHead()` on the server. Keeping a
+  // one-node/one-element anchor preserves positional hydration.
+  head: "div"
 };
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
@@ -1468,6 +1480,158 @@ var TransitionController = class {
   }
 };
 
+// ../renderer/src/head.ts
+var HEAD_MARKER = "data-streetui-head";
+var HEAD_KEY = "data-streetui-head-key";
+function isSignalLike(v) {
+  return v !== null && typeof v === "object" && typeof v["subscribe"] === "function" && typeof v["peek"] === "function";
+}
+function readValue(v) {
+  if (isSignalLike(v)) return String(v.peek() ?? "");
+  return String(v ?? "");
+}
+function resolveEntry(entry) {
+  const attrs = {};
+  for (const key of Object.keys(entry.attrs)) {
+    attrs[key] = readValue(entry.attrs[key]);
+  }
+  const resolved = { tag: entry.tag, attrs };
+  if (entry.tag === "title") {
+    return { ...resolved, text: readValue(entry.text) };
+  }
+  return resolved;
+}
+var HeadManager = class {
+  _dom;
+  _head;
+  _contributions = /* @__PURE__ */ new Map();
+  _applied = /* @__PURE__ */ new Map();
+  _order = 0;
+  _adopted = false;
+  constructor(dom, head) {
+    this._dom = dom;
+    this._head = head;
+  }
+  /** Register (or replace) a node's contribution and re-apply the merged result. */
+  register(nodeId, entries) {
+    this._contributions.set(nodeId, { order: this._order++, entries });
+    this.apply();
+  }
+  /** Withdraw a node's contribution (unmount / route change) and re-apply. */
+  unregister(nodeId) {
+    if (this._contributions.delete(nodeId)) this.apply();
+  }
+  /** Recompute the merged head and patch `document.head` to match. */
+  apply() {
+    if (!this._adopted) {
+      this._adoptServerTags();
+      this._adopted = true;
+    }
+    const ordered = [...this._contributions.values()].sort((a, b) => a.order - b.order);
+    const merged = /* @__PURE__ */ new Map();
+    for (const contribution of ordered) {
+      for (const entry of contribution.entries) {
+        merged.set(entry.dedupKey, resolveEntry(entry));
+      }
+    }
+    for (const [key, desired] of merged) {
+      const existing = this._applied.get(key);
+      if (existing !== void 0 && existing.tag === desired.tag) {
+        this._reconcileAttrs(existing, desired);
+      } else {
+        if (existing !== void 0) {
+          this._dom.removeChild(this._head, existing.el);
+          this._applied.delete(key);
+        }
+        const el = this._createTag(key, desired);
+        this._dom.appendChild(this._head, el);
+        this._applied.set(key, { el, attrKeys: new Set(Object.keys(desired.attrs)), tag: desired.tag });
+      }
+    }
+    for (const [key, record] of [...this._applied]) {
+      if (!merged.has(key)) {
+        this._dom.removeChild(this._head, record.el);
+        this._applied.delete(key);
+      }
+    }
+  }
+  _createTag(key, desired) {
+    const el = this._dom.createElement(desired.tag);
+    this._dom.setAttribute(el, HEAD_MARKER, "");
+    this._dom.setAttribute(el, HEAD_KEY, key);
+    for (const attr of Object.keys(desired.attrs)) {
+      this._dom.setAttribute(el, attr, desired.attrs[attr]);
+    }
+    if (desired.tag === "title") this._dom.setTextContent(el, desired.text ?? "");
+    return el;
+  }
+  _reconcileAttrs(record, desired) {
+    const nextKeys = new Set(Object.keys(desired.attrs));
+    for (const attr of record.attrKeys) {
+      if (!nextKeys.has(attr)) this._dom.removeAttribute(record.el, attr);
+    }
+    for (const attr of nextKeys) {
+      this._dom.setAttribute(record.el, attr, desired.attrs[attr]);
+    }
+    if (desired.tag === "title") this._dom.setTextContent(record.el, desired.text ?? "");
+    record.attrKeys = nextKeys;
+  }
+  /**
+   * Seed `_applied` from server-emitted `[data-streetui-head-key]` tags already
+   * in `document.head`. The subsequent diff reuses these elements when the
+   * client desires the same key (no duplicate), rewrites them if the value
+   * changed, or removes them if the client graph no longer wants them.
+   */
+  _adoptServerTags() {
+    for (const child of this._dom.childNodes(this._head)) {
+      if (!this._dom.isElement(child)) continue;
+      const el = child;
+      const key = this._dom.getAttribute(el, HEAD_KEY);
+      if (key === null) continue;
+      this._applied.set(key, {
+        el,
+        attrKeys: new Set(this._attrNames(el)),
+        tag: this._dom.tagName(el)
+      });
+    }
+  }
+  /** The framework-managed attribute names currently on a server tag. */
+  _attrNames(el) {
+    const names = [];
+    if (this._dom.getAttribute(el, HEAD_MARKER) !== null) names.push(HEAD_MARKER);
+    if (this._dom.getAttribute(el, HEAD_KEY) !== null) names.push(HEAD_KEY);
+    return names;
+  }
+};
+function getHeadManager(ctx) {
+  const head = ctx.dom.head();
+  if (head === null) return null;
+  const mutable = ctx;
+  if (mutable.head === void 0) mutable.head = new HeadManager(ctx.dom, head);
+  return mutable.head;
+}
+function wireHeadBehavior(ctx, graphNode, instance) {
+  const manager = getHeadManager(ctx);
+  if (manager === null) return;
+  const descFn = ctx.graph.getHandler(`__head__${graphNode.id}`);
+  if (descFn === void 0) return;
+  const contribution = descFn();
+  const nodeId = graphNode.id;
+  manager.register(nodeId, contribution.entries);
+  for (const entry of contribution.entries) {
+    for (const attrKey of Object.keys(entry.attrs)) {
+      const v = entry.attrs[attrKey];
+      if (isSignalLike(v)) {
+        instance.trackCleanup(v.subscribe(() => manager.apply()));
+      }
+    }
+    if (isSignalLike(entry.text)) {
+      instance.trackCleanup(entry.text.subscribe(() => manager.apply()));
+    }
+  }
+  instance.trackCleanup(() => manager.unregister(nodeId));
+}
+
 // ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
@@ -1590,6 +1754,9 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     wireEvents(dom, graph, graphNode, el2, instance2);
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, linkUpdate(dom, el2));
+    }
     dom.appendChild(parentDom, el2);
     return instance2;
   }
@@ -1643,6 +1810,16 @@ function mountNode(ctx, graphNode, parentDom) {
     }
     dom.appendChild(parentDom, anchor);
     wireOverlayBehavior(ctx, graphNode, instance2, target);
+    return instance2;
+  }
+  if (graphNode.type === "head") {
+    const anchor = dom.createElement(resolveTag("head"));
+    dom.setAttribute(anchor, "data-streetui-head-anchor", "");
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance2 = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance2);
+    dom.appendChild(parentDom, anchor);
+    wireHeadBehavior(ctx, graphNode, instance2);
     return instance2;
   }
   const tag = resolveTag(graphNode.type);
@@ -1704,6 +1881,17 @@ function buttonUpdate(dom, el) {
       } else {
         dom.removeAttribute(el, "disabled");
       }
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+function linkUpdate(dom, el) {
+  return (propKey, value) => {
+    if (propKey === "label") {
+      dom.setTextContent(el, String(value ?? ""));
+    } else if (propKey === "href") {
+      dom.setAttribute(el, "href", String(value ?? ""));
     } else {
       applyProp(dom, el, propKey, value);
     }
@@ -1936,7 +2124,12 @@ function hydrateNode(ctx, graphNode, domNode, path) {
     case "link": {
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
-      if (graphNode.type === "link") wireEvents(dom, graph, graphNode, domNode, instance);
+      if (graphNode.type === "link") {
+        wireEvents(dom, graph, graphNode, domNode, instance);
+        if (graphNode.stateRefs.length !== 0) {
+          wireSignalBindings(ctx, graphNode, instance, linkUpdate(dom, domNode));
+        }
+      }
       return instance;
     }
     case "reactive-list":
@@ -1964,6 +2157,12 @@ function hydrateNode(ctx, graphNode, domNode, path) {
       }
       hydrateChildren(ctx, graphNode, instance, target, path);
       wireOverlayBehavior(ctx, graphNode, instance, target);
+      return instance;
+    }
+    case "head": {
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      wireHeadBehavior(ctx, graphNode, instance);
       return instance;
     }
     default: {
@@ -2176,7 +2375,8 @@ function analyzeGraph(graph) {
     const isConditional = node.type === "conditional";
     const isPortal = node.type === "portal";
     const isComponent = node.type === "component";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
+    const isHead = node.type === "head";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -2666,6 +2866,118 @@ function resolveTransition(config) {
     appear: config.appear ?? false,
     duration: config.duration ?? 1e3
   };
+}
+
+// ../dsl/src/head.ts
+function metaDedupKey(m) {
+  if (m.charset !== void 0) return "meta:charset";
+  if (m.name !== void 0) return `meta:name=${m.name}`;
+  if (m.property !== void 0) return `meta:property=${m.property}`;
+  if (m.httpEquiv !== void 0) return `meta:http-equiv=${m.httpEquiv}`;
+  return void 0;
+}
+function metaAttrs(m) {
+  const attrs = {};
+  if (m.charset !== void 0) attrs["charset"] = m.charset;
+  if (m.name !== void 0) attrs["name"] = m.name;
+  if (m.property !== void 0) attrs["property"] = m.property;
+  if (m.httpEquiv !== void 0) attrs["http-equiv"] = m.httpEquiv;
+  if (m.content !== void 0) attrs["content"] = m.content;
+  return attrs;
+}
+function linkAttrs(l) {
+  const attrs = { rel: l.rel, href: l.href };
+  if (l.sizes !== void 0) attrs["sizes"] = l.sizes;
+  if (l.type !== void 0) attrs["type"] = l.type;
+  if (l.media !== void 0) attrs["media"] = l.media;
+  if (l.as !== void 0) attrs["as"] = l.as;
+  if (l.crossorigin !== void 0) attrs["crossorigin"] = l.crossorigin;
+  if (l.hreflang !== void 0) attrs["hreflang"] = l.hreflang;
+  return attrs;
+}
+function resolveHead(config) {
+  const entries = [];
+  if (config.charset !== void 0) {
+    entries.push({ tag: "meta", dedupKey: "meta:charset", attrs: { charset: config.charset } });
+  }
+  if (config.base !== void 0) {
+    entries.push({ tag: "base", dedupKey: "base", attrs: { href: config.base } });
+  }
+  if (config.title !== void 0) {
+    entries.push({ tag: "title", dedupKey: "title", attrs: {}, text: config.title });
+  }
+  if (config.description !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=description",
+      attrs: { name: "description", content: config.description }
+    });
+  }
+  if (config.canonical !== void 0) {
+    entries.push({
+      tag: "link",
+      dedupKey: "link:rel=canonical",
+      attrs: { rel: "canonical", href: config.canonical }
+    });
+  }
+  if (config.robots !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=robots",
+      attrs: { name: "robots", content: config.robots }
+    });
+  }
+  if (config.themeColor !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=theme-color",
+      attrs: { name: "theme-color", content: config.themeColor }
+    });
+  }
+  if (config.viewport !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=viewport",
+      attrs: { name: "viewport", content: config.viewport }
+    });
+  }
+  if (config.favicon !== void 0) {
+    const l = typeof config.favicon === "string" ? { rel: "icon", href: config.favicon } : config.favicon;
+    entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}`, attrs: linkAttrs(l) });
+  }
+  if (config.openGraph !== void 0) {
+    for (const key of Object.keys(config.openGraph)) {
+      const property = `og:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:property=${property}`,
+        attrs: { property, content: config.openGraph[key] }
+      });
+    }
+  }
+  if (config.twitter !== void 0) {
+    for (const key of Object.keys(config.twitter)) {
+      const name = `twitter:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:name=${name}`,
+        attrs: { name, content: config.twitter[key] }
+      });
+    }
+  }
+  if (config.meta !== void 0) {
+    for (const m of config.meta) {
+      const key = metaDedupKey(m);
+      if (key === void 0) continue;
+      entries.push({ tag: "meta", dedupKey: key, attrs: metaAttrs(m) });
+    }
+  }
+  if (config.link !== void 0) {
+    for (const l of config.link) {
+      entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}:href=${l.href}`, attrs: linkAttrs(l) });
+    }
+  }
+  return { entries };
 }
 
 // ../state/src/signal.ts
@@ -3231,8 +3543,14 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
     this.container(id, (c) => {
       c.when(
         hasError,
-        // Error state → fallback.
-        (fb) => options.fallback(fb, readError(), retry),
+        // Error state → fallback. The fallback branch mounts exactly when the
+        // boundary enters its error state, so this is also where the optional
+        // `onError` reporting hook fires (observe-only; §6/§7).
+        (fb) => {
+          const currentError = readError();
+          options.onError?.(currentError);
+          options.fallback(fb, currentError, retry);
+        },
         // Healthy state → body, guarded against synchronous build throws.
         (body) => {
           try {
@@ -3244,6 +3562,24 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       );
     }, { id });
   }
+  asyncBoundary(key, res, branches) {
+    const isError = derived(() => res.status.get() === "error");
+    const showSuccess = derived(
+      () => res.status.get() !== "error" && res.data.get() !== void 0
+    );
+    const showLoading = derived(
+      () => res.status.get() !== "error" && res.data.get() === void 0
+    );
+    const dataSignal = derived(() => res.data.get());
+    const retry = () => {
+      void res.refetch();
+    };
+    this.container(key, (c) => {
+      c.when(isError, (fb) => branches.error?.(fb, res.error.peek(), retry));
+      c.when(showSuccess, (sb) => branches.success(sb, dataSignal));
+      c.when(showLoading, (lb) => branches.loading?.(lb));
+    }, { key });
+  }
   // ── Portals & overlays ──────────────────────────────────────────────────────
   portal(key, builder, options = {}) {
     const node = this._graph.createNode("portal", {
@@ -3252,6 +3588,31 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       props: containerProps(options)
     });
     builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  /**
+   * Declare document metadata (2.0 §1–§3). Creates a `'head'` node — a neutral,
+   * empty inline anchor at this position (one node / one element, so positional
+   * hydration is preserved) — and registers a `__head__<id>` descriptor holding
+   * this call's normalized, dedup-keyed {@link resolveHead} contribution. The
+   * renderer applies it to `document.head` on the browser (adopting server tags
+   * on hydration, cleaning up on unmount / route change) and emits the active
+   * graph's merged metadata as a string on the server (`renderHead`).
+   *
+   * Multiple `head()` nodes may be live at once (app default + route + component)
+   * — the renderer merges them and, per dedup key, the last in document order
+   * wins (see head.ts). No new render path: this reuses the same graph-node +
+   * handler-registry convention as overlays/transitions/components.
+   */
+  head(metadata) {
+    const node = this._graph.createNode("head", {
+      parent: this._node,
+      props: { "data-streetui-head-anchor": "" }
+    });
+    const contribution = resolveHead(metadata);
+    this._graph.registerHandler(
+      `__head__${node.id}`,
+      () => contribution
+    );
   }
   /**
    * Shared assembly for every overlay kind: a `portal` node whose single child
@@ -3583,6 +3944,7 @@ var ApplicationGraph = class {
     this.handlers.delete(`__overlay__${node.id}`);
     this.handlers.delete(`__component__${node.id}`);
     this.handlers.delete(`__transition__${node.id}`);
+    this.handlers.delete(`__head__${node.id}`);
   }
   // ── Handler registry ──────────────────────────────────────────────────────
   registerHandler(key, fn) {
@@ -3760,7 +4122,7 @@ function trigger(el, type, init = {}) {
 }
 
 // src/version.ts
-var VERSION = "1.9.0";
+var VERSION = "2.0.0";
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   VERSION,

@@ -66,6 +66,9 @@ var BrowserDOMAdapter = class {
   body() {
     return document.body ?? null;
   }
+  head() {
+    return document.head ?? null;
+  }
   activeElement() {
     return document.activeElement ?? null;
   }
@@ -443,6 +446,9 @@ var ServerDOMAdapter = class {
   focus() {
   }
   body() {
+    return null;
+  }
+  head() {
     return null;
   }
   activeElement() {

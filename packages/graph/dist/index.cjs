@@ -196,6 +196,7 @@ var ApplicationGraph = class {
     this.handlers.delete(`__overlay__${node.id}`);
     this.handlers.delete(`__component__${node.id}`);
     this.handlers.delete(`__transition__${node.id}`);
+    this.handlers.delete(`__head__${node.id}`);
   }
   // ── Handler registry ──────────────────────────────────────────────────────
   registerHandler(key, fn) {

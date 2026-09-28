@@ -57,7 +57,8 @@ function analyzeGraph(graph) {
     const isConditional = node.type === "conditional";
     const isPortal = node.type === "portal";
     const isComponent = node.type === "component";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
+    const isHead = node.type === "head";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,

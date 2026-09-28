@@ -205,7 +205,7 @@ declare function createApplication(options: ApplicationOptions): Application;
  * in the Semantic Application Graph.
  */
 
-type SemanticNodeType = 'application' | 'page' | 'section' | 'container' | 'heading' | 'text' | 'button' | 'input' | 'form' | 'list' | 'list-item' | 'image' | 'link' | 'component' | 'slot' | 'fragment' | 'reactive-list' | 'conditional' | 'portal';
+type SemanticNodeType = 'application' | 'page' | 'section' | 'container' | 'heading' | 'text' | 'button' | 'input' | 'form' | 'list' | 'list-item' | 'image' | 'link' | 'component' | 'slot' | 'fragment' | 'reactive-list' | 'conditional' | 'portal' | 'head';
 interface NodeMetadata {
     readonly createdAt: number;
     readonly [key: string]: unknown;
@@ -248,6 +248,30 @@ interface DiagnosticContext {
     readonly route?: string;
     /** A resource identifier involved, when applicable. */
     readonly resource?: string;
+    /**
+     * The component name involved (from a `component()` definition's `name`), when
+     * the diagnostic arises inside a component. A stable identifier, never a value.
+     */
+    readonly component?: string;
+    /**
+     * A signal identifier involved (e.g. a named/derived signal's debug name),
+     * when applicable. This is the signal's *identity*, never its current value —
+     * signal contents may be user data and are never placed in a diagnostic.
+     */
+    readonly signal?: string;
+    /**
+     * Where in a node's lifecycle the diagnostic arose: `render` (building the
+     * subtree), `effect` (a reactive effect), `setup` (a component's setup),
+     * `loader` (a resource loader), `event` (a DOM handler), or `hydrate`.
+     */
+    readonly phase?: 'render' | 'effect' | 'setup' | 'loader' | 'event' | 'hydrate';
+    /**
+     * A non-sensitive DOM association for where the error surfaced, e.g.
+     * `div#app` or `button.primary`. Callers must pass only structural
+     * identifiers (tag / id / class) — never `textContent`, attribute *values*,
+     * or anything that could carry user data.
+     */
+    readonly element?: string;
 }
 /**
  * The application-provided logging seam. Every method is optional; the
@@ -281,5 +305,64 @@ declare function frameworkError(message: string, context?: DiagnosticContext): S
 declare function reportDiagnostic(sink: DiagnosticSink | undefined, level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: DiagnosticContext): void;
 /** A sink that forwards to a `console`-like object, one call per level. */
 declare function consoleDiagnosticSink(logger?: Partial<Record<'debug' | 'info' | 'warn' | 'error', (msg: string) => void>>): DiagnosticSink;
+/**
+ * Options controlling how much of an error is disclosed in a report.
+ *
+ * Everything defaults to the SAFE (production) posture: no stack, no cause
+ * chain. A stack trace can embed absolute file paths and, in some runtimes,
+ * source fragments, so it is opt-in and belongs to development / trusted server
+ * logging — never to a report that might reach a browser or a third party.
+ */
+interface ErrorReportOptions {
+    /** Include `error.stack` in the report. Default `false` (production-safe). */
+    readonly includeStack?: boolean;
+    /**
+     * Follow and describe `error.cause` (recursively, up to a small depth) when
+     * present. Default `false`. The cause is described with the SAME redaction
+     * rules — only its name/message/(optional)stack, never arbitrary properties.
+     */
+    readonly includeCause?: boolean;
+}
+/**
+ * A production-safe, serializable description of an error plus the framework
+ * context in which it surfaced. This is what §7 asks a diagnostics sink to
+ * receive: enough to locate the failure (component / route / resource / signal /
+ * phase / DOM association via {@link DiagnosticContext}) WITHOUT any sensitive
+ * data. It deliberately carries ONLY the error's class name and message (both
+ * author-controlled), never enumerated own-properties (which frequently hold
+ * request bodies, tokens, or user records), and the stack only when explicitly
+ * opted in.
+ */
+interface ErrorReport {
+    /** The error's constructor name, e.g. `TypeError` (`Error` when unknown). */
+    readonly name: string;
+    /** The error's message. For a non-Error throw, its `String(...)` form. */
+    readonly message: string;
+    /** Whether the thrown value was a real `Error` instance. */
+    readonly isError: boolean;
+    /** The framework context, when supplied. */
+    readonly context?: DiagnosticContext;
+    /** The stack, only when `includeStack` was set and one exists. */
+    readonly stack?: string;
+    /** The described cause, only when `includeCause` was set and one exists. */
+    readonly cause?: ErrorReport;
+}
+/**
+ * Build a {@link ErrorReport} from any thrown value and (optionally) the
+ * framework {@link DiagnosticContext} it surfaced in. Production-safe by
+ * default: no stack, no cause, no enumerated properties. This is a pure
+ * function — it performs no logging and has no side effects, so it is safe to
+ * call from any layer (an `errorBoundary` `onError`, an `asyncBoundary` error
+ * branch, a resource loader `catch`).
+ */
+declare function describeError(error: unknown, context?: DiagnosticContext, options?: ErrorReportOptions): ErrorReport;
+/**
+ * Convenience bridge: build a production-safe {@link ErrorReport} and route it
+ * to a {@link DiagnosticSink} at the `error` level. The sink receives the
+ * report's message and the structured {@link DiagnosticContext}; the full
+ * report is returned to the caller for forwarding elsewhere (e.g. an app's own
+ * crash reporter). Safe with `undefined` sink (no-op) and never throws.
+ */
+declare function reportError(sink: DiagnosticSink | undefined, error: unknown, context?: DiagnosticContext, options?: ErrorReportOptions): ErrorReport;
 
-export { type A11yIds, Application, type ApplicationId, type ApplicationOptions, BaseNode, CleanupRegistry, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, Environment, type EnvironmentCapabilities, type EnvironmentKind, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type SemanticNodeType, StreetFrameworkError, a11yIds, consoleDiagnosticSink, createApplication, createNodeId, environment, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateNodeId, nextId, nodeIdPrefix, reportDiagnostic, resetIdCounter, toIdToken };
+export { type A11yIds, Application, type ApplicationId, type ApplicationOptions, BaseNode, CleanupRegistry, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type SemanticNodeType, StreetFrameworkError, a11yIds, consoleDiagnosticSink, createApplication, createNodeId, describeError, environment, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateNodeId, nextId, nodeIdPrefix, reportDiagnostic, reportError, resetIdCounter, toIdToken };

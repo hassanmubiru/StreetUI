@@ -91,6 +91,87 @@ declare function consoleHydrationDiagnosticSink(logger?: {
 }): HydrationDiagnosticSink;
 
 /**
+ * Document head / metadata runtime (2.0 §1–§3).
+ *
+ * Two entry points, sharing the normalized {@link HeadEntry} model the DSL's
+ * `head()` produces (mirrored here as a local structural type so the renderer
+ * takes no compile-time dependency on the DSL package — the same convention as
+ * the overlay/component descriptors):
+ *
+ *   • `wireHeadBehavior(ctx, node, instance)` — BROWSER. Reads the
+ *     `__head__<id>` descriptor, registers this node's contribution with a
+ *     per-render {@link HeadManager} (created lazily on `ctx`), subscribes to any
+ *     reactive attr/text signals, and tracks cleanup on the NodeInstance so the
+ *     contribution is withdrawn (and the manager re-applies the merged result)
+ *     when the node unmounts or the route changes. Server-safe: when
+ *     `dom.head()` is null (SSR) it is a no-op.
+ *
+ *   • `renderHead(compiled)` — SERVER. Walks the compiled graph in document
+ *     order, merges every live `head()` contribution (last-in-document-order
+ *     wins per dedup key — §3), and serializes the effective tags to an HTML
+ *     string for the caller to place inside `<head>`. Only the active graph is
+ *     walked, so only active-route metadata is emitted (§2). Each tag carries
+ *     `data-streetui-head` + `data-streetui-head-key="…"` so the browser adopts
+ *     it on hydration instead of creating a duplicate.
+ */
+
+interface HeadEntryLike {
+    readonly tag: 'title' | 'meta' | 'link' | 'base';
+    readonly dedupKey: string;
+    readonly attrs: Readonly<Record<string, unknown>>;
+    readonly text?: unknown;
+}
+/**
+ * Coordinates every live `head()` node's contribution into a single
+ * `document.head`. One instance per render (lazily created on `ctx`). Merges by
+ * dedup key with last-in-document-order winning, and applies the minimal diff to
+ * the DOM on every register/unregister/signal change. Adopts server-emitted tags
+ * on the first apply so hydration produces no duplicates.
+ */
+declare class HeadManager {
+    private readonly _dom;
+    private readonly _head;
+    private readonly _contributions;
+    private readonly _applied;
+    private _order;
+    private _adopted;
+    constructor(dom: DOMAdapter, head: Element);
+    /** Register (or replace) a node's contribution and re-apply the merged result. */
+    register(nodeId: string, entries: readonly HeadEntryLike[]): void;
+    /** Withdraw a node's contribution (unmount / route change) and re-apply. */
+    unregister(nodeId: string): void;
+    /** Recompute the merged head and patch `document.head` to match. */
+    apply(): void;
+    private _createTag;
+    private _reconcileAttrs;
+    /**
+     * Seed `_applied` from server-emitted `[data-streetui-head-key]` tags already
+     * in `document.head`. The subsequent diff reuses these elements when the
+     * client desires the same key (no duplicate), rewrites them if the value
+     * changed, or removes them if the client graph no longer wants them.
+     */
+    private _adoptServerTags;
+    /** The framework-managed attribute names currently on a server tag. */
+    private _attrNames;
+}
+/**
+ * Wire a mounted/hydrated `head` node's contribution into `document.head`.
+ * Server-safe (no-op when there is no document). Shared by the mount and hydrate
+ * paths so both establish identical ownership + cleanup.
+ */
+declare function wireHeadBehavior(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance): void;
+/**
+ * Render the active graph's merged document metadata to an HTML string suitable
+ * for placing inside `<head>`. Walks the graph in document order, merges every
+ * `head()` contribution (last-in-document-order wins per dedup key), and
+ * serializes each effective tag with the `data-streetui-head` marker so the
+ * browser adopts it on hydration. Returns `''` when the app declares no metadata
+ * — so apps that never call `head()` emit nothing extra and existing SSR output
+ * is unchanged.
+ */
+declare function renderHead(compiled: CompiledApplication): string;
+
+/**
  * RenderContext — shared state for a single mount operation.
  *
  * Passed through the render pipeline so every sub-function has access
@@ -120,6 +201,14 @@ interface RenderContext {
      * `dom.createRawHTML` instead of recursively constructing the subtree.
      */
     readonly staticHTML?: ReadonlyMap<string, string>;
+    /**
+     * Lazily-created coordinator for `head()` metadata nodes (2.0 §1). Created on
+     * first `wireHeadBehavior` call on the browser (never on the server, where
+     * `dom.head()` is null and `renderHead` emits the metadata instead). Mutable
+     * because it is attached on demand; a render with no `head()` nodes never
+     * allocates one.
+     */
+    head?: HeadManager;
 }
 declare function createRenderContext(dom: DOMAdapter, graph: ApplicationGraph, container: Element, hydrationDiagnostics?: HydrationDiagnosticSink, staticHTML?: ReadonlyMap<string, string>): RenderContext;
 
@@ -168,6 +257,7 @@ declare function textUpdate(dom: DOMAdapter, el: Element, textNode: Text): (prop
 declare function headingUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
 declare function inputUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
 declare function buttonUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
+declare function linkUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
 declare function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): void;
 declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, onUpdate: (propKey: string, value: unknown) => void): void;
 /**
@@ -571,4 +661,4 @@ declare function renderToString(compiled: CompiledApplication, options?: RenderT
 
 declare function resolveTag(type: SemanticNodeType): string;
 
-export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, type ResolvedTransitionLike, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, TransitionController, type TransitionHooks, type TransitionPhase, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, getResolvedTransition, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, runElementTransition, serializeState, textUpdate, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { HeadManager, type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, type ResolvedTransitionLike, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, TransitionController, type TransitionHooks, type TransitionPhase, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, getResolvedTransition, headingUpdate, hydrateGraph, inputUpdate, linkUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderHead, renderToString, resolveTag, runElementTransition, serializeState, textUpdate, wireComponentBehavior, wireEvents, wireHeadBehavior, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

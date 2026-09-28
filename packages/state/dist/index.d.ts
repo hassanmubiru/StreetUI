@@ -214,4 +214,229 @@ interface Resource<T> {
 }
 declare function resource<T>(loader: ResourceLoader<T>, options?: ResourceOptions<T>): Resource<T>;
 
-export { DerivedSignal, type ReactiveConsumer, type ReactiveSource, type ReadonlySignal, type Resource, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, Signal, type SignalKind, Store, type StoreState, type Subscriber, type Unsubscribe, batch, createStore, derived, effect, isBatching, observerCount, resource, signal, signalKind };
+/**
+ * StreetUI mutations — framework-native asynchronous *writes*.
+ *
+ * A `resource` models a read: a loader that runs on creation / on demand and
+ * whose value the UI observes. A `mutation` is its write-side counterpart: an
+ * explicit, argument-taking async action (create / update / delete, a form
+ * submit, a "mark as done" click) whose lifecycle is exposed as ordinary
+ * StreetUI signals so it composes with `derived`, `when()`, and the renderer
+ * with NO second reactive system.
+ *
+ * State machine (mirrors `resource`, but only ever advances on an explicit
+ * `mutate()` — a mutation never runs on its own):
+ *
+ *   idle ──(mutate)──▶ loading ──(resolve)──▶ success
+ *                        │
+ *                        └────(reject)──────▶ error
+ *
+ * There is deliberately NO global cache and NO automatic invalidation registry
+ * (that would be a second state system with its own lifetime and coherency
+ * rules). Invalidation is explicit and local: pass an `onSuccess` that calls the
+ * `refetch()` of whichever resources the write affected. This keeps data flow
+ * one-directional and readable — the write says exactly what it invalidates.
+ */
+
+/** A mutation shares the resource status vocabulary (idle/loading/success/error). */
+type MutationStatus = ResourceStatus;
+/** The async action a mutation runs. Receives the caller's argument. */
+type Mutator<TArgs, TResult> = (args: TArgs) => Promise<TResult> | TResult;
+interface MutationOptions<TArgs, TResult> {
+    /**
+     * Run after a successful mutation, before `mutate()`'s promise resolves. The
+     * natural place to invalidate reads: call the affected resources' `refetch()`.
+     * May be async; its completion is awaited so callers can rely on reads being
+     * up to date once `mutate()` resolves.
+     */
+    readonly onSuccess?: (result: TResult, args: TArgs) => void | Promise<void>;
+    /** Run after a failed mutation (the thrown value is passed through). */
+    readonly onError?: (error: unknown, args: TArgs) => void | Promise<void>;
+    /** Run after success OR error, once the lifecycle has settled. */
+    readonly onSettled?: (args: TArgs) => void | Promise<void>;
+    /**
+     * Optional teardown registrar (e.g. a component's `ctx.onCleanup`). When
+     * given, the mutation registers its own `dispose` so late results from an
+     * in-flight `mutate()` are ignored once the owner is removed.
+     */
+    readonly onCleanup?: (fn: () => void) => void;
+}
+interface Mutation<TArgs, TResult> {
+    /** Reactive lifecycle status. */
+    readonly status: ReadonlySignal<MutationStatus>;
+    /** The most recent successful result, or `undefined` before first success. */
+    readonly data: ReadonlySignal<TResult | undefined>;
+    /** The most recent error, or `undefined` when there is none. Typed `unknown`. */
+    readonly error: ReadonlySignal<unknown>;
+    /** Convenience: `status === 'loading'` (an in-flight write). */
+    readonly pending: ReadonlySignal<boolean>;
+    /**
+     * Run the mutation. Resolves with the result on success. On failure the
+     * rejection is surfaced through `error`/`status` AND re-thrown, so a caller
+     * that wants to react imperatively can `try/catch`; a caller that only wants
+     * the reactive state can ignore the returned promise. Superseded/disposed
+     * runs never write state (race guard), matching `resource`.
+     */
+    mutate(args: TArgs): Promise<TResult>;
+    /** Reset back to `idle` with no data/error. */
+    reset(): void;
+    /** Ignore any in-flight result and mark the mutation inert. Idempotent. */
+    dispose(): void;
+}
+/**
+ * Create a {@link Mutation}. The zero-argument form is written
+ * `mutation<void, T>(() => …)` and invoked as `mutate(undefined)`.
+ */
+declare function mutation<TArgs, TResult>(mutator: Mutator<TArgs, TResult>, options?: MutationOptions<TArgs, TResult>): Mutation<TArgs, TResult>;
+
+/**
+ * Optional HTTP data client (2.0 §17) — the integration path between StreetUI's
+ * transport-agnostic `resource`/`mutation` primitives and a real backend (a
+ * StreetJS server, or any HTTP/JSON API).
+ *
+ * This is deliberately OPTIONAL and dependency-free: it imports nothing from
+ * StreetJS (or any server framework), so StreetUI's core stays independent — an
+ * app that never calls `createClient` never pays for it, and StreetUI does not
+ * take on a backend dependency. It is a thin, honest convenience over the
+ * standard `fetch`: URL joining, JSON encode/decode, header merging, abort
+ * propagation, and a typed error. All state still flows through the existing
+ * `resource`/`mutation` signals — there is no cache and no second data system.
+ *
+ * ```ts
+ * const api = createClient({ baseUrl: '/api' });
+ * const users = api.resource<User[]>('/users');            // a read
+ * const create = api.mutation<NewUser, User>('POST', '/users', {
+ *   onSuccess: () => users.refetch(),                      // explicit invalidation
+ * });
+ * ```
+ */
+
+/** A `fetch`-compatible function. Injectable for tests / non-browser runtimes. */
+type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+interface ClientConfig {
+    /** Prefix joined to every request path (e.g. `/api` or `https://x/api`). */
+    readonly baseUrl?: string;
+    /** Headers merged into every request (per-request headers win). */
+    readonly headers?: Readonly<Record<string, string>>;
+    /**
+     * The fetch implementation to use. Defaults to the global `fetch`. Injecting
+     * one keeps the client testable and usable where no global fetch exists.
+     */
+    readonly fetch?: FetchLike;
+}
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+interface RequestConfig {
+    /** Extra headers for this request (merged over the client's). */
+    readonly headers?: Readonly<Record<string, string>>;
+    /** Abort signal — pass a resource/mutation loader's `ctx.signal` for cancellation. */
+    readonly signal?: AbortSignal;
+    /** Query parameters appended to the URL. */
+    readonly query?: Readonly<Record<string, string | number | boolean>>;
+}
+/**
+ * A failed HTTP response (non-2xx). Carries the status and the parsed body when
+ * one was returned. NOTE: the body may contain server-supplied detail; the §7
+ * error reporter never enumerates an error's own-properties, so `HttpError.body`
+ * never leaks into a diagnostics report unless an app deliberately reads it.
+ */
+declare class HttpError extends Error {
+    readonly status: number;
+    readonly statusText: string;
+    readonly url: string;
+    readonly body: unknown;
+    constructor(status: number, statusText: string, url: string, body: unknown);
+}
+interface Client {
+    /** Issue a request and return the parsed JSON body (throws `HttpError` on non-2xx). */
+    request<T>(method: HttpMethod, path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    get<T>(path: string, config?: RequestConfig): Promise<T>;
+    post<T>(path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    put<T>(path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    patch<T>(path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    del<T>(path: string, config?: RequestConfig): Promise<T>;
+    /**
+     * A GET-backed {@link Resource}. The loader forwards the resource's abort
+     * signal, so `dispose()`/supersede cancels the request.
+     */
+    resource<T>(path: string, options?: ResourceOptions<T> & {
+        readonly query?: RequestConfig['query'];
+    }): Resource<T>;
+    /**
+     * A {@link Mutation} that issues `method path` with the mutate() argument as
+     * the JSON body. Pair with `onSuccess` to refetch affected resources.
+     */
+    mutation<TArgs, TResult>(method: HttpMethod, path: string, options?: MutationOptions<TArgs, TResult>): Mutation<TArgs, TResult>;
+}
+/** Create an optional HTTP data client. Uses global `fetch` unless one is injected. */
+declare function createClient(config?: ClientConfig): Client;
+
+/**
+ * Optional auth session primitive (2.0 §19) — reactive authentication state for
+ * building sign-in UIs and protected routes, composed entirely from the existing
+ * `resource` (the "who am I" read) and `mutation` (logout / refresh writes).
+ *
+ * There is no new auth framework here and no credential handling: the app
+ * supplies a `loadUser` function (however it authenticates — a StreetJS session
+ * cookie, a bearer token, anything) that returns the current user or `null`. The
+ * primitive turns that into the states a UI switches on — `loading`,
+ * `authenticated`, `unauthenticated`, `error` — plus `refresh()` and `logout()`.
+ *
+ * How the pieces the spec names fit together (all EXISTING seams, no new ones):
+ *   - loading / unauth / auth  → switch UI with `when(session.authenticated, …)`
+ *     etc. (the renderer's existing conditional).
+ *   - refresh / logout         → `session.refresh()` / `session.logout()`.
+ *   - protected route          → in a route's setup, read `session.status`; when
+ *     `unauthenticated`, navigate to the login route (router). Throwing inside a
+ *     guarded builder is caught by `errorBoundary` for an error fallback. This
+ *     module stays router-agnostic so core has no router dependency — the app
+ *     wires the navigation, exactly as with any other signal.
+ */
+
+/** The four states an auth-aware UI switches on. */
+type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'error';
+/** Load the current user, or `null`/`undefined` when nobody is signed in. */
+type LoadUser<TUser> = (ctx: ResourceLoaderContext) => Promise<TUser | null | undefined> | TUser | null | undefined;
+interface AuthSessionConfig<TUser> {
+    /** Resolve the current user (or null when unauthenticated). Abort-aware. */
+    readonly loadUser: LoadUser<TUser>;
+    /**
+     * Perform the server-side logout (clear the cookie/token). Optional — when
+     * omitted, `logout()` just re-checks the session. After it resolves the
+     * session refreshes, so `loadUser` should then return null.
+     */
+    readonly logout?: () => Promise<void> | void;
+    /** Skip the initial load; stays `loading` until the first `refresh()`. */
+    readonly immediate?: boolean;
+    /** Teardown registrar (e.g. a component's `ctx.onCleanup`). */
+    readonly onCleanup?: (fn: () => void) => void;
+}
+interface AuthSession<TUser> {
+    /** The current coarse auth state. */
+    readonly status: ReadonlySignal<AuthStatus>;
+    /** The signed-in user, or `undefined` when not authenticated. */
+    readonly user: ReadonlySignal<TUser | undefined>;
+    /** The most recent load/logout error, or `undefined`. */
+    readonly error: ReadonlySignal<unknown>;
+    /** `status === 'authenticated'`. */
+    readonly authenticated: ReadonlySignal<boolean>;
+    /** `status === 'unauthenticated'`. */
+    readonly unauthenticated: ReadonlySignal<boolean>;
+    /** `status === 'loading'` (the initial who-am-I is still in flight). */
+    readonly loading: ReadonlySignal<boolean>;
+    /** True while a `logout()` is in flight. */
+    readonly loggingOut: ReadonlySignal<boolean>;
+    /** Re-run `loadUser` (e.g. after a token refresh or a focus regain). */
+    refresh(): Promise<void>;
+    /** Run the configured server logout, then refresh (→ unauthenticated). */
+    logout(): Promise<void>;
+    /** Cancel in-flight work and detach. Idempotent. */
+    dispose(): void;
+}
+/**
+ * Create an {@link AuthSession}. The session starts in `loading` and resolves to
+ * `authenticated`/`unauthenticated` once `loadUser` settles (unless
+ * `immediate: false`).
+ */
+declare function createAuthSession<TUser>(config: AuthSessionConfig<TUser>): AuthSession<TUser>;
+
+export { type AuthSession, type AuthSessionConfig, type AuthStatus, type Client, type ClientConfig, DerivedSignal, type FetchLike, HttpError, type HttpMethod, type LoadUser, type Mutation, type MutationOptions, type MutationStatus, type Mutator, type ReactiveConsumer, type ReactiveSource, type ReadonlySignal, type RequestConfig, type Resource, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, Signal, type SignalKind, Store, type StoreState, type Subscriber, type Unsubscribe, batch, createAuthSession, createClient, createStore, derived, effect, isBatching, mutation, observerCount, resource, signal, signalKind };

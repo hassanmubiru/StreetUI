@@ -42,6 +42,13 @@ interface DOMAdapter {
      * inline rendering and focus management degrade to a no-op.
      */
     body(): Element | null;
+    /**
+     * The document head — the mount target for `head()` metadata (title/meta/
+     * link/etc.). Returns null on the server (no document), which is what makes
+     * the head platform degrade to server-side string emission (`renderHead`) and
+     * the browser `wireHeadBehavior` a no-op on the server render pass.
+     */
+    head(): Element | null;
     /** The currently focused element, or null on the server / when none is focused. */
     activeElement(): Element | null;
     /** True if `ancestor` contains `node` (inclusive). Always false on the server. */
@@ -86,6 +93,7 @@ declare class BrowserDOMAdapter implements DOMAdapter {
     getElementById(id: string): Element | null;
     focus(element: Element): void;
     body(): Element | null;
+    head(): Element | null;
     activeElement(): Element | null;
     contains(ancestor: Element, node: Node): boolean;
     matches(element: Element, selector: string): boolean;
@@ -227,6 +235,7 @@ declare class ServerDOMAdapter implements DOMAdapter {
     getElementById(): Element | null;
     focus(): void;
     body(): Element | null;
+    head(): Element | null;
     activeElement(): Element | null;
     contains(_ancestor: Element, _node: Node): boolean;
     matches(_element: Element, _selector: string): boolean;

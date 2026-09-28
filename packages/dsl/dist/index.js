@@ -39,6 +39,121 @@ function isTransitionConfig(value) {
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
 
+// src/head.ts
+function metaDedupKey(m) {
+  if (m.charset !== void 0) return "meta:charset";
+  if (m.name !== void 0) return `meta:name=${m.name}`;
+  if (m.property !== void 0) return `meta:property=${m.property}`;
+  if (m.httpEquiv !== void 0) return `meta:http-equiv=${m.httpEquiv}`;
+  return void 0;
+}
+function metaAttrs(m) {
+  const attrs = {};
+  if (m.charset !== void 0) attrs["charset"] = m.charset;
+  if (m.name !== void 0) attrs["name"] = m.name;
+  if (m.property !== void 0) attrs["property"] = m.property;
+  if (m.httpEquiv !== void 0) attrs["http-equiv"] = m.httpEquiv;
+  if (m.content !== void 0) attrs["content"] = m.content;
+  return attrs;
+}
+function linkAttrs(l) {
+  const attrs = { rel: l.rel, href: l.href };
+  if (l.sizes !== void 0) attrs["sizes"] = l.sizes;
+  if (l.type !== void 0) attrs["type"] = l.type;
+  if (l.media !== void 0) attrs["media"] = l.media;
+  if (l.as !== void 0) attrs["as"] = l.as;
+  if (l.crossorigin !== void 0) attrs["crossorigin"] = l.crossorigin;
+  if (l.hreflang !== void 0) attrs["hreflang"] = l.hreflang;
+  return attrs;
+}
+function resolveHead(config) {
+  const entries = [];
+  if (config.charset !== void 0) {
+    entries.push({ tag: "meta", dedupKey: "meta:charset", attrs: { charset: config.charset } });
+  }
+  if (config.base !== void 0) {
+    entries.push({ tag: "base", dedupKey: "base", attrs: { href: config.base } });
+  }
+  if (config.title !== void 0) {
+    entries.push({ tag: "title", dedupKey: "title", attrs: {}, text: config.title });
+  }
+  if (config.description !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=description",
+      attrs: { name: "description", content: config.description }
+    });
+  }
+  if (config.canonical !== void 0) {
+    entries.push({
+      tag: "link",
+      dedupKey: "link:rel=canonical",
+      attrs: { rel: "canonical", href: config.canonical }
+    });
+  }
+  if (config.robots !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=robots",
+      attrs: { name: "robots", content: config.robots }
+    });
+  }
+  if (config.themeColor !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=theme-color",
+      attrs: { name: "theme-color", content: config.themeColor }
+    });
+  }
+  if (config.viewport !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=viewport",
+      attrs: { name: "viewport", content: config.viewport }
+    });
+  }
+  if (config.favicon !== void 0) {
+    const l = typeof config.favicon === "string" ? { rel: "icon", href: config.favicon } : config.favicon;
+    entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}`, attrs: linkAttrs(l) });
+  }
+  if (config.openGraph !== void 0) {
+    for (const key of Object.keys(config.openGraph)) {
+      const property = `og:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:property=${property}`,
+        attrs: { property, content: config.openGraph[key] }
+      });
+    }
+  }
+  if (config.twitter !== void 0) {
+    for (const key of Object.keys(config.twitter)) {
+      const name = `twitter:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:name=${name}`,
+        attrs: { name, content: config.twitter[key] }
+      });
+    }
+  }
+  if (config.meta !== void 0) {
+    for (const m of config.meta) {
+      const key = metaDedupKey(m);
+      if (key === void 0) continue;
+      entries.push({ tag: "meta", dedupKey: key, attrs: metaAttrs(m) });
+    }
+  }
+  if (config.link !== void 0) {
+    for (const l of config.link) {
+      entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}:href=${l.href}`, attrs: linkAttrs(l) });
+    }
+  }
+  return { entries };
+}
+function isHeadContribution(value) {
+  return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
+}
+
 // src/builders.ts
 import { signal, derived, effect } from "@streetui/state";
 function isSignal(v) {
@@ -421,8 +536,14 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
     this.container(id, (c) => {
       c.when(
         hasError,
-        // Error state → fallback.
-        (fb) => options.fallback(fb, readError(), retry),
+        // Error state → fallback. The fallback branch mounts exactly when the
+        // boundary enters its error state, so this is also where the optional
+        // `onError` reporting hook fires (observe-only; §6/§7).
+        (fb) => {
+          const currentError = readError();
+          options.onError?.(currentError);
+          options.fallback(fb, currentError, retry);
+        },
         // Healthy state → body, guarded against synchronous build throws.
         (body) => {
           try {
@@ -434,6 +555,24 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       );
     }, { id });
   }
+  asyncBoundary(key, res, branches) {
+    const isError = derived(() => res.status.get() === "error");
+    const showSuccess = derived(
+      () => res.status.get() !== "error" && res.data.get() !== void 0
+    );
+    const showLoading = derived(
+      () => res.status.get() !== "error" && res.data.get() === void 0
+    );
+    const dataSignal = derived(() => res.data.get());
+    const retry = () => {
+      void res.refetch();
+    };
+    this.container(key, (c) => {
+      c.when(isError, (fb) => branches.error?.(fb, res.error.peek(), retry));
+      c.when(showSuccess, (sb) => branches.success(sb, dataSignal));
+      c.when(showLoading, (lb) => branches.loading?.(lb));
+    }, { key });
+  }
   // ── Portals & overlays ──────────────────────────────────────────────────────
   portal(key, builder, options = {}) {
     const node = this._graph.createNode("portal", {
@@ -442,6 +581,31 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       props: containerProps(options)
     });
     builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  /**
+   * Declare document metadata (2.0 §1–§3). Creates a `'head'` node — a neutral,
+   * empty inline anchor at this position (one node / one element, so positional
+   * hydration is preserved) — and registers a `__head__<id>` descriptor holding
+   * this call's normalized, dedup-keyed {@link resolveHead} contribution. The
+   * renderer applies it to `document.head` on the browser (adopting server tags
+   * on hydration, cleaning up on unmount / route change) and emits the active
+   * graph's merged metadata as a string on the server (`renderHead`).
+   *
+   * Multiple `head()` nodes may be live at once (app default + route + component)
+   * — the renderer merges them and, per dedup key, the last in document order
+   * wins (see head.ts). No new render path: this reuses the same graph-node +
+   * handler-registry convention as overlays/transitions/components.
+   */
+  head(metadata) {
+    const node = this._graph.createNode("head", {
+      parent: this._node,
+      props: { "data-streetui-head-anchor": "" }
+    });
+    const contribution = resolveHead(metadata);
+    this._graph.registerHandler(
+      `__head__${node.id}`,
+      () => contribution
+    );
   }
   /**
    * Shared assembly for every overlay kind: a `portal` node whose single child
@@ -657,9 +821,11 @@ export {
   StreetApp,
   component,
   isComponentDefinition,
+  isHeadContribution,
   isTransitionConfig,
   reactiveListItemKey,
   reactiveListItemSignature,
+  resolveHead,
   resolveTransition,
   streetui
 };

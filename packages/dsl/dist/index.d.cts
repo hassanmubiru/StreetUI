@@ -1,4 +1,4 @@
-import { ReadonlySignal, Signal } from '@streetui/state';
+import { ReadonlySignal, Signal, Resource } from '@streetui/state';
 import { ApplicationGraph, GraphNode } from '@streetui/graph';
 
 /**
@@ -189,6 +189,134 @@ interface ResolvedTransition {
 declare function resolveTransition(config: TransitionConfig): ResolvedTransition;
 /** Runtime brand check for a transition descriptor value. */
 declare function isTransitionConfig(value: unknown): value is TransitionConfig;
+
+/**
+ * Document head / metadata model (2.0 §1–§3).
+ *
+ * `head({...})` is a first-class StreetUI primitive for declaring document
+ * metadata — title, meta, link, canonical, Open Graph, Twitter/X, robots,
+ * theme-color and favicon. It is NOT a copy of another framework's API: it is
+ * expressed on StreetUI's own component/graph model. A `head()` call creates a
+ * `'head'` graph node (rendered as a neutral inline anchor, like a portal) and
+ * registers a `__head__<nodeId>` descriptor — exactly the handler-registry
+ * convention used by `__overlay__`/`__transition__`/`__component__`. The
+ * renderer reads that descriptor to:
+ *
+ *   • apply the contribution to `document.head` on the browser
+ *     (`wireHeadBehavior`), adopting server-emitted tags on hydration so there
+ *     are no duplicates, and cleaning up its own tags on unmount / route change;
+ *   • emit only the active graph's merged metadata as an HTML string on the
+ *     server (`renderHead`).
+ *
+ * This module is pure and DOM-free (like `transition.ts`): it defines the config
+ * shape and normalises it into an ordered list of {@link HeadEntry} with stable
+ * *dedup keys*. All merge/precedence/DOM work happens in the renderer, keyed by
+ * these entries.
+ *
+ * ── Deduplication & precedence (§3) ──────────────────────────────────────────
+ * Every entry carries a `dedupKey`. When several `head()` nodes are live at once
+ * (e.g. an app-level default, a route-level `head()`, and a component-level
+ * `head()`), the renderer merges all of their entries and, for each `dedupKey`,
+ * the LAST contribution in document order wins. Document order is pre-order DFS
+ * = mount order, so a `head()` declared deeper/later (a route or a component
+ * nested inside the app shell) deterministically overrides an app-level default
+ * for the same key. Removing that node (navigating away, unmounting the
+ * component) re-exposes the previously-shadowed default. `<title>` and each
+ * single-instance meta/link (description, robots, theme-color, viewport,
+ * charset, canonical, favicon, and each og: or twitter: property) collapse to one
+ * effective tag; generic `meta[]`/`link[]` array entries are keyed by their
+ * identifying attributes so independent tags coexist.
+ */
+
+/** A head value that may be a literal string or a reactive signal of a string. */
+type BindableString = string | ReadonlySignal<string> | Signal<string>;
+/** A single `<meta>` descriptor. Provide exactly one identifying key. */
+interface MetaDescriptor {
+    /** `name="…"` (e.g. "description", "robots", "theme-color", "twitter:card"). */
+    readonly name?: string;
+    /** `property="…"` (e.g. "og:title", "og:image") — the Open Graph convention. */
+    readonly property?: string;
+    /** `http-equiv="…"` (e.g. "content-security-policy"). */
+    readonly httpEquiv?: string;
+    /** `charset="…"` (e.g. "utf-8"). Standalone; no `content`. */
+    readonly charset?: string;
+    /** The tag's `content`. May be reactive. */
+    readonly content?: BindableString;
+}
+/** A single `<link>` descriptor. `rel`+`href` identify it. */
+interface LinkDescriptor {
+    readonly rel: string;
+    readonly href: string;
+    readonly sizes?: string;
+    readonly type?: string;
+    readonly media?: string;
+    readonly as?: string;
+    readonly crossorigin?: string;
+    readonly hreflang?: string;
+}
+/**
+ * Declarative document metadata. Every field is optional; convenience fields
+ * (title/description/canonical/robots/themeColor/viewport/charset/favicon/
+ * openGraph/twitter) expand into the same normalized entries as the raw
+ * `meta`/`link` arrays, with single-instance dedup keys so a later `head()`
+ * cleanly overrides an earlier one.
+ */
+interface HeadMetadata {
+    /** `<title>` text. May be reactive. Single-instance (dedup key `title`). */
+    readonly title?: BindableString;
+    /** `<meta name="description">`. May be reactive. */
+    readonly description?: BindableString;
+    /** `<link rel="canonical">` href. */
+    readonly canonical?: string;
+    /** `<meta name="robots">` (e.g. "index,follow" / "noindex"). */
+    readonly robots?: string;
+    /** `<meta name="theme-color">`. */
+    readonly themeColor?: string;
+    /** `<meta name="viewport">`. */
+    readonly viewport?: string;
+    /** `<meta charset>`. */
+    readonly charset?: string;
+    /** Favicon: a shorthand for `<link rel="icon">`. String = href, or a full descriptor. */
+    readonly favicon?: string | LinkDescriptor;
+    /** Open Graph properties — each key `k` becomes `<meta property="og:k">`. Values may be reactive. */
+    readonly openGraph?: Readonly<Record<string, BindableString>>;
+    /** Twitter/X card properties — each key `k` becomes `<meta name="twitter:k">`. Values may be reactive. */
+    readonly twitter?: Readonly<Record<string, BindableString>>;
+    /** Raw `<meta>` tags (for anything the convenience fields don't cover). */
+    readonly meta?: readonly MetaDescriptor[];
+    /** Raw `<link>` tags (stylesheets, preload, alternate, etc.). */
+    readonly link?: readonly LinkDescriptor[];
+    /** `<base href>` — single-instance. */
+    readonly base?: string;
+}
+/**
+ * A normalized head tag: one `<title>`, `<meta>`, `<link>` or `<base>`. Attr
+ * values and the title's text may still be reactive (`BindableString`); the
+ * renderer peeks them for SSR and subscribes to them on the browser. `dedupKey`
+ * is what the merge collapses on.
+ */
+interface HeadEntry {
+    readonly tag: 'title' | 'meta' | 'link' | 'base';
+    readonly dedupKey: string;
+    /** Static + reactive attributes (no `undefined` values). */
+    readonly attrs: Readonly<Record<string, BindableString>>;
+    /** Text content — only meaningful for `tag === 'title'`. */
+    readonly text?: BindableString;
+}
+/** The value a `__head__<id>` handler returns: this node's ordered contribution. */
+interface HeadContribution {
+    readonly entries: readonly HeadEntry[];
+}
+/**
+ * Normalise a {@link HeadMetadata} into an ordered list of {@link HeadEntry}.
+ * Emission order within one `head()` is: charset → base → title → description →
+ * canonical → robots → theme-color → viewport → favicon → openGraph → twitter →
+ * explicit meta[] → explicit link[]. (Merge across nodes is document order; this
+ * per-node order only affects the sequence of same-priority tags.)
+ */
+declare function resolveHead(config: HeadMetadata): HeadContribution;
+/** Runtime brand check for a head-contribution descriptor value. */
+declare function isHeadContribution(value: unknown): value is HeadContribution;
 
 /**
  * StreetUI DSL type system.
@@ -382,6 +510,40 @@ interface ErrorBoundaryOptions {
     readonly source?: ErrorSource | ReadonlyArray<ErrorSource>;
     /** Invoked by the fallback's `retry()`, before the body is re-attempted (e.g. `resource.refetch`). */
     readonly onRetry?: () => void;
+    /**
+     * Error-reporting hook (§6/§7). Called with the current error each time the
+     * boundary ENTERS its error state (i.e. when the fallback mounts), including
+     * on a re-entry after a failed retry. Use it to forward the error to a
+     * production diagnostics sink. It observes only — it never changes the
+     * boundary's behavior, and receives the same `unknown` error the fallback
+     * sees (no sensitive framework internals are injected).
+     */
+    readonly onError?: (error: unknown) => void;
+}
+/**
+ * Branch builders for {@link ContainerDSL.asyncBoundary} — the loading / error /
+ * success states of a {@link Resource}. This is deliberately NOT a new async
+ * system: it is thin sugar over the existing `resource` state machine and
+ * `when()`. Exactly one branch is live at a time, chosen by the resource's
+ * reactive `status`/`data` (error takes precedence, then resolved data, then
+ * loading), so mounting/unmounting and cleanup all reuse the conditional
+ * machinery. Branch signature mirrors `errorBoundary`'s fallback: the content
+ * scope comes first.
+ */
+interface AsyncBoundaryBranches<T> {
+    /** Shown while the resource is idle or performing its first load (no data yet). */
+    readonly loading?: (content: ContainerDSL) => void;
+    /**
+     * Shown while the resource is in its error state. Receives the current error
+     * and a `retry()` that re-runs the loader (a thin wrapper over `refetch`).
+     */
+    readonly error?: (content: ContainerDSL, error: unknown, retry: () => void) => void;
+    /**
+     * Shown once the resource has data (including while a refetch keeps the old
+     * value visible). Receives the data as a `ReadonlySignal<T>` so the branch can
+     * bind it reactively and update in place without remounting.
+     */
+    readonly success: (content: ContainerDSL, data: ReadonlySignal<T>) => void;
 }
 interface ContentDSL {
     heading(text: BindableText, options?: HeadingOptions): void;
@@ -422,6 +584,23 @@ interface ContainerDSL extends ContentDSL {
      * removal. It does NOT trap arbitrary global errors; errors remain observable.
      */
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
+    /**
+     * Render the loading / error / success states of an async {@link Resource}
+     * (§4). This is sugar over the existing `resource` state machine and `when()`
+     * — NOT a second async system and NOT a literal port of React Suspense. It
+     * renders exactly one branch at a time based on the resource's reactive state:
+     * the `error` branch while `status === 'error'` (with a `retry()` that calls
+     * `refetch`), otherwise the `success` branch once data is present (data passed
+     * as a `ReadonlySignal<T>` so it updates in place, and stays visible while a
+     * refetch is in flight), otherwise the `loading` branch. Because it is built
+     * from `when()`, SSR renders whichever branch matches the resource's current
+     * (peeked) state — so a server that awaits the resource before serializing
+     * emits the resolved `success` branch, and hydration (seeded via the
+     * resource's `initialData`) reuses it with no duplicate work. Resource
+     * cleanup/cancellation is the resource's own concern (pass its `dispose` to
+     * the owning scope's `onCleanup`, e.g. a component's `ctx.onCleanup`).
+     */
+    asyncBoundary<T>(key: string, resource: Resource<T>, branches: AsyncBoundaryBranches<T>): void;
     /**
      * Render `builder`'s subtree into `document.body` instead of inline at this
      * position (a neutral inline anchor is left behind). On the server there is no
@@ -470,6 +649,18 @@ interface ContainerDSL extends ContentDSL {
      * `ctx.renderChildren` (§6 native child composition).
      */
     component<P>(key: string, def: ComponentDefinition<P>, props: P, children?: ContainerBuilder): void;
+    /**
+     * Declare document metadata (§1–§3): title, meta, link, canonical, Open Graph,
+     * Twitter/X, robots, theme-color, favicon. Renders nothing visible at this
+     * position (a neutral empty anchor); the framework applies the metadata to
+     * `document.head` on the browser and emits it via `renderHead()` on the
+     * server. Several `head()` calls compose — an app-level default, a route-level
+     * `head()`, and a component-level `head()` are merged and, per metadata key,
+     * the last declared (deepest/latest in document order) wins. Removing a
+     * `head()` node (route change / component unmount) re-exposes the previously
+     * shadowed value, and server tags are adopted on hydration without duplication.
+     */
+    head(metadata: HeadMetadata): void;
 }
 interface SectionDSL extends ContainerDSL {
 }
@@ -531,7 +722,23 @@ declare class ContainerBuilderBase extends ContentBuilderBase implements Contain
     form(key: string, builder: FormBuilder, options?: FormOptions): void;
     when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder, options?: WhenOptions): void;
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
+    asyncBoundary<T>(key: string, res: Resource<T>, branches: AsyncBoundaryBranches<T>): void;
     portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
+    /**
+     * Declare document metadata (2.0 §1–§3). Creates a `'head'` node — a neutral,
+     * empty inline anchor at this position (one node / one element, so positional
+     * hydration is preserved) — and registers a `__head__<id>` descriptor holding
+     * this call's normalized, dedup-keyed {@link resolveHead} contribution. The
+     * renderer applies it to `document.head` on the browser (adopting server tags
+     * on hydration, cleaning up on unmount / route change) and emits the active
+     * graph's merged metadata as a string on the server (`renderHead`).
+     *
+     * Multiple `head()` nodes may be live at once (app default + route + component)
+     * — the renderer merges them and, per dedup key, the last in document order
+     * wins (see head.ts). No new render path: this reuses the same graph-node +
+     * handler-registry convention as overlays/transitions/components.
+     */
+    head(metadata: HeadMetadata): void;
     /**
      * Shared assembly for every overlay kind: a `portal` node whose single child
      * is a `when(open, panel)` conditional. The panel container carries the
@@ -618,4 +825,4 @@ interface StreetUI {
 }
 declare const streetui: StreetUI;
 
-export { type A11yOptions, AppBuilder, type AppDSL, type AppOptions, type Bindable, type BindableText, type BoundInputOptions, type ButtonOptions, type ContainerBuilder as ComponentChildren, type ComponentContext, type ComponentDefinition, type ComponentRender, type ComponentSetup, type ContainerBuilder, ContainerBuilderImpl, type ContainerDSL, type ContainerOptions, type ContentDSL, type ControlledInputOptions, type ErrorBoundaryOptions, type ErrorFallbackBuilder, type ErrorSource, type FormBuilder, FormBuilderImpl, type FormDSL, type FormOptions, type HeadingOptions, type ImageOptions, type InputOptions, type InputOptionsBase, type LinkOptions, type ListBuilder, ListBuilderImpl, type ListDSL, type ListOptions, type ListPlanEntry, type OverlayOptions, type PageBuilder, PageBuilderImpl, type PageDSL, type PortalOptions, type ResolvedTransition, type SectionBuilder, SectionBuilderImpl, type SectionDSL, type SectionOptions, StreetApp, type StreetUI, type TextOptions, type TextValue, type TransitionConfig, type WhenOptions, component, isComponentDefinition, isTransitionConfig, reactiveListItemKey, reactiveListItemSignature, resolveTransition, streetui };
+export { type A11yOptions, AppBuilder, type AppDSL, type AppOptions, type AsyncBoundaryBranches, type Bindable, type BindableString, type BindableText, type BoundInputOptions, type ButtonOptions, type ContainerBuilder as ComponentChildren, type ComponentContext, type ComponentDefinition, type ComponentRender, type ComponentSetup, type ContainerBuilder, ContainerBuilderImpl, type ContainerDSL, type ContainerOptions, type ContentDSL, type ControlledInputOptions, type ErrorBoundaryOptions, type ErrorFallbackBuilder, type ErrorSource, type FormBuilder, FormBuilderImpl, type FormDSL, type FormOptions, type HeadContribution, type HeadEntry, type HeadMetadata, type HeadingOptions, type ImageOptions, type InputOptions, type InputOptionsBase, type LinkDescriptor, type LinkOptions, type ListBuilder, ListBuilderImpl, type ListDSL, type ListOptions, type ListPlanEntry, type MetaDescriptor, type OverlayOptions, type PageBuilder, PageBuilderImpl, type PageDSL, type PortalOptions, type ResolvedTransition, type SectionBuilder, SectionBuilderImpl, type SectionDSL, type SectionOptions, StreetApp, type StreetUI, type TextOptions, type TextValue, type TransitionConfig, type WhenOptions, component, isComponentDefinition, isHeadContribution, isTransitionConfig, reactiveListItemKey, reactiveListItemSignature, resolveHead, resolveTransition, streetui };

@@ -37,6 +37,8 @@ __export(src_exports, {
   FOCUSABLE_SELECTOR: () => FOCUSABLE_SELECTOR,
   FormBuilderImpl: () => FormBuilderImpl,
   GraphNode: () => GraphNode,
+  HeadManager: () => HeadManager,
+  HttpError: () => HttpError,
   Lifecycle: () => Lifecycle,
   ListBuilderImpl: () => ListBuilderImpl,
   NodeInstance: () => NodeInstance,
@@ -77,7 +79,9 @@ __export(src_exports, {
   containFocus: () => containFocus,
   createAnnouncer: () => createAnnouncer,
   createApplication: () => createApplication,
+  createAuthSession: () => createAuthSession,
   createBrowserHistory: () => createBrowserHistory,
+  createClient: () => createClient,
   createContext: () => createContext,
   createDevTools: () => createDevTools,
   createForm: () => createForm,
@@ -93,10 +97,12 @@ __export(src_exports, {
   createStreetEvent: () => createStreetEvent,
   defineConfig: () => defineConfig,
   derived: () => derived,
+  describeError: () => describeError,
   diagnosePerformance: () => diagnosePerformance,
   effect: () => effect,
   email: () => email,
   environment: () => environment,
+  escapeHtml: () => escapeHtml,
   escapeHtmlAttr: () => escapeHtmlAttr,
   escapeHtmlText: () => escapeHtmlText,
   flushSync: () => flushSync,
@@ -128,7 +134,9 @@ __export(src_exports, {
   interpolate: () => interpolate,
   isBatching: () => isBatching,
   isComponentDefinition: () => isComponentDefinition,
+  isHeadContribution: () => isHeadContribution,
   isTransitionConfig: () => isTransitionConfig,
+  linkUpdate: () => linkUpdate,
   matchPattern: () => matchPattern,
   matchRoutes: () => matchRoutes,
   maxLength: () => maxLength,
@@ -136,6 +144,7 @@ __export(src_exports, {
   mountGraph: () => mountGraph,
   mountNode: () => mountNode,
   mountRouter: () => mountRouter,
+  mutation: () => mutation,
   nextId: () => nextId,
   nodeIdPrefix: () => nodeIdPrefix,
   nodeTypeStats: () => nodeTypeStats,
@@ -152,10 +161,14 @@ __export(src_exports, {
   readState: () => readState,
   reconcileChildren: () => reconcileChildren,
   reconcileChildrenByPlan: () => reconcileChildrenByPlan,
+  renderDevToolsHTML: () => renderDevToolsHTML,
+  renderHead: () => renderHead,
   renderToString: () => renderToString,
   reportDiagnostic: () => reportDiagnostic,
+  reportError: () => reportError,
   required: () => required,
   resetIdCounter: () => resetIdCounter,
+  resolveHead: () => resolveHead,
   resolveTag: () => resolveTag,
   resolveTransition: () => resolveTransition,
   resource: () => resource,
@@ -183,6 +196,7 @@ __export(src_exports, {
   validateGraph: () => validateGraph,
   wireComponentBehavior: () => wireComponentBehavior,
   wireEvents: () => wireEvents,
+  wireHeadBehavior: () => wireHeadBehavior,
   wireOverlayBehavior: () => wireOverlayBehavior,
   wireReactiveList: () => wireReactiveList,
   wireSignalBindings: () => wireSignalBindings
@@ -190,7 +204,7 @@ __export(src_exports, {
 module.exports = __toCommonJS(src_exports);
 
 // src/version.ts
-var VERSION = "1.9.0";
+var VERSION = "2.0.0";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;
@@ -530,6 +544,198 @@ function resource(loader, options = {}) {
   };
 }
 
+// ../state/src/mutation.ts
+function mutation(mutator, options = {}) {
+  const status = signal("idle");
+  const data = signal(void 0);
+  const error = signal(void 0);
+  const pending = derived(() => status.get() === "loading");
+  let disposed = false;
+  let runId = 0;
+  const mutate = async (args) => {
+    if (disposed) {
+      return await mutator(args);
+    }
+    const myRun = ++runId;
+    batch(() => {
+      error.set(void 0);
+      status.set("loading");
+    });
+    try {
+      const result = await mutator(args);
+      if (!disposed && myRun === runId) {
+        batch(() => {
+          data.set(result);
+          error.set(void 0);
+          status.set("success");
+        });
+      }
+      if (!disposed && myRun === runId) {
+        await options.onSuccess?.(result, args);
+        await options.onSettled?.(args);
+      }
+      return result;
+    } catch (err) {
+      if (!disposed && myRun === runId) {
+        batch(() => {
+          error.set(err);
+          status.set("error");
+        });
+        await options.onError?.(err, args);
+        await options.onSettled?.(args);
+      }
+      throw err;
+    }
+  };
+  const reset = () => {
+    batch(() => {
+      status.set("idle");
+      data.set(void 0);
+      error.set(void 0);
+    });
+  };
+  const dispose = () => {
+    disposed = true;
+  };
+  if (options.onCleanup !== void 0) options.onCleanup(dispose);
+  return { status, data, error, pending, mutate, reset, dispose };
+}
+
+// ../state/src/client.ts
+var HttpError = class extends Error {
+  status;
+  statusText;
+  url;
+  body;
+  constructor(status, statusText, url, body) {
+    super(`HTTP ${status} ${statusText} for ${url}`);
+    this.name = "HttpError";
+    this.status = status;
+    this.statusText = statusText;
+    this.url = url;
+    this.body = body;
+  }
+};
+function joinUrl(baseUrl, path) {
+  if (baseUrl === void 0 || baseUrl === "") return path;
+  const b = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${b}${p}`;
+}
+function withQuery(url, query) {
+  if (query === void 0) return url;
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(query)) params.set(k, String(v));
+  const qs = params.toString();
+  if (qs === "") return url;
+  return url.includes("?") ? `${url}&${qs}` : `${url}?${qs}`;
+}
+function createClient(config = {}) {
+  const doFetch = config.fetch ?? ((input, init) => {
+    if (typeof fetch === "undefined") {
+      throw new Error("createClient: no global fetch; pass { fetch } explicitly");
+    }
+    return fetch(input, init);
+  });
+  async function request(method, path, body, reqConfig = {}) {
+    const url = withQuery(joinUrl(config.baseUrl, path), reqConfig.query);
+    const headers = { ...config.headers, ...reqConfig.headers };
+    const init = { method, headers };
+    if (reqConfig.signal !== void 0) init.signal = reqConfig.signal;
+    if (body !== void 0) {
+      if (headers["Content-Type"] === void 0) headers["Content-Type"] = "application/json";
+      init.body = JSON.stringify(body);
+    }
+    const response = await doFetch(url, init);
+    const parsed = await parseBody(response);
+    if (!response.ok) {
+      throw new HttpError(response.status, response.statusText, url, parsed);
+    }
+    return parsed;
+  }
+  return {
+    request,
+    get: (path, c) => request("GET", path, void 0, c),
+    post: (path, b, c) => request("POST", path, b, c),
+    put: (path, b, c) => request("PUT", path, b, c),
+    patch: (path, b, c) => request("PATCH", path, b, c),
+    del: (path, c) => request("DELETE", path, void 0, c),
+    resource: (path, options = {}) => {
+      const { query, ...resourceOptions } = options;
+      return resource(
+        (ctx) => request("GET", path, void 0, { signal: ctx.signal, ...query !== void 0 ? { query } : {} }),
+        resourceOptions
+      );
+    },
+    mutation: (method, path, options) => mutation((args) => request(method, path, args), options ?? {})
+  };
+}
+async function parseBody(response) {
+  const text = await response.text();
+  if (text === "") return void 0;
+  const type = response.headers.get("content-type") ?? "";
+  if (type.includes("application/json")) {
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+  return text;
+}
+
+// ../state/src/auth.ts
+function createAuthSession(config) {
+  const session = resource(
+    (ctx) => config.loadUser(ctx),
+    {
+      ...config.immediate !== void 0 ? { immediate: config.immediate } : {},
+      ...config.onCleanup !== void 0 ? { onCleanup: config.onCleanup } : {}
+    }
+  );
+  const status = derived(() => {
+    const s = session.status.get();
+    const d = session.data.get();
+    if (s === "error") return "error";
+    if (s === "idle" || s === "loading" && d === void 0) return "loading";
+    return d === null || d === void 0 ? "unauthenticated" : "authenticated";
+  });
+  const user = derived(() => {
+    const d = session.data.get();
+    return d === null ? void 0 : d;
+  });
+  const authenticated = derived(() => status.get() === "authenticated");
+  const unauthenticated = derived(() => status.get() === "unauthenticated");
+  const loading = derived(() => status.get() === "loading");
+  const logoutMutation = mutation(
+    async () => {
+      await config.logout?.();
+    },
+    { onSuccess: () => session.refetch() }
+  );
+  const dispose = () => {
+    session.dispose();
+    status.dispose();
+    user.dispose();
+    authenticated.dispose();
+    unauthenticated.dispose();
+    loading.dispose();
+    logoutMutation.dispose();
+  };
+  return {
+    status,
+    user,
+    error: session.error,
+    authenticated,
+    unauthenticated,
+    loading,
+    loggingOut: logoutMutation.pending,
+    refresh: () => session.refetch(),
+    logout: () => logoutMutation.mutate(void 0),
+    dispose
+  };
+}
+
 // ../core/src/a11y-ids.ts
 var UNSAFE = /[^A-Za-z0-9_-]+/g;
 function toIdToken(base) {
@@ -796,9 +1002,13 @@ function formatDiagnosticContext(context) {
   const parts = [];
   if (context.package !== void 0) parts.push(`package=${context.package}`);
   if (context.operation !== void 0) parts.push(`operation=${context.operation}`);
+  if (context.component !== void 0) parts.push(`component=${context.component}`);
+  if (context.phase !== void 0) parts.push(`phase=${context.phase}`);
   if (context.nodeId !== void 0) parts.push(`node=${context.nodeId}`);
+  if (context.element !== void 0) parts.push(`element=${context.element}`);
   if (context.route !== void 0) parts.push(`route=${context.route}`);
   if (context.resource !== void 0) parts.push(`resource=${context.resource}`);
+  if (context.signal !== void 0) parts.push(`signal=${context.signal}`);
   return parts.length > 0 ? ` [${parts.join(", ")}]` : "";
 }
 var StreetFrameworkError = class extends Error {
@@ -828,6 +1038,42 @@ function consoleDiagnosticSink(logger = console) {
     warn: (m, c) => logger.warn?.(`${m}${formatDiagnosticContext(c)}`),
     error: (m, c) => logger.error?.(`${m}${formatDiagnosticContext(c)}`)
   };
+}
+function describeErrorAt(error, context, options, depth) {
+  const isError = error instanceof Error;
+  const name = isError ? error.name : "Error";
+  const message = isError ? error.message : safeStringify(error);
+  const report = { name, message, isError };
+  if (context !== void 0) report.context = context;
+  if (options.includeStack === true && isError && typeof error.stack === "string") {
+    report.stack = error.stack;
+  }
+  if (options.includeCause === true && isError && depth < 4) {
+    const cause = error.cause;
+    if (cause !== void 0 && cause !== null) {
+      report.cause = describeErrorAt(cause, void 0, options, depth + 1);
+    }
+  }
+  return report;
+}
+function safeStringify(value) {
+  if (typeof value === "string") return value;
+  if (value === null) return "null";
+  if (value === void 0) return "undefined";
+  const t = typeof value;
+  if (t === "number" || t === "boolean" || t === "bigint" || t === "symbol") {
+    return String(value);
+  }
+  const ctor = t === "object" && value !== null ? value.constructor?.name ?? "Object" : t;
+  return `[non-Error ${ctor}]`;
+}
+function describeError(error, context, options = {}) {
+  return describeErrorAt(error, context, options, 0);
+}
+function reportError(sink, error, context, options = {}) {
+  const report = describeError(error, context, options);
+  reportDiagnostic(sink, "error", report.message, report.context);
+  return report;
 }
 
 // ../graph/src/graph-node.ts
@@ -999,6 +1245,7 @@ var ApplicationGraph = class {
     this.handlers.delete(`__overlay__${node.id}`);
     this.handlers.delete(`__component__${node.id}`);
     this.handlers.delete(`__transition__${node.id}`);
+    this.handlers.delete(`__head__${node.id}`);
   }
   // ── Handler registry ──────────────────────────────────────────────────────
   registerHandler(key, fn) {
@@ -1126,6 +1373,121 @@ function isTransitionConfig(value) {
   if (value === null || typeof value !== "object") return false;
   const o = value;
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
+}
+
+// ../dsl/src/head.ts
+function metaDedupKey(m) {
+  if (m.charset !== void 0) return "meta:charset";
+  if (m.name !== void 0) return `meta:name=${m.name}`;
+  if (m.property !== void 0) return `meta:property=${m.property}`;
+  if (m.httpEquiv !== void 0) return `meta:http-equiv=${m.httpEquiv}`;
+  return void 0;
+}
+function metaAttrs(m) {
+  const attrs = {};
+  if (m.charset !== void 0) attrs["charset"] = m.charset;
+  if (m.name !== void 0) attrs["name"] = m.name;
+  if (m.property !== void 0) attrs["property"] = m.property;
+  if (m.httpEquiv !== void 0) attrs["http-equiv"] = m.httpEquiv;
+  if (m.content !== void 0) attrs["content"] = m.content;
+  return attrs;
+}
+function linkAttrs(l) {
+  const attrs = { rel: l.rel, href: l.href };
+  if (l.sizes !== void 0) attrs["sizes"] = l.sizes;
+  if (l.type !== void 0) attrs["type"] = l.type;
+  if (l.media !== void 0) attrs["media"] = l.media;
+  if (l.as !== void 0) attrs["as"] = l.as;
+  if (l.crossorigin !== void 0) attrs["crossorigin"] = l.crossorigin;
+  if (l.hreflang !== void 0) attrs["hreflang"] = l.hreflang;
+  return attrs;
+}
+function resolveHead(config) {
+  const entries = [];
+  if (config.charset !== void 0) {
+    entries.push({ tag: "meta", dedupKey: "meta:charset", attrs: { charset: config.charset } });
+  }
+  if (config.base !== void 0) {
+    entries.push({ tag: "base", dedupKey: "base", attrs: { href: config.base } });
+  }
+  if (config.title !== void 0) {
+    entries.push({ tag: "title", dedupKey: "title", attrs: {}, text: config.title });
+  }
+  if (config.description !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=description",
+      attrs: { name: "description", content: config.description }
+    });
+  }
+  if (config.canonical !== void 0) {
+    entries.push({
+      tag: "link",
+      dedupKey: "link:rel=canonical",
+      attrs: { rel: "canonical", href: config.canonical }
+    });
+  }
+  if (config.robots !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=robots",
+      attrs: { name: "robots", content: config.robots }
+    });
+  }
+  if (config.themeColor !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=theme-color",
+      attrs: { name: "theme-color", content: config.themeColor }
+    });
+  }
+  if (config.viewport !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=viewport",
+      attrs: { name: "viewport", content: config.viewport }
+    });
+  }
+  if (config.favicon !== void 0) {
+    const l = typeof config.favicon === "string" ? { rel: "icon", href: config.favicon } : config.favicon;
+    entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}`, attrs: linkAttrs(l) });
+  }
+  if (config.openGraph !== void 0) {
+    for (const key of Object.keys(config.openGraph)) {
+      const property = `og:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:property=${property}`,
+        attrs: { property, content: config.openGraph[key] }
+      });
+    }
+  }
+  if (config.twitter !== void 0) {
+    for (const key of Object.keys(config.twitter)) {
+      const name = `twitter:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:name=${name}`,
+        attrs: { name, content: config.twitter[key] }
+      });
+    }
+  }
+  if (config.meta !== void 0) {
+    for (const m of config.meta) {
+      const key = metaDedupKey(m);
+      if (key === void 0) continue;
+      entries.push({ tag: "meta", dedupKey: key, attrs: metaAttrs(m) });
+    }
+  }
+  if (config.link !== void 0) {
+    for (const l of config.link) {
+      entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}:href=${l.href}`, attrs: linkAttrs(l) });
+    }
+  }
+  return { entries };
+}
+function isHeadContribution(value) {
+  return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
 
 // ../dsl/src/builders.ts
@@ -1509,8 +1871,14 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
     this.container(id, (c) => {
       c.when(
         hasError,
-        // Error state → fallback.
-        (fb) => options.fallback(fb, readError(), retry),
+        // Error state → fallback. The fallback branch mounts exactly when the
+        // boundary enters its error state, so this is also where the optional
+        // `onError` reporting hook fires (observe-only; §6/§7).
+        (fb) => {
+          const currentError = readError();
+          options.onError?.(currentError);
+          options.fallback(fb, currentError, retry);
+        },
         // Healthy state → body, guarded against synchronous build throws.
         (body) => {
           try {
@@ -1522,6 +1890,24 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       );
     }, { id });
   }
+  asyncBoundary(key, res, branches) {
+    const isError = derived(() => res.status.get() === "error");
+    const showSuccess = derived(
+      () => res.status.get() !== "error" && res.data.get() !== void 0
+    );
+    const showLoading = derived(
+      () => res.status.get() !== "error" && res.data.get() === void 0
+    );
+    const dataSignal = derived(() => res.data.get());
+    const retry = () => {
+      void res.refetch();
+    };
+    this.container(key, (c) => {
+      c.when(isError, (fb) => branches.error?.(fb, res.error.peek(), retry));
+      c.when(showSuccess, (sb) => branches.success(sb, dataSignal));
+      c.when(showLoading, (lb) => branches.loading?.(lb));
+    }, { key });
+  }
   // ── Portals & overlays ──────────────────────────────────────────────────────
   portal(key, builder, options = {}) {
     const node = this._graph.createNode("portal", {
@@ -1530,6 +1916,31 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       props: containerProps(options)
     });
     builder(new ContainerBuilderImpl(node, this._graph));
+  }
+  /**
+   * Declare document metadata (2.0 §1–§3). Creates a `'head'` node — a neutral,
+   * empty inline anchor at this position (one node / one element, so positional
+   * hydration is preserved) — and registers a `__head__<id>` descriptor holding
+   * this call's normalized, dedup-keyed {@link resolveHead} contribution. The
+   * renderer applies it to `document.head` on the browser (adopting server tags
+   * on hydration, cleaning up on unmount / route change) and emits the active
+   * graph's merged metadata as a string on the server (`renderHead`).
+   *
+   * Multiple `head()` nodes may be live at once (app default + route + component)
+   * — the renderer merges them and, per dedup key, the last in document order
+   * wins (see head.ts). No new render path: this reuses the same graph-node +
+   * handler-registry convention as overlays/transitions/components.
+   */
+  head(metadata) {
+    const node = this._graph.createNode("head", {
+      parent: this._node,
+      props: { "data-streetui-head-anchor": "" }
+    });
+    const contribution = resolveHead(metadata);
+    this._graph.registerHandler(
+      `__head__${node.id}`,
+      () => contribution
+    );
   }
   /**
    * Shared assembly for every overlay kind: a `portal` node whose single child
@@ -1902,8 +2313,8 @@ var RuntimeNodeInstance = class {
     this.children.push(instance);
   }
   /** Subscribe to a signal and register the unsubscribe for cleanup. */
-  trackSignal(signal2, handler) {
-    const unsub = signal2.subscribe(handler);
+  trackSignal(signal3, handler) {
+    const unsub = signal3.subscribe(handler);
     this.cleanup.add(unsub);
   }
   /** Register an arbitrary cleanup function (e.g. DOM event removal). */
@@ -2273,6 +2684,9 @@ var BrowserDOMAdapter = class {
   }
   body() {
     return document.body ?? null;
+  }
+  head() {
+    return document.head ?? null;
   }
   activeElement() {
     return document.activeElement ?? null;
@@ -2651,6 +3065,9 @@ var ServerDOMAdapter = class {
   focus() {
   }
   body() {
+    return null;
+  }
+  head() {
     return null;
   }
   activeElement() {
@@ -3035,7 +3452,13 @@ var TAG_MAP = {
   // its children are relocated to a document.body container on the browser
   // (see the portal branch in mount.ts). On the server (no body) it renders
   // inline, so the anchor tag is what SSR/hydration positionally match on.
-  portal: "div"
+  portal: "div",
+  // A `head()` node renders as a neutral, empty inline anchor <div> at its
+  // declaration site (like a portal anchor). Its actual contribution — title/
+  // meta/link/etc. — is applied to `document.head` by `wireHeadBehavior` on the
+  // browser, and emitted separately by `renderHead()` on the server. Keeping a
+  // one-node/one-element anchor preserves positional hydration.
+  head: "div"
 };
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
@@ -3491,6 +3914,184 @@ var TransitionController = class {
   }
 };
 
+// ../renderer/src/head.ts
+var HEAD_MARKER = "data-streetui-head";
+var HEAD_KEY = "data-streetui-head-key";
+function isSignalLike(v) {
+  return v !== null && typeof v === "object" && typeof v["subscribe"] === "function" && typeof v["peek"] === "function";
+}
+function readValue(v) {
+  if (isSignalLike(v)) return String(v.peek() ?? "");
+  return String(v ?? "");
+}
+function resolveEntry(entry) {
+  const attrs = {};
+  for (const key of Object.keys(entry.attrs)) {
+    attrs[key] = readValue(entry.attrs[key]);
+  }
+  const resolved = { tag: entry.tag, attrs };
+  if (entry.tag === "title") {
+    return { ...resolved, text: readValue(entry.text) };
+  }
+  return resolved;
+}
+var HeadManager = class {
+  _dom;
+  _head;
+  _contributions = /* @__PURE__ */ new Map();
+  _applied = /* @__PURE__ */ new Map();
+  _order = 0;
+  _adopted = false;
+  constructor(dom, head) {
+    this._dom = dom;
+    this._head = head;
+  }
+  /** Register (or replace) a node's contribution and re-apply the merged result. */
+  register(nodeId, entries) {
+    this._contributions.set(nodeId, { order: this._order++, entries });
+    this.apply();
+  }
+  /** Withdraw a node's contribution (unmount / route change) and re-apply. */
+  unregister(nodeId) {
+    if (this._contributions.delete(nodeId)) this.apply();
+  }
+  /** Recompute the merged head and patch `document.head` to match. */
+  apply() {
+    if (!this._adopted) {
+      this._adoptServerTags();
+      this._adopted = true;
+    }
+    const ordered = [...this._contributions.values()].sort((a, b) => a.order - b.order);
+    const merged = /* @__PURE__ */ new Map();
+    for (const contribution of ordered) {
+      for (const entry of contribution.entries) {
+        merged.set(entry.dedupKey, resolveEntry(entry));
+      }
+    }
+    for (const [key, desired] of merged) {
+      const existing = this._applied.get(key);
+      if (existing !== void 0 && existing.tag === desired.tag) {
+        this._reconcileAttrs(existing, desired);
+      } else {
+        if (existing !== void 0) {
+          this._dom.removeChild(this._head, existing.el);
+          this._applied.delete(key);
+        }
+        const el = this._createTag(key, desired);
+        this._dom.appendChild(this._head, el);
+        this._applied.set(key, { el, attrKeys: new Set(Object.keys(desired.attrs)), tag: desired.tag });
+      }
+    }
+    for (const [key, record] of [...this._applied]) {
+      if (!merged.has(key)) {
+        this._dom.removeChild(this._head, record.el);
+        this._applied.delete(key);
+      }
+    }
+  }
+  _createTag(key, desired) {
+    const el = this._dom.createElement(desired.tag);
+    this._dom.setAttribute(el, HEAD_MARKER, "");
+    this._dom.setAttribute(el, HEAD_KEY, key);
+    for (const attr of Object.keys(desired.attrs)) {
+      this._dom.setAttribute(el, attr, desired.attrs[attr]);
+    }
+    if (desired.tag === "title") this._dom.setTextContent(el, desired.text ?? "");
+    return el;
+  }
+  _reconcileAttrs(record, desired) {
+    const nextKeys = new Set(Object.keys(desired.attrs));
+    for (const attr of record.attrKeys) {
+      if (!nextKeys.has(attr)) this._dom.removeAttribute(record.el, attr);
+    }
+    for (const attr of nextKeys) {
+      this._dom.setAttribute(record.el, attr, desired.attrs[attr]);
+    }
+    if (desired.tag === "title") this._dom.setTextContent(record.el, desired.text ?? "");
+    record.attrKeys = nextKeys;
+  }
+  /**
+   * Seed `_applied` from server-emitted `[data-streetui-head-key]` tags already
+   * in `document.head`. The subsequent diff reuses these elements when the
+   * client desires the same key (no duplicate), rewrites them if the value
+   * changed, or removes them if the client graph no longer wants them.
+   */
+  _adoptServerTags() {
+    for (const child of this._dom.childNodes(this._head)) {
+      if (!this._dom.isElement(child)) continue;
+      const el = child;
+      const key = this._dom.getAttribute(el, HEAD_KEY);
+      if (key === null) continue;
+      this._applied.set(key, {
+        el,
+        attrKeys: new Set(this._attrNames(el)),
+        tag: this._dom.tagName(el)
+      });
+    }
+  }
+  /** The framework-managed attribute names currently on a server tag. */
+  _attrNames(el) {
+    const names = [];
+    if (this._dom.getAttribute(el, HEAD_MARKER) !== null) names.push(HEAD_MARKER);
+    if (this._dom.getAttribute(el, HEAD_KEY) !== null) names.push(HEAD_KEY);
+    return names;
+  }
+};
+function getHeadManager(ctx) {
+  const head = ctx.dom.head();
+  if (head === null) return null;
+  const mutable = ctx;
+  if (mutable.head === void 0) mutable.head = new HeadManager(ctx.dom, head);
+  return mutable.head;
+}
+function wireHeadBehavior(ctx, graphNode, instance) {
+  const manager = getHeadManager(ctx);
+  if (manager === null) return;
+  const descFn = ctx.graph.getHandler(`__head__${graphNode.id}`);
+  if (descFn === void 0) return;
+  const contribution = descFn();
+  const nodeId = graphNode.id;
+  manager.register(nodeId, contribution.entries);
+  for (const entry of contribution.entries) {
+    for (const attrKey of Object.keys(entry.attrs)) {
+      const v = entry.attrs[attrKey];
+      if (isSignalLike(v)) {
+        instance.trackCleanup(v.subscribe(() => manager.apply()));
+      }
+    }
+    if (isSignalLike(entry.text)) {
+      instance.trackCleanup(entry.text.subscribe(() => manager.apply()));
+    }
+  }
+  instance.trackCleanup(() => manager.unregister(nodeId));
+}
+function renderHead(compiled) {
+  const graph = compiled.graph;
+  const merged = /* @__PURE__ */ new Map();
+  graph.walk((node) => {
+    if (node.type !== "head") return;
+    const descFn = graph.getHandler(`__head__${node.id}`);
+    if (descFn === void 0) return;
+    for (const entry of descFn().entries) {
+      merged.set(entry.dedupKey, resolveEntry(entry));
+    }
+  });
+  if (merged.size === 0) return "";
+  const dom = new ServerDOMAdapter();
+  let out = "";
+  for (const [key, desired] of merged) {
+    const el = dom.createElement(desired.tag);
+    dom.setAttribute(el, HEAD_MARKER, "");
+    dom.setAttribute(el, HEAD_KEY, key);
+    for (const attr of Object.keys(desired.attrs)) {
+      dom.setAttribute(el, attr, desired.attrs[attr]);
+    }
+    if (desired.tag === "title") dom.setTextContent(el, desired.text ?? "");
+    out += dom.serializeOuter(el);
+  }
+  return out;
+}
+
 // ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
@@ -3613,6 +4214,9 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     wireEvents(dom, graph, graphNode, el2, instance2);
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, linkUpdate(dom, el2));
+    }
     dom.appendChild(parentDom, el2);
     return instance2;
   }
@@ -3666,6 +4270,16 @@ function mountNode(ctx, graphNode, parentDom) {
     }
     dom.appendChild(parentDom, anchor);
     wireOverlayBehavior(ctx, graphNode, instance2, target);
+    return instance2;
+  }
+  if (graphNode.type === "head") {
+    const anchor = dom.createElement(resolveTag("head"));
+    dom.setAttribute(anchor, "data-streetui-head-anchor", "");
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance2 = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance2);
+    dom.appendChild(parentDom, anchor);
+    wireHeadBehavior(ctx, graphNode, instance2);
     return instance2;
   }
   const tag = resolveTag(graphNode.type);
@@ -3727,6 +4341,17 @@ function buttonUpdate(dom, el) {
       } else {
         dom.removeAttribute(el, "disabled");
       }
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+function linkUpdate(dom, el) {
+  return (propKey, value) => {
+    if (propKey === "label") {
+      dom.setTextContent(el, String(value ?? ""));
+    } else if (propKey === "href") {
+      dom.setAttribute(el, "href", String(value ?? ""));
     } else {
       applyProp(dom, el, propKey, value);
     }
@@ -3966,7 +4591,12 @@ function hydrateNode(ctx, graphNode, domNode, path) {
     case "link": {
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
-      if (graphNode.type === "link") wireEvents(dom, graph, graphNode, domNode, instance);
+      if (graphNode.type === "link") {
+        wireEvents(dom, graph, graphNode, domNode, instance);
+        if (graphNode.stateRefs.length !== 0) {
+          wireSignalBindings(ctx, graphNode, instance, linkUpdate(dom, domNode));
+        }
+      }
       return instance;
     }
     case "reactive-list":
@@ -3994,6 +4624,12 @@ function hydrateNode(ctx, graphNode, domNode, path) {
       }
       hydrateChildren(ctx, graphNode, instance, target, path);
       wireOverlayBehavior(ctx, graphNode, instance, target);
+      return instance;
+    }
+    case "head": {
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      wireHeadBehavior(ctx, graphNode, instance);
       return instance;
     }
     default: {
@@ -4242,7 +4878,8 @@ function analyzeGraph(graph) {
     const isConditional = node.type === "conditional";
     const isPortal = node.type === "portal";
     const isComponent = node.type === "component";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
+    const isHead = node.type === "head";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
     const isStaticSubtree = isStatic && allChildrenStatic;
     nodes.set(node.id, {
       isStatic,
@@ -5304,11 +5941,22 @@ function capture(compiled, sources, options) {
     snapshot: app.perf,
     diagnostics: diagnosePerformance(compiled, options.perfThresholds)
   };
+  const components = inspectComponents(compiled.graph);
+  const interactions = inspectInteractions(compiled.graph);
+  const diagnostics = {
+    errors: app.diagnostics.errors,
+    warnings: app.diagnostics.warnings,
+    messages: app.diagnostics.messages
+  };
   const snapshot = {
     application,
     graph: app.graph,
     signals,
     performance,
+    components,
+    overlays: interactions.overlays,
+    transitions: interactions.transitions,
+    diagnostics,
     ...sources.router !== void 0 ? { router: inspectRouter(sources.router) } : {},
     ...sources.resources !== void 0 ? { resources: mapInspect(sources.resources, (r) => inspectResource(r)) } : {},
     ...sources.forms !== void 0 ? { forms: mapInspect(sources.forms, (f) => inspectForm(f)) } : {},
@@ -5349,6 +5997,25 @@ function formatSnapshot(s) {
   for (const [label, sig] of Object.entries(s.signals.live)) {
     lines.push(`  ${label} [${sig.kind}] = ${format(sig.value)} \xB7 observers ${sig.observerCount ?? "?"}`);
   }
+  if (s.components.length > 0) {
+    lines.push(`Components: ${s.components.length}`);
+    for (const c of s.components) {
+      lines.push(`  ${"  ".repeat(c.depth)}${c.name}${c.key !== void 0 ? ` (#${c.key})` : ""} \xB7 children ${c.childCount}`);
+    }
+  }
+  if (s.overlays.length > 0) {
+    lines.push(`Overlays: ${s.overlays.length}`);
+    for (const o of s.overlays) {
+      const kind = o.modal ? "modal" : o.menu ? "menu" : o.takesFocus ? "focusable" : "non-modal";
+      lines.push(`  ${o.key ?? o.id} [${kind}] ${o.open ? "open" : "closed"}`);
+    }
+  }
+  if (s.transitions.length > 0) {
+    lines.push(`Transitions: ${s.transitions.length}`);
+    for (const t of s.transitions) {
+      lines.push(`  ${t.key ?? t.id} on <${t.nodeType}> \xB7 ${t.duration}ms${t.appear ? " \xB7 appear" : ""}`);
+    }
+  }
   if (s.router !== void 0) {
     lines.push(`Router: ${s.router.path} (${s.router.pattern})${s.router.isFallback ? " [fallback]" : ""}`);
   }
@@ -5382,6 +6049,12 @@ function formatSnapshot(s) {
   for (const d of s.performance.diagnostics) {
     lines.push(`  ${d.code}: ${d.message}`);
   }
+  lines.push(
+    `Diagnostics: ${s.diagnostics.errors} error(s), ${s.diagnostics.warnings} warning(s)`
+  );
+  for (const m of s.diagnostics.messages) {
+    lines.push(`  ${m}`);
+  }
   return lines.join("\n");
 }
 function format(value) {
@@ -5396,6 +6069,176 @@ function format(value) {
   }
   return String(value);
 }
+
+// ../devtools/src/view.ts
+function escapeHtml(value) {
+  const s = typeof value === "string" ? value : stringifyValue(value);
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+function stringifyValue(value) {
+  if (value === null || value === void 0) return String(value);
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return "[object]";
+    }
+  }
+  return String(value);
+}
+function section(title, count, body) {
+  const badge = count === void 0 ? "" : ` <span class="st-count">${count}</span>`;
+  return `<section class="st-panel"><h2>${escapeHtml(title)}${badge}</h2>${body}</section>`;
+}
+function ul(items) {
+  if (items.length === 0) return '<p class="st-empty">(none)</p>';
+  return `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+}
+function renderDevToolsHTML(s) {
+  const app = s.application;
+  const parts = [];
+  parts.push(
+    section(
+      "Application",
+      void 0,
+      `<p>${escapeHtml(app.identity.name)} <span class="st-dim">v${escapeHtml(app.identity.version)}</span></p><p class="st-dim">${app.nodeCount} nodes \xB7 depth ${app.maxDepth} \xB7 ${app.pages.length} page(s) \xB7 ${app.signalCount} signals \xB7 ${app.eventHandlers} handlers \xB7 ${app.stateBindings} bindings</p>`
+    )
+  );
+  parts.push(
+    section(
+      "Components",
+      s.components.length,
+      ul(
+        s.components.map(
+          (c) => `<span class="st-depth" style="--d:${c.depth}"></span><code>${escapeHtml(c.name)}</code>` + (c.key !== void 0 ? ` <span class="st-key">#${escapeHtml(c.key)}</span>` : "") + ` <span class="st-dim">${c.childCount} child(ren)</span>`
+        )
+      )
+    )
+  );
+  parts.push(section("Graph", void 0, `<pre class="st-tree">${escapeHtml(renderNodeTree(s.graph))}</pre>`));
+  parts.push(
+    section(
+      "Signals",
+      s.signals.boundSignalIds.length,
+      `<p class="st-dim">${s.signals.boundSignalIds.length} bound in graph \xB7 effects shown as observer counts (no global effect registry)</p>` + ul(
+        Object.entries(s.signals.live).map(
+          ([label, sig]) => `<code>${escapeHtml(label)}</code> <span class="st-key">[${escapeHtml(sig.kind)}]</span> = <code>${escapeHtml(sig.value)}</code> <span class="st-dim">observers ${escapeHtml(sig.observerCount ?? "?")}</span>`
+        )
+      )
+    )
+  );
+  if (s.router !== void 0) {
+    parts.push(
+      section(
+        "Router",
+        void 0,
+        `<p><code>${escapeHtml(s.router.path)}</code> <span class="st-dim">(${escapeHtml(s.router.pattern)})${s.router.isFallback ? " \xB7 fallback" : ""}</span></p>`
+      )
+    );
+  }
+  if (s.resources !== void 0) {
+    parts.push(
+      section(
+        "Resources",
+        Object.keys(s.resources).length,
+        ul(
+          Object.entries(s.resources).map(
+            ([label, r]) => `<code>${escapeHtml(label)}</code>: ${escapeHtml(r.status)}` + (r.loading ? ' <span class="st-dim">(loading)</span>' : "") + (r.hasError ? ` <span class="st-err">!${escapeHtml(r.errorName)}</span>` : "")
+          )
+        )
+      )
+    );
+  }
+  parts.push(
+    section(
+      "Overlays",
+      s.overlays.length,
+      ul(
+        s.overlays.map((o) => {
+          const kind = o.modal ? "modal" : o.menu ? "menu" : o.takesFocus ? "focusable" : "non-modal";
+          return `<code>${escapeHtml(o.key ?? o.id)}</code> <span class="st-key">[${kind}]</span> <span class="st-dim">${o.open ? "open" : "closed"}${o.closeOnEscape ? " \xB7 esc" : ""}${o.restoreFocus ? " \xB7 restore" : ""}</span>`;
+        })
+      )
+    )
+  );
+  parts.push(
+    section(
+      "Transitions",
+      s.transitions.length,
+      ul(
+        s.transitions.map(
+          (t) => `<code>${escapeHtml(t.key ?? t.id)}</code> on <code>&lt;${escapeHtml(t.nodeType)}&gt;</code> <span class="st-dim">${t.duration}ms${t.appear ? " \xB7 appear" : ""}</span>`
+        )
+      )
+    )
+  );
+  if (s.forms !== void 0) {
+    parts.push(
+      section(
+        "Forms",
+        Object.keys(s.forms).length,
+        ul(
+          Object.entries(s.forms).map(
+            ([label, f]) => `<code>${escapeHtml(label)}</code>: ${f.valid ? "valid" : "invalid"} \xB7 ${escapeHtml(f.status)} \xB7 ${f.fields.length} field(s)`
+          )
+        )
+      )
+    );
+  }
+  if (s.i18n !== void 0) {
+    const missing = s.i18n.missingKeys;
+    parts.push(
+      section(
+        "i18n",
+        void 0,
+        `<p><code>${escapeHtml(s.i18n.locale)}</code> of [${s.i18n.locales.map(escapeHtml).join(", ")}]${missing !== void 0 ? ` <span class="st-dim">\xB7 missing ${missing.length}</span>` : ""}</p>`
+      )
+    );
+  }
+  parts.push(
+    section(
+      "Performance",
+      s.performance.diagnostics.length,
+      `<p class="st-dim">Structural counts, not runtime timings \u2014 not a production profiler.</p>` + ul(s.performance.diagnostics.map((d) => `<code>${escapeHtml(d.code)}</code>: ${escapeHtml(d.message)}`))
+    )
+  );
+  parts.push(
+    section(
+      "Diagnostics",
+      s.diagnostics.errors + s.diagnostics.warnings,
+      `<p class="st-dim">${s.diagnostics.errors} error(s) \xB7 ${s.diagnostics.warnings} warning(s)</p>` + ul(s.diagnostics.messages.map((m) => escapeHtml(m)))
+    )
+  );
+  const title = `StreetUI DevTools \u2014 ${escapeHtml(app.identity.name)}`;
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${title}</title><style>${DEVTOOLS_CSS}</style></head><body class="st-devtools"><header class="st-header"><h1>${title} <span class="st-dim">v${escapeHtml(app.identity.version)}</span></h1></header><main>${parts.join("")}</main></body></html>`;
+}
+function renderNodeTree(node) {
+  const lines = [];
+  const walk = (n) => {
+    const indent = "  ".repeat(n.depth);
+    const key = n.key !== void 0 ? ` #${n.key}` : "";
+    lines.push(`${indent}<${n.type}${key}> ${n.id}`);
+    for (const c of n.children) walk(c);
+  };
+  walk(node);
+  return lines.join("\n");
+}
+var DEVTOOLS_CSS = [
+  ".st-devtools{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0;color:#e6e6e6;background:#1e1e28}",
+  ".st-header{padding:12px 16px;border-bottom:1px solid #333;background:#15151c}",
+  ".st-header h1{font-size:14px;margin:0}",
+  "main{padding:8px 16px}",
+  ".st-panel{margin:12px 0;border:1px solid #2c2c38;border-radius:6px;overflow:hidden}",
+  ".st-panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin:0;padding:6px 10px;background:#23232e}",
+  ".st-panel ul{list-style:none;margin:0;padding:6px 10px}",
+  ".st-panel li{padding:1px 0}",
+  ".st-panel p{margin:6px 10px}",
+  ".st-count{background:#3a3a4a;border-radius:10px;padding:0 7px;font-size:11px;float:right}",
+  ".st-dim{color:#8a8a9a}.st-key{color:#7db4ff}.st-err{color:#ff8a8a}.st-empty{color:#6a6a7a}",
+  ".st-tree{margin:6px 10px;white-space:pre;overflow:auto;color:#c8c8d4}",
+  ".st-depth{display:inline-block}.st-depth{width:calc(var(--d,0)*12px)}",
+  "code{color:#d7d7e0}"
+].join("");
 
 // src/config.ts
 function defineConfig(config) {
@@ -5420,6 +6263,8 @@ function defineConfig(config) {
   FOCUSABLE_SELECTOR,
   FormBuilderImpl,
   GraphNode,
+  HeadManager,
+  HttpError,
   Lifecycle,
   ListBuilderImpl,
   NodeInstance,
@@ -5460,7 +6305,9 @@ function defineConfig(config) {
   containFocus,
   createAnnouncer,
   createApplication,
+  createAuthSession,
   createBrowserHistory,
+  createClient,
   createContext,
   createDevTools,
   createForm,
@@ -5476,10 +6323,12 @@ function defineConfig(config) {
   createStreetEvent,
   defineConfig,
   derived,
+  describeError,
   diagnosePerformance,
   effect,
   email,
   environment,
+  escapeHtml,
   escapeHtmlAttr,
   escapeHtmlText,
   flushSync,
@@ -5511,7 +6360,9 @@ function defineConfig(config) {
   interpolate,
   isBatching,
   isComponentDefinition,
+  isHeadContribution,
   isTransitionConfig,
+  linkUpdate,
   matchPattern,
   matchRoutes,
   maxLength,
@@ -5519,6 +6370,7 @@ function defineConfig(config) {
   mountGraph,
   mountNode,
   mountRouter,
+  mutation,
   nextId,
   nodeIdPrefix,
   nodeTypeStats,
@@ -5535,10 +6387,14 @@ function defineConfig(config) {
   readState,
   reconcileChildren,
   reconcileChildrenByPlan,
+  renderDevToolsHTML,
+  renderHead,
   renderToString,
   reportDiagnostic,
+  reportError,
   required,
   resetIdCounter,
+  resolveHead,
   resolveTag,
   resolveTransition,
   resource,
@@ -5566,6 +6422,7 @@ function defineConfig(config) {
   validateGraph,
   wireComponentBehavior,
   wireEvents,
+  wireHeadBehavior,
   wireOverlayBehavior,
   wireReactiveList,
   wireSignalBindings

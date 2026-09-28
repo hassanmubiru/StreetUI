@@ -402,12 +402,35 @@ interface PerformancePanel {
     readonly snapshot: ApplicationInspection['perf'];
     readonly diagnostics: readonly PerfDiagnostic[];
 }
+/**
+ * Compilation diagnostics for the DevTools "Diagnostics" panel (§8). These are
+ * the compiler's own findings (errors + warnings), surfaced verbatim — not a
+ * runtime error stream. Runtime/production error reports flow through the
+ * separate `reportError`/`DiagnosticSink` seam in `@streetui/core` (§7).
+ */
+interface DiagnosticsPanel {
+    readonly errors: number;
+    readonly warnings: number;
+    readonly messages: readonly string[];
+}
 /** All panels captured at one `refresh()`. */
 interface DevToolsSnapshot {
     readonly application: ApplicationPanel;
     readonly graph: InspectedNode;
     readonly signals: SignalsPanel;
     readonly performance: PerformancePanel;
+    /**
+     * Component tree (§9): every `component()` instance in document order, with
+     * its stable key/name/location. Read structurally from the graph — the same
+     * data an app/component-tree UI panel renders.
+     */
+    readonly components: readonly InspectedComponent[];
+    /** Overlays currently wired (§13), in graph/containment order (dialog/popover/…). */
+    readonly overlays: readonly InspectedOverlay[];
+    /** Transitions currently wired on nodes (§14). Structural — never interferes with lifecycle. */
+    readonly transitions: readonly InspectedTransition[];
+    /** Compilation diagnostics (§8). */
+    readonly diagnostics: DiagnosticsPanel;
     readonly router?: RouterInspection;
     readonly resources?: Readonly<Record<string, ResourceInspection>>;
     readonly forms?: Readonly<Record<string, FormInspection>>;
@@ -477,4 +500,42 @@ interface DevToolsSession {
  */
 declare function createDevTools(compiled: CompiledApplication, sources?: DevToolsSources, options?: DevToolsOptions): DevToolsSession;
 
-export { type ApplicationIdentity, type ApplicationInspection, type ApplicationPanel, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, type DiagnosticsSummary, type FormInspection, type FormLike, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type ResourceInspection, type ResourceLike, type RouteMatchLike, type RouterInspection, type RouterLike, type SignalInspection, type SignalsPanel, createDevTools, diagnosePerformance, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, nodeTypeStats, printDiagnostics, printGraph };
+/**
+ * DevTools view (2.0 §8) — a DOM-free HTML renderer for a {@link DevToolsSnapshot}.
+ *
+ * This is the "initial UI" layer: it turns the headless snapshot (already
+ * composed from the existing read-only inspectors) into a single self-contained
+ * HTML string a host can inject into a panel, an iframe, or a static report. It
+ * is deliberately a *pure string builder*:
+ *
+ *   - No DOM API is touched and nothing is mounted, so it runs anywhere (Node,
+ *     a worker, a test) and adds nothing to the running app.
+ *   - It reads ONLY the snapshot — no second graph, no reactive subscriptions,
+ *     no retained resource/DOM references.
+ *   - Every dynamic value is HTML-escaped, so an app's data (signal values that
+ *     the caller chose to expose, route paths, form labels) can never break out
+ *     of the markup.
+ *
+ * HONEST SCOPE: this produces markup. Whether it *renders* correctly in a real
+ * browser, is accessible to a screen reader, or performs at 60fps is NOT claimed
+ * here and has NOT been verified — no browser/AT is available in this
+ * environment (the §24 browser gate remains BLOCKED). The value proven by tests
+ * is that the string faithfully and safely reflects the snapshot.
+ *
+ * EFFECTS (§8): StreetUI keeps no global registry of effects (that would require
+ * instrumenting the reactive runtime, which DevTools deliberately does not do).
+ * The closest safe signal is each live signal's `observerCount` — the number of
+ * effects/derivations currently depending on it — which the Signals section
+ * shows. The view labels this honestly rather than inventing an effect list.
+ */
+
+/** Escape a string for safe interpolation into HTML text/attribute content. */
+declare function escapeHtml(value: unknown): string;
+/**
+ * Render a snapshot to a complete, self-contained HTML document string. The
+ * markup is static; call `renderDevToolsHTML(session.refresh())` again to
+ * reflect new state (DevTools pulls — it is never pushed to).
+ */
+declare function renderDevToolsHTML(s: DevToolsSnapshot): string;
+
+export { type ApplicationIdentity, type ApplicationInspection, type ApplicationPanel, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, type DiagnosticsPanel, type DiagnosticsSummary, type FormInspection, type FormLike, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type ResourceInspection, type ResourceLike, type RouteMatchLike, type RouterInspection, type RouterLike, type SignalInspection, type SignalsPanel, createDevTools, diagnosePerformance, escapeHtml, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, nodeTypeStats, printDiagnostics, printGraph, renderDevToolsHTML };

@@ -1,9 +1,8 @@
-import { c as Signal, d as Subscriber, U as Unsubscribe, R as ReadonlySignal, A as ApplicationId, D as DiagnosticCollector, e as ApplicationGraph, G as GraphNode, C as CompiledApplication, f as SemanticNodeType, P as PageDSL, T as TransitionConfig, g as ContainerDSL, h as SignalKind } from './compile-DqsMQVJk.cjs';
-export { i as A11yOptions, j as AppBuilder, k as AppDSL, l as AppOptions, m as ApplicationGraphOptions, B as BaseNode, n as Bindable, o as BindableText, p as BoundInputOptions, q as ButtonOptions, r as CompileOptions, b as ComponentChildren, s as ComponentContext, a as ComponentDefinition, t as ComponentRender, u as ComponentSetup, b as ContainerBuilder, v as ContainerBuilderImpl, w as ContainerOptions, x as ContentDSL, y as ControlledInputOptions, z as DerivedSignal, E as Diagnostic, F as DiagnosticError, H as DiagnosticLocation, I as DiagnosticSeverity, J as ErrorBoundaryOptions, K as ErrorFallbackBuilder, L as ErrorSource, M as EventDescriptor, N as FormBuilder, O as FormBuilderImpl, Q as FormDSL, W as FormOptions, X as GraphNodeData, Y as HandlerFn, Z as HeadingOptions, _ as ImageOptions, $ as InputOptions, a0 as InputOptionsBase, a1 as LinkOptions, a2 as ListBuilder, a3 as ListBuilderImpl, a4 as ListDSL, a5 as ListOptions, a6 as ListPlanEntry, a7 as NodeId, a8 as NodeMetadata, a9 as OverlayOptions, aa as PageBuilder, ab as PageBuilderImpl, ac as PortalOptions, ad as PropValue, ae as Props, af as ReactiveConsumer, ag as ReactiveSource, ah as ResolvedTransition, ai as SectionBuilder, aj as SectionBuilderImpl, ak as SectionDSL, al as SectionOptions, am as SerializedGraph, an as SerializedNode, ao as StateRef, S as StreetApp, ap as StreetUI, aq as TextOptions, ar as TextValue, V as VERSION, as as WhenOptions, at as batch, au as compile, av as compileGraph, aw as component, ax as createNodeId, ay as derived, az as effect, aA as formatDiagnostic, aB as generateApplicationId, aC as generateNodeId, aD as isBatching, aE as isComponentDefinition, aF as isTransitionConfig, aG as nextId, aH as nodeIdPrefix, aI as observerCount, aJ as reactiveListItemKey, aK as reactiveListItemSignature, aL as resetIdCounter, aM as resolveTransition, aN as signal, aO as signalKind, aP as streetui } from './compile-DqsMQVJk.cjs';
-import { R as RenderHandle, S as StreetRenderer, a as HydrationDiagnosticSink } from './hydration-diagnostics-4pwt6v7b.cjs';
-export { H as HydrationDiagnostic, b as HydrationMismatchType, c as consoleHydrationDiagnosticSink, d as createHydrationDiagnosticCollector, f as formatHydrationDiagnostic } from './hydration-diagnostics-4pwt6v7b.cjs';
-import { D as DOMAdapter } from './server-DnwqBTfE.cjs';
-export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-DnwqBTfE.cjs';
+import { c as Signal, d as Subscriber, U as Unsubscribe, R as ReadonlySignal, e as ResourceStatus, f as ResourceOptions, g as Resource, h as ResourceLoaderContext, A as ApplicationId, D as DiagnosticCollector, i as ApplicationGraph, G as GraphNode, C as CompiledApplication, j as HydrationDiagnosticSink, k as SemanticNodeType, P as PageDSL, T as TransitionConfig, l as ContainerDSL, m as SignalKind } from './hydration-diagnostics-CFYDXBlm.cjs';
+export { n as A11yOptions, o as AppBuilder, p as AppDSL, q as AppOptions, r as ApplicationGraphOptions, s as AsyncBoundaryBranches, B as BaseNode, t as Bindable, u as BindableString, v as BindableText, w as BoundInputOptions, x as ButtonOptions, y as CompileOptions, b as ComponentChildren, z as ComponentContext, a as ComponentDefinition, E as ComponentRender, F as ComponentSetup, b as ContainerBuilder, I as ContainerBuilderImpl, J as ContainerOptions, K as ContentDSL, L as ControlledInputOptions, M as DerivedSignal, N as Diagnostic, O as DiagnosticError, Q as DiagnosticLocation, W as DiagnosticSeverity, X as ErrorBoundaryOptions, Y as ErrorFallbackBuilder, Z as ErrorSource, _ as EventDescriptor, $ as FormBuilder, a0 as FormBuilderImpl, a1 as FormDSL, a2 as FormOptions, a3 as GraphNodeData, a4 as HandlerFn, a5 as HeadContribution, a6 as HeadEntry, a7 as HeadMetadata, a8 as HeadingOptions, H as HydrationDiagnostic, a9 as HydrationMismatchType, aa as ImageOptions, ab as InputOptions, ac as InputOptionsBase, ad as LinkDescriptor, ae as LinkOptions, af as ListBuilder, ag as ListBuilderImpl, ah as ListDSL, ai as ListOptions, aj as ListPlanEntry, ak as MetaDescriptor, al as NodeId, am as NodeMetadata, an as OverlayOptions, ao as PageBuilder, ap as PageBuilderImpl, aq as PortalOptions, ar as PropValue, as as Props, at as ReactiveConsumer, au as ReactiveSource, av as ResolvedTransition, aw as ResourceLoader, ax as SectionBuilder, ay as SectionBuilderImpl, az as SectionDSL, aA as SectionOptions, aB as SerializedGraph, aC as SerializedNode, aD as StateRef, S as StreetApp, aE as StreetUI, aF as TextOptions, aG as TextValue, V as VERSION, aH as WhenOptions, aI as batch, aJ as compile, aK as compileGraph, aL as component, aM as consoleHydrationDiagnosticSink, aN as createHydrationDiagnosticCollector, aO as createNodeId, aP as derived, aQ as effect, aR as formatDiagnostic, aS as formatHydrationDiagnostic, aT as generateApplicationId, aU as generateNodeId, aV as isBatching, aW as isComponentDefinition, aX as isHeadContribution, aY as isTransitionConfig, aZ as nextId, a_ as nodeIdPrefix, a$ as observerCount, b0 as reactiveListItemKey, b1 as reactiveListItemSignature, b2 as resetIdCounter, b3 as resolveHead, b4 as resolveTransition, b5 as resource, b6 as signal, b7 as signalKind, b8 as streetui } from './hydration-diagnostics-CFYDXBlm.cjs';
+import { L as Lifecycle, C as CleanupRegistry, D as DOMAdapter, N as NodeInstance, R as RenderContext } from './server-DnAOFpMP.cjs';
+export { H as HeadManager, a as LifecycleHook, b as LifecyclePhase, c as RenderToStringOptions, S as STATE_MARKER_ATTR, d as ServerDOMAdapter, e as createRenderContext, r as readState, f as renderHead, g as renderToString, s as serializeState, h as serverDOMAdapter, w as wireHeadBehavior } from './server-DnAOFpMP.cjs';
+import { R as RenderHandle, S as StreetRenderer } from './renderer-interface-BUhHV7ja.cjs';
 
 /**
  * A simple reactive store built on top of signals.
@@ -23,84 +22,229 @@ declare class Store<T extends StoreState> {
 declare function createStore<T extends StoreState>(initial: T): Store<T>;
 
 /**
- * StreetUI async resources — framework-native asynchronous data.
+ * StreetUI mutations — framework-native asynchronous *writes*.
  *
- * A `resource` wraps a Promise-returning loader and exposes its lifecycle as
- * ordinary StreetUI signals (status / data / error), so it composes with
- * `derived`, `effect`, `when()`, `listOf` and the renderer with no second
- * reactive system.
+ * A `resource` models a read: a loader that runs on creation / on demand and
+ * whose value the UI observes. A `mutation` is its write-side counterpart: an
+ * explicit, argument-taking async action (create / update / delete, a form
+ * submit, a "mark as done" click) whose lifecycle is exposed as ordinary
+ * StreetUI signals so it composes with `derived`, `when()`, and the renderer
+ * with NO second reactive system.
  *
- * State machine:
+ * State machine (mirrors `resource`, but only ever advances on an explicit
+ * `mutate()` — a mutation never runs on its own):
  *
- *   idle ──(load)──▶ loading ──(resolve)──▶ success
- *                      │
- *                      └────(reject)──────▶ error
+ *   idle ──(mutate)──▶ loading ──(resolve)──▶ success
+ *                        │
+ *                        └────(reject)──────▶ error
  *
- * Refetch keeps the previously-loaded `data` visible while `status` is
- * `'loading'` again (see `isRefetching`) — there is no separate `'refetching'`
- * status; it is expressed through `status === 'loading'` with `data` still set.
- *
- * The resource is transport-agnostic: the loader is any function returning a
- * value or a Promise. When it accepts the provided `AbortSignal`, in-flight
- * work is cancelled on `dispose()` or when a newer request supersedes it.
+ * There is deliberately NO global cache and NO automatic invalidation registry
+ * (that would be a second state system with its own lifetime and coherency
+ * rules). Invalidation is explicit and local: pass an `onSuccess` that calls the
+ * `refetch()` of whichever resources the write affected. This keeps data flow
+ * one-directional and readable — the write says exactly what it invalidates.
  */
 
-type ResourceStatus = 'idle' | 'loading' | 'success' | 'error';
-/** Context handed to the loader; carries an AbortSignal for cancellation. */
-interface ResourceLoaderContext {
-    readonly signal: AbortSignal;
-}
-/** Any value-or-Promise producing function. Receives an abort-aware context. */
-type ResourceLoader<T> = (ctx: ResourceLoaderContext) => Promise<T> | T;
-interface ResourceOptions<T = unknown> {
-    /** Load immediately on creation. Defaults to `true`. When `false`, stays `idle` until `refetch()`. */
-    readonly immediate?: boolean;
+/** A mutation shares the resource status vocabulary (idle/loading/success/error). */
+type MutationStatus = ResourceStatus;
+/** The async action a mutation runs. Receives the caller's argument. */
+type Mutator<TArgs, TResult> = (args: TArgs) => Promise<TResult> | TResult;
+interface MutationOptions<TArgs, TResult> {
     /**
-     * Explicit reactive dependencies. When any listed signal changes, the
-     * resource refetches. Dependencies are explicit (not auto-tracked from the
-     * loader body) so there is no risk of an accidental infinite refetch loop.
+     * Run after a successful mutation, before `mutate()`'s promise resolves. The
+     * natural place to invalidate reads: call the affected resources' `refetch()`.
+     * May be async; its completion is awaited so callers can rely on reads being
+     * up to date once `mutate()` resolves.
      */
-    readonly watch?: ReadonlyArray<ReadonlySignal<unknown>>;
+    readonly onSuccess?: (result: TResult, args: TArgs) => void | Promise<void>;
+    /** Run after a failed mutation (the thrown value is passed through). */
+    readonly onError?: (error: unknown, args: TArgs) => void | Promise<void>;
+    /** Run after success OR error, once the lifecycle has settled. */
+    readonly onSettled?: (args: TArgs) => void | Promise<void>;
     /**
-     * Optional teardown registrar (e.g. a route's `ctx.onCleanup`). When given,
-     * the resource registers its own `dispose` so it is cleaned up automatically
-     * when its owner is removed.
+     * Optional teardown registrar (e.g. a component's `ctx.onCleanup`). When
+     * given, the mutation registers its own `dispose` so late results from an
+     * in-flight `mutate()` are ignored once the owner is removed.
      */
     readonly onCleanup?: (fn: () => void) => void;
-    /**
-     * Server-provided initial value for hydration. When present the resource
-     * starts in `'success'` with this data already visible, and the initial
-     * auto-load is skipped (so the client does not refetch data the server
-     * already resolved). This is the client half of SSR resource transfer; the
-     * server side awaits `refetch()` before serializing. Set `immediate: true`
-     * explicitly to force a client refetch anyway.
-     */
-    readonly initialData?: T;
-    /** Server-provided initial error for hydration (mirrors `initialData`). */
-    readonly initialError?: unknown;
-    /**
-     * Explicit initial status override. Rarely needed — inferred as `'success'`
-     * from `initialData` or `'error'` from `initialError`.
-     */
-    readonly initialStatus?: ResourceStatus;
 }
-interface Resource<T> {
+interface Mutation<TArgs, TResult> {
     /** Reactive lifecycle status. */
-    readonly status: ReadonlySignal<ResourceStatus>;
-    /** The last successfully-loaded value, or `undefined` before first success. */
-    readonly data: ReadonlySignal<T | undefined>;
-    /** The most recent error, or `undefined` when there is none. Typed `unknown` — never `any`. */
+    readonly status: ReadonlySignal<MutationStatus>;
+    /** The most recent successful result, or `undefined` before first success. */
+    readonly data: ReadonlySignal<TResult | undefined>;
+    /** The most recent error, or `undefined` when there is none. Typed `unknown`. */
     readonly error: ReadonlySignal<unknown>;
-    /** Convenience: `status === 'loading'`. */
-    readonly loading: ReadonlySignal<boolean>;
-    /** Convenience: loading while previously-loaded data is still present (a refetch). */
-    readonly isRefetching: ReadonlySignal<boolean>;
-    /** Trigger a new request. Resolves when the request settles (or is superseded). */
-    refetch(): Promise<void>;
-    /** Cancel in-flight work, drop watchers, and ignore any late results. Idempotent. */
+    /** Convenience: `status === 'loading'` (an in-flight write). */
+    readonly pending: ReadonlySignal<boolean>;
+    /**
+     * Run the mutation. Resolves with the result on success. On failure the
+     * rejection is surfaced through `error`/`status` AND re-thrown, so a caller
+     * that wants to react imperatively can `try/catch`; a caller that only wants
+     * the reactive state can ignore the returned promise. Superseded/disposed
+     * runs never write state (race guard), matching `resource`.
+     */
+    mutate(args: TArgs): Promise<TResult>;
+    /** Reset back to `idle` with no data/error. */
+    reset(): void;
+    /** Ignore any in-flight result and mark the mutation inert. Idempotent. */
     dispose(): void;
 }
-declare function resource<T>(loader: ResourceLoader<T>, options?: ResourceOptions<T>): Resource<T>;
+/**
+ * Create a {@link Mutation}. The zero-argument form is written
+ * `mutation<void, T>(() => …)` and invoked as `mutate(undefined)`.
+ */
+declare function mutation<TArgs, TResult>(mutator: Mutator<TArgs, TResult>, options?: MutationOptions<TArgs, TResult>): Mutation<TArgs, TResult>;
+
+/**
+ * Optional HTTP data client (2.0 §17) — the integration path between StreetUI's
+ * transport-agnostic `resource`/`mutation` primitives and a real backend (a
+ * StreetJS server, or any HTTP/JSON API).
+ *
+ * This is deliberately OPTIONAL and dependency-free: it imports nothing from
+ * StreetJS (or any server framework), so StreetUI's core stays independent — an
+ * app that never calls `createClient` never pays for it, and StreetUI does not
+ * take on a backend dependency. It is a thin, honest convenience over the
+ * standard `fetch`: URL joining, JSON encode/decode, header merging, abort
+ * propagation, and a typed error. All state still flows through the existing
+ * `resource`/`mutation` signals — there is no cache and no second data system.
+ *
+ * ```ts
+ * const api = createClient({ baseUrl: '/api' });
+ * const users = api.resource<User[]>('/users');            // a read
+ * const create = api.mutation<NewUser, User>('POST', '/users', {
+ *   onSuccess: () => users.refetch(),                      // explicit invalidation
+ * });
+ * ```
+ */
+
+/** A `fetch`-compatible function. Injectable for tests / non-browser runtimes. */
+type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
+interface ClientConfig {
+    /** Prefix joined to every request path (e.g. `/api` or `https://x/api`). */
+    readonly baseUrl?: string;
+    /** Headers merged into every request (per-request headers win). */
+    readonly headers?: Readonly<Record<string, string>>;
+    /**
+     * The fetch implementation to use. Defaults to the global `fetch`. Injecting
+     * one keeps the client testable and usable where no global fetch exists.
+     */
+    readonly fetch?: FetchLike;
+}
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+interface RequestConfig {
+    /** Extra headers for this request (merged over the client's). */
+    readonly headers?: Readonly<Record<string, string>>;
+    /** Abort signal — pass a resource/mutation loader's `ctx.signal` for cancellation. */
+    readonly signal?: AbortSignal;
+    /** Query parameters appended to the URL. */
+    readonly query?: Readonly<Record<string, string | number | boolean>>;
+}
+/**
+ * A failed HTTP response (non-2xx). Carries the status and the parsed body when
+ * one was returned. NOTE: the body may contain server-supplied detail; the §7
+ * error reporter never enumerates an error's own-properties, so `HttpError.body`
+ * never leaks into a diagnostics report unless an app deliberately reads it.
+ */
+declare class HttpError extends Error {
+    readonly status: number;
+    readonly statusText: string;
+    readonly url: string;
+    readonly body: unknown;
+    constructor(status: number, statusText: string, url: string, body: unknown);
+}
+interface Client {
+    /** Issue a request and return the parsed JSON body (throws `HttpError` on non-2xx). */
+    request<T>(method: HttpMethod, path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    get<T>(path: string, config?: RequestConfig): Promise<T>;
+    post<T>(path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    put<T>(path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    patch<T>(path: string, body?: unknown, config?: RequestConfig): Promise<T>;
+    del<T>(path: string, config?: RequestConfig): Promise<T>;
+    /**
+     * A GET-backed {@link Resource}. The loader forwards the resource's abort
+     * signal, so `dispose()`/supersede cancels the request.
+     */
+    resource<T>(path: string, options?: ResourceOptions<T> & {
+        readonly query?: RequestConfig['query'];
+    }): Resource<T>;
+    /**
+     * A {@link Mutation} that issues `method path` with the mutate() argument as
+     * the JSON body. Pair with `onSuccess` to refetch affected resources.
+     */
+    mutation<TArgs, TResult>(method: HttpMethod, path: string, options?: MutationOptions<TArgs, TResult>): Mutation<TArgs, TResult>;
+}
+/** Create an optional HTTP data client. Uses global `fetch` unless one is injected. */
+declare function createClient(config?: ClientConfig): Client;
+
+/**
+ * Optional auth session primitive (2.0 §19) — reactive authentication state for
+ * building sign-in UIs and protected routes, composed entirely from the existing
+ * `resource` (the "who am I" read) and `mutation` (logout / refresh writes).
+ *
+ * There is no new auth framework here and no credential handling: the app
+ * supplies a `loadUser` function (however it authenticates — a StreetJS session
+ * cookie, a bearer token, anything) that returns the current user or `null`. The
+ * primitive turns that into the states a UI switches on — `loading`,
+ * `authenticated`, `unauthenticated`, `error` — plus `refresh()` and `logout()`.
+ *
+ * How the pieces the spec names fit together (all EXISTING seams, no new ones):
+ *   - loading / unauth / auth  → switch UI with `when(session.authenticated, …)`
+ *     etc. (the renderer's existing conditional).
+ *   - refresh / logout         → `session.refresh()` / `session.logout()`.
+ *   - protected route          → in a route's setup, read `session.status`; when
+ *     `unauthenticated`, navigate to the login route (router). Throwing inside a
+ *     guarded builder is caught by `errorBoundary` for an error fallback. This
+ *     module stays router-agnostic so core has no router dependency — the app
+ *     wires the navigation, exactly as with any other signal.
+ */
+
+/** The four states an auth-aware UI switches on. */
+type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'error';
+/** Load the current user, or `null`/`undefined` when nobody is signed in. */
+type LoadUser<TUser> = (ctx: ResourceLoaderContext) => Promise<TUser | null | undefined> | TUser | null | undefined;
+interface AuthSessionConfig<TUser> {
+    /** Resolve the current user (or null when unauthenticated). Abort-aware. */
+    readonly loadUser: LoadUser<TUser>;
+    /**
+     * Perform the server-side logout (clear the cookie/token). Optional — when
+     * omitted, `logout()` just re-checks the session. After it resolves the
+     * session refreshes, so `loadUser` should then return null.
+     */
+    readonly logout?: () => Promise<void> | void;
+    /** Skip the initial load; stays `loading` until the first `refresh()`. */
+    readonly immediate?: boolean;
+    /** Teardown registrar (e.g. a component's `ctx.onCleanup`). */
+    readonly onCleanup?: (fn: () => void) => void;
+}
+interface AuthSession<TUser> {
+    /** The current coarse auth state. */
+    readonly status: ReadonlySignal<AuthStatus>;
+    /** The signed-in user, or `undefined` when not authenticated. */
+    readonly user: ReadonlySignal<TUser | undefined>;
+    /** The most recent load/logout error, or `undefined`. */
+    readonly error: ReadonlySignal<unknown>;
+    /** `status === 'authenticated'`. */
+    readonly authenticated: ReadonlySignal<boolean>;
+    /** `status === 'unauthenticated'`. */
+    readonly unauthenticated: ReadonlySignal<boolean>;
+    /** `status === 'loading'` (the initial who-am-I is still in flight). */
+    readonly loading: ReadonlySignal<boolean>;
+    /** True while a `logout()` is in flight. */
+    readonly loggingOut: ReadonlySignal<boolean>;
+    /** Re-run `loadUser` (e.g. after a token refresh or a focus regain). */
+    refresh(): Promise<void>;
+    /** Run the configured server logout, then refresh (→ unauthenticated). */
+    logout(): Promise<void>;
+    /** Cancel in-flight work and detach. Idempotent. */
+    dispose(): void;
+}
+/**
+ * Create an {@link AuthSession}. The session starts in `loading` and resolves to
+ * `authenticated`/`unauthenticated` once `loadUser` settles (unless
+ * `immediate: false`).
+ */
+declare function createAuthSession<TUser>(config: AuthSessionConfig<TUser>): AuthSession<TUser>;
 
 /**
  * Deterministic accessibility id helpers.
@@ -161,33 +305,6 @@ interface A11yIds {
  * page.dropdown('menu', { open, id: m.controls }, (d) => { … });
  */
 declare function a11yIds(base: string): A11yIds;
-
-/**
- * Application and component lifecycle primitives.
- *
- * Lifecycle phases:
- *   created → mounted → active ⇄ updating → unmounting → destroyed
- */
-type LifecyclePhase = 'created' | 'mounted' | 'active' | 'updating' | 'unmounting' | 'destroyed';
-type LifecycleHook = () => void | Promise<void>;
-declare class Lifecycle {
-    private _phase;
-    private readonly _hooks;
-    get phase(): LifecyclePhase;
-    get isMounted(): boolean;
-    get isDestroyed(): boolean;
-    on(phase: LifecyclePhase, hook: LifecycleHook): () => void;
-    transition(to: LifecyclePhase): Promise<void>;
-    onMount(hook: LifecycleHook): () => void;
-    onUnmount(hook: LifecycleHook): () => void;
-    onDestroy(hook: LifecycleHook): () => void;
-}
-/** A simple cleanup registry — collect teardown functions and run them all at once. */
-declare class CleanupRegistry {
-    private readonly _fns;
-    add(fn: () => void): void;
-    run(): void;
-}
 
 /**
  * Environment detection and capability flags.
@@ -272,6 +389,30 @@ interface DiagnosticContext {
     readonly route?: string;
     /** A resource identifier involved, when applicable. */
     readonly resource?: string;
+    /**
+     * The component name involved (from a `component()` definition's `name`), when
+     * the diagnostic arises inside a component. A stable identifier, never a value.
+     */
+    readonly component?: string;
+    /**
+     * A signal identifier involved (e.g. a named/derived signal's debug name),
+     * when applicable. This is the signal's *identity*, never its current value —
+     * signal contents may be user data and are never placed in a diagnostic.
+     */
+    readonly signal?: string;
+    /**
+     * Where in a node's lifecycle the diagnostic arose: `render` (building the
+     * subtree), `effect` (a reactive effect), `setup` (a component's setup),
+     * `loader` (a resource loader), `event` (a DOM handler), or `hydrate`.
+     */
+    readonly phase?: 'render' | 'effect' | 'setup' | 'loader' | 'event' | 'hydrate';
+    /**
+     * A non-sensitive DOM association for where the error surfaced, e.g.
+     * `div#app` or `button.primary`. Callers must pass only structural
+     * identifiers (tag / id / class) — never `textContent`, attribute *values*,
+     * or anything that could carry user data.
+     */
+    readonly element?: string;
 }
 /**
  * The application-provided logging seam. Every method is optional; the
@@ -305,6 +446,65 @@ declare function frameworkError(message: string, context?: DiagnosticContext): S
 declare function reportDiagnostic(sink: DiagnosticSink | undefined, level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: DiagnosticContext): void;
 /** A sink that forwards to a `console`-like object, one call per level. */
 declare function consoleDiagnosticSink(logger?: Partial<Record<'debug' | 'info' | 'warn' | 'error', (msg: string) => void>>): DiagnosticSink;
+/**
+ * Options controlling how much of an error is disclosed in a report.
+ *
+ * Everything defaults to the SAFE (production) posture: no stack, no cause
+ * chain. A stack trace can embed absolute file paths and, in some runtimes,
+ * source fragments, so it is opt-in and belongs to development / trusted server
+ * logging — never to a report that might reach a browser or a third party.
+ */
+interface ErrorReportOptions {
+    /** Include `error.stack` in the report. Default `false` (production-safe). */
+    readonly includeStack?: boolean;
+    /**
+     * Follow and describe `error.cause` (recursively, up to a small depth) when
+     * present. Default `false`. The cause is described with the SAME redaction
+     * rules — only its name/message/(optional)stack, never arbitrary properties.
+     */
+    readonly includeCause?: boolean;
+}
+/**
+ * A production-safe, serializable description of an error plus the framework
+ * context in which it surfaced. This is what §7 asks a diagnostics sink to
+ * receive: enough to locate the failure (component / route / resource / signal /
+ * phase / DOM association via {@link DiagnosticContext}) WITHOUT any sensitive
+ * data. It deliberately carries ONLY the error's class name and message (both
+ * author-controlled), never enumerated own-properties (which frequently hold
+ * request bodies, tokens, or user records), and the stack only when explicitly
+ * opted in.
+ */
+interface ErrorReport {
+    /** The error's constructor name, e.g. `TypeError` (`Error` when unknown). */
+    readonly name: string;
+    /** The error's message. For a non-Error throw, its `String(...)` form. */
+    readonly message: string;
+    /** Whether the thrown value was a real `Error` instance. */
+    readonly isError: boolean;
+    /** The framework context, when supplied. */
+    readonly context?: DiagnosticContext;
+    /** The stack, only when `includeStack` was set and one exists. */
+    readonly stack?: string;
+    /** The described cause, only when `includeCause` was set and one exists. */
+    readonly cause?: ErrorReport;
+}
+/**
+ * Build a {@link ErrorReport} from any thrown value and (optionally) the
+ * framework {@link DiagnosticContext} it surfaced in. Production-safe by
+ * default: no stack, no cause, no enumerated properties. This is a pure
+ * function — it performs no logging and has no side effects, so it is safe to
+ * call from any layer (an `errorBoundary` `onError`, an `asyncBoundary` error
+ * branch, a resource loader `catch`).
+ */
+declare function describeError(error: unknown, context?: DiagnosticContext, options?: ErrorReportOptions): ErrorReport;
+/**
+ * Convenience bridge: build a production-safe {@link ErrorReport} and route it
+ * to a {@link DiagnosticSink} at the `error` level. The sink receives the
+ * report's message and the structured {@link DiagnosticContext}; the full
+ * report is returned to the caller for forwarding elsewhere (e.g. an app's own
+ * crash reporter). Safe with `undefined` sink (no-op) and never throws.
+ */
+declare function reportError(sink: DiagnosticSink | undefined, error: unknown, context?: DiagnosticContext, options?: ErrorReportOptions): ErrorReport;
 
 /**
  * Compiler-phase validation of the ApplicationGraph.
@@ -574,6 +774,7 @@ declare class BrowserDOMAdapter implements DOMAdapter {
     getElementById(id: string): Element | null;
     focus(element: Element): void;
     body(): Element | null;
+    head(): Element | null;
     activeElement(): Element | null;
     contains(ancestor: Element, node: Node): boolean;
     matches(element: Element, selector: string): boolean;
@@ -780,61 +981,6 @@ interface Announcer {
 declare function createAnnouncer(dom: DOMAdapter): Announcer;
 
 /**
- * NodeInstance — the renderer's live counterpart to a GraphNode.
- *
- * Tracks the actual DOM node(s), all signal subscriptions that drive
- * targeted DOM updates, and DOM event listener teardowns.
- */
-
-declare class NodeInstance {
-    readonly graphNode: GraphNode;
-    /** The primary DOM node for this instance (element or text node). */
-    domNode: Node;
-    readonly children: NodeInstance[];
-    readonly cleanup: CleanupRegistry;
-    constructor(graphNode: GraphNode, domNode: Node);
-    addChild(child: NodeInstance): void;
-    /** Subscribe to a signal; auto-cleanup on unmount. */
-    trackSignal<T>(sig: ReadonlySignal<T>, handler: (v: T) => void): void;
-    /** Register a raw cleanup fn (DOM event removal, etc.). */
-    trackCleanup(fn: () => void): void;
-    dispose(): void;
-}
-
-/**
- * RenderContext — shared state for a single mount operation.
- *
- * Passed through the render pipeline so every sub-function has access
- * to the DOM adapter, graph, and instance map without prop-drilling.
- */
-
-interface RenderContext {
-    readonly dom: DOMAdapter;
-    readonly graph: ApplicationGraph;
-    /** Maps GraphNode.id → its live NodeInstance */
-    readonly instances: Map<string, NodeInstance>;
-    /** The root container element. */
-    readonly container: Element;
-    /**
-     * Optional dev-only sink that observes hydration mismatch repairs. When
-     * absent (the default) the hydration path does no extra work — this is how
-     * DevTools/diagnostics stay off the production runtime path.
-     */
-    readonly hydrationDiagnostics?: HydrationDiagnosticSink;
-    /**
-     * Optional SSR-only static-subtree plan (v1.7). Maps a maximal
-     * static-subtree root GraphNode.id → its precomputed, verbatim HTML string.
-     * Present only on the server render path when a plan has been built; on the
-     * browser mount path it is always `undefined`, so the client hot path is
-     * unaffected (a single `=== undefined` check short-circuits). When a mounted
-     * node's id is in this map, the renderer emits the precomputed HTML via
-     * `dom.createRawHTML` instead of recursively constructing the subtree.
-     */
-    readonly staticHTML?: ReadonlyMap<string, string>;
-}
-declare function createRenderContext(dom: DOMAdapter, graph: ApplicationGraph, container: Element, hydrationDiagnostics?: HydrationDiagnosticSink, staticHTML?: ReadonlyMap<string, string>): RenderContext;
-
-/**
  * Attribute and property application helpers.
  *
  * Decides whether a prop should be set as a DOM attribute or a JS property,
@@ -879,6 +1025,7 @@ declare function textUpdate(dom: DOMAdapter, el: Element, textNode: Text): (prop
 declare function headingUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
 declare function inputUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
 declare function buttonUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
+declare function linkUpdate(dom: DOMAdapter, el: Element): (propKey: string, value: unknown) => void;
 declare function applyNodeProps(ctx: RenderContext, graphNode: GraphNode, el: Element): void;
 declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, onUpdate: (propKey: string, value: unknown) => void): void;
 /**
@@ -2037,12 +2184,35 @@ interface PerformancePanel {
     readonly snapshot: ApplicationInspection['perf'];
     readonly diagnostics: readonly PerfDiagnostic[];
 }
+/**
+ * Compilation diagnostics for the DevTools "Diagnostics" panel (§8). These are
+ * the compiler's own findings (errors + warnings), surfaced verbatim — not a
+ * runtime error stream. Runtime/production error reports flow through the
+ * separate `reportError`/`DiagnosticSink` seam in `streetui` (§7).
+ */
+interface DiagnosticsPanel {
+    readonly errors: number;
+    readonly warnings: number;
+    readonly messages: readonly string[];
+}
 /** All panels captured at one `refresh()`. */
 interface DevToolsSnapshot {
     readonly application: ApplicationPanel;
     readonly graph: InspectedNode;
     readonly signals: SignalsPanel;
     readonly performance: PerformancePanel;
+    /**
+     * Component tree (§9): every `component()` instance in document order, with
+     * its stable key/name/location. Read structurally from the graph — the same
+     * data an app/component-tree UI panel renders.
+     */
+    readonly components: readonly InspectedComponent[];
+    /** Overlays currently wired (§13), in graph/containment order (dialog/popover/…). */
+    readonly overlays: readonly InspectedOverlay[];
+    /** Transitions currently wired on nodes (§14). Structural — never interferes with lifecycle. */
+    readonly transitions: readonly InspectedTransition[];
+    /** Compilation diagnostics (§8). */
+    readonly diagnostics: DiagnosticsPanel;
     readonly router?: RouterInspection;
     readonly resources?: Readonly<Record<string, ResourceInspection>>;
     readonly forms?: Readonly<Record<string, FormInspection>>;
@@ -2113,6 +2283,44 @@ interface DevToolsSession {
 declare function createDevTools(compiled: CompiledApplication, sources?: DevToolsSources, options?: DevToolsOptions): DevToolsSession;
 
 /**
+ * DevTools view (2.0 §8) — a DOM-free HTML renderer for a {@link DevToolsSnapshot}.
+ *
+ * This is the "initial UI" layer: it turns the headless snapshot (already
+ * composed from the existing read-only inspectors) into a single self-contained
+ * HTML string a host can inject into a panel, an iframe, or a static report. It
+ * is deliberately a *pure string builder*:
+ *
+ *   - No DOM API is touched and nothing is mounted, so it runs anywhere (Node,
+ *     a worker, a test) and adds nothing to the running app.
+ *   - It reads ONLY the snapshot — no second graph, no reactive subscriptions,
+ *     no retained resource/DOM references.
+ *   - Every dynamic value is HTML-escaped, so an app's data (signal values that
+ *     the caller chose to expose, route paths, form labels) can never break out
+ *     of the markup.
+ *
+ * HONEST SCOPE: this produces markup. Whether it *renders* correctly in a real
+ * browser, is accessible to a screen reader, or performs at 60fps is NOT claimed
+ * here and has NOT been verified — no browser/AT is available in this
+ * environment (the §24 browser gate remains BLOCKED). The value proven by tests
+ * is that the string faithfully and safely reflects the snapshot.
+ *
+ * EFFECTS (§8): StreetUI keeps no global registry of effects (that would require
+ * instrumenting the reactive runtime, which DevTools deliberately does not do).
+ * The closest safe signal is each live signal's `observerCount` — the number of
+ * effects/derivations currently depending on it — which the Signals section
+ * shows. The view labels this honestly rather than inventing an effect list.
+ */
+
+/** Escape a string for safe interpolation into HTML text/attribute content. */
+declare function escapeHtml(value: unknown): string;
+/**
+ * Render a snapshot to a complete, self-contained HTML document string. The
+ * markup is static; call `renderDevToolsHTML(session.refresh())` again to
+ * reflect new state (DevTools pulls — it is never pushed to).
+ */
+declare function renderDevToolsHTML(s: DevToolsSnapshot): string;
+
+/**
  * StreetUI project configuration (Phase 9). The config is intentionally tiny:
  * every field has a sensible default so `streetui.config.ts` is optional. A
  * project with no config file still builds and runs.
@@ -2166,4 +2374,4 @@ interface ResolvedConfig {
 /** Identity helper that gives `streetui.config.ts` full type-checking + inference. */
 declare function defineConfig(config: StreetUIConfig): StreetUIConfig;
 
-export { type A11yIds, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type ResolvedTransitionLike, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, TransitionConfig, TransitionController, type TransitionHooks, type TransitionPhase, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createAnnouncer, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, getResolvedTransition, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, restoreFocus, routerOutlet, rovingMenu, runElementTransition, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { type A11yIds, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, type AuthSession, type AuthSessionConfig, type AuthStatus, BrowserDOMAdapter, CleanupRegistry, type Client, type ClientConfig, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsPanel, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type FetchLike, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HttpError, type HttpMethod, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LoadUser, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type Mutation, type MutationOptions, type MutationStatus, type Mutator, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, RenderContext, RenderHandle, type RequestConfig, type ResolvedConfig, type ResolvedTransitionLike, Resource, type ResourceInspection, type ResourceLike, ResourceLoaderContext, ResourceOptions, ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, TransitionConfig, TransitionController, type TransitionHooks, type TransitionPhase, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createAnnouncer, createApplication, createAuthSession, createBrowserHistory, createClient, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, describeError, diagnosePerformance, email, environment, escapeHtml, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, getResolvedTransition, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, interpolate, linkUpdate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, mutation, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, renderDevToolsHTML, reportDiagnostic, reportError, required, resolveTag, restoreFocus, routerOutlet, rovingMenu, runElementTransition, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

@@ -264,9 +264,13 @@ function formatDiagnosticContext(context) {
   const parts = [];
   if (context.package !== void 0) parts.push(`package=${context.package}`);
   if (context.operation !== void 0) parts.push(`operation=${context.operation}`);
+  if (context.component !== void 0) parts.push(`component=${context.component}`);
+  if (context.phase !== void 0) parts.push(`phase=${context.phase}`);
   if (context.nodeId !== void 0) parts.push(`node=${context.nodeId}`);
+  if (context.element !== void 0) parts.push(`element=${context.element}`);
   if (context.route !== void 0) parts.push(`route=${context.route}`);
   if (context.resource !== void 0) parts.push(`resource=${context.resource}`);
+  if (context.signal !== void 0) parts.push(`signal=${context.signal}`);
   return parts.length > 0 ? ` [${parts.join(", ")}]` : "";
 }
 var StreetFrameworkError = class extends Error {
@@ -297,6 +301,42 @@ function consoleDiagnosticSink(logger = console) {
     error: (m, c) => logger.error?.(`${m}${formatDiagnosticContext(c)}`)
   };
 }
+function describeErrorAt(error, context, options, depth) {
+  const isError = error instanceof Error;
+  const name = isError ? error.name : "Error";
+  const message = isError ? error.message : safeStringify(error);
+  const report = { name, message, isError };
+  if (context !== void 0) report.context = context;
+  if (options.includeStack === true && isError && typeof error.stack === "string") {
+    report.stack = error.stack;
+  }
+  if (options.includeCause === true && isError && depth < 4) {
+    const cause = error.cause;
+    if (cause !== void 0 && cause !== null) {
+      report.cause = describeErrorAt(cause, void 0, options, depth + 1);
+    }
+  }
+  return report;
+}
+function safeStringify(value) {
+  if (typeof value === "string") return value;
+  if (value === null) return "null";
+  if (value === void 0) return "undefined";
+  const t = typeof value;
+  if (t === "number" || t === "boolean" || t === "bigint" || t === "symbol") {
+    return String(value);
+  }
+  const ctor = t === "object" && value !== null ? value.constructor?.name ?? "Object" : t;
+  return `[non-Error ${ctor}]`;
+}
+function describeError(error, context, options = {}) {
+  return describeErrorAt(error, context, options, 0);
+}
+function reportError(sink, error, context, options = {}) {
+  const report = describeError(error, context, options);
+  reportDiagnostic(sink, "error", report.message, report.context);
+  return report;
+}
 export {
   Application,
   BaseNode,
@@ -310,6 +350,7 @@ export {
   consoleDiagnosticSink,
   createApplication,
   createNodeId,
+  describeError,
   environment,
   formatDiagnostic,
   formatDiagnosticContext,
@@ -319,6 +360,7 @@ export {
   nextId,
   nodeIdPrefix,
   reportDiagnostic,
+  reportError,
   resetIdCounter,
   toIdToken
 };
