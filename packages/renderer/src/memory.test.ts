@@ -257,3 +257,79 @@ describe('memory / keyed-list mutation stress leaves no residue', () => {
     expect(ctx.instances.size).toBeLessThanOrEqual(1);
   });
 });
+
+describe('memory / transition stress leaves no residue (§26)', () => {
+  const FADE = { name: 'fade', duration: 100000 } as const;
+
+  function rows(n: number): { id: number }[] {
+    return Array.from({ length: n }, (_, i) => ({ id: i + 1 }));
+  }
+
+  function compileTransitionList(items: Signal<{ id: number }[]>) {
+    resetIdCounter();
+    const app = streetui.app({ name: 'mem-transition' });
+    app.page('home', (page) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (page as any).listOf(
+        'rows',
+        items,
+        (item: { id: number }, _i: number, c: { text: (t: string) => void }) => {
+          c.text(String(item.id));
+        },
+        { itemTransition: FADE },
+      );
+    });
+    return compile(app);
+  }
+
+  const transitionHandlers = (graph: { handlers: Map<string, unknown> }): number =>
+    [...graph.handlers.keys()].filter((k) => k.startsWith('__transition__')).length;
+
+  /** Settle every currently-running transition of `phase` inside `root`. */
+  function settle(root: Element, phase: 'enter' | 'leave'): void {
+    for (const el of Array.from(root.querySelectorAll(`.fade-${phase}-active`))) {
+      el.dispatchEvent(new Event('transitionend', { bubbles: true }));
+    }
+  }
+
+  // Enter+leave animate at scale: mount, grow to N (enter), churn to empty
+  // (leave), and prove the instance index AND the per-item `__transition__`
+  // handler registry return exactly to baseline — no controller/listener/timer
+  // or handler leak — for lists of 50, 100 and 200 items.
+  for (const N of [50, 100, 200]) {
+    it(`grow→enter→leave of ${N} transitioned items drains instances + handlers to baseline`, () => {
+      const items = signal(rows(0));
+      const compiled = compileTransitionList(items);
+      const container = makeContainer();
+      document.body.appendChild(container);
+      const { ctx, handle } = mountWithCtx(compiled.graph, container);
+
+      const baselineInstances = ctx.instances.size;
+      const baselineTransitions = transitionHandlers(compiled.graph);
+
+      // Grow: every new row enters (from+active applied synchronously).
+      items.set(rows(N));
+      expect(container.querySelectorAll('.fade-enter-active').length).toBe(N);
+      // One live `__transition__` descriptor per item (plus any baseline).
+      expect(transitionHandlers(compiled.graph)).toBe(baselineTransitions + N);
+      settle(container, 'enter');
+
+      // Churn to empty: every row leaves; removal/dispose/detach is DEFERRED
+      // until each leave animation ends, so the nodes are still present now.
+      items.set(rows(0));
+      const leaving = container.querySelectorAll('.fade-leave-active');
+      expect(leaving.length).toBe(N);
+      settle(container, 'leave');
+
+      // Post-settle: instance index and the transition-handler registry are
+      // back to their pre-grow baseline — no residue from N enters + N leaves.
+      expect(ctx.instances.size).toBe(baselineInstances);
+      expect(transitionHandlers(compiled.graph)).toBe(baselineTransitions);
+
+      handle.unmount();
+      expect(ctx.instances.size).toBeLessThanOrEqual(1);
+      expect(transitionHandlers(compiled.graph)).toBe(0);
+      if (container.parentNode !== null) container.parentNode.removeChild(container);
+    });
+  }
+});

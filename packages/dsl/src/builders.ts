@@ -207,6 +207,8 @@ interface OverlayKindConfig {
   readonly modal: boolean;
   /** Move focus into the panel when it opens. */
   readonly takesFocus: boolean;
+  /** Wire arrow/Home/End/Enter/Space roving-focus navigation (role="menu"). */
+  readonly menu?: boolean;
   /** Emit `aria-modal="true"` on the panel. */
   readonly ariaModal: boolean;
   /** Emit an `aria-live` region on the panel (announcements). */
@@ -231,7 +233,7 @@ const OVERLAY_KINDS = {
     defaultCloseOnEscape: false, defaultRestoreFocus: false,
   },
   dropdown: {
-    role: 'menu', modal: false, takesFocus: true, ariaModal: false,
+    role: 'menu', modal: false, takesFocus: true, menu: true, ariaModal: false,
     defaultCloseOnEscape: true, defaultRestoreFocus: true,
   },
   toast: {
@@ -245,6 +247,7 @@ interface OverlayBehaviorDescriptor {
   readonly open: ReadonlySignal<boolean>;
   readonly modal: boolean;
   readonly takesFocus: boolean;
+  readonly menu: boolean;
   readonly closeOnEscape: boolean;
   readonly restoreFocus: boolean;
   readonly initialFocusId?: string;
@@ -701,6 +704,7 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       open: openSignal,
       modal: kind.modal,
       takesFocus: kind.takesFocus,
+      menu: kind.menu ?? false,
       closeOnEscape: options.closeOnEscape ?? kind.defaultCloseOnEscape,
       restoreFocus: options.restoreFocus ?? kind.defaultRestoreFocus,
       ...(options.initialFocusId !== undefined ? { initialFocusId: options.initialFocusId } : {}),

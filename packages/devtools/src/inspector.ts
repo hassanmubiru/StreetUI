@@ -110,3 +110,118 @@ export function inspectComponents(graph: ApplicationGraph): InspectedComponent[]
   return out;
 }
 
+// ── Interaction inspection (§19) ─────────────────────────────────────────────
+
+/** An overlay currently wired in the graph (dialog/popover/tooltip/…). */
+export interface InspectedOverlay {
+  /** The build-order node id of the overlay's portal host. */
+  id: string;
+  /** The stable author-provided key, if any. */
+  key: string | undefined;
+  /** Whether the overlay is open right now (peeked, no subscription). */
+  open: boolean;
+  /** Modal (focus-trapping) overlay? */
+  modal: boolean;
+  /** Does it move focus into itself on open? */
+  takesFocus: boolean;
+  /** Is it a roving-focus menu (role="menu")? */
+  menu: boolean;
+  /** Does Escape close it? */
+  closeOnEscape: boolean;
+  /** Does it restore focus to the opener on close? */
+  restoreFocus: boolean;
+  /** Depth of the portal host node in the graph. */
+  depth: number;
+}
+
+/** A transition currently wired on a graph node. */
+export interface InspectedTransition {
+  /** The build-order node id the transition is attached to. */
+  id: string;
+  /** The stable author-provided key, if any. */
+  key: string | undefined;
+  /** The node type the transition animates (element/portal/list-item/…). */
+  nodeType: string;
+  /** Fallback completion timeout in ms (the resolved `duration`). */
+  duration: number;
+  /** Does it animate the very first appearance (initial mount)? */
+  appear: boolean;
+  /** Depth of the node in the graph. */
+  depth: number;
+}
+
+/** A prod-safe snapshot of the graph's interaction wiring. */
+export interface InspectedInteractions {
+  overlays: InspectedOverlay[];
+  transitions: InspectedTransition[];
+}
+
+/**
+ * Minimal structural views of the descriptors the DSL registers behind
+ * `__overlay__<id>` / `__transition__<id>`. Duplicated here (not imported from
+ * `@streetui/dsl`) so DevTools reads the wiring structurally, with no build-time
+ * dependency on the DSL package — the same no-fragmentation discipline the
+ * renderer already follows.
+ */
+interface OverlayDescriptorLike {
+  readonly open: { peek(): boolean };
+  readonly modal: boolean;
+  readonly takesFocus: boolean;
+  readonly menu: boolean;
+  readonly closeOnEscape: boolean;
+  readonly restoreFocus: boolean;
+}
+interface ResolvedTransitionLike {
+  readonly duration: number;
+  readonly appear: boolean;
+}
+
+/**
+ * Snapshot every overlay and transition currently wired in the graph, in
+ * document order. This is the interaction-aware companion to
+ * {@link inspectComponents}: it reads only the `__overlay__<id>` /
+ * `__transition__<id>` handler descriptors and public graph structure — it
+ * peeks the `open` signal without subscribing, retains no DOM nodes, mutates
+ * nothing, and is safe to call in production. Because a departing overlay's
+ * handler is pruned on detach (`_unregisterNodeHandlers`), a closed-and-removed
+ * overlay simply no longer appears here.
+ */
+export function inspectInteractions(graph: ApplicationGraph): InspectedInteractions {
+  const overlays: InspectedOverlay[] = [];
+  const transitions: InspectedTransition[] = [];
+  graph.walk((node, depth) => {
+    const overlayFn = graph.getHandler(`__overlay__${node.id}`) as
+      | (() => OverlayDescriptorLike)
+      | undefined;
+    if (overlayFn !== undefined) {
+      const d = overlayFn();
+      overlays.push({
+        id: node.id,
+        key: node.key,
+        open: d.open.peek(),
+        modal: d.modal,
+        takesFocus: d.takesFocus,
+        menu: d.menu,
+        closeOnEscape: d.closeOnEscape,
+        restoreFocus: d.restoreFocus,
+        depth,
+      });
+    }
+    const transitionFn = graph.getHandler(`__transition__${node.id}`) as
+      | (() => ResolvedTransitionLike)
+      | undefined;
+    if (transitionFn !== undefined) {
+      const t = transitionFn();
+      transitions.push({
+        id: node.id,
+        key: node.key,
+        nodeType: node.type,
+        duration: t.duration,
+        appear: t.appear,
+        depth,
+      });
+    }
+  });
+  return { overlays, transitions };
+}
+

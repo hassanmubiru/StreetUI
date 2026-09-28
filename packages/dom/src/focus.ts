@@ -118,18 +118,37 @@ export function trapFocus(dom: DOMAdapter, container: Element): () => void {
  * Modal containment: if focus moves to an element outside `container`, redirect
  * it back inside. Listens on the document body (focusin bubbles there) and
  * returns a cleanup function. Server-safe no-op (body() is null).
+ *
+ * Nested modals (§16): every active containment pushes its container onto a
+ * module-level stack, and a handler only redirects while ITS container is the
+ * top of the stack — i.e. the most recently opened modal. This is the framework's
+ * minimal "focus owner" concept: because overlay panels are relocated to
+ * body-level portals (siblings, not descendants), two overlapping `containFocus`
+ * handlers would otherwise fight over every `focusin`. The stack makes exactly
+ * one owner authoritative at a time; cleanup pops it so the previous modal
+ * resumes ownership. State is internal and torn down on cleanup — nothing is
+ * retained on the graph (§18).
  */
+const containmentStack: Element[] = [];
+
 export function containFocus(dom: DOMAdapter, container: Element): () => void {
   const body = dom.body();
   if (body === null) return () => {};
+  containmentStack.push(container);
   const onFocusIn = ((event: FocusEvent): void => {
+    // Only the topmost owner enforces containment (nested-modal correctness).
+    if (containmentStack[containmentStack.length - 1] !== container) return;
     const target = event.target as Node | null;
     if (target !== null && !dom.contains(container, target)) {
       focusFirst(dom, container);
     }
   }) as EventListener;
   dom.addEventListener(body, 'focusin', onFocusIn);
-  return () => dom.removeEventListener(body, 'focusin', onFocusIn);
+  return () => {
+    dom.removeEventListener(body, 'focusin', onFocusIn);
+    const index = containmentStack.lastIndexOf(container);
+    if (index !== -1) containmentStack.splice(index, 1);
+  };
 }
 
 /**
@@ -142,5 +161,57 @@ export function onEscape(dom: DOMAdapter, target: Element, handler: () => void):
   }) as EventListener;
   dom.addEventListener(target, 'keydown', onKeydown);
   return () => dom.removeEventListener(target, 'keydown', onKeydown);
+}
+
+/**
+ * Roving-focus keyboard navigation for a menu (role="menu") container: the
+ * arrow keys move focus between the container's focusable items (wrap-around at
+ * both ends), Home/End jump to the first/last item, and Enter/Space activate
+ * the currently-focused item (a native `click`, so an item's `onClick` fires).
+ * `Tab` and `Escape` are deliberately left alone — the overlay layer wires
+ * Escape-to-close separately and a menu does not trap Tab.
+ *
+ * Items are re-queried on every key (via {@link getFocusable}) so a menu whose
+ * items change reactively is always navigated against the live set, and items
+ * disabled after mount are skipped. Attaches a keydown listener to the
+ * container and returns a cleanup function. Server-safe: `addEventListener` is
+ * a no-op and the returned cleanup is still callable.
+ */
+export function rovingMenu(
+  dom: DOMAdapter,
+  container: Element,
+  selector: string = FOCUSABLE_SELECTOR,
+): () => void {
+  const onKeydown = ((event: KeyboardEvent): void => {
+    const key = event.key;
+    const isActivate = key === 'Enter' || key === ' ' || key === 'Spacebar';
+    const isMove =
+      key === 'ArrowDown' || key === 'ArrowUp' || key === 'Home' || key === 'End';
+    if (!isActivate && !isMove) return;
+
+    const items = getFocusable(dom, container, selector);
+    if (items.length === 0) return;
+    const active = dom.activeElement();
+    const index = active === null ? -1 : items.indexOf(active);
+
+    if (isActivate) {
+      // Activating a menu item only makes sense when one is focused; otherwise
+      // let the event fall through unchanged.
+      if (index < 0) return;
+      event.preventDefault();
+      (items[index] as unknown as { click?: () => void }).click?.();
+      return;
+    }
+
+    event.preventDefault();
+    let next: number;
+    if (key === 'Home') next = 0;
+    else if (key === 'End') next = items.length - 1;
+    else if (key === 'ArrowDown') next = index < 0 ? 0 : (index + 1) % items.length;
+    else next = index <= 0 ? items.length - 1 : index - 1; // ArrowUp
+    dom.focus(items[next]!);
+  }) as EventListener;
+  dom.addEventListener(container, 'keydown', onKeydown);
+  return () => dom.removeEventListener(container, 'keydown', onKeydown);
 }
 

@@ -13,6 +13,13 @@ import {
   flushUpdates,
   waitFor,
   renderServerThenHydrate,
+  focus,
+  blur,
+  pressKey,
+  clickOutside,
+  openOverlay,
+  closeOverlay,
+  waitForTransition,
 } from './helpers.js';
 import { render } from './test-renderer.js';
 
@@ -126,5 +133,87 @@ describe('renderServerThenHydrate', () => {
     r.flush();
     expect(r.container.textContent).toContain('2');
     r.unmount();
+  });
+});
+
+describe('interaction helpers (§20)', () => {
+  it('focus/blur move the active element', () => {
+    const app = streetui.app({ name: 'fb' });
+    app.page('home', (p) => p.button('Go', { id: 'go' }));
+    const { container, unmount } = render(app);
+    const go = container.querySelector('#go') as HTMLElement;
+    focus(go);
+    expect(document.activeElement).toBe(go);
+    blur(go);
+    expect(document.activeElement).not.toBe(go);
+    unmount();
+  });
+
+  it('openOverlay/closeOverlay drive an overlay and pressKey(Escape) closes it', async () => {
+    const open = signal(false);
+    const app = streetui.app({ name: 'ov' });
+    app.page('home', (page) => {
+      page.dialog('dlg', { open, onClose: () => open.set(false) }, (d) =>
+        d.button('First', { id: 'first' }),
+      );
+    });
+    const { unmount } = render(app);
+
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+    await openOverlay(open);
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    // Focus moved into the panel; Escape from there closes cooperatively.
+    expect(document.activeElement).toBe(document.getElementById('first'));
+    pressKey('Escape');
+    await flushUpdates();
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+
+    // closeOverlay is the explicit path too.
+    await openOverlay(open);
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    await closeOverlay(open);
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+    unmount();
+  });
+
+  it('clickOutside dispatches outside and rejects an inside target', () => {
+    const app = streetui.app({ name: 'co' });
+    app.page('home', (p) => p.button('In', { id: 'in' }));
+    const { container, unmount } = render(app);
+    const inside = container.querySelector('#in') as HTMLElement;
+    // Inside target is a loud error, not a silent no-op.
+    expect(() => clickOutside(container, inside)).toThrow(/inside the container/);
+    // Outside (body) dispatches without throwing.
+    expect(() => clickOutside(container)).not.toThrow();
+    unmount();
+  });
+
+  it('waitForTransition settles a leave so the node is removed', async () => {
+    const FADE = { name: 'fade', duration: 100000 } as const;
+    const open = signal(false);
+    const app = streetui.app({ name: 'wt' });
+    app.page('home', (page) => {
+      page.dialog('dlg', { open, onClose: () => open.set(false), transition: FADE }, (d) =>
+        d.button('First', { id: 'first' }),
+      );
+    });
+    const { unmount } = render(app);
+
+    await openOverlay(open);
+    const portal = document.body.querySelector('[data-streetui-portal-container]')!;
+    // Settle the enter so the leave is clean.
+    await waitForTransition(portal.querySelector('.fade-enter-active')!);
+
+    // Close: panel is still present, animating out.
+    open.set(false);
+    await flushUpdates();
+    const leaving = portal.querySelector('.fade-leave-active')!;
+    expect(leaving).not.toBeNull();
+    expect(portal.querySelector('[role="dialog"]')).not.toBeNull();
+
+    // waitForTransition dispatches transitionend + flushes → node removed.
+    await waitForTransition(leaving);
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+    unmount();
   });
 });

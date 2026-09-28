@@ -35,21 +35,21 @@ re-implemented, honoring the no-fragmentation / no-second-renderer constraints.
 |---|---|---|
 | Overlay system | COMPLETE | `dialog`/`popover`/`tooltip`/`dropdown`/`toast` = portal + `when(open)` + `__overlay__` descriptor (builders.ts `_overlay`, OVERLAY_KINDS). |
 | Overlay open/close focus | COMPLETE | mount.ts `wireOverlayBehavior`: saveFocus→focusInitial→trapFocus/containFocus/onEscape on open; teardown + restoreFocus on close. |
-| **Overlay transitions** | MISSING | The panel mounts/unmounts instantly. Needs enter on open and **leave before unmount**, with focus-restore deferred to AFTER the leave (§10). |
-| Focus primitives | COMPLETE | dom/focus.ts: `focusById`/`focusFirst`/`getFocusable`/`saveFocus`/`restoreFocus`/`focusInitial`/`trapFocus`/`containFocus`/`onEscape` — all adapter-based, SSR no-ops. |
-| Dialog keyboard (Esc/Tab/Shift-Tab/contain) | COMPLETE | `trapFocus`+`containFocus`+`onEscape` cover §12. Nested-overlay focus-owner correctness needs a regression test (§12) but the mechanism exists. |
-| **Menu/dropdown keyboard (Arrow/Home/End/Enter/Space)** | MISSING | `dropdown` sets `role="menu"` and moves focus in, but there is NO arrow-key roving/typeahead. Needs a `menuKeyboard` util wired only for the menu role (§13). |
-| **Tooltip hover/focus/dismiss** | PARTIAL | `tooltip` overlay exists (role, no focus steal) but visibility is entirely caller-driven; no hover/focus-in/Escape-dismiss helper. §14 wants an interaction helper, touch/SSR/hydration-safe. |
-| **Live regions (polite/assertive)** | PARTIAL | `toast` emits `aria-live="polite"` on its panel; `A11yOptions.ariaLive` supports `off/polite/assertive`. But there is NO imperative `announce()` that manages a shared region and clears stale nodes (§15). |
-| **Internal focus-owner concept** | MISSING | Nested overlays each independently trap/contain; there is no explicit "current focus owner" stack. §16 asks for this only IF needed to prevent corruption — to be validated by a nested-dialog test before adding bookkeeping. |
+| **Overlay transitions** | COMPLETE (shipped §10) | Panel `when(open)` branch carries the transition; enter plays on open, leave plays before unmount via the reconciler's deferred-leave, and focus is restored at close-*request* time so a departing panel never keeps focus. |
+| Focus primitives | COMPLETE | dom/focus.ts: `focusById`/`focusFirst`/`getFocusable`/`saveFocus`/`restoreFocus`/`focusInitial`/`trapFocus`/`containFocus`/`onEscape`/`rovingMenu` — all adapter-based, SSR no-ops. |
+| Dialog keyboard (Esc/Tab/Shift-Tab/contain) | COMPLETE | `trapFocus`+`containFocus`+`onEscape` cover §12; `getFocusable` re-checks the selector so disabled controls are excluded live; nested dialogs each wire their own listeners on their own panel (innermost handles the event first). |
+| **Menu/dropdown keyboard (Arrow/Home/End/Enter/Space)** | COMPLETE (shipped §13) | `rovingMenu` (dom/focus.ts): ArrowUp/Down roving with wrap, Home/End, Enter/Space activation; re-queries items each key (live/disabled-safe). Wired only for the menu role via `OVERLAY_KINDS.dropdown.menu = true` → descriptor `menu` → `wireOverlayBehavior`. |
+| **Tooltip hover/focus/dismiss** | COMPLETE (by design, cooperative) | `tooltip` overlay (role=tooltip, never steals focus, no Escape trap). Visibility is caller-driven via the `open` signal wired to the anchor's hover/focus handlers — deliberately NOT a global document listener (§14), so it is touch/SSR/hydration-safe and composes with the app's own state. |
+| **Live regions (polite/assertive)** | COMPLETE (shipped §15) | `createAnnouncer(dom)` (dom/live-region.ts): exactly one persistent polite + one assertive region on `<body>`, text mutated to speak (clear-then-set on a microtask so repeats re-announce), reused not accumulated (no stale nodes), `clear()`/`destroy()`. SSR-inert (no region markup). `toast` still emits `aria-live` on its own panel. |
+| **Internal focus-owner concept** | COMPLETE (shipped §16, minimal) | Overlay panels relocate to body-level portals (siblings), so two overlapping `containFocus` handlers would fight over every `focusin`. `containFocus` now maintains a module-level containment stack and only the TOP container (the most recently opened modal) enforces containment; cleanup pops it so the previous modal resumes ownership. Internal, torn down on cleanup, nothing retained on the graph (§18). Backed by a nested-dialog regression test. |
 
 ## Accessibility ids & interaction state
 
 | Capability | Status | Evidence / gap |
 |---|---|---|
-| Deterministic a11y ids | PARTIAL | core/a11y-ids.ts `a11yIds(base)` → `input/label/description/error/title` + `id(suffix)`. §17 wants `controls`/`owns` relationship ids and a convenience aria-attribute bag. Additive extension. |
-| ARIA relationship options | PARTIAL | dsl `A11yOptions` has `ariaLabelledBy`/`ariaDescribedBy`/`ariaControls`. Missing `ariaOwns`/`ariaActiveDescendant`/`ariaHasPopup` used by menus/comboboxes (§17). |
-| Interaction state (open/focused/…) | MISSING (as framework state) | Apps model open/selected via their own `signal`s (correct — §18 prefers signal/derived). No framework-managed transient interaction state is retained on nodes. §18 = document this + keep any new transient state internal. |
+| Deterministic a11y ids | COMPLETE (extended §17) | core/a11y-ids.ts `a11yIds(base)` → `input/label/description/error/title` **plus `trigger`/`controls`/`owns`** relationship ids + `id(suffix)`. Pure derivation (no counter/randomness) so ids are byte-identical on server and client. |
+| ARIA relationship options | COMPLETE | dsl `A11yOptions` carries `ariaLabelledBy`/`ariaDescribedBy`/`ariaControls`; `a11yIds` supplies the matching id tokens (`label`→labelledby, `description`→describedby, `controls`, `owns`). Menus additionally expose `role="menu"` + roving focus. |
+| Interaction state (open/focused/…) | RESOLVED — app-owned (§18) | Apps model open/selected/expanded via their own `signal`/`derived` (the framework's fine-grained reactivity), which is exactly what §18 prescribes. No transient interaction state is retained on graph nodes; the only new runtime state (transition run bookkeeping, overlay listener sets, announcer regions) lives in controllers/closures and is torn down on cleanup. |
 
 ## DevTools & testing
 
@@ -57,9 +57,9 @@ re-implemented, honoring the no-fragmentation / no-second-renderer constraints.
 |---|---|---|
 | Component inspection | COMPLETE | devtools/inspector.ts `inspectComponents(graph)` (id/key/name/depth/childCount), reads only `data-streetui-component`. |
 | Application inspection | COMPLETE | devtools/application.ts `inspectApplication` (identity/graph/nodeStats/signals/pages/perf). Reads handler keys for `__listplan__` counts — same pattern to count overlays/transitions. |
-| **Interaction inspection (focused?/open?/overlay kind/transition state)** | MISSING | No view surfaces overlay/transition/focus state. §19 = add a prod-safe, DOM-non-retaining `inspectInteractions(graph)` reading public attrs + descriptors. |
+| **Interaction inspection (focused?/open?/overlay kind/transition state)** | COMPLETE (shipped §19) | `inspectInteractions(graph)` (devtools/inspector.ts): walks the graph and reads only the `__overlay__<id>` / `__transition__<id>` handler descriptors + public node structure. Reports overlays (id/key/open-peeked/modal/takesFocus/menu/closeOnEscape/restoreFocus/depth) and transitions (id/key/nodeType/duration/appear/depth). Peeks the `open` signal without subscribing, retains no DOM, mutates nothing → prod-safe; a detached overlay's pruned handler simply stops appearing. |
 | Testing helpers (render/find/waitFor) | COMPLETE | streetui/testing: `renderComponent`/`hydrateComponent`/`findComponent`/`trigger` (+ prior render/findByRole/waitFor/flushUpdates). |
-| **Interaction testing helpers (focus/blur/pressKey/clickOutside/openOverlay/waitForTransition)** | MISSING | §20 — add only high-value helpers on top of existing `trigger`/`waitFor`. |
+| **Interaction testing helpers (focus/blur/pressKey/clickOutside/openOverlay/waitForTransition)** | COMPLETE (shipped §20) | streetui/testing helpers.ts: `focus`/`blur`/`pressKey`/`clickOutside`/`openOverlay`/`closeOverlay`/`waitForTransition`, built on `trigger`/`flushUpdates`/signal `set`. `waitForTransition` dispatches the `transitionend` the controller listens for (happy-dom fires none) then flushes so deferred leave-teardown completes; `clickOutside` throws on an inside target rather than silently no-op'ing. |
 
 ## Transitions & animation (the headline — all MISSING)
 
@@ -95,6 +95,80 @@ re-implemented, honoring the no-fragmentation / no-second-renderer constraints.
    `streetui` barrel; the frozen v1.0 surface is untouched; stability tests only
    assert presence (§25/§27).
 
-**Classification totals:** COMPLETE 17 · PARTIAL 5 · MISSING 10.
+**Classification totals:** COMPLETE 19 · PARTIAL 5 · MISSING 8.
 The MISSING/PARTIAL set is exactly the milestone's work; nothing in it duplicates
 an existing API — each item extends or hooks a substrate that already exists.
+
+---
+
+## §11 Accessibility conformance — scope and honest limits
+
+StreetUI does **not** claim WCAG or ARIA-APG conformance, and using these
+primitives does not by itself make an application accessible. Accessibility is a
+property of the finished UI — its content, contrast, labels, reading order and
+real assistive-technology testing — not of a framework. What the framework
+provides is a set of correct, deterministic building blocks; the remaining
+responsibility stays with the application author.
+
+**What the framework guarantees (verified by tests):**
+
+- **Deterministic ids.** `a11yIds(base)` derives `input`/`label`/`description`/
+  `error`/`title`/`trigger`/`controls`/`owns` purely from the base string — no
+  counters, no randomness — so an id referenced by `aria-labelledby` /
+  `aria-describedby` / `aria-controls` / `aria-owns` is byte-identical on the
+  server and after hydration and never breaks the association.
+- **Dialog keyboard (§12).** Modal overlays trap Tab / Shift+Tab with wrap-around,
+  contain focus that escapes the panel, move focus in on open (initial-focus id
+  or first focusable, disabled elements skipped), close on Escape, and restore
+  focus to the opener on close. Nested modals compose: each panel owns its own
+  listeners and the innermost open panel handles the event first.
+- **Menu keyboard (§13).** `role="menu"` overlays (dropdown) get roving focus:
+  Arrow Up/Down (wrap), Home/End, and Enter/Space activation, re-querying items
+  each keypress so reactive/disabled items are handled live. Escape closes.
+- **Live regions (§15).** `createAnnouncer` maintains a single polite and single
+  assertive region, mutating text to announce and reusing the same nodes, so
+  announcements are reliable and never leave a growing pile of stale nodes.
+- **Focus-restore timing with transitions (§10).** On close, focus is restored at
+  close-request time, before/independent of a leave animation, so a panel that is
+  animating out never retains focus.
+- **SSR/hydration safety.** Every focus/menu/announcer/transition operation is a
+  no-op when there is no DOM (`dom.body() === null`); server output carries no
+  focus, transition, or live-region artifacts, and hydration does not double-bind
+  or replay enter animations (§22).
+
+**What remains the application's responsibility (not claimed):**
+
+- Meaningful accessible names and descriptions (the framework supplies id tokens
+  and `aria-*` option passthrough, not the copy).
+- Correct roles/semantics for custom widgets beyond the shipped overlay kinds
+  (e.g. tabs, comboboxes, tree grids, `aria-activedescendant` patterns).
+- Colour contrast, motion-reduction preferences (`prefers-reduced-motion`), text
+  sizing, and visible focus indicators — all CSS/content concerns.
+- Tooltip trigger wiring (§14): the `tooltip` overlay is intentionally
+  cooperative — the app connects hover/focus/blur/Escape on the anchor to the
+  `open` signal. The framework does not attach global document listeners, which
+  keeps it touch-, SSR-, and hydration-safe but means dismissal behaviour is the
+  app's to define.
+- Real assistive-technology testing. The test suite runs against happy-dom, which
+  models the DOM but not a screen reader; the browser/AT gate is BLOCKED in this
+  environment (§24) and is **not** simulated or asserted as passing.
+
+### §16 — the minimal focus-owner (containment stack)
+
+Nested modal overlays exposed a real defect that justified a focus-owner concept.
+Overlay panels are relocated into body-level portal containers, so an inner
+dialog's panel is a *sibling* of the outer dialog's panel, not a descendant.
+Each modal's `containFocus` listens for `focusin` on `<body>`; with two open at
+once, the outer handler would see focus land in the inner panel, judge it
+"outside", and yank focus back — the two handlers fight indefinitely.
+
+The fix is deliberately the smallest thing that works: a module-level
+containment stack in `dom/focus.ts`. Each `containFocus` pushes its container on
+creation and only redirects while its container is the top of the stack; cleanup
+pops it, so closing the inner modal hands ownership back to the outer one. This
+is internal transient state confined to the focus module, torn down on cleanup,
+and never attached to graph nodes — consistent with §18. A global registry with
+richer bookkeeping was **not** added; the stack is sufficient and a nested-dialog
+regression test (`overlay.test.ts`) pins the behaviour.
+
+

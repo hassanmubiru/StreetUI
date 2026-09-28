@@ -275,3 +275,68 @@ describe('component — factory (§3)', () => {
     expect(ran).toBe(0);
   });
 });
+
+describe('component — interaction platform integration (§29)', () => {
+  const FADE = { name: 'fade', duration: 100000 } as const;
+  const endTransition = (el: Element): void =>
+    void el.dispatchEvent(new Event('transitionend', { bubbles: true }));
+
+  it('a transition composes inside a component and its handler is pruned on dispose', async () => {
+    let cleaned = 0;
+    // A component that owns a transitioned `when()` panel driven by a prop signal.
+    const Panel = component<{ open: Signal<boolean> }>((props, ctx) => {
+      ctx.onCleanup(() => cleaned++);
+      return (c) =>
+        c.when(props.open, (b) => b.text('panel body', { id: 'panel' }), undefined, {
+          transition: FADE,
+        });
+    }, { name: 'Panel' });
+
+    const open: Signal<boolean> = signal(false);
+    const mounted: Signal<boolean> = signal(true);
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const app = streetui.app({ name: 'combo' });
+    app.page('home', (page) => {
+      // Wrap the component in a `when` so we can unmount the whole component.
+      page.when(mounted, (c) => (c as ContainerDSL).component('p', Panel, { open }), undefined);
+    });
+    const handle = createRenderer({ domAdapter: new BrowserDOMAdapter() }).mount(
+      compile(app),
+      container,
+    );
+
+    // Panel wrapper present, body hidden.
+    expect(container.querySelector('[data-streetui-component="Panel"]')).not.toBeNull();
+    expect(document.getElementById('panel')).toBeNull();
+
+    // Open → the body enters (transition classes applied inside the component).
+    open.set(true);
+    await flush();
+    const entering = container.querySelector('.fade-enter-active')!;
+    expect(entering).not.toBeNull();
+    expect(document.getElementById('panel')).not.toBeNull();
+    endTransition(entering);
+
+    // Close → the body leaves; removal is deferred until the leave ends.
+    open.set(false);
+    await flush();
+    const leaving = container.querySelector('.fade-leave-active')!;
+    expect(leaving).not.toBeNull();
+    expect(document.getElementById('panel')).not.toBeNull();
+    endTransition(leaving);
+    expect(document.getElementById('panel')).toBeNull();
+
+    // Unmount the whole component → its cleanup runs (composition teardown).
+    open.set(true);
+    await flush();
+    endTransition(container.querySelector('.fade-enter-active')!);
+    mounted.set(false);
+    await flush();
+    expect(container.querySelector('[data-streetui-component="Panel"]')).toBeNull();
+    expect(cleaned).toBe(1);
+
+    handle.unmount();
+    if (container.parentNode !== null) container.parentNode.removeChild(container);
+  });
+});

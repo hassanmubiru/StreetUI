@@ -73,6 +73,82 @@ export async function waitFor<T>(
   }
 }
 
+// ── Interaction helpers (§20) ───────────────────────────────────────────────
+
+/** A minimal writable-boolean seam (an overlay `open` signal, typically). */
+export interface BooleanControl {
+  set(value: boolean): void;
+}
+
+/** Focus `el` (no-op if it exposes no `focus`). Intentful wrapper for tests. */
+export function focus(el: Element): void {
+  (el as unknown as { focus?: () => void }).focus?.();
+}
+
+/** Blur `el` (no-op if it exposes no `blur`). */
+export function blur(el: Element): void {
+  (el as unknown as { blur?: () => void }).blur?.();
+}
+
+/**
+ * Dispatch a bubbling, cancelable `keydown` for `key` on `el` (defaulting to the
+ * currently-focused element). Extra `init` fields (e.g. `{ shiftKey: true }`)
+ * are forwarded. Use for keyboard-interaction assertions (Escape, Tab, arrows).
+ */
+export function pressKey(
+  key: string,
+  el: Element | null = document.activeElement,
+  init: KeyboardEventInit = {},
+): void {
+  if (el === null) return;
+  el.dispatchEvent(
+    new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }),
+  );
+}
+
+/**
+ * Simulate a pointer interaction OUTSIDE `container` — a `mousedown` + `click`
+ * on `document.body` (or `target` if given). Drives "click-away to dismiss"
+ * behaviour without the test constructing events by hand. If `target` is inside
+ * `container` this throws, so a mistake is loud rather than a silent no-op.
+ */
+export function clickOutside(container: Element, target: Element = document.body): void {
+  if (container.contains(target)) {
+    throw new Error('[StreetUI Testing] clickOutside: target is inside the container');
+  }
+  target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+  target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+}
+
+/**
+ * Open an overlay by flipping its `open` control to `true`, then flush so the
+ * panel mounts and its enter/focus wiring runs. Overlay visibility is app-owned
+ * state (§18) — a plain signal — so this is a thin, intentful wrapper over
+ * `set(true)` + {@link flushUpdates}.
+ */
+export async function openOverlay(open: BooleanControl): Promise<void> {
+  open.set(true);
+  await flushUpdates();
+}
+
+/** Close an overlay by flipping its `open` control to `false`, then flush. */
+export async function closeOverlay(open: BooleanControl): Promise<void> {
+  open.set(false);
+  await flushUpdates();
+}
+
+/**
+ * Settle a CSS transition on `el` deterministically: dispatch the
+ * `transitionend` the controller listens for (happy-dom fires none of its own),
+ * then flush pending work so any deferred leave-teardown (DOM removal, dispose,
+ * detach) completes. Await this after toggling a transitioned element to assert
+ * its post-animation state without depending on the fallback timeout.
+ */
+export async function waitForTransition(el: Element): Promise<void> {
+  el.dispatchEvent(new Event('transitionend', { bubbles: true }));
+  await flushUpdates();
+}
+
 // ── Text / role queries (container-scoped) ──────────────────────────────────
 
 /** Find the first leaf element whose text content includes `text`. */

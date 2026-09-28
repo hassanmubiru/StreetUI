@@ -224,3 +224,145 @@ describe('dialog — SSR renders inline, hydration wires focus', () => {
     expect(document.body.querySelector('[data-streetui-portal-container]')).toBeNull();
   });
 });
+
+describe('overlay transitions + focus restore timing (§10)', () => {
+  const FADE = { name: 'fade', duration: 100000 } as const;
+  const endTransition = (el: Element): void => {
+    el.dispatchEvent(new Event('transitionend', { bubbles: true }));
+  };
+
+  it('enters the panel on open, and on close restores focus immediately while the panel leaves', () => {
+    const open: Signal<boolean> = signal(false);
+    mountApp((page) => {
+      page.button('Open', { id: 'opener', onClick: () => open.set(true) });
+      page.dialog(
+        'dlg',
+        { open, onClose: () => open.set(false), transition: FADE },
+        (d) => {
+          d.button('First', { id: 'first' });
+        },
+      );
+    });
+
+    const opener = document.getElementById('opener')!;
+    opener.focus();
+    open.set(true);
+
+    // Panel present; its host branch is playing the enter animation.
+    const portal = document.body.querySelector('[data-streetui-portal-container]')!;
+    const panel = portal.querySelector('[role="dialog"]')!;
+    expect(panel).not.toBeNull();
+    expect(portal.querySelector('.fade-enter-active')).not.toBeNull();
+    // Focus moved into the panel.
+    expect(document.activeElement).toBe(document.getElementById('first'));
+    // Settle the enter.
+    endTransition(portal.querySelector('.fade-enter-active')!);
+
+    // Close: focus MUST be restored to the opener at once — a departing panel
+    // must not keep focus — even though the panel is still animating out (§10).
+    open.set(false);
+    expect(document.activeElement).toBe(opener); // restored immediately
+    const leaving = portal.querySelector('.fade-leave-active');
+    expect(leaving).not.toBeNull(); // panel still in the DOM, animating out
+    expect(portal.querySelector('[role="dialog"]')).not.toBeNull();
+
+    // Leave completes → panel removed from the DOM.
+    endTransition(leaving!);
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it('SSR of an overlay with a transition emits no transition classes (§21)', () => {
+    const open = signal(true);
+    const app = streetui.app({ name: 'overlay-ssr' });
+    app.page('home', (page) => {
+      page.dialog('dlg', { open, transition: FADE }, (d) => d.text('hi'));
+    });
+    const html = renderToString(compile(app));
+    expect(html).not.toContain('fade-enter');
+    expect(html).not.toContain('fade-leave');
+  });
+});
+
+describe('dropdown — menu keyboard navigation (§13)', () => {
+  it('roves with arrows/Home/End and activates items with Enter/Space', () => {
+    const open: Signal<boolean> = signal(false);
+    let chosen = '';
+    mountApp((page) => {
+      page.dropdown('menu', { open, onClose: () => open.set(false) }, (m) => {
+        m.button('First', { id: 'mi-1', onClick: () => { chosen = 'first'; } });
+        m.button('Second', { id: 'mi-2', onClick: () => { chosen = 'second'; } });
+        m.button('Third', { id: 'mi-3', onClick: () => { chosen = 'third'; } });
+      });
+    });
+
+    open.set(true);
+    const menu = document.body.querySelector('[role="menu"]')!;
+    expect(menu).not.toBeNull();
+    // takesFocus moved focus onto the first item.
+    expect(document.activeElement).toBe(document.getElementById('mi-1'));
+
+    // ArrowDown advances; ArrowUp from the top wraps to the last.
+    keydown(document.activeElement!, 'ArrowDown');
+    expect(document.activeElement).toBe(document.getElementById('mi-2'));
+    keydown(document.activeElement!, 'Home');
+    expect(document.activeElement).toBe(document.getElementById('mi-1'));
+    keydown(document.activeElement!, 'ArrowUp');
+    expect(document.activeElement).toBe(document.getElementById('mi-3'));
+    keydown(document.activeElement!, 'End');
+    expect(document.activeElement).toBe(document.getElementById('mi-3'));
+
+    // Enter activates the focused item (fires its onClick).
+    keydown(document.activeElement!, 'Enter');
+    expect(chosen).toBe('third');
+  });
+});
+
+describe('nested modal dialogs — focus ownership (§12/§16)', () => {
+  it('the inner dialog owns focus while open; the outer resumes containment after it closes', () => {
+    const outer: Signal<boolean> = signal(false);
+    const inner: Signal<boolean> = signal(false);
+    mountApp((page) => {
+      page.button('Open', { id: 'opener', onClick: () => outer.set(true) });
+      page.dialog('outer', { open: outer, onClose: () => outer.set(false) }, (d) => {
+        d.button('OuterA', { id: 'outer-a' });
+        d.button('OuterB', { id: 'outer-b' });
+        d.dialog('inner', { open: inner, onClose: () => inner.set(false) }, (i) => {
+          i.button('InnerA', { id: 'inner-a' });
+          i.button('InnerB', { id: 'inner-b' });
+        });
+      });
+    });
+
+    document.getElementById('opener')!.focus();
+    outer.set(true);
+    // Outer took focus.
+    expect(document.activeElement).toBe(document.getElementById('outer-a'));
+
+    // Open the inner dialog: focus moves into it and the inner panel owns
+    // containment — a focus attempt landing outside is pulled into the INNER
+    // panel, not the outer one.
+    inner.set(true);
+    expect(document.activeElement).toBe(document.getElementById('inner-a'));
+
+    // Simulate focus escaping to the body: only the topmost (inner) container
+    // enforces containment, so focus is redirected back into the inner panel.
+    document.body.focus();
+    expect(document.getElementById('inner-a')).not.toBeNull();
+    // Tab from the inner's last item wraps within the INNER panel.
+    const innerB = document.getElementById('inner-b')!;
+    innerB.focus();
+    keydown(innerB, 'Tab');
+    expect(document.activeElement).toBe(document.getElementById('inner-a'));
+
+    // Close the inner dialog. Focus restores and the OUTER dialog resumes
+    // containment (its listeners were never removed, but were dormant while the
+    // inner one was the top owner).
+    inner.set(false);
+    expect(document.body.querySelectorAll('[role="dialog"]').length).toBe(1);
+    // Outer now traps Tab again: from the outer's last item, Tab wraps to first.
+    const outerB = document.getElementById('outer-b')!;
+    outerB.focus();
+    keydown(outerB, 'Tab');
+    expect(document.activeElement).toBe(document.getElementById('outer-a'));
+  });
+});

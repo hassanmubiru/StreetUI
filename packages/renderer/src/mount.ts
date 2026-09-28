@@ -18,6 +18,7 @@ import {
   trapFocus,
   containFocus,
   onEscape,
+  rovingMenu,
   saveFocus,
   restoreFocus,
 } from '@streetui/dom';
@@ -457,6 +458,13 @@ export function wireReactiveList(
   // reconcile* helpers below. On the server (no body) the controller's hooks
   // no-op, so SSR is unchanged (§21).
   const controller = new TransitionController(ctx.dom, ctx.graph, (leaving) => {
+    // Full teardown at leave-animation end — the same four steps the synchronous
+    // path splits between the reconciler (DOM-remove + dispose) and this helper
+    // (forget + detach). Deferred here because `beginLeave` excluded this
+    // instance from `result.removed`, so nothing else will tear it down.
+    const parent = ctx.dom.parentNode(leaving.domNode);
+    if (parent !== null) ctx.dom.removeChild(parent, leaving.domNode);
+    leaving.dispose();
     forgetInstance(ctx, leaving);
     ctx.graph.detachNode(leaving.graphNode);
   });
@@ -588,6 +596,8 @@ interface OverlayBehavior {
   readonly modal: boolean;
   /** Move focus into the panel when it opens. */
   readonly takesFocus: boolean;
+  /** Wire arrow/Home/End/Enter/Space roving-focus navigation (role="menu"). */
+  readonly menu: boolean;
   /** Escape key invokes `onClose`. */
   readonly closeOnEscape: boolean;
   /** Restore focus to the pre-open element on close. */
@@ -640,11 +650,18 @@ export function wireOverlayBehavior(
   const onOpenChange = (isOpen: boolean): void => {
     if (isOpen) {
       if (desc.restoreFocus) saved = saveFocus(dom);
-      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
+      // Establish containment/roving BEFORE moving focus in, so that when a
+      // nested modal opens it becomes the authoritative focus owner before its
+      // initial focus fires — otherwise the outer modal's still-active
+      // containment would pull that focus back out (§16).
       if (desc.modal) {
         active.push(trapFocus(dom, target));
         active.push(containFocus(dom, target));
       }
+      if (desc.menu) {
+        active.push(rovingMenu(dom, target));
+      }
+      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
       if (desc.closeOnEscape && desc.onClose !== undefined) {
         active.push(onEscape(dom, target, desc.onClose));
       }

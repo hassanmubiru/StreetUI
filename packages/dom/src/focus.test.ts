@@ -5,6 +5,7 @@ import type { DOMAdapter } from './adapter.js';
 import {
   focusById, focusFirst, FOCUSABLE_SELECTOR,
   getFocusable, saveFocus, restoreFocus, focusInitial, trapFocus, containFocus, onEscape,
+  rovingMenu,
 } from './focus.js';
 
 describe('focus helpers (browser)', () => {
@@ -65,6 +66,7 @@ describe('focus helpers (server) — SSR-safe no-ops', () => {
     expect(() => trapFocus(dom, el)()).not.toThrow();
     expect(() => containFocus(dom, el)()).not.toThrow();
     expect(() => onEscape(dom, el, () => {})()).not.toThrow();
+    expect(() => rovingMenu(dom, el)()).not.toThrow();
   });
 });
 
@@ -166,6 +168,61 @@ describe('v1.9 focus platform (browser)', () => {
     cleanup();
     keydown(container, 'Escape');
     expect(count).toBe(1);
+  });
+
+  it('rovingMenu moves focus with arrows (wrap), Home/End, and activates on Enter/Space', () => {
+    container.innerHTML =
+      '<button id="a">a</button><button id="b">b</button><button id="c">c</button>';
+    const a = container.querySelector<HTMLElement>('#a')!;
+    const b = container.querySelector<HTMLElement>('#b')!;
+    const c = container.querySelector<HTMLElement>('#c')!;
+    let clicked = '';
+    for (const el of [a, b, c]) el.addEventListener('click', () => { clicked = el.id; });
+    const cleanup = rovingMenu(dom, container);
+
+    // ArrowDown from nothing focuses the first, then advances and wraps.
+    const e1 = keydown(container, 'ArrowDown');
+    expect(e1.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(a);
+    keydown(container, 'ArrowDown');
+    expect(document.activeElement).toBe(b);
+    c.focus();
+    keydown(container, 'ArrowDown'); // wraps last → first
+    expect(document.activeElement).toBe(a);
+    keydown(container, 'ArrowUp'); // wraps first → last
+    expect(document.activeElement).toBe(c);
+
+    // Home / End jump to the ends.
+    keydown(container, 'End');
+    expect(document.activeElement).toBe(c);
+    keydown(container, 'Home');
+    expect(document.activeElement).toBe(a);
+
+    // Enter / Space activate the focused item.
+    keydown(container, 'Enter');
+    expect(clicked).toBe('a');
+    b.focus();
+    keydown(container, ' ');
+    expect(clicked).toBe('b');
+
+    // Detaches on cleanup.
+    cleanup();
+    a.focus();
+    const e2 = keydown(container, 'ArrowDown');
+    expect(e2.defaultPrevented).toBe(false);
+  });
+
+  it('rovingMenu skips disabled items and ignores unrelated keys', () => {
+    container.innerHTML =
+      '<button id="a">a</button><button id="x" disabled>x</button><button id="c">c</button>';
+    const a = container.querySelector<HTMLElement>('#a')!;
+    rovingMenu(dom, container);
+    a.focus();
+    keydown(container, 'ArrowDown'); // skips the disabled #x → #c
+    expect(document.activeElement).toBe(container.querySelector('#c'));
+    // A non-navigation key is left untouched.
+    const e = keydown(container, 'k');
+    expect(e.defaultPrevented).toBe(false);
   });
 });
 

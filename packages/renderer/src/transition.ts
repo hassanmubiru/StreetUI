@@ -223,6 +223,44 @@ interface LeavingEntry {
   readonly run: Run;
 }
 
+/** Which half of a transition to play on a bare element. */
+export type TransitionPhase = 'enter' | 'leave';
+
+/**
+ * Play one enter/leave transition on a bare DOM element, outside the keyed
+ * reconciler — the seam the router uses for route leave/enter (§9) and any other
+ * consumer that owns a single host element rather than a reactive container.
+ *
+ * Reuses the exact same {@link startRun} mechanics as list/conditional
+ * transitions (from+active applied immediately, next-frame flip to `to`,
+ * completion on transitionend/animationend or the fallback timer), so there is
+ * one transition engine, not two. The returned handle's `cancel()` settles the
+ * run immediately WITHOUT invoking `onDone` — the caller uses it to abort an
+ * in-flight enter when the same host is about to start leaving (rapid
+ * navigation), avoiding overlapping runs/duplicate listeners on one element.
+ *
+ * On the server (or any non-element target) there is nothing to animate, so
+ * `onDone` runs synchronously and `cancel()` is a no-op — the caller's teardown
+ * still happens exactly once.
+ */
+export function runElementTransition(
+  dom: DOMAdapter,
+  el: Element,
+  rt: ResolvedTransitionLike,
+  phase: TransitionPhase,
+  onDone: () => void,
+): { cancel(): void } {
+  if (dom.body() === null || !dom.isElement(el)) {
+    onDone();
+    return { cancel: () => {} };
+  }
+  const active = phase === 'enter' ? rt.enterActive : rt.leaveActive;
+  const from = phase === 'enter' ? rt.enterFrom : rt.leaveFrom;
+  const to = phase === 'enter' ? rt.enterTo : rt.leaveTo;
+  return startRun(dom, el, active, from, to, rt.duration, onDone);
+}
+
+
 /**
  * Per-container transition controller. One instance is created for each
  * reactive-list / conditional NodeInstance in {@link wireReactiveList}; its

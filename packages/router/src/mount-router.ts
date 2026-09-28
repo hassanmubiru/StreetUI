@@ -19,9 +19,11 @@
  */
 
 import { streetui, type PageDSL, type ContainerDSL } from '@streetui/dsl';
+import { resolveTransition, type TransitionConfig } from '@streetui/dsl';
 import { compile } from '@streetui/compiler';
 import { createRuntime, type MountedApplication, type StreetRenderer } from '@streetui/runtime';
-import { createRenderer } from '@streetui/renderer';
+import { createRenderer, runElementTransition } from '@streetui/renderer';
+import { BrowserDOMAdapter, type DOMAdapter } from '@streetui/dom';
 import { CleanupRegistry } from '@streetui/core';
 import type { Router } from './router.js';
 import type { RouteContext, RouteMatch } from './types.js';
@@ -56,6 +58,17 @@ export interface MountRouterOptions {
    * subsequent client-side navigations mount normally. Defaults to false.
    */
   readonly hydrate?: boolean;
+  /**
+   * Optional enter/leave transition played on client-side navigations (§9). When
+   * set, each navigation mounts the incoming route into its own host wrapper,
+   * plays the enter animation on it, and defers the outgoing route's disposal
+   * (route-scoped cleanup + DOM removal) until its leave animation ends — so
+   * resources stay alive exactly as long as the departing DOM. History is
+   * untouched (the router already navigated), and the initial mount/hydration is
+   * NOT animated (§22-style: the first paint must match the server). Reuses the
+   * single CSS-class transition engine — no second animation system.
+   */
+  readonly transition?: TransitionConfig;
 }
 
 export interface MountedRouter {
@@ -117,27 +130,74 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
   }
 
   // ── 2. Route mounting / disposal ─────────────────────────────────────────────
+  const routeTransition =
+    options.transition !== undefined ? resolveTransition(options.transition) : undefined;
+  // A DOM adapter for the transition host manipulation. Only constructed when a
+  // transition is configured (browser-only feature), so SSR/headless router use
+  // never touches a browser global. Manipulates the same `class` attribute the
+  // reconciler-driven transitions use, via the same engine.
+  const txDom: DOMAdapter | undefined =
+    routeTransition !== undefined ? new BrowserDOMAdapter() : undefined;
+
   interface ActiveRoute {
     readonly registry: CleanupRegistry;
     readonly mounted: MountedApplication;
+    /** The host wrapper this route's DOM lives in (transition mode only). */
+    host: Element | null;
+    /** In-flight enter run, cancelled if this host starts leaving (rapid nav). */
+    enterRun: { cancel(): void } | null;
   }
   let active: ActiveRoute | null = null;
+  // Routes whose leave animation is still running (transition mode). Kept so a
+  // hard `unmount()` can settle + tear them down instead of leaking.
+  const pendingLeaves = new Map<ActiveRoute, { cancel(): void }>();
   // Only the very first route render hydrates the server HTML in the outlet;
   // client-side navigations after that mount fresh.
   let firstRender = hydrateMode;
 
-  const disposeActive = (): void => {
-    if (active === null) return;
+  /** Full synchronous teardown of a route (no transition / on leave-end). */
+  const teardownRoute = (route: ActiveRoute): void => {
     // Run user-registered cleanup (effects, subscriptions) FIRST, then tear down
     // the DOM + runtime signal bindings. Both reuse existing machinery.
-    active.registry.run();
-    active.mounted.unmount();
+    route.registry.run();
+    route.mounted.unmount();
+    if (route.host !== null && txDom !== undefined) {
+      const parent = txDom.parentNode(route.host);
+      if (parent !== null) txDom.removeChild(parent, route.host);
+    }
+  };
+
+  const disposeActive = (): void => {
+    if (active === null) return;
+    teardownRoute(active);
     active = null;
   };
 
-  const renderRoute = (match: RouteMatch): void => {
-    disposeActive();
+  /**
+   * Move whatever is currently in the outlet into a fresh host wrapper (used to
+   * isolate a hydrated/initial route so it can be animated out on the first
+   * client navigation). Returns the wrapper, now the sole child of the outlet.
+   */
+  const wrapOutletChildren = (dom: DOMAdapter): Element => {
+    const host = dom.createElement('div');
+    dom.setAttribute(host, 'data-streetui-route', '');
+    const moved: Node[] = [];
+    let child = dom.firstChild(outlet);
+    while (child !== null) {
+      moved.push(child);
+      child = dom.nextSibling(child);
+    }
+    for (const n of moved) dom.appendChild(host, n);
+    dom.appendChild(outlet, host);
+    return host;
+  };
 
+  /** Build + mount (or hydrate) a route into `target`, returning its handle. */
+  const buildRoute = (
+    match: RouteMatch,
+    target: Element,
+    hydrate: boolean,
+  ): ActiveRoute => {
     const registry = new CleanupRegistry();
     const ctx: RouteContext = {
       path: match.path,
@@ -146,17 +206,75 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
       query: match.query,
       onCleanup: (fn) => registry.add(fn),
     };
-
     const routeApp = streetui.app({ name: `route:${match.pattern}` });
     routeApp.page('route', (page) => match.route.builder(page, ctx));
     const runtime = createRuntime({ renderer });
     const routeCompiled = compile(routeApp);
-    const mounted = firstRender
-      ? runtime.hydrate(routeCompiled, outlet)
-      : runtime.mount(routeCompiled, outlet);
-    firstRender = false;
+    const mounted = hydrate
+      ? runtime.hydrate(routeCompiled, target)
+      : runtime.mount(routeCompiled, target);
+    return { registry, mounted, host: null, enterRun: null };
+  };
 
-    active = { registry, mounted };
+  const renderRoute = (match: RouteMatch): void => {
+    // Non-transitioned path — unchanged synchronous behaviour.
+    if (routeTransition === undefined || txDom === undefined) {
+      disposeActive();
+      active = buildRoute(match, outlet, firstRender);
+      firstRender = false;
+      return;
+    }
+
+    // Transitioned path. The initial render (mount or hydrate) is NOT animated:
+    // it must match the server paint, so we just place it in a host wrapper for
+    // later animation and return.
+    if (active === null) {
+      if (firstRender) {
+        // Hydrate the server HTML in place, then isolate it in a host wrapper.
+        active = buildRoute(match, outlet, true);
+        active.host = wrapOutletChildren(txDom);
+      } else {
+        const host = txDom.createElement('div');
+        txDom.setAttribute(host, 'data-streetui-route', '');
+        txDom.appendChild(outlet, host);
+        active = buildRoute(match, host, false);
+        active.host = host;
+      }
+      firstRender = false;
+      return;
+    }
+
+    // Client-side navigation with a route already mounted: cross-fade.
+    firstRender = false;
+    const leaving = active;
+    // Abort any in-flight enter on the departing host so we never run two
+    // overlapping animations on one element (§6 discipline).
+    leaving.enterRun?.cancel();
+    leaving.enterRun = null;
+    const leaveHost = leaving.host;
+
+    // Mount the incoming route into a fresh host and animate it in.
+    const enterHost = txDom.createElement('div');
+    txDom.setAttribute(enterHost, 'data-streetui-route', '');
+    txDom.appendChild(outlet, enterHost);
+    const next = buildRoute(match, enterHost, false);
+    next.host = enterHost;
+    next.enterRun = runElementTransition(txDom, enterHost, routeTransition, 'enter', () => {
+      next.enterRun = null;
+    });
+    active = next;
+
+    // Animate the departing host out, then tear the old route down. Resources
+    // (route-scoped cleanup + signal bindings) live until the leave completes.
+    if (leaveHost !== null) {
+      const run = runElementTransition(txDom, leaveHost, routeTransition, 'leave', () => {
+        pendingLeaves.delete(leaving);
+        teardownRoute(leaving);
+      });
+      pendingLeaves.set(leaving, run);
+    } else {
+      teardownRoute(leaving);
+    }
   };
 
   // Initial render, then react to every route change.
@@ -195,6 +313,12 @@ export function mountRouter(router: Router, options: MountRouterOptions): Mounte
     unmount() {
       if (interceptLinks) container.removeEventListener('click', onClick);
       stopRouteSub();
+      // Settle any in-flight leave animations and tear their routes down.
+      for (const [route, run] of pendingLeaves) {
+        run.cancel();
+        teardownRoute(route);
+      }
+      pendingLeaves.clear();
       disposeActive();
       shellMounted?.unmount();
       router.destroy();

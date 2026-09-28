@@ -3,7 +3,7 @@ import { resetIdCounter } from '@streetui/core';
 import { streetui } from '@streetui/dsl';
 import { compile } from '@streetui/compiler';
 import { signal } from '@streetui/state';
-import { inspectGraph, printGraph, printDiagnostics, nodeTypeStats, inspectComponents } from './inspector.js';
+import { inspectGraph, printGraph, printDiagnostics, nodeTypeStats, inspectComponents, inspectInteractions } from './inspector.js';
 import { component } from '@streetui/dsl';
 
 beforeEach(() => resetIdCounter());
@@ -165,5 +165,59 @@ describe('inspectComponents (§21)', () => {
     const plain = streetui.app({ name: 'p' });
     plain.page('home', (page) => page.heading('none'));
     expect(inspectComponents(compile(plain).graph)).toEqual([]);
+  });
+});
+
+describe('inspectInteractions (§19)', () => {
+  it('snapshots overlays with their descriptor flags and live open state', () => {
+    const open = signal(false);
+    const app = streetui.app({ name: 'i' });
+    app.page('home', (page) => {
+      page.dialog('dlg', { open }, (d) => d.button('OK', { id: 'ok' }));
+    });
+    const graph = compile(app).graph;
+
+    let snap = inspectInteractions(graph);
+    expect(snap.overlays).toHaveLength(1);
+    const dlg = snap.overlays[0]!;
+    expect(dlg.key).toBe('dlg');
+    expect(dlg.open).toBe(false); // peeked, closed
+    expect(dlg.modal).toBe(true);
+    expect(dlg.takesFocus).toBe(true);
+    expect(dlg.menu).toBe(false);
+    expect(dlg.closeOnEscape).toBe(true);
+    expect(dlg.restoreFocus).toBe(true);
+
+    // Peeks the live signal without subscribing: flipping open is reflected.
+    open.set(true);
+    snap = inspectInteractions(graph);
+    expect(snap.overlays[0]!.open).toBe(true);
+  });
+
+  it('flags a dropdown as a menu and lists transitions with duration/appear', () => {
+    const open = signal(false);
+    const app = streetui.app({ name: 'i2' });
+    app.page('home', (page) => {
+      page.dropdown('menu', { open }, (m) => m.button('Item', { id: 'it' }));
+      page.section('s', (s) => s.text('body'), {
+        transition: { name: 'fade', duration: 250, appear: true },
+      });
+    });
+    const graph = compile(app).graph;
+    const snap = inspectInteractions(graph);
+
+    expect(snap.overlays.map((o) => o.menu)).toContain(true);
+    expect(snap.transitions.length).toBeGreaterThanOrEqual(1);
+    const t = snap.transitions.find((x) => x.key === 's')!;
+    expect(t).toBeDefined();
+    expect(t.duration).toBe(250);
+    expect(t.appear).toBe(true);
+    expect(typeof t.nodeType).toBe('string');
+  });
+
+  it('returns empty arrays for a graph with no overlays or transitions', () => {
+    const app = streetui.app({ name: 'i3' });
+    app.page('home', (page) => page.heading('plain'));
+    expect(inspectInteractions(compile(app).graph)).toEqual({ overlays: [], transitions: [] });
   });
 });
