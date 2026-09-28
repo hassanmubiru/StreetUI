@@ -3,7 +3,7 @@
   "version": "1.9.3",
   "nodeVersion": "v24.18.0",
   "browserVersion": null,
-  "timestamp": "2026-09-28T14:13:55.117Z",
+  "timestamp": "2026-09-28T14:23:37.595Z",
   "environment": {
     "domEnvironment": "chromium (Playwright)",
     "arch": "x64",
@@ -16,9 +16,9 @@
     "A_initialRender": {
       "nodes": 10000,
       "medianMs": 9.5,
-      "p95Ms": 20.9,
-      "minMs": 8.4,
-      "maxMs": 20.9,
+      "p95Ms": 17.9,
+      "minMs": 8.8,
+      "maxMs": 17.9,
       "samples": 15,
       "domNodesCreated": 20002,
       "note": "time to create DOM; synchronous render == interactive"
@@ -28,7 +28,7 @@
       "medianMs": 0,
       "p95Ms": 0.1,
       "minMs": 0,
-      "maxMs": 0.2,
+      "maxMs": 0.1,
       "samples": 40,
       "domMutations": 1,
       "note": "one signal write in a 10k tree; domMutations MUST be 1 (fine-grained)"
@@ -36,10 +36,10 @@
     "C_largeList": {
       "append": {
         "items": 10000,
-        "medianMs": 0.3,
-        "p95Ms": 0.7,
+        "medianMs": 0.2,
+        "p95Ms": 0.5,
         "minMs": 0.2,
-        "maxMs": 0.7,
+        "maxMs": 0.5,
         "samples": 12,
         "domNodesCreated": 1,
         "domNodesRemoved": 0
@@ -47,16 +47,16 @@
       "prepend": {
         "items": 10000,
         "medianMs": 0.4,
-        "p95Ms": 0.5,
+        "p95Ms": 0.8,
         "minMs": 0.3,
-        "maxMs": 0.5,
+        "maxMs": 0.8,
         "samples": 12,
         "domNodesCreated": 1,
         "domNodesRemoved": 0
       },
       "remove-first": {
         "items": 10000,
-        "medianMs": 0.5,
+        "medianMs": 0.4,
         "p95Ms": 0.7,
         "minMs": 0.3,
         "maxMs": 0.7,
@@ -67,39 +67,39 @@
       "remove-middle": {
         "items": 10000,
         "medianMs": 0.3,
-        "p95Ms": 1.2,
+        "p95Ms": 0.4,
         "minMs": 0.2,
-        "maxMs": 1.2,
+        "maxMs": 0.4,
         "samples": 12,
         "domNodesCreated": 0,
         "domNodesRemoved": 1
       },
       "remove-last": {
         "items": 10000,
-        "medianMs": 0.2,
-        "p95Ms": 0.4,
-        "minMs": 0.1,
-        "maxMs": 0.4,
+        "medianMs": 0.4,
+        "p95Ms": 0.6,
+        "minMs": 0.2,
+        "maxMs": 0.6,
         "samples": 12,
         "domNodesCreated": 0,
         "domNodesRemoved": 1
       },
       "reorder": {
         "items": 10000,
-        "medianMs": 0.9,
-        "p95Ms": 1.8,
-        "minMs": 0.8,
-        "maxMs": 1.8,
+        "medianMs": 1.1,
+        "p95Ms": 1.6,
+        "minMs": 0.7,
+        "maxMs": 1.6,
         "samples": 12,
         "domNodesCreated": 2,
         "domNodesRemoved": 2
       },
       "reverse": {
         "items": 10000,
-        "medianMs": 14.5,
-        "p95Ms": 24.4,
-        "minMs": 12.4,
-        "maxMs": 24.4,
+        "medianMs": 15.9,
+        "p95Ms": 41.4,
+        "minMs": 13.4,
+        "maxMs": 41.4,
         "samples": 12,
         "domNodesCreated": 10000,
         "domNodesRemoved": 10000
@@ -107,9 +107,9 @@
       "update-item": {
         "items": 10000,
         "medianMs": 0.3,
-        "p95Ms": 0.6,
+        "p95Ms": 0.4,
         "minMs": 0.2,
-        "maxMs": 0.6,
+        "maxMs": 0.4,
         "samples": 12,
         "domNodesCreated": 1,
         "domNodesRemoved": 1
@@ -118,20 +118,20 @@
     "D_fanOut": {
       "subscribers=1000": {
         "subscribers": 1000,
-        "medianMs": 0.5,
-        "p95Ms": 0.6,
+        "medianMs": 0.4,
+        "p95Ms": 0.9,
         "minMs": 0.4,
-        "maxMs": 2.1,
+        "maxMs": 0.9,
         "samples": 25,
         "domMutations": 1000,
         "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
       },
       "subscribers=10000": {
         "subscribers": 10000,
-        "medianMs": 4.5,
-        "p95Ms": 6.9,
-        "minMs": 4,
-        "maxMs": 7,
+        "medianMs": 4.9,
+        "p95Ms": 7.4,
+        "minMs": 4.1,
+        "maxMs": 7.5,
         "samples": 25,
         "domMutations": 10000,
         "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
