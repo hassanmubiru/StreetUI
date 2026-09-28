@@ -1,11 +1,14 @@
 # StreetUI
 
-**StreetUI is a complete TypeScript UI framework.** It ships its own reactivity,
-a semantic UI DSL, a compiler, a semantic application graph, a direct DOM
-renderer (no virtual DOM), a router, async resources, forms and validation,
-context, accessibility helpers, internationalization, server-side rendering with
-hydration, testing utilities, devtools, and a CLI — as **one package, one
-import**.
+**StreetUI is a complete TypeScript application framework.** It ships its own
+reactivity, a semantic UI DSL, a compiler, a semantic application graph, a
+direct DOM renderer (no virtual DOM), a router, async resources, data mutations,
+first-class components, overlays with portals and focus management, CSS
+transitions, accessibility platform, forms, context, i18n, SSR with static-plan
+acceleration, hydration, testing utilities, DevTools, and a CLI —
+as **one package, one import**.
+
+Current version: **2.1.0** · [Changelog](https://github.com/streetui/streetui/blob/main/CHANGELOG.md)
 
 You install one thing:
 
@@ -107,20 +110,23 @@ renderer.hydrate(compiled, document.getElementById('app')!); // reuses server DO
 
 ## Subpath entries
 
-| Import                | What it gives you                                      |
-| --------------------- | ------------------------------------------------------ |
-| `streetui`            | The full framework: reactivity, DSL, compiler, graph, runtime, renderer, router, forms, context, i18n, devtools, SSR + hydration. |
-| `streetui/server`     | A curated server-rendering subset (`renderToString`, `serializeState`, `readState`, `ServerDOMAdapter`). |
-| `streetui/testing`    | Testing utilities (`render`, `findByRole`, `waitFor`, …). |
+| Import | What it gives you |
+|---|---|
+| `streetui` | The full framework: reactivity, DSL, compiler, graph, runtime, renderer, router, forms, context, i18n, components, overlays, transitions, a11y, data, devtools, SSR + hydration. |
+| `streetui/server` | Server-rendering subset: `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`, `renderDevToolsReport`. |
+| `streetui/testing` | Testing utilities: `render`, `findByRole`, `waitFor`, `renderComponent`, `findComponent`, `trigger`, `openOverlay`, `waitForTransition`. |
 
 ## What's inside (and why you don't have to think about it)
 
-Reactivity (signals, derived, effects, batching, stores, resources), the
-semantic DSL and compiler, the semantic application graph, the runtime, a
-keyed DOM reconciler with no virtual DOM, the router, forms and validators,
-context, i18n, SSR, hydration, devtools, and the CLI are all implemented as
-internal modules and bundled into this one package. You get the whole framework
-from `npm install streetui`.
+Reactivity (signals, derived, effects, batching, stores, resources, mutations),
+the semantic DSL and compiler, the semantic application graph, the runtime, a
+keyed DOM reconciler with no virtual DOM, first-class components, the router,
+forms and validators, context, i18n, overlays (dialog/popover/tooltip/dropdown/
+toast) with portals and focus management, CSS-class transitions, an
+accessibility platform (keyboard nav, live regions, focus trapping, deterministic
+a11y ids), SSR with static-plan acceleration, hydration, DevTools, and the CLI
+are all implemented as internal modules and bundled into this one package. You
+get the whole framework from `npm install streetui`.
 
 ## License
 
