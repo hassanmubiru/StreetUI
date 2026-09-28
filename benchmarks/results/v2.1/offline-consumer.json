@@ -15,5 +15,13 @@
     "reason": "The public `streetui` barrel and `@streetui/cli` declare a runtime dependency on esbuild@0.24.2 (+ native @esbuild/linux-x64) for the bundled CLI build. esbuild is NOT in the offline npm cache (ENOTCACHED) and the registry is E403, so `npm install streetui-2.1.0.tgz` cannot resolve it offline. This is a pre-existing ENVIRONMENT blocker — it fails identically at 1.9.0/2.0.0 — NOT a 2.1 regression. The esbuild-free @streetui/* path above proves the framework code itself is consumable; the built `streetui` dist reports VERSION 2.1.0 and exposes all exports.",
     "notFabricated": true
   },
+  "generatedApp": {
+    "status": "PASS",
+    "how": "createProject({ template: 'basic', frameworkVersion: '2.1.0' }) from the built @streetui/cli dist scaffolds a 9-file app.",
+    "tokenLeak": "NONE — no __FRAMEWORK_VERSION__ / __PROJECT_NAME__ placeholders remain in generated output.",
+    "versionPinning": "generated package.json deps pin @streetui/{compiler,dom,dsl,renderer,state} to 2.1.0 exactly.",
+    "runtime": "generated deps install offline from tarballs; the generated src/server.ts render() (compiled with repo tsc) emits a full HTML document (len=679) containing the heading, #app mount div, hydration island, and <!doctype html>.",
+    "note": "registry-based `npm create streetui` is BLOCKED (E403); validation used the local CLI + locally packed tarballs, clearly labelled."
+  },
   "timestamp": "2026-09-28T08:52:00.000Z"
 }
