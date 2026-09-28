@@ -182,6 +182,12 @@ export class ServerDOMAdapter implements DOMAdapter {
     return null;
   }
 
+  head(): Element | null {
+    // No document on the server — head metadata is emitted as a string by
+    // `renderHead()` instead of being applied to a live document.head.
+    return null;
+  }
+
   activeElement(): Element | null {
     return null;
   }
