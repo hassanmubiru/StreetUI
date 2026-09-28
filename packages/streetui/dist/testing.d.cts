@@ -1,6 +1,6 @@
-import { S as StreetApp, a as ComponentDefinition, b as ContainerBuilder } from './compile-CJJQYi71.cjs';
-export { V as VERSION } from './compile-CJJQYi71.cjs';
-import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-BQeehq3i.cjs';
+import { S as StreetApp, a as ComponentDefinition, b as ContainerBuilder } from './compile-DqsMQVJk.cjs';
+export { V as VERSION } from './compile-DqsMQVJk.cjs';
+import { R as RenderHandle, H as HydrationDiagnostic } from './hydration-diagnostics-4pwt6v7b.cjs';
 export * from 'streetui/diagnostics';
 
 /**
@@ -71,6 +71,44 @@ interface WaitForOptions {
  * deadline. Use for assertions that become true only after async work settles.
  */
 declare function waitFor<T>(check: () => T, options?: WaitForOptions): Promise<T>;
+/** A minimal writable-boolean seam (an overlay `open` signal, typically). */
+interface BooleanControl {
+    set(value: boolean): void;
+}
+/** Focus `el` (no-op if it exposes no `focus`). Intentful wrapper for tests. */
+declare function focus(el: Element): void;
+/** Blur `el` (no-op if it exposes no `blur`). */
+declare function blur(el: Element): void;
+/**
+ * Dispatch a bubbling, cancelable `keydown` for `key` on `el` (defaulting to the
+ * currently-focused element). Extra `init` fields (e.g. `{ shiftKey: true }`)
+ * are forwarded. Use for keyboard-interaction assertions (Escape, Tab, arrows).
+ */
+declare function pressKey(key: string, el?: Element | null, init?: KeyboardEventInit): void;
+/**
+ * Simulate a pointer interaction OUTSIDE `container` — a `mousedown` + `click`
+ * on `document.body` (or `target` if given). Drives "click-away to dismiss"
+ * behaviour without the test constructing events by hand. If `target` is inside
+ * `container` this throws, so a mistake is loud rather than a silent no-op.
+ */
+declare function clickOutside(container: Element, target?: Element): void;
+/**
+ * Open an overlay by flipping its `open` control to `true`, then flush so the
+ * panel mounts and its enter/focus wiring runs. Overlay visibility is app-owned
+ * state (§18) — a plain signal — so this is a thin, intentful wrapper over
+ * `set(true)` + {@link flushUpdates}.
+ */
+declare function openOverlay(open: BooleanControl): Promise<void>;
+/** Close an overlay by flipping its `open` control to `false`, then flush. */
+declare function closeOverlay(open: BooleanControl): Promise<void>;
+/**
+ * Settle a CSS transition on `el` deterministically: dispatch the
+ * `transitionend` the controller listens for (happy-dom fires none of its own),
+ * then flush pending work so any deferred leave-teardown (DOM removal, dispose,
+ * detach) completes. Await this after toggling a transitioned element to assert
+ * its post-animation state without depending on the fallback timeout.
+ */
+declare function waitForTransition(el: Element): Promise<void>;
 /** Find the first leaf element whose text content includes `text`. */
 declare function findByText(container: Element, text: string): Element;
 interface ByRoleOptions {
@@ -170,4 +208,4 @@ declare function getComponentName(el: Element): string | null;
  */
 declare function trigger(el: Element, type: string, init?: Record<string, unknown>): void;
 
-export { type ByRoleOptions, type HydrateTestOptions, type HydrateTestResult, type RenderComponentResult, type RenderResult, type WaitForOptions, findAllByRole, findAllComponents, findByRole, findByText, findComponent, flushUpdates, getComponentName, hydrateComponent, render, renderComponent, renderOnce, renderServerThenHydrate, trigger, waitFor };
+export { type BooleanControl, type ByRoleOptions, type HydrateTestOptions, type HydrateTestResult, type RenderComponentResult, type RenderResult, type WaitForOptions, blur, clickOutside, closeOverlay, findAllByRole, findAllComponents, findByRole, findByText, findComponent, flushUpdates, focus, getComponentName, hydrateComponent, openOverlay, pressKey, render, renderComponent, renderOnce, renderServerThenHydrate, trigger, waitFor, waitForTransition };

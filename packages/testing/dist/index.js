@@ -104,6 +104,37 @@ async function waitFor(check, options = {}) {
     await new Promise((resolve) => setTimeout(resolve, interval));
   }
 }
+function focus(el) {
+  el.focus?.();
+}
+function blur(el) {
+  el.blur?.();
+}
+function pressKey(key, el = document.activeElement, init = {}) {
+  if (el === null) return;
+  el.dispatchEvent(
+    new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init })
+  );
+}
+function clickOutside(container, target = document.body) {
+  if (container.contains(target)) {
+    throw new Error("[StreetUI Testing] clickOutside: target is inside the container");
+  }
+  target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
+  target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+}
+async function openOverlay(open) {
+  open.set(true);
+  await flushUpdates();
+}
+async function closeOverlay(open) {
+  open.set(false);
+  await flushUpdates();
+}
+async function waitForTransition(el) {
+  el.dispatchEvent(new Event("transitionend", { bubbles: true }));
+  await flushUpdates();
+}
 function findByText(container, text) {
   const match = Array.from(container.querySelectorAll("*")).find(
     (el) => el.children.length === 0 && (el.textContent?.includes(text) ?? false)
@@ -256,19 +287,26 @@ function trigger(el, type, init = {}) {
   el.dispatchEvent(event);
 }
 export {
+  blur,
+  clickOutside,
+  closeOverlay,
   findAllByRole,
   findAllComponents,
   findByRole,
   findByText,
   findComponent,
   flushUpdates,
+  focus,
   getComponentName,
   hydrateComponent,
+  openOverlay,
+  pressKey,
   render,
   renderComponent,
   renderOnce,
   renderServerThenHydrate,
   trigger,
-  waitFor
+  waitFor,
+  waitForTransition
 };
 //# sourceMappingURL=index.js.map

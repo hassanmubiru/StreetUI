@@ -221,9 +221,11 @@ function createRouter(options) {
 
 // src/mount-router.ts
 import { streetui } from "@streetui/dsl";
+import { resolveTransition } from "@streetui/dsl";
 import { compile } from "@streetui/compiler";
 import { createRuntime } from "@streetui/runtime";
-import { createRenderer } from "@streetui/renderer";
+import { createRenderer, runElementTransition } from "@streetui/renderer";
+import { BrowserDOMAdapter } from "@streetui/dom";
 import { CleanupRegistry } from "@streetui/core";
 var ROUTER_OUTLET_ID = "streetui-router-outlet";
 function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
@@ -264,16 +266,38 @@ function mountRouter(router, options) {
   } else {
     outlet = container;
   }
+  const routeTransition = options.transition !== void 0 ? resolveTransition(options.transition) : void 0;
+  const txDom = routeTransition !== void 0 ? new BrowserDOMAdapter() : void 0;
   let active = null;
+  const pendingLeaves = /* @__PURE__ */ new Map();
   let firstRender = hydrateMode;
+  const teardownRoute = (route) => {
+    route.registry.run();
+    route.mounted.unmount();
+    if (route.host !== null && txDom !== void 0) {
+      const parent = txDom.parentNode(route.host);
+      if (parent !== null) txDom.removeChild(parent, route.host);
+    }
+  };
   const disposeActive = () => {
     if (active === null) return;
-    active.registry.run();
-    active.mounted.unmount();
+    teardownRoute(active);
     active = null;
   };
-  const renderRoute = (match) => {
-    disposeActive();
+  const wrapOutletChildren = (dom) => {
+    const host = dom.createElement("div");
+    dom.setAttribute(host, "data-streetui-route", "");
+    const moved = [];
+    let child = dom.firstChild(outlet);
+    while (child !== null) {
+      moved.push(child);
+      child = dom.nextSibling(child);
+    }
+    for (const n of moved) dom.appendChild(host, n);
+    dom.appendChild(outlet, host);
+    return host;
+  };
+  const buildRoute = (match, target, hydrate) => {
     const registry = new CleanupRegistry();
     const ctx = {
       path: match.path,
@@ -286,9 +310,53 @@ function mountRouter(router, options) {
     routeApp.page("route", (page) => match.route.builder(page, ctx));
     const runtime = createRuntime({ renderer });
     const routeCompiled = compile(routeApp);
-    const mounted = firstRender ? runtime.hydrate(routeCompiled, outlet) : runtime.mount(routeCompiled, outlet);
+    const mounted = hydrate ? runtime.hydrate(routeCompiled, target) : runtime.mount(routeCompiled, target);
+    return { registry, mounted, host: null, enterRun: null };
+  };
+  const renderRoute = (match) => {
+    if (routeTransition === void 0 || txDom === void 0) {
+      disposeActive();
+      active = buildRoute(match, outlet, firstRender);
+      firstRender = false;
+      return;
+    }
+    if (active === null) {
+      if (firstRender) {
+        active = buildRoute(match, outlet, true);
+        active.host = wrapOutletChildren(txDom);
+      } else {
+        const host = txDom.createElement("div");
+        txDom.setAttribute(host, "data-streetui-route", "");
+        txDom.appendChild(outlet, host);
+        active = buildRoute(match, host, false);
+        active.host = host;
+      }
+      firstRender = false;
+      return;
+    }
     firstRender = false;
-    active = { registry, mounted };
+    const leaving = active;
+    leaving.enterRun?.cancel();
+    leaving.enterRun = null;
+    const leaveHost = leaving.host;
+    const enterHost = txDom.createElement("div");
+    txDom.setAttribute(enterHost, "data-streetui-route", "");
+    txDom.appendChild(outlet, enterHost);
+    const next = buildRoute(match, enterHost, false);
+    next.host = enterHost;
+    next.enterRun = runElementTransition(txDom, enterHost, routeTransition, "enter", () => {
+      next.enterRun = null;
+    });
+    active = next;
+    if (leaveHost !== null) {
+      const run = runElementTransition(txDom, leaveHost, routeTransition, "leave", () => {
+        pendingLeaves.delete(leaving);
+        teardownRoute(leaving);
+      });
+      pendingLeaves.set(leaving, run);
+    } else {
+      teardownRoute(leaving);
+    }
   };
   renderRoute(router.currentRoute.peek());
   const stopRouteSub = router.currentRoute.subscribe((match) => renderRoute(match));
@@ -316,6 +384,11 @@ function mountRouter(router, options) {
     unmount() {
       if (interceptLinks) container.removeEventListener("click", onClick);
       stopRouteSub();
+      for (const [route, run] of pendingLeaves) {
+        run.cancel();
+        teardownRoute(route);
+      }
+      pendingLeaves.clear();
       disposeActive();
       shellMounted?.unmount();
       router.destroy();

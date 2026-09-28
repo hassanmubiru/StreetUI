@@ -46,6 +46,58 @@ interface InspectedComponent {
  * fine-grained prop updates (which never rebuild the node).
  */
 declare function inspectComponents(graph: ApplicationGraph): InspectedComponent[];
+/** An overlay currently wired in the graph (dialog/popover/tooltip/…). */
+interface InspectedOverlay {
+    /** The build-order node id of the overlay's portal host. */
+    id: string;
+    /** The stable author-provided key, if any. */
+    key: string | undefined;
+    /** Whether the overlay is open right now (peeked, no subscription). */
+    open: boolean;
+    /** Modal (focus-trapping) overlay? */
+    modal: boolean;
+    /** Does it move focus into itself on open? */
+    takesFocus: boolean;
+    /** Is it a roving-focus menu (role="menu")? */
+    menu: boolean;
+    /** Does Escape close it? */
+    closeOnEscape: boolean;
+    /** Does it restore focus to the opener on close? */
+    restoreFocus: boolean;
+    /** Depth of the portal host node in the graph. */
+    depth: number;
+}
+/** A transition currently wired on a graph node. */
+interface InspectedTransition {
+    /** The build-order node id the transition is attached to. */
+    id: string;
+    /** The stable author-provided key, if any. */
+    key: string | undefined;
+    /** The node type the transition animates (element/portal/list-item/…). */
+    nodeType: string;
+    /** Fallback completion timeout in ms (the resolved `duration`). */
+    duration: number;
+    /** Does it animate the very first appearance (initial mount)? */
+    appear: boolean;
+    /** Depth of the node in the graph. */
+    depth: number;
+}
+/** A prod-safe snapshot of the graph's interaction wiring. */
+interface InspectedInteractions {
+    overlays: InspectedOverlay[];
+    transitions: InspectedTransition[];
+}
+/**
+ * Snapshot every overlay and transition currently wired in the graph, in
+ * document order. This is the interaction-aware companion to
+ * {@link inspectComponents}: it reads only the `__overlay__<id>` /
+ * `__transition__<id>` handler descriptors and public graph structure — it
+ * peeks the `open` signal without subscribing, retains no DOM nodes, mutates
+ * nothing, and is safe to call in production. Because a departing overlay's
+ * handler is pruned on detach (`_unregisterNodeHandlers`), a closed-and-removed
+ * overlay simply no longer appears here.
+ */
+declare function inspectInteractions(graph: ApplicationGraph): InspectedInteractions;
 
 /**
  * DevTools foundation (v0.6, Phase 18). A single read-only entry point that
@@ -425,4 +477,4 @@ interface DevToolsSession {
  */
 declare function createDevTools(compiled: CompiledApplication, sources?: DevToolsSources, options?: DevToolsOptions): DevToolsSession;
 
-export { type ApplicationIdentity, type ApplicationInspection, type ApplicationPanel, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, type DiagnosticsSummary, type FormInspection, type FormLike, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedNode, type InspectedPage, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type ResourceInspection, type ResourceLike, type RouteMatchLike, type RouterInspection, type RouterLike, type SignalInspection, type SignalsPanel, createDevTools, diagnosePerformance, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, nodeTypeStats, printDiagnostics, printGraph };
+export { type ApplicationIdentity, type ApplicationInspection, type ApplicationPanel, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, type DiagnosticsSummary, type FormInspection, type FormLike, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type ResourceInspection, type ResourceLike, type RouteMatchLike, type RouterInspection, type RouterLike, type SignalInspection, type SignalsPanel, createDevTools, diagnosePerformance, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, nodeTypeStats, printDiagnostics, printGraph };

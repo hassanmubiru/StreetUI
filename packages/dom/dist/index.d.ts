@@ -292,16 +292,64 @@ declare function focusInitial(dom: DOMAdapter, container: Element, initialFocusI
  * cleanup is still callable.
  */
 declare function trapFocus(dom: DOMAdapter, container: Element): () => void;
-/**
- * Modal containment: if focus moves to an element outside `container`, redirect
- * it back inside. Listens on the document body (focusin bubbles there) and
- * returns a cleanup function. Server-safe no-op (body() is null).
- */
 declare function containFocus(dom: DOMAdapter, container: Element): () => void;
 /**
  * Invoke `handler` when Escape is pressed while focus is within `target`.
  * Returns a cleanup function. Server-safe no-op.
  */
 declare function onEscape(dom: DOMAdapter, target: Element, handler: () => void): () => void;
+/**
+ * Roving-focus keyboard navigation for a menu (role="menu") container: the
+ * arrow keys move focus between the container's focusable items (wrap-around at
+ * both ends), Home/End jump to the first/last item, and Enter/Space activate
+ * the currently-focused item (a native `click`, so an item's `onClick` fires).
+ * `Tab` and `Escape` are deliberately left alone — the overlay layer wires
+ * Escape-to-close separately and a menu does not trap Tab.
+ *
+ * Items are re-queried on every key (via {@link getFocusable}) so a menu whose
+ * items change reactively is always navigated against the live set, and items
+ * disabled after mount are skipped. Attaches a keydown listener to the
+ * container and returns a cleanup function. Server-safe: `addEventListener` is
+ * a no-op and the returned cleanup is still callable.
+ */
+declare function rovingMenu(dom: DOMAdapter, container: Element, selector?: string): () => void;
 
-export { BrowserDOMAdapter, type DOMAdapter, FOCUSABLE_SELECTOR, ServerComment, ServerDOMAdapter, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, browserDOMAdapter, containFocus, escapeHtmlAttr, escapeHtmlText, focusById, focusFirst, focusInitial, getFocusable, onEscape, restoreFocus, saveFocus, serializeChildren, serializeServerNode, serverDOMAdapter, trapFocus };
+/**
+ * ARIA live-region announcer (§15).
+ *
+ * Screen readers announce text that appears inside an `aria-live` region. The
+ * naive approach — append a fresh `<div aria-live>` per message — leaks a
+ * growing pile of stale nodes and (because a node inserted *already carrying*
+ * its text is often not re-announced) is unreliable. This announcer instead
+ * keeps exactly TWO persistent regions on `<body>` — one `polite`, one
+ * `assertive` — and mutates their text to speak. Announcing clears the region
+ * first and writes on a microtask so that repeating the same string still
+ * triggers a DOM mutation the AT will pick up.
+ *
+ * Built entirely on the {@link DOMAdapter}, so it is server-safe: when
+ * `dom.body()` is null (SSR / headless) construction returns an inert announcer
+ * whose `announce`/`clear`/`destroy` are no-ops. There is never any SSR markup
+ * for a live region — announcements are a runtime-only concept.
+ */
+
+interface Announcer {
+    /**
+     * Announce `message`. `assertive` (default false) routes to the assertive
+     * region (interrupts the user) instead of the polite one (waits for a pause).
+     */
+    announce(message: string, options?: {
+        assertive?: boolean;
+    }): void;
+    /** Clear both regions without announcing anything. */
+    clear(): void;
+    /** Remove both regions from the DOM. Idempotent. */
+    destroy(): void;
+}
+/**
+ * Create a live-region announcer bound to `dom`. Idempotent per call — each
+ * call owns its own pair of regions, so an app that wants a single shared
+ * announcer should create one and reuse it (and `destroy()` it on teardown).
+ */
+declare function createAnnouncer(dom: DOMAdapter): Announcer;
+
+export { type Announcer, BrowserDOMAdapter, type DOMAdapter, FOCUSABLE_SELECTOR, ServerComment, ServerDOMAdapter, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, browserDOMAdapter, containFocus, createAnnouncer, escapeHtmlAttr, escapeHtmlText, focusById, focusFirst, focusInitial, getFocusable, onEscape, restoreFocus, rovingMenu, saveFocus, serializeChildren, serializeServerNode, serverDOMAdapter, trapFocus };

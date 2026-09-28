@@ -177,7 +177,7 @@ declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, in
  * (spec §15). A `conditional` node has no plan handler and falls back to the
  * eager build factory (it only ever renders 0..1 branch, so eager is fine).
  */
-declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element): void;
+declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element, runAppear?: boolean): void;
 /**
  * Attach overlay focus/keyboard behavior to a mounted portal. Server-safe: on
  * the server `dom.body()` is null so this returns immediately (SSR emits inert
@@ -211,6 +211,122 @@ declare function wireComponentBehavior(ctx: RenderContext, graphNode: GraphNode,
  */
 
 declare function patchNode(ctx: RenderContext, graphNode: GraphNode, propKey: string, newValue: unknown): void;
+
+/**
+ * CSS class-based enter/leave transition controller (§2–§8).
+ *
+ * This is the browser-only runtime that consumes the `__transition__<nodeId>`
+ * descriptor the DSL registers (a pre-resolved {@link ResolvedTransitionLike}).
+ * It is deliberately structural about that descriptor — like the renderer's
+ * `__overlay__`/`__component__` handling — so the renderer takes NO compile-time
+ * dependency on the DSL package.
+ *
+ * Engine (confirmed decision): CSS classes, no Web Animations API, no
+ * browser-only API referenced at module scope. Every timer / rAF / event
+ * binding is reached lazily through `globalThis` and only ever runs when
+ * `dom.body() !== null` (the same SSR guard `wireOverlayBehavior` uses), so:
+ *   - server output is byte-identical (nothing here runs during SSR — §21);
+ *   - happy-dom, which dispatches no `transitionend`/`animationend`, still
+ *     completes deterministically via the fallback timeout (§24).
+ *
+ * The controller is created once per reactive container instance (reactive-list
+ * or conditional) so its `leaving` map survives across reconcile passes — that
+ * is what makes leave→enter reclaim (§6) and keyed-identity list leave (§7)
+ * correct.
+ */
+
+/**
+ * The renderer's structural view of the resolved transition the DSL stores in
+ * `__transition__<id>`. Mirrors `@streetui/dsl`'s `ResolvedTransition` without
+ * importing it (no renderer→dsl dependency).
+ */
+interface ResolvedTransitionLike {
+    readonly enterActive: readonly string[];
+    readonly enterFrom: readonly string[];
+    readonly enterTo: readonly string[];
+    readonly leaveActive: readonly string[];
+    readonly leaveFrom: readonly string[];
+    readonly leaveTo: readonly string[];
+    readonly appear: boolean;
+    readonly duration: number;
+}
+/**
+ * Hooks handed to the reconciler so it can (a) reclaim an instance that is
+ * mid-leave when its key re-enters (leave→enter cancellation), (b) defer the
+ * remove/dispose/forget/detach chain for a leaving instance until its animation
+ * ends, and (c) play the enter animation for a freshly-inserted instance. When
+ * no transition applies (or we are on the server) every hook degrades to the
+ * pre-transition synchronous behaviour.
+ */
+interface TransitionHooks {
+    /**
+     * If an instance for `key` is currently animating out, cancel its leave and
+     * return it for reuse; otherwise undefined. The caller re-mounts nothing and
+     * reuses the returned instance's live DOM node.
+     */
+    takeLeaving(key: string): NodeInstance | undefined;
+    /**
+     * Begin a leave animation for a removed instance. Returns true when the whole
+     * teardown chain has been deferred to animation-end (caller must NOT remove,
+     * dispose, forget or detach it), or false when there is no transition / no
+     * browser and the caller should tear it down synchronously as before.
+     */
+    beginLeave(inst: NodeInstance): boolean;
+    /** Play the enter animation for a freshly-inserted (or reclaimed) instance. */
+    onEnter(inst: NodeInstance): void;
+}
+/** Read the pre-resolved transition descriptor for a node, if any. */
+declare function getResolvedTransition(graph: ApplicationGraph, nodeId: string): ResolvedTransitionLike | undefined;
+/** Which half of a transition to play on a bare element. */
+type TransitionPhase = 'enter' | 'leave';
+/**
+ * Play one enter/leave transition on a bare DOM element, outside the keyed
+ * reconciler — the seam the router uses for route leave/enter (§9) and any other
+ * consumer that owns a single host element rather than a reactive container.
+ *
+ * Reuses the exact same {@link startRun} mechanics as list/conditional
+ * transitions (from+active applied immediately, next-frame flip to `to`,
+ * completion on transitionend/animationend or the fallback timer), so there is
+ * one transition engine, not two. The returned handle's `cancel()` settles the
+ * run immediately WITHOUT invoking `onDone` — the caller uses it to abort an
+ * in-flight enter when the same host is about to start leaving (rapid
+ * navigation), avoiding overlapping runs/duplicate listeners on one element.
+ *
+ * On the server (or any non-element target) there is nothing to animate, so
+ * `onDone` runs synchronously and `cancel()` is a no-op — the caller's teardown
+ * still happens exactly once.
+ */
+declare function runElementTransition(dom: DOMAdapter, el: Element, rt: ResolvedTransitionLike, phase: TransitionPhase, onDone: () => void): {
+    cancel(): void;
+};
+/**
+ * Per-container transition controller. One instance is created for each
+ * reactive-list / conditional NodeInstance in {@link wireReactiveList}; its
+ * `leaving` map persists across every reconcile of that container.
+ */
+declare class TransitionController {
+    private readonly dom;
+    private readonly graph;
+    /** Full teardown of a leaving instance (remove + dispose + forget + detach). */
+    private readonly finalize;
+    private readonly leaving;
+    constructor(dom: DOMAdapter, graph: ApplicationGraph, 
+    /** Full teardown of a leaving instance (remove + dispose + forget + detach). */
+    finalize: (inst: NodeInstance) => void);
+    /** True only in a real DOM environment (browser). */
+    private get browser();
+    private keyOf;
+    private resolved;
+    /** Run the enter animation for `inst` if it carries a transition (browser only). */
+    enter(inst: NodeInstance): void;
+    /**
+     * Play `appear` for any initial child that opted into it (fresh browser mount
+     * only — hydration must never animate appear, §22, and this is called only on
+     * the mount path).
+     */
+    appear(children: readonly NodeInstance[]): void;
+    hooks(): TransitionHooks;
+}
 
 /**
  * Reconciliation — diff-based child list updates.
@@ -264,7 +380,7 @@ interface PlanEntry {
  * @param newNodes    New graph children (in desired order)
  * @param mountFn     Factory to create a new NodeInstance for a graph node
  */
-declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], newNodes: readonly GraphNode[], mountFn: MountFn): ReconcileResult;
+declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], newNodes: readonly GraphNode[], mountFn: MountFn, hooks?: TransitionHooks): ReconcileResult;
 /**
  * Plan-based keyed reconciliation (spec §15 — the optimised reactive-list path).
  *
@@ -283,7 +399,7 @@ declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldIn
  * DOM reordering uses a longest-increasing-subsequence pass so the number of
  * moves is minimal (e.g. a prepend into a 10k list moves 1 node, not 10k).
  */
-declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn): ReconcileResult;
+declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn, hooks?: TransitionHooks): ReconcileResult;
 
 /**
  * StreetUI Renderer — framework-owned DOM renderer.
@@ -455,4 +571,4 @@ declare function renderToString(compiled: CompiledApplication, options?: RenderT
 
 declare function resolveTag(type: SemanticNodeType): string;
 
-export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, serializeState, textUpdate, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, type ResolvedTransitionLike, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, TransitionController, type TransitionHooks, type TransitionPhase, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, getResolvedTransition, headingUpdate, hydrateGraph, inputUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderToString, resolveTag, runElementTransition, serializeState, textUpdate, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

@@ -144,6 +144,7 @@ import {
   trapFocus,
   containFocus,
   onEscape,
+  rovingMenu,
   saveFocus,
   restoreFocus
 } from "@streetui/dom";
@@ -219,7 +220,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
 }
 
 // src/reconciliation.ts
-function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn) {
+function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
     const key = inst.graphNode.key ?? inst.graphNode.id;
@@ -240,28 +241,33 @@ function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn) {
       }
       newInstances.push(existing);
     } else {
-      const inst = mountFn(newNode, parentDom);
-      newInstances.push(inst);
+      const reclaimed = hooks?.takeLeaving(key);
+      if (reclaimed !== void 0) {
+        patchExistingInstance(ctx, reclaimed, newNode);
+        reconcileItemChildren(ctx, reclaimed, newNode, mountFn);
+        hooks?.onEnter(reclaimed);
+        newInstances.push(reclaimed);
+      } else {
+        const inst = mountFn(newNode, parentDom);
+        hooks?.onEnter(inst);
+        newInstances.push(inst);
+      }
     }
   }
   const removed = [];
   for (const inst of oldInstances) {
     const key = inst.graphNode.key ?? inst.graphNode.id;
-    if (!usedKeys.has(key)) {
-      removed.push(inst);
-    }
-  }
-  for (const inst of removed) {
+    if (usedKeys.has(key)) continue;
+    if (hooks !== void 0 && hooks.beginLeave(inst)) continue;
     const parent = ctx.dom.parentNode(inst.domNode);
-    if (parent !== null) {
-      ctx.dom.removeChild(parent, inst.domNode);
-    }
+    if (parent !== null) ctx.dom.removeChild(parent, inst.domNode);
     inst.dispose();
+    removed.push(inst);
   }
   reorderDom(ctx, parentDom, newInstances);
   return { instances: newInstances, removed };
 }
-function reconcileChildrenByPlan(ctx, parentDom, oldInstances, plan, mountFn) {
+function reconcileChildrenByPlan(ctx, parentDom, oldInstances, plan, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
     oldByKey.set(inst.graphNode.key ?? inst.graphNode.id, inst);
@@ -288,21 +294,34 @@ function reconcileChildrenByPlan(ctx, parentDom, oldInstances, plan, mountFn) {
       }
       newInstances.push(existing);
     } else {
-      const freshNode = entry.build();
-      built.push(freshNode);
-      const inst = mountFn(freshNode, parentDom);
-      newInstances.push(inst);
+      const reclaimed = hooks?.takeLeaving(entry.key);
+      if (reclaimed !== void 0) {
+        const freshNode = entry.build();
+        built.push(freshNode);
+        patchExistingInstance(ctx, reclaimed, freshNode);
+        reconcileItemChildren(ctx, reclaimed, freshNode, mountFn);
+        reclaimed.graphNode.setProp("_sig", freshNode.getProp("_sig"));
+        reclaimed.graphNode.setProp("_item", entry.item);
+        hooks?.onEnter(reclaimed);
+        newInstances.push(reclaimed);
+      } else {
+        const freshNode = entry.build();
+        built.push(freshNode);
+        const inst = mountFn(freshNode, parentDom);
+        hooks?.onEnter(inst);
+        newInstances.push(inst);
+      }
     }
   }
   const removed = [];
   for (const inst of oldInstances) {
     const key = inst.graphNode.key ?? inst.graphNode.id;
-    if (!usedKeys.has(key)) removed.push(inst);
-  }
-  for (const inst of removed) {
+    if (usedKeys.has(key)) continue;
+    if (hooks !== void 0 && hooks.beginLeave(inst)) continue;
     const parent = ctx.dom.parentNode(inst.domNode);
     if (parent !== null) ctx.dom.removeChild(parent, inst.domNode);
     inst.dispose();
+    removed.push(inst);
   }
   reorderDomMinimal(ctx, parentDom, oldInstances, newInstances);
   return { instances: newInstances, removed, built };
@@ -427,6 +446,187 @@ function patchExistingInstance(ctx, instance, newNode) {
     }
   }
 }
+
+// src/transition.ts
+function getResolvedTransition(graph, nodeId) {
+  const fn = graph.getHandler(`__transition__${nodeId}`);
+  return fn === void 0 ? void 0 : fn();
+}
+function host() {
+  return globalThis;
+}
+function nextFrame(cb) {
+  const h = host();
+  const raf = h.requestAnimationFrame;
+  if (typeof raf === "function") {
+    raf(() => raf(cb));
+  } else {
+    h.setTimeout(cb, 0);
+  }
+}
+function splitClass(value) {
+  if (value === null) return [];
+  const out = [];
+  for (const t of value.split(/\s+/)) if (t.length > 0) out.push(t);
+  return out;
+}
+function addClasses(dom, el, classes) {
+  if (classes.length === 0) return;
+  const current = splitClass(dom.getAttribute(el, "class"));
+  let changed = false;
+  for (const c of classes) {
+    if (!current.includes(c)) {
+      current.push(c);
+      changed = true;
+    }
+  }
+  if (changed) dom.setAttribute(el, "class", current.join(" "));
+}
+function removeClasses(dom, el, classes) {
+  if (classes.length === 0) return;
+  const current = splitClass(dom.getAttribute(el, "class"));
+  const next = current.filter((c) => !classes.includes(c));
+  if (next.length !== current.length) {
+    if (next.length === 0) dom.removeAttribute(el, "class");
+    else dom.setAttribute(el, "class", next.join(" "));
+  }
+}
+function startRun(dom, el, active, from, to, duration, onDone) {
+  const h = host();
+  let finished = false;
+  let timer = null;
+  const onEvent = (e) => {
+    if (e.target !== el) return;
+    finish();
+  };
+  const detach = () => {
+    dom.removeEventListener(el, "transitionend", onEvent);
+    dom.removeEventListener(el, "animationend", onEvent);
+    if (timer !== null) {
+      h.clearTimeout(timer);
+      timer = null;
+    }
+  };
+  const finish = () => {
+    if (finished) return;
+    finished = true;
+    detach();
+    removeClasses(dom, el, active);
+    removeClasses(dom, el, to);
+    removeClasses(dom, el, from);
+    onDone();
+  };
+  addClasses(dom, el, from);
+  addClasses(dom, el, active);
+  dom.addEventListener(el, "transitionend", onEvent);
+  dom.addEventListener(el, "animationend", onEvent);
+  timer = h.setTimeout(finish, duration);
+  nextFrame(() => {
+    if (finished) return;
+    removeClasses(dom, el, from);
+    addClasses(dom, el, to);
+  });
+  return {
+    cancel: () => {
+      if (finished) return;
+      finished = true;
+      detach();
+      removeClasses(dom, el, active);
+      removeClasses(dom, el, to);
+      removeClasses(dom, el, from);
+    }
+  };
+}
+function runElementTransition(dom, el, rt, phase, onDone) {
+  if (dom.body() === null || !dom.isElement(el)) {
+    onDone();
+    return { cancel: () => {
+    } };
+  }
+  const active = phase === "enter" ? rt.enterActive : rt.leaveActive;
+  const from = phase === "enter" ? rt.enterFrom : rt.leaveFrom;
+  const to = phase === "enter" ? rt.enterTo : rt.leaveTo;
+  return startRun(dom, el, active, from, to, rt.duration, onDone);
+}
+var TransitionController = class {
+  constructor(dom, graph, finalize) {
+    this.dom = dom;
+    this.graph = graph;
+    this.finalize = finalize;
+  }
+  leaving = /* @__PURE__ */ new Map();
+  /** True only in a real DOM environment (browser). */
+  get browser() {
+    return this.dom.body() !== null;
+  }
+  keyOf(inst) {
+    return inst.graphNode.key ?? inst.graphNode.id;
+  }
+  resolved(node) {
+    return getResolvedTransition(this.graph, node.id);
+  }
+  /** Run the enter animation for `inst` if it carries a transition (browser only). */
+  enter(inst) {
+    if (!this.browser) return;
+    const rt = this.resolved(inst.graphNode);
+    if (rt === void 0) return;
+    const el = inst.domNode;
+    if (!this.dom.isElement(el)) return;
+    startRun(this.dom, el, rt.enterActive, rt.enterFrom, rt.enterTo, rt.duration, () => {
+    });
+  }
+  /**
+   * Play `appear` for any initial child that opted into it (fresh browser mount
+   * only — hydration must never animate appear, §22, and this is called only on
+   * the mount path).
+   */
+  appear(children) {
+    if (!this.browser) return;
+    for (const child of children) {
+      const rt = this.resolved(child.graphNode);
+      if (rt !== void 0 && rt.appear) this.enter(child);
+    }
+  }
+  hooks() {
+    return {
+      takeLeaving: (key) => {
+        const entry = this.leaving.get(key);
+        if (entry === void 0) return void 0;
+        entry.run.cancel();
+        this.leaving.delete(key);
+        return entry.inst;
+      },
+      beginLeave: (inst) => {
+        if (!this.browser) return false;
+        const rt = this.resolved(inst.graphNode);
+        if (rt === void 0) return false;
+        const el = inst.domNode;
+        if (!this.dom.isElement(el)) return false;
+        const key = this.keyOf(inst);
+        const prior = this.leaving.get(key);
+        if (prior !== void 0) prior.run.cancel();
+        const run = startRun(
+          this.dom,
+          el,
+          rt.leaveActive,
+          rt.leaveFrom,
+          rt.leaveTo,
+          rt.duration,
+          () => {
+            const current = this.leaving.get(key);
+            if (current !== void 0 && current.run === run) {
+              this.leaving.delete(key);
+              this.finalize(inst);
+            }
+          }
+        );
+        this.leaving.set(key, { inst, run });
+        return true;
+      },
+      onEnter: (inst) => this.enter(inst)
+    };
+  }
+};
 
 // src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
@@ -580,7 +780,7 @@ function mountNode(ctx, graphNode, parentDom) {
       instance2.addChild(childInstance);
     }
     dom.appendChild(parentDom, el2);
-    wireReactiveList(ctx, graphNode, instance2, el2);
+    wireReactiveList(ctx, graphNode, instance2, el2, true);
     return instance2;
   }
   if (graphNode.type === "portal") {
@@ -689,32 +889,42 @@ function wireSignalBindings(ctx, graphNode, instance, onUpdate) {
     instance.trackCleanup(unsub);
   }
 }
-function wireReactiveList(ctx, graphNode, instance, el) {
+function wireReactiveList(ctx, graphNode, instance, el, runAppear = false) {
   const plan = ctx.graph.getHandler(`__listplan__${graphNode.id}`);
   const build = ctx.graph.getHandler(`__listbuild__${graphNode.id}`);
   if (plan === void 0 && build === void 0) return;
+  const controller = new TransitionController(ctx.dom, ctx.graph, (leaving) => {
+    const parent = ctx.dom.parentNode(leaving.domNode);
+    if (parent !== null) ctx.dom.removeChild(parent, leaving.domNode);
+    leaving.dispose();
+    forgetInstance(ctx, leaving);
+    ctx.graph.detachNode(leaving.graphNode);
+  });
+  const hooks = controller.hooks();
+  if (runAppear) controller.appear(instance.children);
   for (const stateRef of graphNode.stateRefs) {
     if (stateRef.propKey !== "items") continue;
     const sig = ctx.graph.getHandler(`__signal__${stateRef.signalId}`);
     if (sig === void 0 || typeof sig.subscribe !== "function") continue;
     const unsub = sig.subscribe((value) => {
       if (plan !== void 0) {
-        reconcileReactiveListByPlan(ctx, graphNode, instance, el, plan(value));
+        reconcileReactiveListByPlan(ctx, graphNode, instance, el, plan(value), hooks);
       } else {
-        reconcileReactiveList(ctx, graphNode, instance, el, build(value));
+        reconcileReactiveList(ctx, graphNode, instance, el, build(value), hooks);
       }
     });
     instance.trackCleanup(unsub);
   }
 }
-function reconcileReactiveListByPlan(ctx, listNode, listInstance, listEl, plan) {
+function reconcileReactiveListByPlan(ctx, listNode, listInstance, listEl, plan, hooks) {
   const oldInstances = [...listInstance.children];
   const result = reconcileChildrenByPlan(
     ctx,
     listEl,
     oldInstances,
     plan,
-    (node, parent) => mountNode(ctx, node, parent)
+    (node, parent) => mountNode(ctx, node, parent),
+    hooks
   );
   listInstance.children.length = 0;
   for (const inst of result.instances) listInstance.children.push(inst);
@@ -729,14 +939,15 @@ function reconcileReactiveListByPlan(ctx, listNode, listInstance, listEl, plan) 
   for (const child of [...listNode.children]) listNode.removeChild(child);
   for (const inst of result.instances) listNode.appendChild(inst.graphNode);
 }
-function reconcileReactiveList(ctx, listNode, listInstance, listEl, newNodes) {
+function reconcileReactiveList(ctx, listNode, listInstance, listEl, newNodes, hooks) {
   const oldInstances = [...listInstance.children];
   const result = reconcileChildren(
     ctx,
     listEl,
     oldInstances,
     newNodes,
-    (node, parent) => mountNode(ctx, node, parent)
+    (node, parent) => mountNode(ctx, node, parent),
+    hooks
   );
   listInstance.children.length = 0;
   for (const inst of result.instances) listInstance.children.push(inst);
@@ -772,11 +983,14 @@ function wireOverlayBehavior(ctx, graphNode, instance, target) {
   const onOpenChange = (isOpen) => {
     if (isOpen) {
       if (desc.restoreFocus) saved = saveFocus(dom);
-      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
       if (desc.modal) {
         active.push(trapFocus(dom, target));
         active.push(containFocus(dom, target));
       }
+      if (desc.menu) {
+        active.push(rovingMenu(dom, target));
+      }
+      if (desc.takesFocus) focusInitial(dom, target, desc.initialFocusId);
       if (desc.closeOnEscape && desc.onClose !== void 0) {
         active.push(onEscape(dom, target, desc.onClose));
       }
@@ -1207,6 +1421,7 @@ export {
   STATE_MARKER_ATTR,
   StreetRenderHandle,
   StreetRendererImpl,
+  TransitionController,
   applyNodeProps,
   applyProp,
   buttonUpdate,
@@ -1215,6 +1430,7 @@ export {
   createRenderContext,
   createRenderer,
   formatHydrationDiagnostic,
+  getResolvedTransition,
   headingUpdate,
   hydrateGraph,
   inputUpdate,
@@ -1227,6 +1443,7 @@ export {
   reconcileChildrenByPlan,
   renderToString,
   resolveTag,
+  runElementTransition,
   serializeState,
   textUpdate,
   wireComponentBehavior,

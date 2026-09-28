@@ -1,4 +1,4 @@
-import { PageDSL, ContainerDSL } from '@streetui/dsl';
+import { PageDSL, TransitionConfig, ContainerDSL } from '@streetui/dsl';
 import { ReadonlySignal } from '@streetui/state';
 import { StreetRenderer } from '@streetui/runtime';
 
@@ -234,6 +234,17 @@ interface MountRouterOptions {
      * subsequent client-side navigations mount normally. Defaults to false.
      */
     readonly hydrate?: boolean;
+    /**
+     * Optional enter/leave transition played on client-side navigations (§9). When
+     * set, each navigation mounts the incoming route into its own host wrapper,
+     * plays the enter animation on it, and defers the outgoing route's disposal
+     * (route-scoped cleanup + DOM removal) until its leave animation ends — so
+     * resources stay alive exactly as long as the departing DOM. History is
+     * untouched (the router already navigated), and the initial mount/hydration is
+     * NOT animated (§22-style: the first paint must match the server). Reuses the
+     * single CSS-class transition engine — no second animation system.
+     */
+    readonly transition?: TransitionConfig;
 }
 interface MountedRouter {
     /** The element route content is rendered into. */

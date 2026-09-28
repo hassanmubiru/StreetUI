@@ -7,7 +7,7 @@
  * (`streetui --version`) — the consolidated test-suite pins all three to the
  * same coordinated release so they can never silently drift apart.
  */
-declare const VERSION = "1.8.0";
+declare const VERSION = "1.9.0";
 
 /**
  * StreetUI reactive signals — framework-owned reactivity, no external libraries.
@@ -447,6 +447,90 @@ declare function component<P = Record<string, never>>(setup: ComponentSetup<P>, 
 declare function isComponentDefinition(value: unknown): value is ComponentDefinition<unknown>;
 
 /**
+ * Transition configuration (§2, §4).
+ *
+ * A `TransitionConfig` is a pure, declarative description of a CSS class-based
+ * enter/leave transition — the engine choice for this milestone. It contains NO
+ * DOM references, NO timers and NO browser-only APIs, so it is safe to build on
+ * the server (where it is simply ignored — see the renderer's SSR guard) and to
+ * carry on a graph handler (`__transition__<nodeId>`) alongside the existing
+ * `__overlay__`/`__component__` descriptors.
+ *
+ * The class model follows the widely-understood enter/leave convention:
+ *
+ *   enter:  [enterActive (+ enter) whole phase] · enterFrom (start) → enterTo (end)
+ *   leave:  [leaveActive (+ leave) whole phase] · leaveFrom (start) → leaveTo (end)
+ *
+ * `name` is a shorthand that expands to `${name}-enter-from`,
+ * `${name}-enter-active`, `${name}-enter-to` and the leave equivalents; explicit
+ * class fields override the derived ones. Because the classes are just strings,
+ * SSR output is deterministic (no class is applied on the server at all — the
+ * controller is browser-only), satisfying §4/§21.
+ */
+interface TransitionConfig {
+    /** Shorthand base: expands to `${name}-enter-from`, `${name}-enter-active`, … */
+    readonly name?: string;
+    /** Class(es) present for the whole enter phase (in addition to `enterActive`). */
+    readonly enter?: string;
+    /** Class(es) applied at the start of enter, removed on the next frame. */
+    readonly enterFrom?: string;
+    /** Class(es) present for the whole enter phase (where the CSS `transition` lives). */
+    readonly enterActive?: string;
+    /** Class(es) added on the next frame, removed when enter completes. */
+    readonly enterTo?: string;
+    /** Class(es) present for the whole leave phase (in addition to `leaveActive`). */
+    readonly leave?: string;
+    /** Class(es) applied at the start of leave, removed on the next frame. */
+    readonly leaveFrom?: string;
+    /** Class(es) present for the whole leave phase (where the CSS `transition` lives). */
+    readonly leaveActive?: string;
+    /** Class(es) added on the next frame, removed when leave completes. */
+    readonly leaveTo?: string;
+    /**
+     * Also animate the very first appearance (initial mount). Hydration never
+     * animates appear (the DOM is already present and correct); this only affects
+     * fresh browser mounts. Defaults to false.
+     */
+    readonly appear?: boolean;
+    /**
+     * Fallback completion timeout in milliseconds. A transition normally completes
+     * on the element's `transitionend`/`animationend`. This timeout is the safety
+     * net for (a) transitions that fire no such event and (b) test DOMs like
+     * happy-dom that dispatch no transition events at all — making tests
+     * deterministic without a real browser (§24). Defaults to 1000. Use a small
+     * value (or 0 → next macrotask) in tests.
+     */
+    readonly duration?: number;
+}
+/**
+ * The resolved, ready-to-apply form of a {@link TransitionConfig}: each phase's
+ * classes are pre-split into arrays so the controller applies/removes them with
+ * no per-run string parsing. Produced once by {@link resolveTransition} at wire
+ * time (browser only).
+ */
+interface ResolvedTransition {
+    /** enter classes present for the whole phase (base `enter` + `enterActive`). */
+    readonly enterActive: readonly string[];
+    /** enter start classes (removed next frame). */
+    readonly enterFrom: readonly string[];
+    /** enter end classes (added next frame). */
+    readonly enterTo: readonly string[];
+    readonly leaveActive: readonly string[];
+    readonly leaveFrom: readonly string[];
+    readonly leaveTo: readonly string[];
+    readonly appear: boolean;
+    readonly duration: number;
+}
+/**
+ * Resolve a {@link TransitionConfig} into applied class arrays. The `name`
+ * shorthand supplies defaults; any explicit field overrides the derived class
+ * for that phase-slot (still merged with `enter`/`leave` base classes).
+ */
+declare function resolveTransition(config: TransitionConfig): ResolvedTransition;
+/** Runtime brand check for a transition descriptor value. */
+declare function isTransitionConfig(value: unknown): value is TransitionConfig;
+
+/**
  * StreetUI DSL type system.
  * All builder callbacks and option shapes live here.
  */
@@ -492,6 +576,14 @@ interface A11yOptions {
     readonly ariaRequired?: boolean;
     /** aria-modal — mark a dialog as modal (content outside is inert to AT). */
     readonly ariaModal?: boolean;
+    /** aria-owns — id(s) of elements owned by this one when the DOM can't express it. */
+    readonly ariaOwns?: string;
+    /** aria-activedescendant — id of the active option in a composite widget (menu/listbox/combobox). */
+    readonly ariaActiveDescendant?: string;
+    /** aria-haspopup — the element opens a popup ('menu' | 'listbox' | 'dialog' | 'grid' | 'tree' | true). */
+    readonly ariaHasPopup?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
+    /** aria-selected — selection state within a composite widget. */
+    readonly ariaSelected?: boolean;
 }
 interface TextOptions extends A11yOptions {
     readonly class?: string;
@@ -555,6 +647,15 @@ interface ContainerOptions extends A11yOptions {
     readonly class?: string;
     readonly id?: string;
     readonly key?: string;
+    /**
+     * Enter/leave transition for this element (§2). CSS class-based and
+     * browser-only: on the server it is ignored (deterministic SSR output). The
+     * enter animation runs when the element is added by a reactive `when`/`listOf`
+     * change (or on initial mount when `appear` is set); the leave animation runs
+     * before the element is removed and disposed — the reconciler defers teardown
+     * until the transition completes.
+     */
+    readonly transition?: TransitionConfig;
 }
 interface SectionOptions extends ContainerOptions {
 }
@@ -562,6 +663,21 @@ interface FormOptions extends ContainerOptions {
     readonly onSubmit?: (e: Event) => void;
 }
 interface ListOptions extends ContainerOptions {
+    /**
+     * Enter/leave transition applied to each list item (§7). Preserves keyed
+     * identity: reordering reuses items (no leave/enter), append/prepend enter,
+     * remove leaves before disposal, and a removed key that reappears mid-leave is
+     * reclaimed (leave→enter). `transition` (inherited) applies to the list
+     * container itself; `itemTransition` applies to its rows.
+     */
+    readonly itemTransition?: TransitionConfig;
+}
+/** Options for `when()` (§2 conditional transitions). */
+interface WhenOptions {
+    /** Transition applied to the active branch as it mounts/unmounts. */
+    readonly transition?: TransitionConfig;
+    /** Also animate the branch present on the initial mount (appear). */
+    readonly appear?: boolean;
 }
 /** Options for a plain portal (mount children into `document.body`). */
 interface PortalOptions extends ContainerOptions {
@@ -634,7 +750,7 @@ interface ContainerDSL extends ContentDSL {
      * renders while the condition is false. Compiles into the same reactive
      * reconciliation machinery as `listOf` — there is no separate render path.
      */
-    when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder): void;
+    when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder, options?: WhenOptions): void;
     /**
      * Render `builder`, but swap to `options.fallback` when the boundary enters an
      * error state. A boundary enters that state when (a) any observed `source`
@@ -753,7 +869,7 @@ declare class ContainerBuilderBase extends ContentBuilderBase implements Contain
     list(key: string, builder: ListBuilder, options?: ListOptions): void;
     listOf<T>(key: string, items: Signal<T[]> | ReadonlySignal<T[]>, renderItem: (item: T, index: number, content: ContentDSL) => void, options?: ListOptions): void;
     form(key: string, builder: FormBuilder, options?: FormOptions): void;
-    when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder): void;
+    when(condition: Bindable<boolean>, builder: ContainerBuilder, elseBuilder?: ContainerBuilder, options?: WhenOptions): void;
     errorBoundary(id: string, builder: ContainerBuilder, options: ErrorBoundaryOptions): void;
     portal(key: string, builder: ContainerBuilder, options?: PortalOptions): void;
     /**
@@ -880,4 +996,4 @@ declare function compile(app: StreetApp, options?: CompileOptions): CompiledAppl
  */
 declare function compileGraph(graph: ApplicationGraph, options?: CompileOptions): CompiledApplication;
 
-export { type InputOptionsBase as $, type ApplicationId as A, BaseNode as B, type CompiledApplication as C, DiagnosticCollector as D, type Diagnostic as E, DiagnosticError as F, GraphNode as G, type DiagnosticLocation as H, type DiagnosticSeverity as I, type ErrorBoundaryOptions as J, type ErrorFallbackBuilder as K, type ErrorSource as L, type EventDescriptor as M, type FormBuilder as N, FormBuilderImpl as O, type PageDSL as P, type FormDSL as Q, type ReadonlySignal as R, StreetApp as S, type FormOptions as T, type Unsubscribe as U, VERSION as V, type GraphNodeData as W, type HandlerFn as X, type HeadingOptions as Y, type ImageOptions as Z, type InputOptions as _, type ComponentDefinition as a, type LinkOptions as a0, type ListBuilder as a1, ListBuilderImpl as a2, type ListDSL as a3, type ListOptions as a4, type ListPlanEntry as a5, type NodeId as a6, type NodeMetadata as a7, type OverlayOptions as a8, type PageBuilder as a9, isBatching as aA, isComponentDefinition as aB, nextId as aC, nodeIdPrefix as aD, observerCount as aE, reactiveListItemKey as aF, reactiveListItemSignature as aG, resetIdCounter as aH, signal as aI, signalKind as aJ, streetui as aK, PageBuilderImpl as aa, type PortalOptions as ab, type PropValue as ac, type Props as ad, type ReactiveConsumer as ae, type ReactiveSource as af, type SectionBuilder as ag, SectionBuilderImpl as ah, type SectionDSL as ai, type SectionOptions as aj, type SerializedGraph as ak, type SerializedNode as al, type StateRef as am, type StreetUI as an, type TextOptions as ao, type TextValue as ap, batch as aq, compile as ar, compileGraph as as, component as at, createNodeId as au, derived as av, effect as aw, formatDiagnostic as ax, generateApplicationId as ay, generateNodeId as az, type ContainerBuilder as b, Signal as c, type Subscriber as d, ApplicationGraph as e, type SemanticNodeType as f, type ContainerDSL as g, type SignalKind as h, type A11yOptions as i, AppBuilder as j, type AppDSL as k, type AppOptions as l, type ApplicationGraphOptions as m, type Bindable as n, type BindableText as o, type BoundInputOptions as p, type ButtonOptions as q, type CompileOptions as r, type ComponentContext as s, type ComponentRender as t, type ComponentSetup as u, ContainerBuilderImpl as v, type ContainerOptions as w, type ContentDSL as x, type ControlledInputOptions as y, DerivedSignal as z };
+export { type InputOptions as $, type ApplicationId as A, BaseNode as B, type CompiledApplication as C, DiagnosticCollector as D, type Diagnostic as E, DiagnosticError as F, GraphNode as G, type DiagnosticLocation as H, type DiagnosticSeverity as I, type ErrorBoundaryOptions as J, type ErrorFallbackBuilder as K, type ErrorSource as L, type EventDescriptor as M, type FormBuilder as N, FormBuilderImpl as O, type PageDSL as P, type FormDSL as Q, type ReadonlySignal as R, StreetApp as S, type TransitionConfig as T, type Unsubscribe as U, VERSION as V, type FormOptions as W, type GraphNodeData as X, type HandlerFn as Y, type HeadingOptions as Z, type ImageOptions as _, type ComponentDefinition as a, type InputOptionsBase as a0, type LinkOptions as a1, type ListBuilder as a2, ListBuilderImpl as a3, type ListDSL as a4, type ListOptions as a5, type ListPlanEntry as a6, type NodeId as a7, type NodeMetadata as a8, type OverlayOptions as a9, formatDiagnostic as aA, generateApplicationId as aB, generateNodeId as aC, isBatching as aD, isComponentDefinition as aE, isTransitionConfig as aF, nextId as aG, nodeIdPrefix as aH, observerCount as aI, reactiveListItemKey as aJ, reactiveListItemSignature as aK, resetIdCounter as aL, resolveTransition as aM, signal as aN, signalKind as aO, streetui as aP, type PageBuilder as aa, PageBuilderImpl as ab, type PortalOptions as ac, type PropValue as ad, type Props as ae, type ReactiveConsumer as af, type ReactiveSource as ag, type ResolvedTransition as ah, type SectionBuilder as ai, SectionBuilderImpl as aj, type SectionDSL as ak, type SectionOptions as al, type SerializedGraph as am, type SerializedNode as an, type StateRef as ao, type StreetUI as ap, type TextOptions as aq, type TextValue as ar, type WhenOptions as as, batch as at, compile as au, compileGraph as av, component as aw, createNodeId as ax, derived as ay, effect as az, type ContainerBuilder as b, Signal as c, type Subscriber as d, ApplicationGraph as e, type SemanticNodeType as f, type ContainerDSL as g, type SignalKind as h, type A11yOptions as i, AppBuilder as j, type AppDSL as k, type AppOptions as l, type ApplicationGraphOptions as m, type Bindable as n, type BindableText as o, type BoundInputOptions as p, type ButtonOptions as q, type CompileOptions as r, type ComponentContext as s, type ComponentRender as t, type ComponentSetup as u, ContainerBuilderImpl as v, type ContainerOptions as w, type ContentDSL as x, type ControlledInputOptions as y, DerivedSignal as z };

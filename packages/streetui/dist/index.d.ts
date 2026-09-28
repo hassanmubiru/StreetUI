@@ -1,9 +1,9 @@
-import { c as Signal, d as Subscriber, U as Unsubscribe, R as ReadonlySignal, A as ApplicationId, D as DiagnosticCollector, e as ApplicationGraph, G as GraphNode, C as CompiledApplication, f as SemanticNodeType, P as PageDSL, g as ContainerDSL, h as SignalKind } from './compile-CJJQYi71.js';
-export { i as A11yOptions, j as AppBuilder, k as AppDSL, l as AppOptions, m as ApplicationGraphOptions, B as BaseNode, n as Bindable, o as BindableText, p as BoundInputOptions, q as ButtonOptions, r as CompileOptions, b as ComponentChildren, s as ComponentContext, a as ComponentDefinition, t as ComponentRender, u as ComponentSetup, b as ContainerBuilder, v as ContainerBuilderImpl, w as ContainerOptions, x as ContentDSL, y as ControlledInputOptions, z as DerivedSignal, E as Diagnostic, F as DiagnosticError, H as DiagnosticLocation, I as DiagnosticSeverity, J as ErrorBoundaryOptions, K as ErrorFallbackBuilder, L as ErrorSource, M as EventDescriptor, N as FormBuilder, O as FormBuilderImpl, Q as FormDSL, T as FormOptions, W as GraphNodeData, X as HandlerFn, Y as HeadingOptions, Z as ImageOptions, _ as InputOptions, $ as InputOptionsBase, a0 as LinkOptions, a1 as ListBuilder, a2 as ListBuilderImpl, a3 as ListDSL, a4 as ListOptions, a5 as ListPlanEntry, a6 as NodeId, a7 as NodeMetadata, a8 as OverlayOptions, a9 as PageBuilder, aa as PageBuilderImpl, ab as PortalOptions, ac as PropValue, ad as Props, ae as ReactiveConsumer, af as ReactiveSource, ag as SectionBuilder, ah as SectionBuilderImpl, ai as SectionDSL, aj as SectionOptions, ak as SerializedGraph, al as SerializedNode, am as StateRef, S as StreetApp, an as StreetUI, ao as TextOptions, ap as TextValue, V as VERSION, aq as batch, ar as compile, as as compileGraph, at as component, au as createNodeId, av as derived, aw as effect, ax as formatDiagnostic, ay as generateApplicationId, az as generateNodeId, aA as isBatching, aB as isComponentDefinition, aC as nextId, aD as nodeIdPrefix, aE as observerCount, aF as reactiveListItemKey, aG as reactiveListItemSignature, aH as resetIdCounter, aI as signal, aJ as signalKind, aK as streetui } from './compile-CJJQYi71.js';
-import { R as RenderHandle, S as StreetRenderer, a as HydrationDiagnosticSink } from './hydration-diagnostics-DNAJumYF.js';
-export { H as HydrationDiagnostic, b as HydrationMismatchType, c as consoleHydrationDiagnosticSink, d as createHydrationDiagnosticCollector, f as formatHydrationDiagnostic } from './hydration-diagnostics-DNAJumYF.js';
-import { D as DOMAdapter } from './server-DNlg7ou2.js';
-export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-DNlg7ou2.js';
+import { c as Signal, d as Subscriber, U as Unsubscribe, R as ReadonlySignal, A as ApplicationId, D as DiagnosticCollector, e as ApplicationGraph, G as GraphNode, C as CompiledApplication, f as SemanticNodeType, P as PageDSL, T as TransitionConfig, g as ContainerDSL, h as SignalKind } from './compile-DqsMQVJk.js';
+export { i as A11yOptions, j as AppBuilder, k as AppDSL, l as AppOptions, m as ApplicationGraphOptions, B as BaseNode, n as Bindable, o as BindableText, p as BoundInputOptions, q as ButtonOptions, r as CompileOptions, b as ComponentChildren, s as ComponentContext, a as ComponentDefinition, t as ComponentRender, u as ComponentSetup, b as ContainerBuilder, v as ContainerBuilderImpl, w as ContainerOptions, x as ContentDSL, y as ControlledInputOptions, z as DerivedSignal, E as Diagnostic, F as DiagnosticError, H as DiagnosticLocation, I as DiagnosticSeverity, J as ErrorBoundaryOptions, K as ErrorFallbackBuilder, L as ErrorSource, M as EventDescriptor, N as FormBuilder, O as FormBuilderImpl, Q as FormDSL, W as FormOptions, X as GraphNodeData, Y as HandlerFn, Z as HeadingOptions, _ as ImageOptions, $ as InputOptions, a0 as InputOptionsBase, a1 as LinkOptions, a2 as ListBuilder, a3 as ListBuilderImpl, a4 as ListDSL, a5 as ListOptions, a6 as ListPlanEntry, a7 as NodeId, a8 as NodeMetadata, a9 as OverlayOptions, aa as PageBuilder, ab as PageBuilderImpl, ac as PortalOptions, ad as PropValue, ae as Props, af as ReactiveConsumer, ag as ReactiveSource, ah as ResolvedTransition, ai as SectionBuilder, aj as SectionBuilderImpl, ak as SectionDSL, al as SectionOptions, am as SerializedGraph, an as SerializedNode, ao as StateRef, S as StreetApp, ap as StreetUI, aq as TextOptions, ar as TextValue, V as VERSION, as as WhenOptions, at as batch, au as compile, av as compileGraph, aw as component, ax as createNodeId, ay as derived, az as effect, aA as formatDiagnostic, aB as generateApplicationId, aC as generateNodeId, aD as isBatching, aE as isComponentDefinition, aF as isTransitionConfig, aG as nextId, aH as nodeIdPrefix, aI as observerCount, aJ as reactiveListItemKey, aK as reactiveListItemSignature, aL as resetIdCounter, aM as resolveTransition, aN as signal, aO as signalKind, aP as streetui } from './compile-DqsMQVJk.js';
+import { R as RenderHandle, S as StreetRenderer, a as HydrationDiagnosticSink } from './hydration-diagnostics-B2FmY05M.js';
+export { H as HydrationDiagnostic, b as HydrationMismatchType, c as consoleHydrationDiagnosticSink, d as createHydrationDiagnosticCollector, f as formatHydrationDiagnostic } from './hydration-diagnostics-B2FmY05M.js';
+import { D as DOMAdapter } from './server-BYnmb_hR.js';
+export { R as RenderToStringOptions, S as STATE_MARKER_ATTR, a as ServerDOMAdapter, r as readState, b as renderToString, s as serializeState, c as serverDOMAdapter } from './server-BYnmb_hR.js';
 
 /**
  * A simple reactive store built on top of signals.
@@ -124,14 +124,24 @@ interface A11yIds {
     readonly base: string;
     /** Id for the primary interactive element (e.g. the input). */
     readonly input: string;
-    /** Id for a label element / labelling text. */
+    /** Id for a label element / labelling text (target of `aria-labelledby`). */
     readonly label: string;
-    /** Id for descriptive/help text. */
+    /** Id for descriptive/help text (target of `aria-describedby`). */
     readonly description: string;
     /** Id for an error message element. */
     readonly error: string;
-    /** Id for a title element (e.g. a dialog title). */
+    /** Id for a title element (e.g. a dialog title; target of `aria-labelledby`). */
     readonly title: string;
+    /**
+     * Id for a control that triggers a popup (button/summary). Pair with
+     * `controls` on the popup it opens (`ariaControls: ids.controls`,
+     * `ariaExpanded: open`).
+     */
+    readonly trigger: string;
+    /** Id for a popup/region a `trigger` controls (target of `aria-controls`). */
+    readonly controls: string;
+    /** Id for a subtree owned out-of-DOM-order (target of `aria-owns`). */
+    readonly owns: string;
     /** Derive an arbitrary suffixed id from the same base. */
     id(suffix: string): string;
 }
@@ -143,6 +153,12 @@ interface A11yIds {
  * // ids.input === 'email-input', ids.label === 'email-label', ...
  * input({ bind: value, id: ids.input, ariaLabelledBy: ids.label, ariaDescribedBy: ids.error });
  * text('Email', { id: ids.label });
+ *
+ * @example
+ * // A menu button that controls its popup, wired by shared ids:
+ * const m = a11yIds('actions');
+ * button('Actions', { id: m.trigger, ariaControls: m.controls, ariaExpanded: open });
+ * page.dropdown('menu', { open, id: m.controls }, (d) => { … });
  */
 declare function a11yIds(base: string): A11yIds;
 
@@ -703,17 +719,65 @@ declare function focusInitial(dom: DOMAdapter, container: Element, initialFocusI
  * cleanup is still callable.
  */
 declare function trapFocus(dom: DOMAdapter, container: Element): () => void;
-/**
- * Modal containment: if focus moves to an element outside `container`, redirect
- * it back inside. Listens on the document body (focusin bubbles there) and
- * returns a cleanup function. Server-safe no-op (body() is null).
- */
 declare function containFocus(dom: DOMAdapter, container: Element): () => void;
 /**
  * Invoke `handler` when Escape is pressed while focus is within `target`.
  * Returns a cleanup function. Server-safe no-op.
  */
 declare function onEscape(dom: DOMAdapter, target: Element, handler: () => void): () => void;
+/**
+ * Roving-focus keyboard navigation for a menu (role="menu") container: the
+ * arrow keys move focus between the container's focusable items (wrap-around at
+ * both ends), Home/End jump to the first/last item, and Enter/Space activate
+ * the currently-focused item (a native `click`, so an item's `onClick` fires).
+ * `Tab` and `Escape` are deliberately left alone — the overlay layer wires
+ * Escape-to-close separately and a menu does not trap Tab.
+ *
+ * Items are re-queried on every key (via {@link getFocusable}) so a menu whose
+ * items change reactively is always navigated against the live set, and items
+ * disabled after mount are skipped. Attaches a keydown listener to the
+ * container and returns a cleanup function. Server-safe: `addEventListener` is
+ * a no-op and the returned cleanup is still callable.
+ */
+declare function rovingMenu(dom: DOMAdapter, container: Element, selector?: string): () => void;
+
+/**
+ * ARIA live-region announcer (§15).
+ *
+ * Screen readers announce text that appears inside an `aria-live` region. The
+ * naive approach — append a fresh `<div aria-live>` per message — leaks a
+ * growing pile of stale nodes and (because a node inserted *already carrying*
+ * its text is often not re-announced) is unreliable. This announcer instead
+ * keeps exactly TWO persistent regions on `<body>` — one `polite`, one
+ * `assertive` — and mutates their text to speak. Announcing clears the region
+ * first and writes on a microtask so that repeating the same string still
+ * triggers a DOM mutation the AT will pick up.
+ *
+ * Built entirely on the {@link DOMAdapter}, so it is server-safe: when
+ * `dom.body()` is null (SSR / headless) construction returns an inert announcer
+ * whose `announce`/`clear`/`destroy` are no-ops. There is never any SSR markup
+ * for a live region — announcements are a runtime-only concept.
+ */
+
+interface Announcer {
+    /**
+     * Announce `message`. `assertive` (default false) routes to the assertive
+     * region (interrupts the user) instead of the polite one (waits for a pause).
+     */
+    announce(message: string, options?: {
+        assertive?: boolean;
+    }): void;
+    /** Clear both regions without announcing anything. */
+    clear(): void;
+    /** Remove both regions from the DOM. Idempotent. */
+    destroy(): void;
+}
+/**
+ * Create a live-region announcer bound to `dom`. Idempotent per call — each
+ * call owns its own pair of regions, so an app that wants a single shared
+ * announcer should create one and reuse it (and `destroy()` it on teardown).
+ */
+declare function createAnnouncer(dom: DOMAdapter): Announcer;
 
 /**
  * NodeInstance — the renderer's live counterpart to a GraphNode.
@@ -824,7 +888,7 @@ declare function wireSignalBindings(ctx: RenderContext, graphNode: GraphNode, in
  * (spec §15). A `conditional` node has no plan handler and falls back to the
  * eager build factory (it only ever renders 0..1 branch, so eager is fine).
  */
-declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element): void;
+declare function wireReactiveList(ctx: RenderContext, graphNode: GraphNode, instance: NodeInstance, el: Element, runAppear?: boolean): void;
 /**
  * Attach overlay focus/keyboard behavior to a mounted portal. Server-safe: on
  * the server `dom.body()` is null so this returns immediately (SSR emits inert
@@ -858,6 +922,122 @@ declare function wireComponentBehavior(ctx: RenderContext, graphNode: GraphNode,
  */
 
 declare function patchNode(ctx: RenderContext, graphNode: GraphNode, propKey: string, newValue: unknown): void;
+
+/**
+ * CSS class-based enter/leave transition controller (§2–§8).
+ *
+ * This is the browser-only runtime that consumes the `__transition__<nodeId>`
+ * descriptor the DSL registers (a pre-resolved {@link ResolvedTransitionLike}).
+ * It is deliberately structural about that descriptor — like the renderer's
+ * `__overlay__`/`__component__` handling — so the renderer takes NO compile-time
+ * dependency on the DSL package.
+ *
+ * Engine (confirmed decision): CSS classes, no Web Animations API, no
+ * browser-only API referenced at module scope. Every timer / rAF / event
+ * binding is reached lazily through `globalThis` and only ever runs when
+ * `dom.body() !== null` (the same SSR guard `wireOverlayBehavior` uses), so:
+ *   - server output is byte-identical (nothing here runs during SSR — §21);
+ *   - happy-dom, which dispatches no `transitionend`/`animationend`, still
+ *     completes deterministically via the fallback timeout (§24).
+ *
+ * The controller is created once per reactive container instance (reactive-list
+ * or conditional) so its `leaving` map survives across reconcile passes — that
+ * is what makes leave→enter reclaim (§6) and keyed-identity list leave (§7)
+ * correct.
+ */
+
+/**
+ * The renderer's structural view of the resolved transition the DSL stores in
+ * `__transition__<id>`. Mirrors `streetui`'s `ResolvedTransition` without
+ * importing it (no renderer→dsl dependency).
+ */
+interface ResolvedTransitionLike {
+    readonly enterActive: readonly string[];
+    readonly enterFrom: readonly string[];
+    readonly enterTo: readonly string[];
+    readonly leaveActive: readonly string[];
+    readonly leaveFrom: readonly string[];
+    readonly leaveTo: readonly string[];
+    readonly appear: boolean;
+    readonly duration: number;
+}
+/**
+ * Hooks handed to the reconciler so it can (a) reclaim an instance that is
+ * mid-leave when its key re-enters (leave→enter cancellation), (b) defer the
+ * remove/dispose/forget/detach chain for a leaving instance until its animation
+ * ends, and (c) play the enter animation for a freshly-inserted instance. When
+ * no transition applies (or we are on the server) every hook degrades to the
+ * pre-transition synchronous behaviour.
+ */
+interface TransitionHooks {
+    /**
+     * If an instance for `key` is currently animating out, cancel its leave and
+     * return it for reuse; otherwise undefined. The caller re-mounts nothing and
+     * reuses the returned instance's live DOM node.
+     */
+    takeLeaving(key: string): NodeInstance | undefined;
+    /**
+     * Begin a leave animation for a removed instance. Returns true when the whole
+     * teardown chain has been deferred to animation-end (caller must NOT remove,
+     * dispose, forget or detach it), or false when there is no transition / no
+     * browser and the caller should tear it down synchronously as before.
+     */
+    beginLeave(inst: NodeInstance): boolean;
+    /** Play the enter animation for a freshly-inserted (or reclaimed) instance. */
+    onEnter(inst: NodeInstance): void;
+}
+/** Read the pre-resolved transition descriptor for a node, if any. */
+declare function getResolvedTransition(graph: ApplicationGraph, nodeId: string): ResolvedTransitionLike | undefined;
+/** Which half of a transition to play on a bare element. */
+type TransitionPhase = 'enter' | 'leave';
+/**
+ * Play one enter/leave transition on a bare DOM element, outside the keyed
+ * reconciler — the seam the router uses for route leave/enter (§9) and any other
+ * consumer that owns a single host element rather than a reactive container.
+ *
+ * Reuses the exact same {@link startRun} mechanics as list/conditional
+ * transitions (from+active applied immediately, next-frame flip to `to`,
+ * completion on transitionend/animationend or the fallback timer), so there is
+ * one transition engine, not two. The returned handle's `cancel()` settles the
+ * run immediately WITHOUT invoking `onDone` — the caller uses it to abort an
+ * in-flight enter when the same host is about to start leaving (rapid
+ * navigation), avoiding overlapping runs/duplicate listeners on one element.
+ *
+ * On the server (or any non-element target) there is nothing to animate, so
+ * `onDone` runs synchronously and `cancel()` is a no-op — the caller's teardown
+ * still happens exactly once.
+ */
+declare function runElementTransition(dom: DOMAdapter, el: Element, rt: ResolvedTransitionLike, phase: TransitionPhase, onDone: () => void): {
+    cancel(): void;
+};
+/**
+ * Per-container transition controller. One instance is created for each
+ * reactive-list / conditional NodeInstance in {@link wireReactiveList}; its
+ * `leaving` map persists across every reconcile of that container.
+ */
+declare class TransitionController {
+    private readonly dom;
+    private readonly graph;
+    /** Full teardown of a leaving instance (remove + dispose + forget + detach). */
+    private readonly finalize;
+    private readonly leaving;
+    constructor(dom: DOMAdapter, graph: ApplicationGraph, 
+    /** Full teardown of a leaving instance (remove + dispose + forget + detach). */
+    finalize: (inst: NodeInstance) => void);
+    /** True only in a real DOM environment (browser). */
+    private get browser();
+    private keyOf;
+    private resolved;
+    /** Run the enter animation for `inst` if it carries a transition (browser only). */
+    enter(inst: NodeInstance): void;
+    /**
+     * Play `appear` for any initial child that opted into it (fresh browser mount
+     * only — hydration must never animate appear, §22, and this is called only on
+     * the mount path).
+     */
+    appear(children: readonly NodeInstance[]): void;
+    hooks(): TransitionHooks;
+}
 
 /**
  * Reconciliation — diff-based child list updates.
@@ -911,7 +1091,7 @@ interface PlanEntry {
  * @param newNodes    New graph children (in desired order)
  * @param mountFn     Factory to create a new NodeInstance for a graph node
  */
-declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], newNodes: readonly GraphNode[], mountFn: MountFn): ReconcileResult;
+declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], newNodes: readonly GraphNode[], mountFn: MountFn, hooks?: TransitionHooks): ReconcileResult;
 /**
  * Plan-based keyed reconciliation (spec §15 — the optimised reactive-list path).
  *
@@ -930,7 +1110,7 @@ declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldIn
  * DOM reordering uses a longest-increasing-subsequence pass so the number of
  * moves is minimal (e.g. a prepend into a 10k list moves 1 node, not 10k).
  */
-declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn): ReconcileResult;
+declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn, hooks?: TransitionHooks): ReconcileResult;
 
 /**
  * StreetUI Renderer — framework-owned DOM renderer.
@@ -1253,6 +1433,17 @@ interface MountRouterOptions {
      * subsequent client-side navigations mount normally. Defaults to false.
      */
     readonly hydrate?: boolean;
+    /**
+     * Optional enter/leave transition played on client-side navigations (§9). When
+     * set, each navigation mounts the incoming route into its own host wrapper,
+     * plays the enter animation on it, and defers the outgoing route's disposal
+     * (route-scoped cleanup + DOM removal) until its leave animation ends — so
+     * resources stay alive exactly as long as the departing DOM. History is
+     * untouched (the router already navigated), and the initial mount/hydration is
+     * NOT animated (§22-style: the first paint must match the server). Reuses the
+     * single CSS-class transition engine — no second animation system.
+     */
+    readonly transition?: TransitionConfig;
 }
 interface MountedRouter {
     /** The element route content is rendered into. */
@@ -1490,6 +1681,58 @@ interface InspectedComponent {
  * fine-grained prop updates (which never rebuild the node).
  */
 declare function inspectComponents(graph: ApplicationGraph): InspectedComponent[];
+/** An overlay currently wired in the graph (dialog/popover/tooltip/…). */
+interface InspectedOverlay {
+    /** The build-order node id of the overlay's portal host. */
+    id: string;
+    /** The stable author-provided key, if any. */
+    key: string | undefined;
+    /** Whether the overlay is open right now (peeked, no subscription). */
+    open: boolean;
+    /** Modal (focus-trapping) overlay? */
+    modal: boolean;
+    /** Does it move focus into itself on open? */
+    takesFocus: boolean;
+    /** Is it a roving-focus menu (role="menu")? */
+    menu: boolean;
+    /** Does Escape close it? */
+    closeOnEscape: boolean;
+    /** Does it restore focus to the opener on close? */
+    restoreFocus: boolean;
+    /** Depth of the portal host node in the graph. */
+    depth: number;
+}
+/** A transition currently wired on a graph node. */
+interface InspectedTransition {
+    /** The build-order node id the transition is attached to. */
+    id: string;
+    /** The stable author-provided key, if any. */
+    key: string | undefined;
+    /** The node type the transition animates (element/portal/list-item/…). */
+    nodeType: string;
+    /** Fallback completion timeout in ms (the resolved `duration`). */
+    duration: number;
+    /** Does it animate the very first appearance (initial mount)? */
+    appear: boolean;
+    /** Depth of the node in the graph. */
+    depth: number;
+}
+/** A prod-safe snapshot of the graph's interaction wiring. */
+interface InspectedInteractions {
+    overlays: InspectedOverlay[];
+    transitions: InspectedTransition[];
+}
+/**
+ * Snapshot every overlay and transition currently wired in the graph, in
+ * document order. This is the interaction-aware companion to
+ * {@link inspectComponents}: it reads only the `__overlay__<id>` /
+ * `__transition__<id>` handler descriptors and public graph structure — it
+ * peeks the `open` signal without subscribing, retains no DOM nodes, mutates
+ * nothing, and is safe to call in production. Because a departing overlay's
+ * handler is pruned on detach (`_unregisterNodeHandlers`), a closed-and-removed
+ * overlay simply no longer appears here.
+ */
+declare function inspectInteractions(graph: ApplicationGraph): InspectedInteractions;
 
 /**
  * DevTools foundation (v0.6, Phase 18). A single read-only entry point that
@@ -1923,4 +2166,4 @@ interface ResolvedConfig {
 /** Identity helper that gives `streetui.config.ts` full type-checking + inference. */
 declare function defineConfig(config: StreetUIConfig): StreetUIConfig;
 
-export { type A11yIds, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedNode, type InspectedPage, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, restoreFocus, routerOutlet, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { type A11yIds, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, BrowserDOMAdapter, CleanupRegistry, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LifecycleHook, type LifecyclePhase, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, type RenderContext, RenderHandle, type ResolvedConfig, type ResolvedTransitionLike, type Resource, type ResourceInspection, type ResourceLike, type ResourceLoader, type ResourceLoaderContext, type ResourceOptions, type ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, TransitionConfig, TransitionController, type TransitionHooks, type TransitionPhase, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createAnnouncer, createApplication, createBrowserHistory, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderContext, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, diagnosePerformance, email, environment, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, getResolvedTransition, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, interpolate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, reportDiagnostic, required, resolveTag, resource, restoreFocus, routerOutlet, rovingMenu, runElementTransition, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

@@ -29,11 +29,54 @@ __export(index_exports, {
   StreetApp: () => StreetApp,
   component: () => component,
   isComponentDefinition: () => isComponentDefinition,
+  isTransitionConfig: () => isTransitionConfig,
   reactiveListItemKey: () => reactiveListItemKey,
   reactiveListItemSignature: () => reactiveListItemSignature,
+  resolveTransition: () => resolveTransition,
   streetui: () => streetui
 });
 module.exports = __toCommonJS(index_exports);
+
+// src/transition.ts
+function classes(value) {
+  if (value === void 0) return [];
+  const out = [];
+  for (const token of value.split(/\s+/)) {
+    if (token.length > 0 && !out.includes(token)) out.push(token);
+  }
+  return out;
+}
+function merge(a, b) {
+  const out = [...a];
+  for (const token of b) if (!out.includes(token)) out.push(token);
+  return out;
+}
+function resolveTransition(config) {
+  const n = config.name;
+  const enterActive = merge(
+    classes(config.enter),
+    classes(config.enterActive ?? (n !== void 0 ? `${n}-enter-active` : void 0))
+  );
+  const leaveActive = merge(
+    classes(config.leave),
+    classes(config.leaveActive ?? (n !== void 0 ? `${n}-leave-active` : void 0))
+  );
+  return {
+    enterActive,
+    enterFrom: classes(config.enterFrom ?? (n !== void 0 ? `${n}-enter-from` : void 0)),
+    enterTo: classes(config.enterTo ?? (n !== void 0 ? `${n}-enter-to` : void 0)),
+    leaveActive,
+    leaveFrom: classes(config.leaveFrom ?? (n !== void 0 ? `${n}-leave-from` : void 0)),
+    leaveTo: classes(config.leaveTo ?? (n !== void 0 ? `${n}-leave-to` : void 0)),
+    appear: config.appear ?? false,
+    duration: config.duration ?? 1e3
+  };
+}
+function isTransitionConfig(value) {
+  if (value === null || typeof value !== "object") return false;
+  const o = value;
+  return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
+}
 
 // src/builders.ts
 var import_state = require("@streetui/state");
@@ -63,6 +106,18 @@ function applyA11yProps(props, options) {
   if (options.ariaInvalid !== void 0) props["aria-invalid"] = String(options.ariaInvalid);
   if (options.ariaRequired !== void 0) props["aria-required"] = String(options.ariaRequired);
   if (options.ariaModal !== void 0) props["aria-modal"] = String(options.ariaModal);
+  if (options.ariaOwns !== void 0) props["aria-owns"] = options.ariaOwns;
+  if (options.ariaActiveDescendant !== void 0) props["aria-activedescendant"] = options.ariaActiveDescendant;
+  if (options.ariaHasPopup !== void 0) props["aria-haspopup"] = String(options.ariaHasPopup);
+  if (options.ariaSelected !== void 0) props["aria-selected"] = String(options.ariaSelected);
+}
+function registerTransition(graph, node, config) {
+  if (config === void 0) return;
+  const resolved = resolveTransition(config);
+  graph.registerHandler(
+    `__transition__${node.id}`,
+    () => resolved
+  );
 }
 function containerProps(options) {
   const props = {};
@@ -123,6 +178,7 @@ var OVERLAY_KINDS = {
     role: "menu",
     modal: false,
     takesFocus: true,
+    menu: true,
     ariaModal: false,
     defaultCloseOnEscape: true,
     defaultRestoreFocus: true
@@ -255,6 +311,7 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       parent: this._node,
       props: containerProps(options)
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new SectionBuilderImpl(node, this._graph));
   }
   container(key, builder, options = {}) {
@@ -263,6 +320,7 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       parent: this._node,
       props: containerProps(options)
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new ContainerBuilderImpl(node, this._graph));
   }
   list(key, builder, options = {}) {
@@ -271,6 +329,7 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       parent: this._node,
       props: containerProps(options)
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new ListBuilderImpl(node, this._graph));
   }
   listOf(key, items, renderItem, options = {}) {
@@ -280,6 +339,7 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       parent: this._node,
       props: containerProps(options)
     });
+    registerTransition(graph, node, options.transition);
     const signalId = `${node.id}:items`;
     node.stateRefs.push({ signalId, propKey: "items" });
     graph.registerHandler(`__signal__${signalId}`, items);
@@ -301,6 +361,7 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
         }
       });
       renderItem(item, index, new ContainerBuilderImpl(itemNode, graph));
+      registerTransition(graph, itemNode, options.itemTransition);
       return itemNode;
     };
     const buildPlan = (raw) => {
@@ -332,6 +393,7 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       parent: this._node,
       props
     });
+    registerTransition(this._graph, node, options.transition);
     if (options.onSubmit !== void 0) {
       const handlerKey = `submit:${node.id}`;
       this._graph.registerHandler(handlerKey, options.onSubmit);
@@ -339,18 +401,20 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
     }
     builder(new FormBuilderImpl(node, this._graph));
   }
-  when(condition, builder, elseBuilder) {
+  when(condition, builder, elseBuilder, options = {}) {
     const graph = this._graph;
     const node = graph.createNode("conditional", {
       parent: this._node,
       props: containerProps({})
     });
+    const branchTransition = options.transition !== void 0 && options.appear === true ? { ...options.transition, appear: true } : options.transition;
     const buildBranch = (build, tag) => {
       const branchKey = `when-${tag}:${node.id}`;
       const branch = graph.createNode("container", {
         key: branchKey,
         props: { key: branchKey }
       });
+      registerTransition(graph, branch, branchTransition);
       build(new ContainerBuilderImpl(branch, graph));
       return branch;
     };
@@ -445,13 +509,24 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
       ...options.ariaDescribedBy !== void 0 ? { ariaDescribedBy: options.ariaDescribedBy } : {}
     };
     const portalBuilder = new ContainerBuilderImpl(portalNode, graph);
-    portalBuilder.when(openSignal, (panelHost) => {
-      panelHost.container(`${key}__panel`, builder, panelOptions);
-    });
+    portalBuilder.when(
+      openSignal,
+      (panelHost) => {
+        panelHost.container(`${key}__panel`, builder, panelOptions);
+      },
+      void 0,
+      // Overlay open/close rides the panel's `when`; a transition animates the
+      // panel in on open and — via the reconciler's deferred-leave — plays the
+      // leave before the panel is removed (§10). Focus is restored at close-
+      // request time (see wireOverlayBehavior), so it never stays trapped inside
+      // a panel that is animating away.
+      options.transition !== void 0 ? { transition: options.transition } : {}
+    );
     const descriptor = {
       open: openSignal,
       modal: kind.modal,
       takesFocus: kind.takesFocus,
+      menu: kind.menu ?? false,
       closeOnEscape: options.closeOnEscape ?? kind.defaultCloseOnEscape,
       restoreFocus: options.restoreFocus ?? kind.defaultRestoreFocus,
       ...options.initialFocusId !== void 0 ? { initialFocusId: options.initialFocusId } : {},
@@ -548,6 +623,7 @@ var ListBuilderImpl = class extends ContentBuilderBase {
       parent: this._node,
       props: containerProps(options)
     });
+    registerTransition(this._graph, node, options.transition);
     builder(new ContainerBuilderImpl(node, this._graph));
   }
 };
@@ -621,8 +697,10 @@ var streetui = {
   StreetApp,
   component,
   isComponentDefinition,
+  isTransitionConfig,
   reactiveListItemKey,
   reactiveListItemSignature,
+  resolveTransition,
   streetui
 });
 //# sourceMappingURL=index.cjs.map

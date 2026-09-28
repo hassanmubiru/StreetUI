@@ -54,6 +54,40 @@ function inspectComponents(graph) {
   });
   return out;
 }
+function inspectInteractions(graph) {
+  const overlays = [];
+  const transitions = [];
+  graph.walk((node, depth) => {
+    const overlayFn = graph.getHandler(`__overlay__${node.id}`);
+    if (overlayFn !== void 0) {
+      const d = overlayFn();
+      overlays.push({
+        id: node.id,
+        key: node.key,
+        open: d.open.peek(),
+        modal: d.modal,
+        takesFocus: d.takesFocus,
+        menu: d.menu,
+        closeOnEscape: d.closeOnEscape,
+        restoreFocus: d.restoreFocus,
+        depth
+      });
+    }
+    const transitionFn = graph.getHandler(`__transition__${node.id}`);
+    if (transitionFn !== void 0) {
+      const t = transitionFn();
+      transitions.push({
+        id: node.id,
+        key: node.key,
+        nodeType: node.type,
+        duration: t.duration,
+        appear: t.appear,
+        depth
+      });
+    }
+  });
+  return { overlays, transitions };
+}
 
 // src/application.ts
 import { formatDiagnostic as formatDiagnostic2 } from "@streetui/core";
@@ -396,6 +430,7 @@ export {
   inspectForm,
   inspectGraph,
   inspectI18n,
+  inspectInteractions,
   inspectResource,
   inspectRouter,
   inspectSignal,

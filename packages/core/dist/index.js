@@ -13,6 +13,9 @@ function a11yIds(base) {
     description: `${token}-description`,
     error: `${token}-error`,
     title: `${token}-title`,
+    trigger: `${token}-trigger`,
+    controls: `${token}-controls`,
+    owns: `${token}-owns`,
     id: (suffix) => `${token}-${toIdToken(suffix)}`
   };
 }

@@ -559,18 +559,25 @@ function trapFocus(dom, container) {
   dom.addEventListener(container, "keydown", onKeydown);
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
+var containmentStack = [];
 function containFocus(dom, container) {
   const body = dom.body();
   if (body === null) return () => {
   };
+  containmentStack.push(container);
   const onFocusIn = (event) => {
+    if (containmentStack[containmentStack.length - 1] !== container) return;
     const target = event.target;
     if (target !== null && !dom.contains(container, target)) {
       focusFirst(dom, container);
     }
   };
   dom.addEventListener(body, "focusin", onFocusIn);
-  return () => dom.removeEventListener(body, "focusin", onFocusIn);
+  return () => {
+    dom.removeEventListener(body, "focusin", onFocusIn);
+    const index = containmentStack.lastIndexOf(container);
+    if (index !== -1) containmentStack.splice(index, 1);
+  };
 }
 function onEscape(dom, target, handler) {
   const onKeydown = (event) => {
@@ -578,6 +585,84 @@ function onEscape(dom, target, handler) {
   };
   dom.addEventListener(target, "keydown", onKeydown);
   return () => dom.removeEventListener(target, "keydown", onKeydown);
+}
+function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
+  const onKeydown = (event) => {
+    const key = event.key;
+    const isActivate = key === "Enter" || key === " " || key === "Spacebar";
+    const isMove = key === "ArrowDown" || key === "ArrowUp" || key === "Home" || key === "End";
+    if (!isActivate && !isMove) return;
+    const items = getFocusable(dom, container, selector);
+    if (items.length === 0) return;
+    const active = dom.activeElement();
+    const index = active === null ? -1 : items.indexOf(active);
+    if (isActivate) {
+      if (index < 0) return;
+      event.preventDefault();
+      items[index].click?.();
+      return;
+    }
+    event.preventDefault();
+    let next;
+    if (key === "Home") next = 0;
+    else if (key === "End") next = items.length - 1;
+    else if (key === "ArrowDown") next = index < 0 ? 0 : (index + 1) % items.length;
+    else next = index <= 0 ? items.length - 1 : index - 1;
+    dom.focus(items[next]);
+  };
+  dom.addEventListener(container, "keydown", onKeydown);
+  return () => dom.removeEventListener(container, "keydown", onKeydown);
+}
+
+// src/live-region.ts
+var VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;";
+function makeRegion(dom, politeness) {
+  const el = dom.createElement("div");
+  dom.setAttribute(el, "aria-live", politeness);
+  dom.setAttribute(el, "aria-atomic", "true");
+  dom.setAttribute(el, "role", politeness === "assertive" ? "alert" : "status");
+  dom.setAttribute(el, "data-streetui-live", politeness);
+  dom.setAttribute(el, "style", VISUALLY_HIDDEN);
+  return el;
+}
+function createAnnouncer(dom) {
+  const body = dom.body();
+  if (body === null) {
+    return { announce() {
+    }, clear() {
+    }, destroy() {
+    } };
+  }
+  const polite = makeRegion(dom, "polite");
+  const assertive = makeRegion(dom, "assertive");
+  dom.appendChild(body, polite);
+  dom.appendChild(body, assertive);
+  let destroyed = false;
+  const write = (region, message) => {
+    dom.setTextContent(region, "");
+    void Promise.resolve().then(() => {
+      if (!destroyed) dom.setTextContent(region, message);
+    });
+  };
+  return {
+    announce(message, options) {
+      if (destroyed) return;
+      write(options?.assertive === true ? assertive : polite, message);
+    },
+    clear() {
+      if (destroyed) return;
+      dom.setTextContent(polite, "");
+      dom.setTextContent(assertive, "");
+    },
+    destroy() {
+      if (destroyed) return;
+      destroyed = true;
+      for (const region of [polite, assertive]) {
+        const parent = dom.parentNode(region);
+        if (parent !== null) dom.removeChild(parent, region);
+      }
+    }
+  };
 }
 export {
   BrowserDOMAdapter,
@@ -591,6 +676,7 @@ export {
   ServerText,
   browserDOMAdapter,
   containFocus,
+  createAnnouncer,
   escapeHtmlAttr,
   escapeHtmlText,
   focusById,
@@ -599,6 +685,7 @@ export {
   getFocusable,
   onEscape,
   restoreFocus,
+  rovingMenu,
   saveFocus,
   serializeChildren,
   serializeServerNode,
