@@ -2,7 +2,7 @@
   "schema": "streetui-browser-run-all/v1.8",
   "status": "AVAILABLE",
   "reason": null,
-  "detectedAt": "2026-09-28T13:59:55.479Z",
+  "detectedAt": "2026-09-28T14:13:55.187Z",
   "environment": {
     "runtime": "node v24.18.0",
     "playwright": true,
@@ -68,7 +68,7 @@
           "resultPath": "benchmarks/results/svelte.json",
           "browserStatus": "BLOCKED",
           "nodeSideData": "present (Node SSR/bundle — NOT browser numbers)",
-          "note": "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of null (reading 'nodes_start')\n    at st (http://localhost:36159/assets/index-Bi84fnm0.js:1:15125)\n    at http://localhost:36159/assets/index-Bi84fnm0.js:1:15368\n    at et (http://localhost:36159/assets/index-Bi84fnm0.js:1:20707)\n    at xr (http://localhost:36159/assets/index-Bi84fnm0.js:1:20321)\n    at Vr (http://localhost:36159/assets/index-Bi84fnm0.js:1:26171)\n    at async eval (eval at evaluate (:1:1), <anonymous>:1:13)\n    at async <anonymous>:260:30"
+          "note": "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of null (reading 'nodes_start')\n    at st (http://localhost:37335/assets/index-Bi84fnm0.js:1:15125)\n    at http://localhost:37335/assets/index-Bi84fnm0.js:1:15368\n    at et (http://localhost:37335/assets/index-Bi84fnm0.js:1:20707)\n    at xr (http://localhost:37335/assets/index-Bi84fnm0.js:1:20321)\n    at Vr (http://localhost:37335/assets/index-Bi84fnm0.js:1:26171)\n    at async eval (eval at evaluate (:1:1), <anonymous>:1:13)\n    at async <anonymous>:260:30"
         },
         {
           "framework": "solid",
