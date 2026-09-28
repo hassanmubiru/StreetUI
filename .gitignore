@@ -1,0 +1,66 @@
+# ── Node / package managers ────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.pnpm-debug.log
+npm-debug.log*
+yarn-error.log
+
+# ── Build outputs ──────────────────────────────────────────────────────────
+dist/
+dist-tarballs/
+*.tgz
+*.tar.gz
+
+# ── Turbo ──────────────────────────────────────────────────────────────────
+.turbo/
+
+# ── Test / coverage ────────────────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+
+# ── TypeScript ────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Environment / secrets ─────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Editor / OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# ── Benchmark results & temp ──────────────────────────────────────────────
+benchmarks/results/
+/tmp/
+
+# ── Root-level milestone / release report markdown ────────────────────────
+# README.md is intentionally NOT listed here — it stays tracked.
+/CHANGELOG.md
+/CONSOLIDATION-1.0-REPORT.md
+/HARDENING_REPORT.md
+/VERIFICATION_REPORT.md
+/V0.4-SSR-REPORT.md
+/V0.5-PLATFORM-REPORT.md
+/V0.6-CLI-REPORT.md
+/V0.7-PERFORMANCE-REPORT.md
+/V0.9-ECOSYSTEM-REPORT.md
+/V1.0-FINAL-RELEASE-EXECUTION-REPORT.md
+/V1.0-STABLE-RELEASE-REPORT.md
+/V1.1-PERFORMANCE-REPORT.md
+/V1.2-PERFORMANCE-REPORT.md
+/V1.3-REAL-WORLD-PERFORMANCE-REPORT.md
+/V1.4-RENDERING-SSR-PERFORMANCE-REPORT.md
+/V1.5-UNIFIED-BROWSER-BENCHMARK-REPORT.md
+/V1.6-SSR-SERVERDOM-REPORT.md
+/V1.7-STATIC-SSR-COMPILER-REPORT.md
+/V1.7-STATIC-SSR-REPORT.md
+/V1.8-CLIENT-BROWSER-REPORT.md
+/V1.8.0-COMPONENT-PLATFORM-REPORT.md
+/V1.9-OVERLAY-FOCUS-REPORT.md
+/V1.9.0-TRANSITIONS-A11Y-INTERACTION-PLATFORM-REPORT.md
+/V2.0.0-APPLICATION-PLATFORM-REPORT.md
+/V2.1.0-BROWSER-ACCESSIBILITY-VALIDATION-REPORT.md
