@@ -626,6 +626,12 @@ var DEVTOOLS_CSS = [
   ".st-depth{display:inline-block}.st-depth{width:calc(var(--d,0)*12px)}",
   "code{color:#d7d7e0}"
 ].join("");
+
+// src/devtools-report.ts
+function renderDevToolsReport(compiled, sources = {}, options = {}) {
+  const session = createDevTools(compiled, sources, options);
+  return renderDevToolsHTML(session.snapshot);
+}
 export {
   DEFAULT_PERF_THRESHOLDS,
   createDevTools,
@@ -644,6 +650,7 @@ export {
   nodeTypeStats,
   printDiagnostics,
   printGraph,
-  renderDevToolsHTML
+  renderDevToolsHTML,
+  renderDevToolsReport
 };
 //# sourceMappingURL=index.js.map

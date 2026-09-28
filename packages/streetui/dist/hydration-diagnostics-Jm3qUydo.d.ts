@@ -7,7 +7,7 @@
  * (`streetui --version`) — the consolidated test-suite pins all three to the
  * same coordinated release so they can never silently drift apart.
  */
-declare const VERSION = "2.0.0";
+declare const VERSION = "2.1.0";
 
 /**
  * StreetUI reactive signals — framework-owned reactivity, no external libraries.

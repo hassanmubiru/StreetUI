@@ -37,7 +37,8 @@ __export(index_exports, {
   nodeTypeStats: () => nodeTypeStats,
   printDiagnostics: () => printDiagnostics,
   printGraph: () => printGraph,
-  renderDevToolsHTML: () => renderDevToolsHTML
+  renderDevToolsHTML: () => renderDevToolsHTML,
+  renderDevToolsReport: () => renderDevToolsReport
 });
 module.exports = __toCommonJS(index_exports);
 
@@ -666,6 +667,12 @@ var DEVTOOLS_CSS = [
   ".st-depth{display:inline-block}.st-depth{width:calc(var(--d,0)*12px)}",
   "code{color:#d7d7e0}"
 ].join("");
+
+// src/devtools-report.ts
+function renderDevToolsReport(compiled, sources = {}, options = {}) {
+  const session = createDevTools(compiled, sources, options);
+  return renderDevToolsHTML(session.snapshot);
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   DEFAULT_PERF_THRESHOLDS,
@@ -685,6 +692,7 @@ var DEVTOOLS_CSS = [
   nodeTypeStats,
   printDiagnostics,
   printGraph,
-  renderDevToolsHTML
+  renderDevToolsHTML,
+  renderDevToolsReport
 });
 //# sourceMappingURL=index.cjs.map

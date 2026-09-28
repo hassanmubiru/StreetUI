@@ -162,6 +162,7 @@ __export(src_exports, {
   reconcileChildren: () => reconcileChildren,
   reconcileChildrenByPlan: () => reconcileChildrenByPlan,
   renderDevToolsHTML: () => renderDevToolsHTML,
+  renderDevToolsReport: () => renderDevToolsReport,
   renderHead: () => renderHead,
   renderToString: () => renderToString,
   reportDiagnostic: () => reportDiagnostic,
@@ -204,7 +205,7 @@ __export(src_exports, {
 module.exports = __toCommonJS(src_exports);
 
 // src/version.ts
-var VERSION = "2.0.0";
+var VERSION = "2.1.0";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;
@@ -6240,6 +6241,12 @@ var DEVTOOLS_CSS = [
   "code{color:#d7d7e0}"
 ].join("");
 
+// ../devtools/src/devtools-report.ts
+function renderDevToolsReport(compiled, sources = {}, options = {}) {
+  const session = createDevTools(compiled, sources, options);
+  return renderDevToolsHTML(session.snapshot);
+}
+
 // src/config.ts
 function defineConfig(config) {
   return config;
@@ -6388,6 +6395,7 @@ function defineConfig(config) {
   reconcileChildren,
   reconcileChildrenByPlan,
   renderDevToolsHTML,
+  renderDevToolsReport,
   renderHead,
   renderToString,
   reportDiagnostic,

@@ -1,4 +1,4 @@
-import { G as GraphNode, R as ReadonlySignal, C as CompiledApplication, i as ApplicationGraph, j as HydrationDiagnosticSink } from './hydration-diagnostics-CFYDXBlm.js';
+import { G as GraphNode, R as ReadonlySignal, C as CompiledApplication, i as ApplicationGraph, j as HydrationDiagnosticSink } from './hydration-diagnostics-Jm3qUydo.cjs';
 
 /**
  * Application and component lifecycle primitives.

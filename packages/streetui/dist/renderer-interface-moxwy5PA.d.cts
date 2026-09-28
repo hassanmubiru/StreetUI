@@ -1,4 +1,4 @@
-import { C as CompiledApplication } from './hydration-diagnostics-CFYDXBlm.cjs';
+import { C as CompiledApplication } from './hydration-diagnostics-Jm3qUydo.cjs';
 
 /**
  * The interface the runtime uses to communicate with the renderer.

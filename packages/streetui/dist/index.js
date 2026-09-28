@@ -1,5 +1,5 @@
 // src/version.ts
-var VERSION = "2.0.0";
+var VERSION = "2.1.0";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;
@@ -6035,6 +6035,12 @@ var DEVTOOLS_CSS = [
   "code{color:#d7d7e0}"
 ].join("");
 
+// ../devtools/src/devtools-report.ts
+function renderDevToolsReport(compiled, sources = {}, options = {}) {
+  const session = createDevTools(compiled, sources, options);
+  return renderDevToolsHTML(session.snapshot);
+}
+
 // src/config.ts
 function defineConfig(config) {
   return config;
@@ -6182,6 +6188,7 @@ export {
   reconcileChildren,
   reconcileChildrenByPlan,
   renderDevToolsHTML,
+  renderDevToolsReport,
   renderHead,
   renderToString,
   reportDiagnostic,
