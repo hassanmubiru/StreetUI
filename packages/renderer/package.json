@@ -36,6 +36,7 @@
     "@streetui/runtime": "workspace:*"
   },
   "devDependencies": {
+    "@streetui/forms": "workspace:*",
     "typescript": "*",
     "tsup": "*",
     "vitest": "*",

@@ -33,6 +33,7 @@ import {
   type PlanEntry,
 } from './reconciliation.js';
 import { TransitionController, type TransitionHooks } from './transition.js';
+import { wireHeadBehavior } from './head.js';
 
 /**
  * Prop keys handled by the per-type mount branches (or reserved internals), so
@@ -279,6 +280,23 @@ export function mountNode(
 
     dom.appendChild(parentDom, anchor);
     wireOverlayBehavior(ctx, graphNode, instance, target);
+    return instance;
+  }
+
+  // Head — a metadata node (title/meta/link/base). Renders as a neutral inline
+  // anchor at the declaration site (like a portal), while its contribution is
+  // applied to `document.head` by `wireHeadBehavior` (browser) or emitted by
+  // `renderHead` (server). No visible children; the anchor keeps hydration
+  // structurally aligned with the SSR output.
+  if (graphNode.type === 'head') {
+    const anchor = dom.createElement(resolveTag('head'));
+    dom.setAttribute(anchor, 'data-streetui-head-anchor', '');
+    applyNodeProps(ctx, graphNode, anchor);
+    const instance = new NodeInstance(graphNode, anchor);
+    ctx.instances.set(graphNode.id, instance);
+
+    dom.appendChild(parentDom, anchor);
+    wireHeadBehavior(ctx, graphNode, instance);
     return instance;
   }
 

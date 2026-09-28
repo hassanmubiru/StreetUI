@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { resetIdCounter } from '@streetui/core';
-import { streetui } from '@streetui/dsl';
+import { streetui, component } from '@streetui/dsl';
 import { compile, type CompiledApplication } from '@streetui/compiler';
 import { signal, derived, resource } from '@streetui/state';
 import { createDevTools } from './panels.js';
@@ -159,5 +159,41 @@ describe('createDevTools — performance panel & text report', () => {
     expect(report).toContain('Application:');
     expect(report).toContain('count [writable] = 7');
     expect(report).toContain('Performance:');
+  });
+});
+
+describe('createDevTools — component/overlay/transition/diagnostics panels (§8-§14)', () => {
+  it('captures the component tree, overlays, transitions, and compile diagnostics', () => {
+    const Card = component<{ title: string }>((props) => (c) => {
+      c.heading(props.title, { level: 3 });
+    }, { name: 'Card' });
+    const open = signal(false);
+    const app = streetui.app({ name: 'panels', version: '2.0.0' });
+    app.page('home', (page) => {
+      page.component('c', Card, { title: 'T' });
+      page.dialog('dlg', { open }, (d) => d.button('OK', { id: 'ok' }));
+      page.section('s', (s) => s.text('body'), {
+        transition: { name: 'fade', duration: 250, appear: true },
+      });
+    });
+    const s = createDevTools(compile(app)).snapshot;
+
+    expect(s.components.map((c) => c.name)).toContain('Card');
+    expect(s.overlays.map((o) => o.key)).toContain('dlg');
+    expect(s.overlays[0]?.modal).toBe(true);
+    expect(s.transitions.find((t) => t.key === 's')?.duration).toBe(250);
+    // Compile diagnostics panel is always present (clean compile → zero counts).
+    expect(s.diagnostics.errors).toBe(0);
+    expect(Array.isArray(s.diagnostics.messages)).toBe(true);
+  });
+
+  it('renders the new panels into the text report', () => {
+    const Card = component((_p) => (c) => c.text('x'), { name: 'Card' });
+    const app = streetui.app({ name: 'panels2', version: '2.0.0' });
+    app.page('home', (page) => page.component('c', Card, {}));
+    const report = createDevTools(compile(app)).format();
+    expect(report).toContain('Components: 1');
+    expect(report).toContain('Card');
+    expect(report).toContain('Diagnostics:');
   });
 });

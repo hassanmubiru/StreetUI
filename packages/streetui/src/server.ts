@@ -17,6 +17,7 @@
 // Server-side rendering: compiled app → HTML string, with hydration state.
 export {
   renderToString,
+  renderHead,
   serializeState,
   readState,
   STATE_MARKER_ATTR,

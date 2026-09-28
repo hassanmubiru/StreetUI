@@ -3,7 +3,7 @@
  * All builder callbacks and option shapes live here.
  */
 
-import type { Signal, ReadonlySignal } from '@streetui/state';
+import type { Signal, ReadonlySignal, Resource } from '@streetui/state';
 import type { ComponentDefinition } from './component.js';
 import type { TransitionConfig } from './transition.js';
 import type { HeadMetadata } from './head.js';
@@ -223,6 +223,41 @@ export interface ErrorBoundaryOptions {
   readonly source?: ErrorSource | ReadonlyArray<ErrorSource>;
   /** Invoked by the fallback's `retry()`, before the body is re-attempted (e.g. `resource.refetch`). */
   readonly onRetry?: () => void;
+  /**
+   * Error-reporting hook (§6/§7). Called with the current error each time the
+   * boundary ENTERS its error state (i.e. when the fallback mounts), including
+   * on a re-entry after a failed retry. Use it to forward the error to a
+   * production diagnostics sink. It observes only — it never changes the
+   * boundary's behavior, and receives the same `unknown` error the fallback
+   * sees (no sensitive framework internals are injected).
+   */
+  readonly onError?: (error: unknown) => void;
+}
+
+/**
+ * Branch builders for {@link ContainerDSL.asyncBoundary} — the loading / error /
+ * success states of a {@link Resource}. This is deliberately NOT a new async
+ * system: it is thin sugar over the existing `resource` state machine and
+ * `when()`. Exactly one branch is live at a time, chosen by the resource's
+ * reactive `status`/`data` (error takes precedence, then resolved data, then
+ * loading), so mounting/unmounting and cleanup all reuse the conditional
+ * machinery. Branch signature mirrors `errorBoundary`'s fallback: the content
+ * scope comes first.
+ */
+export interface AsyncBoundaryBranches<T> {
+  /** Shown while the resource is idle or performing its first load (no data yet). */
+  readonly loading?: (content: ContainerDSL) => void;
+  /**
+   * Shown while the resource is in its error state. Receives the current error
+   * and a `retry()` that re-runs the loader (a thin wrapper over `refetch`).
+   */
+  readonly error?: (content: ContainerDSL, error: unknown, retry: () => void) => void;
+  /**
+   * Shown once the resource has data (including while a refetch keeps the old
+   * value visible). Receives the data as a `ReadonlySignal<T>` so the branch can
+   * bind it reactively and update in place without remounting.
+   */
+  readonly success: (content: ContainerDSL, data: ReadonlySignal<T>) => void;
 }
 
 // ── Interfaces for each DSL scope ─────────────────────────────────────────────
@@ -280,6 +315,27 @@ export interface ContainerDSL extends ContentDSL {
     id: string,
     builder: ContainerBuilder,
     options: ErrorBoundaryOptions,
+  ): void;
+  /**
+   * Render the loading / error / success states of an async {@link Resource}
+   * (§4). This is sugar over the existing `resource` state machine and `when()`
+   * — NOT a second async system and NOT a literal port of React Suspense. It
+   * renders exactly one branch at a time based on the resource's reactive state:
+   * the `error` branch while `status === 'error'` (with a `retry()` that calls
+   * `refetch`), otherwise the `success` branch once data is present (data passed
+   * as a `ReadonlySignal<T>` so it updates in place, and stays visible while a
+   * refetch is in flight), otherwise the `loading` branch. Because it is built
+   * from `when()`, SSR renders whichever branch matches the resource's current
+   * (peeked) state — so a server that awaits the resource before serializing
+   * emits the resolved `success` branch, and hydration (seeded via the
+   * resource's `initialData`) reuses it with no duplicate work. Resource
+   * cleanup/cancellation is the resource's own concern (pass its `dispose` to
+   * the owning scope's `onCleanup`, e.g. a component's `ctx.onCleanup`).
+   */
+  asyncBoundary<T>(
+    key: string,
+    resource: Resource<T>,
+    branches: AsyncBoundaryBranches<T>,
   ): void;
   /**
    * Render `builder`'s subtree into `document.body` instead of inline at this

@@ -9,6 +9,7 @@ import type { DOMAdapter } from '@streetui/dom';
 import type { ApplicationGraph, GraphNode } from '@streetui/graph';
 import type { NodeInstance } from './node-instance.js';
 import type { HydrationDiagnosticSink } from './hydration-diagnostics.js';
+import type { HeadManager } from './head.js';
 
 export interface RenderContext {
   readonly dom: DOMAdapter;
@@ -33,6 +34,14 @@ export interface RenderContext {
    * `dom.createRawHTML` instead of recursively constructing the subtree.
    */
   readonly staticHTML?: ReadonlyMap<string, string>;
+  /**
+   * Lazily-created coordinator for `head()` metadata nodes (2.0 §1). Created on
+   * first `wireHeadBehavior` call on the browser (never on the server, where
+   * `dom.head()` is null and `renderHead` emits the metadata instead). Mutable
+   * because it is attached on demand; a render with no `head()` nodes never
+   * allocates one.
+   */
+  head?: HeadManager;
 }
 
 export function createRenderContext(

@@ -34,6 +34,7 @@ import type {
   TextValue,
   ErrorBoundaryOptions,
   ErrorSource,
+  AsyncBoundaryBranches,
   PageBuilder,
   SectionBuilder,
   ContainerBuilder as ContainerBuilderFn,
@@ -50,7 +51,7 @@ import { resolveTransition } from './transition.js';
 import type { HeadMetadata } from './head.js';
 import { resolveHead } from './head.js';
 import type { WhenOptions } from './dsl-types.js';
-import { signal, derived, effect, type Signal, type ReadonlySignal } from '@streetui/state';
+import { signal, derived, effect, type Signal, type ReadonlySignal, type Resource } from '@streetui/state';
 
 /**
  * A single reactive-list reconciliation descriptor (spec §15).
@@ -620,8 +621,14 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
     this.container(id, (c) => {
       c.when(
         hasError,
-        // Error state → fallback.
-        (fb) => options.fallback(fb, readError(), retry),
+        // Error state → fallback. The fallback branch mounts exactly when the
+        // boundary enters its error state, so this is also where the optional
+        // `onError` reporting hook fires (observe-only; §6/§7).
+        (fb) => {
+          const currentError = readError();
+          options.onError?.(currentError);
+          options.fallback(fb, currentError, retry);
+        },
         // Healthy state → body, guarded against synchronous build throws.
         (body) => {
           try {
@@ -634,6 +641,36 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
         },
       );
     }, { id });
+  }
+
+  asyncBoundary<T>(
+    key: string,
+    res: Resource<T>,
+    branches: AsyncBoundaryBranches<T>,
+  ): void {
+    // Pure sugar over `resource` + `when` — no second async system, no new node
+    // type, no renderer wiring. Three mutually-exclusive, exhaustive reactive
+    // conditions select the live branch. Error wins; then resolved data (kept
+    // visible during a refetch); then loading/idle.
+    const isError = derived<boolean>(() => res.status.get() === 'error');
+    const showSuccess = derived<boolean>(
+      () => res.status.get() !== 'error' && res.data.get() !== undefined,
+    );
+    const showLoading = derived<boolean>(
+      () => res.status.get() !== 'error' && res.data.get() === undefined,
+    );
+    // Narrow the data signal to `T` for the success branch. Only read inside the
+    // success branch, where `data` is guaranteed present.
+    const dataSignal = derived<T>(() => res.data.get() as T);
+    const retry = (): void => {
+      void res.refetch();
+    };
+
+    this.container(key, (c) => {
+      c.when(isError, (fb) => branches.error?.(fb, res.error.peek(), retry));
+      c.when(showSuccess, (sb) => branches.success(sb, dataSignal));
+      c.when(showLoading, (lb) => branches.loading?.(lb));
+    }, { key });
   }
 
   // ── Portals & overlays ──────────────────────────────────────────────────────

@@ -28,6 +28,13 @@ import {
   type InspectedPage,
 } from './application.js';
 import type { InspectedNode } from './inspector.js';
+import {
+  inspectComponents,
+  inspectInteractions,
+  type InspectedComponent,
+  type InspectedOverlay,
+  type InspectedTransition,
+} from './inspector.js';
 import { diagnosePerformance, type PerfDiagnostic, type PerfThresholds } from './diagnostics.js';
 import {
   inspectSignal,
@@ -75,12 +82,36 @@ export interface PerformancePanel {
   readonly diagnostics: readonly PerfDiagnostic[];
 }
 
+/**
+ * Compilation diagnostics for the DevTools "Diagnostics" panel (§8). These are
+ * the compiler's own findings (errors + warnings), surfaced verbatim — not a
+ * runtime error stream. Runtime/production error reports flow through the
+ * separate `reportError`/`DiagnosticSink` seam in `@streetui/core` (§7).
+ */
+export interface DiagnosticsPanel {
+  readonly errors: number;
+  readonly warnings: number;
+  readonly messages: readonly string[];
+}
+
 /** All panels captured at one `refresh()`. */
 export interface DevToolsSnapshot {
   readonly application: ApplicationPanel;
   readonly graph: InspectedNode;
   readonly signals: SignalsPanel;
   readonly performance: PerformancePanel;
+  /**
+   * Component tree (§9): every `component()` instance in document order, with
+   * its stable key/name/location. Read structurally from the graph — the same
+   * data an app/component-tree UI panel renders.
+   */
+  readonly components: readonly InspectedComponent[];
+  /** Overlays currently wired (§13), in graph/containment order (dialog/popover/…). */
+  readonly overlays: readonly InspectedOverlay[];
+  /** Transitions currently wired on nodes (§14). Structural — never interferes with lifecycle. */
+  readonly transitions: readonly InspectedTransition[];
+  /** Compilation diagnostics (§8). */
+  readonly diagnostics: DiagnosticsPanel;
   readonly router?: RouterInspection;
   readonly resources?: Readonly<Record<string, ResourceInspection>>;
   readonly forms?: Readonly<Record<string, FormInspection>>;
@@ -217,11 +248,26 @@ function capture(
     diagnostics: diagnosePerformance(compiled, options.perfThresholds),
   };
 
+  // Component tree (§9) + interaction wiring (§13/§14) read structurally from
+  // the one graph — no second graph, no subscriptions, nothing retained.
+  const components = inspectComponents(compiled.graph);
+  const interactions = inspectInteractions(compiled.graph);
+
+  const diagnostics: DiagnosticsPanel = {
+    errors: app.diagnostics.errors,
+    warnings: app.diagnostics.warnings,
+    messages: app.diagnostics.messages,
+  };
+
   const snapshot: DevToolsSnapshot = {
     application,
     graph: app.graph,
     signals,
     performance,
+    components,
+    overlays: interactions.overlays,
+    transitions: interactions.transitions,
+    diagnostics,
     ...(sources.router !== undefined ? { router: inspectRouter(sources.router) } : {}),
     ...(sources.resources !== undefined
       ? { resources: mapInspect(sources.resources, (r) => inspectResource(r)) }
@@ -282,6 +328,28 @@ function formatSnapshot(s: DevToolsSnapshot): string {
     lines.push(`  ${label} [${sig.kind}] = ${format(sig.value)} · observers ${sig.observerCount ?? '?'}`);
   }
 
+  if (s.components.length > 0) {
+    lines.push(`Components: ${s.components.length}`);
+    for (const c of s.components) {
+      lines.push(`  ${'  '.repeat(c.depth)}${c.name}${c.key !== undefined ? ` (#${c.key})` : ''} · children ${c.childCount}`);
+    }
+  }
+
+  if (s.overlays.length > 0) {
+    lines.push(`Overlays: ${s.overlays.length}`);
+    for (const o of s.overlays) {
+      const kind = o.modal ? 'modal' : o.menu ? 'menu' : o.takesFocus ? 'focusable' : 'non-modal';
+      lines.push(`  ${o.key ?? o.id} [${kind}] ${o.open ? 'open' : 'closed'}`);
+    }
+  }
+
+  if (s.transitions.length > 0) {
+    lines.push(`Transitions: ${s.transitions.length}`);
+    for (const t of s.transitions) {
+      lines.push(`  ${t.key ?? t.id} on <${t.nodeType}> · ${t.duration}ms${t.appear ? ' · appear' : ''}`);
+    }
+  }
+
   if (s.router !== undefined) {
     lines.push(`Router: ${s.router.path} (${s.router.pattern})${s.router.isFallback ? ' [fallback]' : ''}`);
   }
@@ -319,6 +387,13 @@ function formatSnapshot(s: DevToolsSnapshot): string {
   );
   for (const d of s.performance.diagnostics) {
     lines.push(`  ${d.code}: ${d.message}`);
+  }
+
+  lines.push(
+    `Diagnostics: ${s.diagnostics.errors} error(s), ${s.diagnostics.warnings} warning(s)`,
+  );
+  for (const m of s.diagnostics.messages) {
+    lines.push(`  ${m}`);
   }
 
   return lines.join('\n');

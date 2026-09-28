@@ -23,6 +23,7 @@ import { NodeInstance } from './node-instance.js';
 import { wireEvents } from './events.js';
 import { resolveTag } from './tag-map.js';
 import { formatHydrationDiagnostic } from './hydration-diagnostics.js';
+import { wireHeadBehavior } from './head.js';
 import {
   mountNode,
   wireSignalBindings,
@@ -166,6 +167,18 @@ function hydrateNode(
       }
       hydrateChildren(ctx, graphNode, instance, target, path);
       wireOverlayBehavior(ctx, graphNode, instance, target);
+      return instance;
+    }
+
+    case 'head': {
+      // The server emitted this node's metadata into `<head>` (via renderHead)
+      // and left a neutral empty anchor here. Adopt the anchor, then wire the
+      // head behavior: the HeadManager adopts the server `[data-streetui-head-
+      // key]` tags on first apply so re-asserting this contribution produces no
+      // duplicates. No children to hydrate.
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      wireHeadBehavior(ctx, graphNode, instance);
       return instance;
     }
 

@@ -31,7 +31,7 @@
  * for the same key. Removing that node (navigating away, unmounting the
  * component) re-exposes the previously-shadowed default. `<title>` and each
  * single-instance meta/link (description, robots, theme-color, viewport,
- * charset, canonical, favicon, and each og:*/twitter:* property) collapse to one
+ * charset, canonical, favicon, and each og: or twitter: property) collapse to one
  * effective tag; generic `meta[]`/`link[]` array entries are keyed by their
  * identifying attributes so independent tags coexist.
  */
