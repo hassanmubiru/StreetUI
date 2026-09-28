@@ -74,6 +74,7 @@ async function measure(framework) {
   const bundle = await build({
     entryPoints: [framework.adapter], bundle: true, format: 'esm', write: false,
     target: 'es2020', minify: false,
+    absWorkingDir: path.resolve(__dirname, '../../..'), // resolve 'streetui' from repo root
   });
   const adapterJs = bundle.outputFiles[0].text;
   const coreJs = fs.readFileSync(path.resolve(__dirname, 'scenario.mjs'), 'utf8');
