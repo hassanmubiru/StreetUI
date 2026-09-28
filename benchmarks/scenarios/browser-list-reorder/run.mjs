@@ -71,13 +71,11 @@ const FRAMEWORKS = [
 ];
 
 async function measure(framework) {
-  // absWorkingDir must be the package where 'streetui' resolves (packages/streetui)
   const repoRoot = path.resolve(__dirname, '../../..');
-  const streetuiDir = path.join(repoRoot, 'packages', 'streetui');
   const bundle = await build({
     entryPoints: [framework.adapter], bundle: true, format: 'esm', write: false,
     target: 'es2020', minify: false,
-    absWorkingDir: streetuiDir,
+    alias: { 'streetui': path.join(repoRoot, 'packages', 'streetui', 'dist', 'index.js') },
   });
   const adapterJs = bundle.outputFiles[0].text;
   const coreJs = fs.readFileSync(path.resolve(__dirname, 'scenario.mjs'), 'utf8');
