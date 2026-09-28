@@ -38,8 +38,7 @@ benchmarks/results/
 /tmp/
 
 # ── Root-level milestone / release report markdown ────────────────────────
-# README.md is intentionally NOT listed here — it stays tracked.
-/CHANGELOG.md
+# README.md and CHANGELOG.md are intentionally NOT listed here — they stay tracked.
 /CONSOLIDATION-1.0-REPORT.md
 /HARDENING_REPORT.md
 /VERIFICATION_REPORT.md
