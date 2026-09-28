@@ -5,6 +5,28 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 2.1.0 — Browser, Accessibility & Framework Validation (2026-09-28)
+
+**Minor release** — additive: `renderDevToolsReport` convenience + docs
+reorganization. All 18 packages **published to npm at `2.1.0`**. Full detail in
+[`V2.1.0-BROWSER-ACCESSIBILITY-VALIDATION-REPORT.md`](./V2.1.0-BROWSER-ACCESSIBILITY-VALIDATION-REPORT.md).
+
+### Added
+
+- **`renderDevToolsReport(compiled, sources?, options?)`** in `@streetui/devtools`
+  — thin convenience composing `renderDevToolsHTML(createDevTools(compiled).snapshot)`;
+  DOM-free, non-mutating, zero production cost.
+- **Docs reorganization** — `docs/README.md` as a 17-step learning portal; six
+  new dedicated pages: `async-ui.md`, `overlays.md`, `accessibility.md`,
+  `transitions.md`, `cli.md`, `deployment.md`.
+
+### Verified
+
+- Build 29/29, typecheck 47/47, tests **863/863** (0 failed/skipped).
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+- Client-bundle leak check CLEAN (minimal 36,344 B, typical 65,456 B).
+- Offline tarball consumer PASS (ESM + CJS SSR).
+
 ## 2.0.0 — Application Platform & DevTools (2026-09-28)
 
 **Major release** — large but strictly additive API; no public export removed or
