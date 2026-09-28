@@ -5,6 +5,29 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 2.0.0 — Application Platform & DevTools (2026-09-28)
+
+**Major release** — large but strictly additive API; no public export removed or
+renamed. All 18 packages **published to npm at `2.0.0`**. Full detail in
+[`V2.0.0-APPLICATION-PLATFORM-REPORT.md`](./V2.0.0-APPLICATION-PLATFORM-REPORT.md).
+
+### Added
+
+- **Data layer:** `mutation`, `createClient`, `HttpError`, `createAuthSession`.
+- **Components:** `component()`, `ComponentContext`, `isComponentDefinition`.
+- **Head / metadata:** `page.head`, server `renderHead`.
+- **Boundaries:** `asyncBoundary`, `errorBoundary`.
+- **DevTools:** `inspectComponents`, `inspectInteractions`.
+- All v1.7–v1.9 surface (`portal`, overlays, transitions, a11y platform)
+  previously landed incrementally now ships together under 2.0.
+
+### Verified
+
+- Build 29/29, typecheck 47/47, tests 860/860 (0 failed/skipped).
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+- All regression gates PASS; memory stress (resource/form/overlay/router) no leaks.
+- Release-check 18 packages, 0 errors, 0 warnings.
+
 ## 1.9.0 — Transitions, Accessibility & Production Interaction Platform (2026-09-28)
 
 **Minor release** — additive public API, no breaking changes. All 18 packages
