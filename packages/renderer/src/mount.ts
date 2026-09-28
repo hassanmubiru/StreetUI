@@ -201,6 +201,13 @@ export function mountNode(
     const instance = new NodeInstance(graphNode, el);
     ctx.instances.set(graphNode.id, instance);
     wireEvents(dom, graph, graphNode, el, instance);
+
+    // A link's label/href may be bound to signals (e.g. i18n `t()` in nav). Wire
+    // the same signal-binding path buttons use so the text updates reactively.
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance, linkUpdate(dom, el));
+    }
+
     dom.appendChild(parentDom, el);
     return instance;
   }
@@ -398,6 +405,21 @@ export function buttonUpdate(
       } else {
         dom.removeAttribute(el, 'disabled');
       }
+    } else {
+      applyProp(dom, el, propKey, value);
+    }
+  };
+}
+
+export function linkUpdate(
+  dom: DOMAdapter,
+  el: Element,
+): (propKey: string, value: unknown) => void {
+  return (propKey, value) => {
+    if (propKey === 'label') {
+      dom.setTextContent(el, String(value ?? ''));
+    } else if (propKey === 'href') {
+      dom.setAttribute(el, 'href', String(value ?? ''));
     } else {
       applyProp(dom, el, propKey, value);
     }

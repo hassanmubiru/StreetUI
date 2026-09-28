@@ -289,6 +289,26 @@ describe('reactive signal updates', () => {
     disabled.set(true);
     expect(btn.hasAttribute('disabled')).toBe(true);
   });
+
+  it('updates a link label when its bound signal changes (e.g. i18n nav)', () => {
+    resetIdCounter();
+    const label = signal('Home');
+    const app = streetui.app({ name: 'test' });
+    app.page('home', page => {
+      page.link(label, { href: '/', id: 'nav' });
+    });
+    const compiled = compile(app);
+
+    const container = makeContainer();
+    const dom = new BrowserDOMAdapter();
+    const ctx = createRenderContext(dom, compiled.graph, container);
+    mountGraph(ctx);
+
+    const a = container.querySelector('#nav') as HTMLAnchorElement;
+    expect(a.textContent).toBe('Home');
+    label.set('Accueil');
+    expect(a.textContent).toBe('Accueil');
+  });
 });
 
 // ── Reactive list (listOf) reconciliation ──────────────────────────────────────

@@ -86,4 +86,117 @@ client resume with hydrated state — see [SSR](./ssr.md) and
 [Hydration](./hydration.md). The performance app seeds its deps from a state
 island so the client rebuilds the same resource configuration the server used.
 
-Next: [SSR](./ssr.md).
+## Mutations — the write side
+
+`resource` reads; `mutation` writes. A mutation wraps an async writer and exposes
+the same shape of reactive state, plus `mutate()` to run it:
+
+```ts
+import { mutation } from 'streetui';
+
+const saveUser = mutation<{ id: number; name: string }, User>(
+  (patch) => api.put(`/users/${patch.id}`, patch),
+  {
+    onSuccess: () => userDetail.refetch(),   // explicit, local invalidation
+    onError:   (err) => log(err),
+    onSettled: () => {},
+  },
+);
+
+saveUser.status;   // ReadonlySignal<'idle' | 'loading' | 'success' | 'error'>
+saveUser.data;     // ReadonlySignal<TResult | undefined>
+saveUser.error;    // ReadonlySignal<unknown>
+saveUser.pending;  // ReadonlySignal<boolean>
+
+await saveUser.mutate({ id: 1, name: 'Ada' }); // resolves the result, re-throws on failure
+saveUser.reset();
+saveUser.dispose();
+```
+
+There is **no global cache and no auto-invalidation registry**. Invalidation is
+explicit and local: a mutation says which read it refreshes by calling that
+resource's `refetch()` from `onSuccess`. Concurrent `mutate()` calls are guarded
+by a monotonic run id — the newest run wins and stale runs never write state.
+
+## The write path: form → mutation → invalidate → UI
+
+The pieces compose without a second data system. A validated `createForm`
+submit runs a `mutation`; its `onSuccess` refetches the `resource` that feeds the
+view; the view updates through the ordinary reactive bindings:
+
+```ts
+const list = resource<Item[]>(() => api.get('/items'));
+
+const addItem = mutation<string, void>(
+  (name) => api.post('/items', { name }),
+  { onSuccess: () => list.refetch() },
+);
+
+const form = createForm<{ name: string }>({
+  initialValues: { name: '' },
+  validators: { name: required('Name is required') },
+  onSubmit: (values) => { void addItem.mutate(values.name); }, // must return void
+});
+```
+
+An invalid form never runs the mutation. This exact flow is exercised end to end
+(DSL → compiler → renderer → DOM) in `examples/streetui-showcase` and in the
+renderer's `data-flow.test.ts`.
+
+## Optional HTTP client
+
+`createClient` is an optional, dependency-free JSON client over the global
+`fetch`. It does not import any server framework and adds no dependency; inject a
+`fetch` for tests. It also produces `resource`/`mutation` bound to a path:
+
+```ts
+import { createClient, HttpError } from 'streetui';
+
+const api = createClient({ baseUrl: '/api', headers: { Authorization: `Bearer ${token}` } });
+
+const users = api.resource<User[]>('/users', { query: { active: true } });
+const create = api.mutation<NewUser, User>('POST', '/users', { onSuccess: () => users.refetch() });
+
+try {
+  await api.get('/secret');
+} catch (e) {
+  if (e instanceof HttpError) console.log(e.status, e.body); // typed, carries parsed body
+}
+```
+
+`get` / `post` / `put` / `patch` / `del` cover the verbs; a non-2xx response
+throws a typed `HttpError` carrying `status`, `statusText`, `url`, and the parsed
+`body`. The client forwards a resource's abort `signal` to `fetch`, so route
+changes cancel in-flight requests exactly as with a hand-written loader.
+
+## Authentication
+
+`createAuthSession` turns a "who am I" loader into the reactive states a sign-in
+UI switches on. It is built entirely from `resource` + `mutation` and is
+router-agnostic — it handles no credentials itself:
+
+```ts
+import { createAuthSession } from 'streetui';
+
+const auth = createAuthSession<User>({
+  loadUser: async ({ signal }) => {
+    const res = await fetch('/api/me', { signal });
+    return res.ok ? res.json() : null;   // null ⇒ unauthenticated
+  },
+  logout: () => fetch('/api/logout', { method: 'POST' }).then(() => undefined),
+});
+
+auth.status;          // 'loading' | 'authenticated' | 'unauthenticated' | 'error'
+auth.user;            // ReadonlySignal<User | undefined>
+auth.authenticated;   // ReadonlySignal<boolean>
+auth.loggingOut;      // ReadonlySignal<boolean>
+await auth.refresh(); // re-run loadUser (e.g. after a token refresh)
+await auth.logout();  // run the configured logout, then refresh → unauthenticated
+```
+
+A refetch keeps the prior user visible (no flicker). Wire navigation into your
+router by reading `auth.status` in a route's setup and navigating to the login
+route when it is `unauthenticated`; a thrown guard is caught by `errorBoundary`.
+
+Next: [Application platform](./application-platform.md) · [SSR](./ssr.md).
+

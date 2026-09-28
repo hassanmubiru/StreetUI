@@ -65,7 +65,12 @@ from the real `examples/streetui-performance-app`:
 - [Routing](./routing.md) — `createRouter` / `mountRouter`, params, history, and
   cleanup.
 - [Forms](./forms.md) — `createForm`, validators, field state, and field isolation.
-- [Data](./data.md) — `resource` for async loading, retry, and abort.
+- [Data](./data.md) — `resource` for async loading; `mutation`, the
+  form → mutation → invalidate write path, the optional `createClient` HTTP
+  client, and `createAuthSession`.
+- [Application platform](./application-platform.md) — overlays (dialog / popover
+  / tooltip / dropdown / toast), transitions, async & error boundaries, document
+  metadata (`head` / `renderHead`), and i18n, tied together by the showcase.
 - [SSR](./ssr.md) — `renderToString` and state serialization.
 - [Hydration](./hydration.md) — adopting server DOM with the zero-node guarantee.
 
@@ -109,6 +114,9 @@ and `cli`. `benchmarks` is private and not published.
 
 Real, buildable examples live under [`examples/`](../examples): `basic-app`,
 `streetui-account`, `streetui-data`, `streetui-docs`, `streetui-showcase`,
-`streetui-ssr`, and `streetui-full-app` — the primary end-to-end integration
-example exercising SSR, hydration, navigation, forms, resources, context, and
-i18n together.
+`streetui-ssr`, and `streetui-full-app`. The **`streetui-showcase`**
+`platform-showcase` app is the primary end-to-end integration example for the
+2.0 application platform — routing, overlays, transitions, async data, error
+handling, the form → mutation → refetch write path, per-route metadata, i18n,
+a11y, and SSR + hydration together; `streetui-full-app` covers the same
+SSR/hydration/router/forms/resources/context/i18n baseline.

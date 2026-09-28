@@ -34,6 +34,7 @@ import {
   headingUpdate,
   inputUpdate,
   buttonUpdate,
+  linkUpdate,
 } from './mount.js';
 
 /** Hydrate the whole application graph against `ctx.container`. */
@@ -121,11 +122,17 @@ function hydrateNode(
 
     case 'image':
     case 'link': {
-      // Leaf elements with no reactive bindings or events beyond what the markup
-      // already encodes; links may still carry click handlers.
+      // Leaf elements. Links may carry click handlers and — like buttons — a
+      // label/href bound to a signal (e.g. i18n `t()` in nav), so wire the same
+      // reactive binding path after adopting the server node.
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
-      if (graphNode.type === 'link') wireEvents(dom, graph, graphNode, domNode, instance);
+      if (graphNode.type === 'link') {
+        wireEvents(dom, graph, graphNode, domNode, instance);
+        if (graphNode.stateRefs.length !== 0) {
+          wireSignalBindings(ctx, graphNode, instance, linkUpdate(dom, domNode));
+        }
+      }
       return instance;
     }
 

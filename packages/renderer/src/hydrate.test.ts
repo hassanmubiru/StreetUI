@@ -105,6 +105,18 @@ describe('hydrate — reactive updates against adopted DOM', () => {
     // Still the same element — updated in place, not replaced.
     expect(container.querySelector('h1')).toBe(h1);
   });
+
+  it('updates a link label bound to a signal against the adopted node', () => {
+    const label = signal('Home');
+    const { container, hydrate } = prepare((page) => page.link(label, { href: '/', id: 'nav' }));
+    const a = container.querySelector('#nav');
+    expect(a?.textContent).toBe('Home');
+    hydrate();
+    expect(container.querySelector('#nav')).toBe(a); // adopted, not recreated
+    label.set('Accueil');
+    expect(a?.textContent).toBe('Accueil');
+    expect(container.querySelector('#nav')).toBe(a);
+  });
 });
 
 describe('hydrate — conditional (when)', () => {

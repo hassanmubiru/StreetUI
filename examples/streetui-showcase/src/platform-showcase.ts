@@ -38,11 +38,10 @@ import {
   routerOutlet,
   createMemoryHistory,
   type Signal,
-  type ReadonlySignal,
   type RouteDefinition,
   type MountedRouter,
+  type Router,
   type PageDSL,
-  type ContainerDSL,
 } from 'streetui';
 
 // ── Domain ───────────────────────────────────────────────────────────────────
@@ -279,7 +278,9 @@ function buildUserDetails(
   const form = createForm<{ name: string; role: string }>({
     initialValues: { name: '', role: '' },
     validators: { name: [required(), minLength(2)] },
-    onSubmit: (values) => saveMutation.mutate({ id, name: values.name, role: values.role }),
+    onSubmit: (values) => {
+      void saveMutation.mutate({ id, name: values.name, role: values.role });
+    },
   });
   onCleanup(() => {
     detail.dispose();
@@ -422,12 +423,19 @@ function buildShell(sh: PageDSL, i18n: I18n, ui: ShowcaseUI): void {
 
 // ── App factory ────────────────────────────────────────────────────────────────
 
+export interface MountedShowcase {
+  /** The mounted router handle (`{ outlet, unmount() }`). */
+  readonly mounted: MountedRouter;
+  /** The live router — exposes `navigate`, `currentRoute`, etc. for driving the app. */
+  readonly router: Router;
+}
+
 export interface PlatformShowcase {
   readonly data: ShowcaseData;
   readonly i18n: I18n;
   readonly ui: ShowcaseUI;
   routes(): RouteDefinition[];
-  mount(container: Element, opts?: { path?: string; hydrate?: boolean }): MountedRouter;
+  mount(container: Element, opts?: { path?: string; hydrate?: boolean }): MountedShowcase;
 }
 
 export function createPlatformShowcase(): PlatformShowcase {
@@ -446,13 +454,14 @@ export function createPlatformShowcase(): PlatformShowcase {
     { path: '*', builder: (page) => page.section('nf', (s) => s.heading('Not found', { id: 'not-found', level: 1 })) },
   ];
 
-  const mount = (container: Element, opts: { path?: string; hydrate?: boolean } = {}): MountedRouter => {
+  const mount = (container: Element, opts: { path?: string; hydrate?: boolean } = {}): MountedShowcase => {
     const router = createRouter({ routes: routes(), history: createMemoryHistory(opts.path ?? '/') });
-    return mountRouter(router, {
+    const mounted = mountRouter(router, {
       container,
       ...(opts.hydrate !== undefined ? { hydrate: opts.hydrate } : {}),
       shell: (sh) => buildShell(sh, i18n, ui),
     });
+    return { mounted, router };
   };
 
   return { data, i18n, ui, routes, mount };
