@@ -1,0 +1,39 @@
+{
+  "schema": "streetui-2.1-environment/v1",
+  "purpose": "StreetUI 2.1 validation-phase environment gate (§1). Captured, not simulated. Every gate below is reported at face value; no unavailable capability is substituted with happy-dom or with published third-party numbers (§16).",
+  "capturedAt": "2026-09-28T08:33:00.000Z",
+  "host": {
+    "os": "Linux 6.8.0-138-generic",
+    "arch": "x86_64",
+    "cpuModel": "12th Gen Intel(R) Core(TM) i7-1255U",
+    "cpuCores": 2,
+    "memTotalKB": 4010256,
+    "node": "v22.23.2",
+    "npm": "10.9.8"
+  },
+  "gates": {
+    "browser": {
+      "status": "BLOCKED",
+      "reason": "No Chromium executable exists on the system. `find /` finds no chrome/chromium/chrome-linux64/headless_shell binary; google-chrome/chromium/chromium-browser are not on PATH; CHROMIUM_PATH and CHROME_PATH are unset; ~/.cache/ms-playwright contains only a stale .links hash entry (no downloaded browser). `playwright install chromium` requires cdn.playwright.dev which is unreachable (npm registry E403 offline). A real chromium.launch() would fail.",
+      "notSubstituted": "happy-dom models the DOM but is NOT a browser; it is used only for relative-delta Node measurements and is never reported as a browser result."
+    },
+    "assistiveTechnology": {
+      "status": "BLOCKED",
+      "reason": "No screen reader / assistive technology is available in this headless Node VM (no NVDA/JAWS/VoiceOver/Orca, no AT-SPI bus, no browser to host one). Accessibility conformance therefore cannot be observed. Static ARIA/role/id derivation is verified in code (deterministic, SSR byte-identical) but that is NOT an AT-conformance pass and is not reported as one.",
+      "notSimulated": "No screen-reader output is simulated (§14)."
+    },
+    "competitors": {
+      "status": "BLOCKED",
+      "reason": "Cross-framework browser benchmarking (§15/§16) requires the same real Chromium on the same machine for every framework. Chromium is absent (see browser gate) and the npm registry is E403, so React/Vue/Svelte/Solid cannot be built and launched here. Per §16, missing measurements are null with explicit status; published third-party numbers are NOT used as substitutes.",
+      "preExistingSuspectData": "benchmarks/results/{react,vue,svelte,solid}.json and comparison.json (timestamp 2026-09-25) carry competitor numbers labelled domEnvironment='chromium (Playwright)' but with browserVersion=null and nodeVersion='v24.18.0' — a different, unreproducible environment whose provenance is internally inconsistent (a real Playwright run records a browser version). These are NOT used as 2.1 evidence and must not be presented as same-environment competitor measurements. See integrity-note.md."
+    },
+    "registry": {
+      "status": "BLOCKED",
+      "reason": "npm registry is E403 Forbidden in this environment. `streetui` was never published; `npm info streetui version` and `npm create`/generated-from-registry flows cannot run. Consumer validation is done offline from locally packed tarballs instead (§2/§3, clearly labelled)."
+    }
+  },
+  "measuredHere": {
+    "node_happy_dom": "AVAILABLE — relative-delta Node/happy-dom benchmarks and SSR byte-identity are measured in-environment and reported as such (never as browser numbers).",
+    "ssrByteIdentity": "AVAILABLE — scripts/verify-ssr-hashes.mjs runs fully in Node."
+  }
+}

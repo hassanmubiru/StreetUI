@@ -1,0 +1,15 @@
+{
+  "schema": "streetui-2.1-competitors/v1",
+  "status": "BLOCKED",
+  "reason": "Fair cross-framework comparison (§15/§16) requires the same real Chromium on the same machine for every framework. Chromium is absent and the npm registry is E403 (see environment.json). No competitor was built or launched in this environment.",
+  "methodologyIfUnblocked": "On a machine with npm registry access and a real Chromium: install each competitor and Playwright's Chromium, then run benchmarks/run-competitors.mjs and benchmarks/browser/run-all.mjs so every framework — including streetui — is measured under the identical browser and hardware. Only then may rows be added to a comparison; §17 still forbids declaring a winner.",
+  "frameworks": {
+    "react": { "measured": false, "reason": "no Chromium; registry E403", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_gzip": null },
+    "vue": { "measured": false, "reason": "no Chromium; registry E403", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_gzip": null },
+    "svelte": { "measured": false, "reason": "no Chromium; registry E403", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_gzip": null },
+    "solid": { "measured": false, "reason": "no Chromium; registry E403", "initialRender_ms": null, "singleUpdate_ms": null, "listUpdate_ms": null, "ssr_ms": null, "hydration_ms": null, "bundle_gzip": null }
+  },
+  "supersedes": "benchmarks/results/{react,vue,svelte,solid}.json and comparison.json (2026-09-25) — excluded as unreproducible/inconsistent; see integrity-note.md",
+  "ranking": "NONE (§17: no 1st/2nd/3rd/winner/best/worst).",
+  "timestamp": "2026-09-28T08:33:00.000Z"
+}

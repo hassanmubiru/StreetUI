@@ -1,0 +1,19 @@
+{
+  "schema": "streetui-2.1-offline-consumer/v1",
+  "purpose": "§2/§3 — validate that the packaged 2.1.0 framework is installable and runnable by a consumer. The npm registry is E403 (see environment.json), so this is done OFFLINE from locally packed tarballs, clearly labelled — not from the public registry.",
+  "streetuiVersion": "2.1.0",
+  "registry": { "status": "BLOCKED", "reason": "npm registry E403; `npm info streetui` and registry install/`npm create streetui` cannot run." },
+  "offlineTarballConsumer": {
+    "status": "PASS",
+    "installed": "16 esbuild-free @streetui/* 2.1.0 tarballs (compiler, context, core, devtools, dom, dsl, events, forms, graph, i18n, renderer, router, runtime, scheduler, state, testing)",
+    "install": "npm install --offline --no-audit --no-fund --no-package-lock <abs tarball paths> → 16 packages, no workspace linking, concrete 2.1.0 versions",
+    "esm": "ESM-SSR-OK (renderToString(compile(app)) contains heading + signal value)",
+    "cjs": "CJS-SSR-OK (require() path renders heading + signal value)"
+  },
+  "mainBarrelConsumer": {
+    "status": "BLOCKED",
+    "reason": "The public `streetui` barrel and `@streetui/cli` declare a runtime dependency on esbuild@0.24.2 (+ native @esbuild/linux-x64) for the bundled CLI build. esbuild is NOT in the offline npm cache (ENOTCACHED) and the registry is E403, so `npm install streetui-2.1.0.tgz` cannot resolve it offline. This is a pre-existing ENVIRONMENT blocker — it fails identically at 1.9.0/2.0.0 — NOT a 2.1 regression. The esbuild-free @streetui/* path above proves the framework code itself is consumable; the built `streetui` dist reports VERSION 2.1.0 and exposes all exports.",
+    "notFabricated": true
+  },
+  "timestamp": "2026-09-28T08:52:00.000Z"
+}

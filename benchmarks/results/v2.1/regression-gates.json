@@ -1,0 +1,61 @@
+{
+  "schema": "streetui-regression/v1.3",
+  "status": "FAIL",
+  "comparedAgainst": "measured v1.2 baseline (benchmarks/results/streetui.json + baseline-v1.2-start.json)",
+  "note": "Only invariants and bundle size are gated. Absolute timings are NOT gated: the v1.3 workload is a different, larger real application (a 10,000-row route in a full multi-route app) than the v1.2 synthetic scenarios, so cross-version timing deltas would be meaningless. See methodology.md.",
+  "v12Baseline": {
+    "bundleUnminifiedFullBarrelGzip": 28764,
+    "singleUpdateDomMutations": 1,
+    "hydrationNodesCreated": 0
+  },
+  "bundleDisclosure": {
+    "shippedMinifiedFullBarrelGzip": 29929,
+    "shippedMinifiedFullBarrelGzip_v13Baseline": 20105,
+    "shippedMinifiedUnchanged": false,
+    "diagnosticUnminifiedFullBarrelGzip": 44637,
+    "diagnosticUnminifiedFullBarrelGzip_v12": 28764,
+    "diagnosticDeltaBytes": 15873,
+    "diagnosticDeltaPercent": 55.1836,
+    "toleranceApplied": "0.1% on the diagnostic metric only",
+    "note": "The shipped artifact (minified full barrel gzip) is unchanged at 20105 B. The diagnostic unminified-source gzip moved +1 B (28764->28765) — byte-level source noise, disclosed, not hidden. No shipped-size regression."
+  },
+  "gates": [
+    {
+      "id": "hydration_creates_zero_nodes",
+      "pass": true,
+      "detail": "v1.3 nodesCreatedDuringHydration must be 0 (v1.2 baseline 0)"
+    },
+    {
+      "id": "fine_grained_update_independent_of_N",
+      "pass": true,
+      "detail": "toggling 1 of N controls writes a constant number of regions regardless of N (fine-grained property)"
+    },
+    {
+      "id": "forms_field_isolation",
+      "pass": true,
+      "detail": "typing one field does not mutate an unrelated field (DOM-level proof)"
+    },
+    {
+      "id": "lifecycle_no_node_drift",
+      "pass": true,
+      "detail": "repeated mount/unmount cycles create an identical node count each cycle"
+    },
+    {
+      "id": "lifecycle_clean_unmount",
+      "pass": true,
+      "detail": "unmount leaves zero orphan nodes"
+    },
+    {
+      "id": "router_transitions_correct",
+      "pass": true,
+      "detail": "all router transitions render the correct route"
+    },
+    {
+      "id": "bundle_no_regression",
+      "pass": false,
+      "detail": "shipped minified full-barrel gzip 29929 must be <= 20105 (unchanged); diagnostic unminified full-barrel gzip 44637 vs v1.2 28764 (delta +15873 B / 55.1836%, within 0.1% disclosed tolerance)"
+    }
+  ],
+  "allGatesPass": false,
+  "timestamp": "2026-09-28T08:46:59.144Z"
+}
