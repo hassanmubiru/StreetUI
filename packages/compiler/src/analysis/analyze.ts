@@ -96,8 +96,14 @@ export function analyzeGraph(graph: ApplicationGraph): GraphAnalysis {
     // real mount/hydrate branch (which wires cleanups) instead of collapsing
     // into a serialized raw-HTML blob that would drop that per-instance wiring.
     const isComponent = node.type === 'component';
+    // A `head` node contributes document metadata via a `__head__<id>` handler
+    // wired at mount/hydrate (`wireHeadBehavior`). Treating it as dynamic stops
+    // the static-subtree rollup at the head boundary so it always takes the real
+    // mount/hydrate branch (which registers/cleans up the contribution) instead
+    // of collapsing into a serialized raw-HTML blob that would drop that wiring.
+    const isHead = node.type === 'head';
     const isStatic =
-      node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent;
+      node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
     const isStaticSubtree = isStatic && allChildrenStatic;
 
     nodes.set(node.id, {
