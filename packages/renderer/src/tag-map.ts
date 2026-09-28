@@ -27,6 +27,12 @@ const TAG_MAP: Partial<Record<SemanticNodeType, string>> = {
   // (see the portal branch in mount.ts). On the server (no body) it renders
   // inline, so the anchor tag is what SSR/hydration positionally match on.
   portal: 'div',
+  // A `head()` node renders as a neutral, empty inline anchor <div> at its
+  // declaration site (like a portal anchor). Its actual contribution — title/
+  // meta/link/etc. — is applied to `document.head` by `wireHeadBehavior` on the
+  // browser, and emitted separately by `renderHead()` on the server. Keeping a
+  // one-node/one-element anchor preserves positional hydration.
+  head: 'div',
 };
 
 export function resolveTag(type: SemanticNodeType): string {

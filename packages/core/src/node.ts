@@ -24,7 +24,8 @@ export type SemanticNodeType =
   | 'fragment'
   | 'reactive-list'
   | 'conditional'
-  | 'portal';
+  | 'portal'
+  | 'head';
 
 export interface NodeMetadata {
   readonly createdAt: number;
