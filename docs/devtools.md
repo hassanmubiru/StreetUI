@@ -160,3 +160,51 @@ for (const c of inspectComponents(compiled.graph)) {
   console.log('  '.repeat(c.depth) + `<${c.name}> key=${c.key} children=${c.childCount}`);
 }
 ```
+
+## Rendering a DevTools UI
+
+The inspectors above return plain data; to turn a snapshot into a viewable UI,
+render it to HTML.
+
+### `renderDevToolsHTML(snapshot)`
+
+Turns a `DevToolsSnapshot` into a complete, self-contained HTML document — a
+DOM-free, XSS-escaped string you can inject into a panel or iframe, or write to
+disk. It is a pure view: it touches no DOM API, mounts nothing, subscribes to no
+signal, and adds no capability of its own. "effects" are reported honestly as
+observer counts, and it makes **no** claim to be a production profiler.
+
+```ts
+import { createDevTools, renderDevToolsHTML } from 'streetui';
+
+const session = createDevTools(compiled);
+const html = renderDevToolsHTML(session.snapshot);
+```
+
+### `renderDevToolsReport(compiled, sources?, options?)`
+
+The one-call convenience: given a compiled app, build a DevTools session and
+render its current snapshot to a complete HTML document. It is exactly the
+composition of the two pieces above and adds no new capability:
+
+```ts
+renderDevToolsReport(compiled)  ≡  renderDevToolsHTML(createDevTools(compiled).snapshot)
+```
+
+```ts
+import { renderDevToolsReport } from 'streetui';
+
+const html = renderDevToolsReport(compiled);   // open in a browser or save as a static report
+```
+
+It inherits every property of the pieces it composes: DOM-free (runs in Node, a
+worker, or a test), non-mutating and non-instrumenting (DevTools pulls, it is
+never pushed to), and zero production cost (nothing in the runtime imports it —
+the interface exists only once dev code opts in by calling it). Call it again to
+reflect new state.
+
+> **Honest scope.** This produces markup. Whether it renders pixel-correctly, is
+> screen-reader accessible, or hits 60fps in a real browser is **not** claimed
+> and has **not** been verified here — the browser/AT gates are `BLOCKED` in
+> this environment. What is verified is that the emitted document faithfully and
+> safely (HTML-escaped) reflects the snapshot.
