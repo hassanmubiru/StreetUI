@@ -102,6 +102,10 @@ export class BrowserDOMAdapter implements DOMAdapter {
     return document.body ?? null;
   }
 
+  head(): Element | null {
+    return document.head ?? null;
+  }
+
   activeElement(): Element | null {
     return document.activeElement ?? null;
   }
