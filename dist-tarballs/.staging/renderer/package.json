@@ -1,0 +1,55 @@
+{
+  "name": "@streetui/renderer",
+  "version": "2.0.0",
+  "description": "StreetUI renderer — framework-owned DOM renderer, reconciliation, patching",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@streetui/core": "2.0.0",
+    "@streetui/graph": "2.0.0",
+    "@streetui/state": "2.0.0",
+    "@streetui/events": "2.0.0",
+    "@streetui/scheduler": "2.0.0",
+    "@streetui/compiler": "2.0.0",
+    "@streetui/dsl": "2.0.0",
+    "@streetui/dom": "2.0.0",
+    "@streetui/runtime": "2.0.0"
+  },
+  "devDependencies": {
+    "@streetui/forms": "workspace:*",
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
