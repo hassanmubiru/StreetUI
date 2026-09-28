@@ -1,12 +1,12 @@
 {
   "schema": "streetui-browser-run-all/v1.8",
-  "status": "BLOCKED",
-  "reason": "no Chromium binary found on PATH or via CHROMIUM_PATH/CHROME_PATH (offline registry 403 — not installable here)",
-  "detectedAt": "2026-09-28T08:31:42.191Z",
+  "status": "AVAILABLE",
+  "reason": null,
+  "detectedAt": "2026-09-28T13:59:55.479Z",
   "environment": {
-    "runtime": "node v22.23.2",
+    "runtime": "node v24.18.0",
     "playwright": true,
-    "chromium": null
+    "chromium": "/usr/bin/google-chrome"
   },
   "suites": [
     {
@@ -22,8 +22,8 @@
       "exitCode": 0,
       "spawnError": null,
       "resultPath": "benchmarks/results/v1.3/streetui-browser.json",
-      "status": "BLOCKED",
-      "reason": "Playwright resolves, but its Chromium browser binary is NOT downloaded (executable absent at /sessions/sweet-gallant-mendel/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome); a real chromium.launch() would fail. `playwright install chromium` needs cdn.playwright.dev, which is unreachable offline (npm/registry E403). Real-browser metrics are therefore NOT measured and NOT fabricated."
+      "status": "OK",
+      "reason": null
     },
     {
       "id": "list-reorder-10k",
@@ -31,7 +31,7 @@
       "describes": [
         "isolated 10k keyed-row reorder: create/append/prepend/insert/remove/swap/reverse/shuffle/update"
       ],
-      "exitCode": 0,
+      "exitCode": 1,
       "spawnError": null,
       "resultPath": "benchmarks/results/v1.8/browser-list-reorder.json",
       "status": "BLOCKED",
@@ -68,7 +68,7 @@
           "resultPath": "benchmarks/results/svelte.json",
           "browserStatus": "BLOCKED",
           "nodeSideData": "present (Node SSR/bundle — NOT browser numbers)",
-          "note": "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of null (reading 'nodes_start')\n    at st (http://localhost:35417/assets/index-Bi84fnm0.js:1:15125)\n    at http://localhost:35417/assets/index-Bi84fnm0.js:1:15368\n    at et (http://localhost:35417/assets/index-Bi84fnm0.js:1:20707)\n    at xr (http://localhost:35417/assets/index-Bi84fnm0.js:1:20321)\n    at Vr (http://localhost:35417/assets/index-Bi84fnm0.js:1:26171)\n    at async eval (eval at evaluate (:1:1), <anonymous>:1:13)\n    at async <anonymous>:260:30"
+          "note": "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of null (reading 'nodes_start')\n    at st (http://localhost:36159/assets/index-Bi84fnm0.js:1:15125)\n    at http://localhost:36159/assets/index-Bi84fnm0.js:1:15368\n    at et (http://localhost:36159/assets/index-Bi84fnm0.js:1:20707)\n    at xr (http://localhost:36159/assets/index-Bi84fnm0.js:1:20321)\n    at Vr (http://localhost:36159/assets/index-Bi84fnm0.js:1:26171)\n    at async eval (eval at evaluate (:1:1), <anonymous>:1:13)\n    at async <anonymous>:260:30"
         },
         {
           "framework": "solid",
