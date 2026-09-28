@@ -47,6 +47,8 @@ import type {
 } from './component.js';
 import type { TransitionConfig } from './transition.js';
 import { resolveTransition } from './transition.js';
+import type { HeadMetadata } from './head.js';
+import { resolveHead } from './head.js';
 import type { WhenOptions } from './dsl-types.js';
 import { signal, derived, effect, type Signal, type ReadonlySignal } from '@streetui/state';
 
@@ -643,6 +645,32 @@ class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
       props: containerProps(options),
     });
     builder(new ContainerBuilderImpl(node, this._graph));
+  }
+
+  /**
+   * Declare document metadata (2.0 §1–§3). Creates a `'head'` node — a neutral,
+   * empty inline anchor at this position (one node / one element, so positional
+   * hydration is preserved) — and registers a `__head__<id>` descriptor holding
+   * this call's normalized, dedup-keyed {@link resolveHead} contribution. The
+   * renderer applies it to `document.head` on the browser (adopting server tags
+   * on hydration, cleaning up on unmount / route change) and emits the active
+   * graph's merged metadata as a string on the server (`renderHead`).
+   *
+   * Multiple `head()` nodes may be live at once (app default + route + component)
+   * — the renderer merges them and, per dedup key, the last in document order
+   * wins (see head.ts). No new render path: this reuses the same graph-node +
+   * handler-registry convention as overlays/transitions/components.
+   */
+  head(metadata: HeadMetadata): void {
+    const node = this._graph.createNode('head', {
+      parent: this._node,
+      props: { 'data-streetui-head-anchor': '' },
+    });
+    const contribution = resolveHead(metadata);
+    this._graph.registerHandler(
+      `__head__${node.id}`,
+      (() => contribution) as unknown as () => unknown,
+    );
   }
 
   /**

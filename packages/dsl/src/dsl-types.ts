@@ -6,6 +6,7 @@
 import type { Signal, ReadonlySignal } from '@streetui/state';
 import type { ComponentDefinition } from './component.js';
 import type { TransitionConfig } from './transition.js';
+import type { HeadMetadata } from './head.js';
 
 // A bound value can be a literal or a reactive signal
 export type Bindable<T> = T | ReadonlySignal<T> | Signal<T>;
@@ -333,6 +334,18 @@ export interface ContainerDSL extends ContentDSL {
     props: P,
     children?: ContainerBuilder,
   ): void;
+  /**
+   * Declare document metadata (§1–§3): title, meta, link, canonical, Open Graph,
+   * Twitter/X, robots, theme-color, favicon. Renders nothing visible at this
+   * position (a neutral empty anchor); the framework applies the metadata to
+   * `document.head` on the browser and emits it via `renderHead()` on the
+   * server. Several `head()` calls compose — an app-level default, a route-level
+   * `head()`, and a component-level `head()` are merged and, per metadata key,
+   * the last declared (deepest/latest in document order) wins. Removing a
+   * `head()` node (route change / component unmount) re-exposes the previously
+   * shadowed value, and server tags are adopted on hydration without duplication.
+   */
+  head(metadata: HeadMetadata): void;
 }
 
 export interface SectionDSL extends ContainerDSL {}
