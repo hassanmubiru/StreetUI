@@ -1,15 +1,17 @@
 # StreetUI
 
-**StreetUI — a complete TypeScript UI framework.** It ships as a single npm
-package, `streetui`, with its own compiler, semantic application graph,
-reactivity, and DOM renderer.
+**StreetUI — a complete TypeScript application framework.** One install, one
+import, every layer owned end-to-end: compiler, semantic graph, reactivity, DOM
+renderer, SSR, hydration, router, forms, data, components, overlays,
+transitions, accessibility, DevTools, and CLI.
 
-No React. No Vue. No Preact. No JSX. No virtual DOM libraries. StreetUI owns its
-entire stack:
+No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 
 ```
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
+
+Current version: **2.1.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui)
 
 ---
 
@@ -19,20 +21,23 @@ DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 npm install streetui
 ```
 
-Everything is imported from the one package:
+Everything comes from the one package:
 
 ```ts
 import {
-  signal, derived, streetui, compile,
-  createRenderer, BrowserDOMAdapter, createRuntime,
+  signal, derived, effect, batch,
+  streetui, compile,
+  createRenderer, BrowserDOMAdapter,
+  component, resource, createForm,
+  createRouter, mountRouter, routerOutlet,
+  dialog, portal,
 } from 'streetui';
 ```
 
-Two curated subpaths live in the **same** package (you still only install
-`streetui`):
+Two curated subpaths in the **same** package (still just `npm install streetui`):
 
-- `streetui/server` — `renderToString`, `serializeState`, `readState`, `ServerDOMAdapter`
-- `streetui/testing` — `render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `flushUpdates`
+- `streetui/server` — `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`
+- `streetui/testing` — `render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `renderComponent`, `findComponent`, `trigger`
 
 ---
 
@@ -40,220 +45,183 @@ Two curated subpaths live in the **same** package (you still only install
 
 ```bash
 npx streetui create my-app     # templates: basic, ssr
-cd my-app
-npm install
+cd my-app && npm install
 npm run dev
 ```
 
-`streetui create` scaffolds a real, working server-rendered app (no
-placeholders, no React, no JSX) and drives the StreetUI pipeline directly. CLI
-commands: `streetui create | dev | build | start` (flags `--port`, `--host`,
-`--help`, `--version`).
+CLI commands: `streetui create | dev | build | start` (flags `--port`, `--host`, `--help`, `--version`).
 
 ---
 
-## Internal architecture (modules)
+## The full platform (v2.1)
 
-StreetUI is internally modular, but **consumers install only the single
-`streetui` package** — the modules below are its internal structure, not
-separately installed dependencies.
+### Reactivity
 
-```
-packages/
-  core/        Application identity, lifecycle, diagnostics, environment
-  dsl/         Semantic TypeScript DSL
-  compiler/    DSL → validation → graph compilation
-  graph/       Semantic Application Graph (nodes, traversal, validation)
-  runtime/     Application mounting, lifecycle, signal/event integration
-  state/       Reactive signals, derived state, stores
-  events/      Event bus, DOM event bridge
-  scheduler/   Microtask update scheduler with priority queues
-  dom/         DOM adapter abstraction (BrowserDOMAdapter, ServerDOMAdapter)
-  renderer/    StreetUI's own DOM renderer — mount, patch, reconcile, SSR, hydrate
-  testing/     Test renderer and query helpers
-  devtools/    Graph inspector, application inspection, print utilities, node stats
-  router/      Client-side routing, navigation, route lifecycle
-  forms/       Reactive form model + synchronous validation (on signals)
-  context/     Build-time provider/consumer scoping (no prop drilling)
-  i18n/        Reactive, typed internationalization (on signals)
-  cli/         Developer CLI — create/dev/build/start + project tooling
-
-apps/
-  playground/  Live browser playground
-  docs/        Documentation
-
-examples/
-  basic-app/         Counter app — full end-to-end demonstration
-  streetui-docs/     Multi-page docs site built on @streetui/router
-  streetui-data/     Router + resource() + errorBoundary against a real HTTP API
-  streetui-ssr/      Server rendering + hydration of one universal app
-  streetui-account/  The whole platform in one app — router + resources + forms +
-                     validation + context + i18n + a11y + SSR + hydration
-```
-
-Accessibility is a **cross-cutting** concern rather than a package: deterministic
-id helpers live in `@streetui/core` (`a11yIds`), and ARIA/`role`/`tabindex`
-attributes flow through the DSL's existing attribute API — see the Accessibility
-section below.
-
----
-
-## Developing StreetUI (contributors)
-
-Working on the framework itself (not consuming it) uses the monorepo toolchain:
-
-```bash
-pnpm install
-pnpm build
-pnpm test
-pnpm typecheck
-```
-
----
-
-## DSL example
+Signals, derived state, effects, and batched updates — the reactive core that
+drives every framework layer.
 
 ```ts
-import { signal, streetui, compile, createRuntime, createRenderer } from 'streetui';
-
 const count = signal(0);
-
-const app = streetui.app({ name: 'Counter' });
-
-app.page('home', page => {
-  page.section('main', section => {
-    section.heading('Counter');
-    section.text(count);          // reactive — updates DOM automatically
-    section.button('Increment', {
-      onClick: () => count.update(n => n + 1),
-    });
-  });
-});
-
-const compiled = compile(app);
-const renderer = createRenderer();
-const runtime  = createRuntime({ renderer });
-
-runtime.mount(compiled, document.getElementById('app')!);
+const doubled = derived(() => count.get() * 2);
+effect(() => console.log(doubled.get()));
+count.set(5); // logs 10
 ```
 
----
+### DSL + compiler
 
-## Rendering model
-
-The renderer creates real DOM nodes using browser APIs via `DOMAdapter`.
-When a signal changes, the signal's subscriber fires synchronously and
-patches only the affected DOM node — no full re-render, no diffing the
-entire tree.
-
-```
-Signal.set(value)
-  → subscriber fires
-  → patchNode(ctx, graphNode, propKey, newValue)
-  → dom.setTextContent / setAttribute / setProperty
-  → targeted DOM mutation
-```
-
----
-
-## Routing
-
-Multi-page applications are built with `@streetui/router`, which sits *above*
-the pipeline and drives which page is mounted. It reuses StreetUI's own signals
-(for route state and active links) and the core `CleanupRegistry` (for route
-teardown) — no virtual DOM, no second reactive system, no third-party deps. On
-navigation only the affected route subtree is recreated; the shell persists.
+A typed semantic DSL that compiles to an immutable Application Graph. The graph
+is the single source of truth for SSR, hydration, and client rendering.
 
 ```ts
-import { createRouter, mountRouter, routerOutlet } from 'streetui';
+const app = streetui.app({ name: 'Counter' });
+app.page('home', (page) => {
+  page.heading('Counter');
+  page.text(count);
+  page.button('Increment', { onClick: () => count.update(n => n + 1) });
+});
+const compiled = compile(app);
+```
 
+### Components
+
+First-class components with typed props, reactive updates without re-running
+`setup`, native slots, lifecycle cleanup, and full ecosystem integration.
+
+```ts
+import { component } from 'streetui';
+
+const Card = component<{ title: Signal<string>; count: Signal<number> }>(
+  (props, ctx) => (scope) => {
+    scope.heading(props.title);
+    scope.text(derived(() => `Count: ${props.count.get()}`));
+    ctx.onCleanup(() => console.log('Card unmounted'));
+  },
+  { name: 'Card' },
+);
+
+page.component('my-card', Card, { title: signal('Hello'), count });
+```
+
+### Router
+
+Client-side routing built on StreetUI signals — no virtual DOM, no third-party
+deps. Route state, active links, and teardown all flow through the same
+primitives.
+
+```ts
 const router = createRouter({
   routes: [
-    { path: '/',              builder: (page) => page.section('home', s => s.heading('Home')) },
-    { path: '/docs/:section', builder: (page, ctx) => page.section('d', s => s.heading(ctx.params.section ?? '')) },
-    { path: '*',              builder: (page) => page.section('nf', s => s.heading('404')) },
+    { path: '/',       builder: (page) => page.heading('Home') },
+    { path: '/about',  builder: (page) => page.heading('About') },
+    { path: '*',       builder: (page) => page.heading('404') },
   ],
 });
 
 mountRouter(router, {
   container: document.getElementById('app')!,
-  shell: (shell) => { shell.section('nav', n => n.link('Home', { href: '/' })); routerOutlet(shell); },
-});
-```
-
-See `packages/router/README.md` for routes, dynamic/query parameters,
-navigation, active links, 404 handling, and route lifecycle cleanup.
-
----
-
-## Async data: resources & error boundaries
-
-Real applications talk to real APIs. `resource()` (in `@streetui/state`) is a
-framework-native async primitive: it runs a `Promise`-returning loader and
-exposes the result as ordinary StreetUI signals — `status`
-(`'idle' | 'loading' | 'success' | 'error'`), `data`, `error`, plus the derived
-`loading` and `isRefetching`. There is no second reactive system, no virtual
-DOM, and no HTTP client baked in: the loader is any async function, so plain
-`fetch()` (or anything else) works.
-
-```ts
-import { resource, derived } from 'streetui';
-
-const products = resource<Product[]>(({ signal }) =>
-  fetch('/api/products', { signal }).then((r) => {
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json() as Promise<Product[]>;
-  }),
-);
-
-// Consume reactively — these are the same signals used everywhere else.
-page.when(products.loading, (l) => l.text('Loading…'));
-page.listOf('items', derived(() => products.data.get() ?? []), (p, _i, c) =>
-  c.text(`${p.name} — $${p.price}`),
-);
-```
-
-`resource()` guards against the hard parts automatically: overlapping requests
-are ordered by a monotonic run id (an older response can never overwrite a newer
-one), the in-flight request is aborted via `AbortController` when it is
-superseded or the owner is disposed, and `refetch()` preserves the previous
-`data` while reloading (surfaced as `isRefetching`). Register `dispose` with a
-route's `ctx.onCleanup` and navigating away tears the resource down — it will
-never update detached UI.
-
-Failures are contained with the `errorBoundary` DSL block, which swaps its body
-for a fallback when an observed error signal becomes non-null (or the body
-throws while building) and hands the fallback a `retry()`:
-
-```ts
-c.errorBoundary('products', (body) => {
-  body.listOf('items', list, (p, _i, x) => x.text(p.name));
-}, {
-  source: products.error,
-  onRetry: () => void products.refetch(),
-  fallback: (fb, error, retry) => {
-    fb.text(`Unable to load (${(error as Error).message}).`);
-    fb.button('Retry', { onClick: retry });
+  shell: (shell) => {
+    shell.link('Home', { href: '/' });
+    routerOutlet(shell);
   },
 });
 ```
 
-It reuses the same reactive `when()` machinery, so the fallback subtree and all
-its handlers are torn down on removal; it does *not* trap arbitrary global
-errors, and errors stay observable. A complete, runnable data-driven app (real
-local HTTP server, loading → list → error → retry, router-scoped cleanup) lives
-in `examples/streetui-data`. See `packages/state/README.md` for the full
-`resource()` reference.
+### Data: resources & mutations
 
----
+Framework-native async primitives. `resource()` exposes Promise results as
+signals; `mutation()` + `createClient()` handle write operations.
 
-## Forms & validation
+```ts
+import { resource, mutation, createClient } from 'streetui';
 
-`@streetui/forms` is a reactive form model built **on the same signals** as the
-rest of StreetUI — no second state system. A field's `value` is a writable
-`Signal<string>` that plugs straight into the DSL's `input({ bind })`, so the
-renderer's existing binding is the only listener; `values`, `errors`, `touched`,
-`dirty`, `valid`, and the submission `status` are all (derived) signals.
+const client = createClient({ baseUrl: '/api' });
+
+const products = resource<Product[]>(({ signal }) =>
+  fetch('/api/products', { signal }).then(r => r.json()),
+);
+
+const addProduct = mutation(async (data: Partial<Product>) => {
+  await client.post('/products', data);
+  products.refetch();
+});
+
+page.when(products.loading, (l) => l.text('Loading…'));
+page.listOf('items', derived(() => products.data.get() ?? []), (p, _i, c) =>
+  c.text(p.name),
+);
+```
+
+### Overlays, portals & focus
+
+Production-grade overlay system — dialog, popover, tooltip, dropdown, toast —
+each a portal + reactive panel + full ARIA + focus management.
+
+```ts
+const open = signal(false);
+
+page.dialog('confirm', {
+  open,
+  onClose: () => open.set(false),
+  closeOnEscape: true,
+  restoreFocus: true,
+}, (panel) => {
+  panel.heading('Confirm');
+  panel.text('Are you sure?');
+  panel.button('Cancel', { onClick: () => open.set(false) });
+  panel.button('OK',     { onClick: () => { doAction(); open.set(false); } });
+});
+```
+
+Available kinds and their ARIA/focus behaviour:
+
+| Kind | Role | aria-modal | Focus trap | Escape closes | Restore focus | aria-live |
+|---|---|---|---|---|---|---|
+| `dialog` | dialog | ✅ | ✅ | ✅ | ✅ | — |
+| `popover` | dialog | ❌ | ❌ | ✅ | ✅ | — |
+| `dropdown` | menu | ❌ | ❌ | ✅ | ✅ | — |
+| `tooltip` | tooltip | ❌ | ❌ | ❌ | ❌ | — |
+| `toast` | status | ❌ | ❌ | ❌ | ❌ | polite |
+
+### CSS transitions
+
+Class-based enter/leave transitions on `when()` branches, list items, overlays,
+and router navigation — no WAAPI, browser-only, SSR-inert.
+
+```ts
+page.when(visible, (panel) => {
+  panel.text('I animate in and out');
+}, {
+  transition: {
+    enterFrom: 'opacity-0',
+    enterActive: 'transition-opacity duration-300',
+    enterTo: 'opacity-100',
+    leaveFrom: 'opacity-100',
+    leaveActive: 'transition-opacity duration-300',
+    leaveTo: 'opacity-0',
+  },
+});
+```
+
+### Accessibility
+
+Semantic-first: use real elements, add ARIA only when needed. Keyboard
+navigation, focus trapping, live regions, and deterministic id helpers baked in.
+
+```ts
+import { a11yIds, createAnnouncer } from 'streetui';
+
+const ids = a11yIds('email');
+group.text('Email', { id: ids.label });
+group.input({ bind, id: ids.input, ariaLabelledBy: ids.label, ariaRequired: true });
+
+const announcer = createAnnouncer(dom);
+announcer.polite('3 results found');
+```
+
+### Forms
+
+Reactive form model built on signals — no second state system, same binding as
+everything else.
 
 ```ts
 import { createForm, required, email, minLength } from 'streetui';
@@ -261,239 +229,132 @@ import { createForm, required, email, minLength } from 'streetui';
 const form = createForm({
   initialValues: { email: '', password: '' },
   validators: {
-    email: [required(), email()],           // ordered — first error wins
+    email:    [required(), email()],
     password: [required(), minLength(8)],
   },
-  onSubmit: async (values) => { await createAccount(values); },   // may throw
+  onSubmit: async (values) => createAccount(values),
 });
 
 page.input({ bind: form.field('email').value, type: 'email' });
 page.button(
-  derived(() => (form.submitting.get() ? 'Creating…' : 'Create account')),
+  derived(() => form.submitting.get() ? 'Creating…' : 'Create account'),
   { disabled: form.submitting, onClick: () => void form.submit() },
 );
 ```
 
-`form.submit()` marks every field touched, then either stays `idle` (invalid —
-errors now visible) or runs `idle → submitting → success | error`, capturing a
-thrown value in `form.submitError`. Built-in validators are `required`,
-`minLength`, `maxLength`, `email`, `pattern`; a custom one is just
-`(value: string) => string | undefined`. Async validation is deliberately out of
-the synchronous core — layer it on with `resource()`. Call `form.dispose()` on
-teardown (e.g. `ctx.onCleanup`). See `packages/forms/README.md`.
+### SSR, hydration & head
 
----
-
-## Context — no prop drilling
-
-`@streetui/context` is a tiny build-time value stack that mirrors the synchronous
-top-down DSL build — **not** React Context and **not** a reactive system.
-`provide(value, run)` pushes a value for the duration of `run()` (during which
-nested builders execute and may `consume()`), then pops it; consumers resolve the
-nearest active provider or the required default.
+Server rendering with static-plan acceleration (13.5× speedup on large routes),
+zero-node hydration (adopts server DOM in place), and per-route `<head>` metadata.
 
 ```ts
-import { createContext } from 'streetui';
+// server
+import { renderToString, renderHead } from 'streetui/server';
 
-const FormContext = createContext<FormScope | null>(null, 'app.form');
+const compiled = compile(app);
+const html  = renderToString(compiled);
+const head  = renderHead(compiled, { title: 'My App' });
 
-page.form('signup', (fb) => {
-  FormContext.provide({ form, i18n }, () => {
-    textField(fb, 'email');   // reads form + i18n via FormContext.consume()
-  });
-});
+// client — adopts server DOM, no recreation
+import { hydrate } from 'streetui';
+hydrate(compiled, document.getElementById('app')!);
 ```
 
-Put a **signal** into a context to make the shared value reactive — the signal
-owns the reactivity and the normal node lifecycle tears it down. See
-`packages/context/README.md`.
+### DevTools
 
----
-
-## Accessibility
-
-StreetUI keeps accessible markup **semantic-first**: use the real element
-(`heading`, `button`, `link`, `section`, `form`), add ARIA only when semantics
-fall short, and never inject ARIA automatically. ARIA/`role`/`tabindex`
-attributes flow through the DSL's **existing** attribute API — no parallel a11y
-API to learn:
+Non-instrumenting, pull-based graph inspection. Runs in Node, a worker, or a
+browser — zero production cost.
 
 ```ts
-page.section('nav', (n) => n.link('Home', { href: '/' }), { role: 'navigation' });
-page.text(error, { role: 'alert', ariaLive: 'polite' });
-page.button('Menu', { ariaExpanded: open, ariaControls: 'menu-panel' });
+import { inspectComponents, inspectInteractions } from 'streetui/server';
+import { renderDevToolsReport } from 'streetui/server';
+
+const report = renderDevToolsReport(compiled);
+// → complete self-contained HTML document
 ```
-
-ARIA state attributes serialize as the strings `"true"`/`"false"` (so they are
-never silently dropped during SSR), and this holds through hydration.
-
-For the id relationships accessible markup needs — `aria-labelledby`,
-`aria-describedby`, a dialog title — use `a11yIds()` from `@streetui/core`. It
-derives ids from a stable base string with **no counter and no randomness**, so
-the server and client always compute the same ids and a re-rendered subtree
-never breaks its associations:
-
-```ts
-import { a11yIds } from 'streetui';
-
-const ids = a11yIds('email');   // { input:'email-input', label:'email-label', error:'email-error', ... }
-group.text('Email', { id: ids.label });
-group.input({ bind, id: ids.input, ariaLabelledBy: ids.label, ariaDescribedBy: ids.error, ariaRequired: true });
-```
-
-Keyboard access is handled through the existing event system (`onClick`,
-`onKeydown`, …) on the real interactive elements.
 
 ---
 
-## Internationalization
+## Real-browser benchmark results (Chrome 154)
 
-`@streetui/i18n` is reactive, typed, and — again — built on signals. `t()`
-returns a derived signal that recomputes on locale change; `translate()` is a
-one-shot read for values captured once (validator messages, static labels).
+Measured on this machine with Google Chrome 154.0.8037.57 via Playwright.
+All numbers are from a real browser engine, not happy-dom.
 
-```ts
-import { createI18n } from 'streetui';
-
-const i18n = createI18n({ locale: 'en', messages, fallbackLocale: 'en' });
-
-page.heading(i18n.t('app.title'));                       // reactive
-page.text(i18n.t('hello', { name: 'Ada' }));             // interpolation: {name}
-page.text(i18n.plural('items', count));                  // Intl.PluralRules
-shell.button('EN/FR', { onClick: () => i18n.setLocale(next) });   // flips every t()
-```
-
-Keys are typed (`keyof M`), a missing key deterministically echoes the key
-itself, and interpolation uses `{name}` (no ICU). Because translation is
-deterministic, `renderToString()` and `hydrate()` stay in agreement **as long as
-the client boots with the same initial locale the server rendered with**. See
-`packages/i18n/README.md`.
-
----
-
-## The whole platform together
-
-`examples/streetui-account` is one realistic "Create account" application that
-exercises **every** capability in a single build: `@streetui/router` (pages,
-params, SSR + hydration), `@streetui/state` (`signal`/`derived`/`resource` for
-async plan loading), `@streetui/forms` (reactive model, validators, submission
-lifecycle), `@streetui/context` (form + i18n passed down without prop drilling),
-`@streetui/i18n` (typed reactive translation with a live locale toggle), and
-`@streetui/core` (`a11yIds` for label/description wiring). Nothing is faked —
-plans are fetched over real HTTP and submitting POSTs to a real endpoint, and the
-exact same build function renders on the server and hydrates on the client.
-
----
-
-## Internal modules
-
-These are StreetUI's internal modules. **Consumers install only the single
-`streetui` package** and import every symbol below from `streetui` (with the
-`streetui/server` and `streetui/testing` subpaths); the `@streetui/*` names are
-internal boundaries, not separately published dependencies.
-
-| Module | Description |
+| Scenario | Result |
 |---|---|
-| `@streetui/core` | Identity, lifecycle, diagnostics |
-| `@streetui/dsl` | Semantic TypeScript DSL |
-| `@streetui/compiler` | DSL → graph compilation pipeline |
-| `@streetui/graph` | Semantic Application Graph |
-| `@streetui/runtime` | Mounting, signal wiring, lifecycle |
-| `@streetui/state` | Reactive signals and stores |
-| `@streetui/events` | Event bus and DOM bridge |
-| `@streetui/scheduler` | Batched microtask scheduler |
-| `@streetui/dom` | DOM adapter abstraction |
-| `@streetui/renderer` | StreetUI's own DOM renderer |
-| `@streetui/testing` | Test renderer and query helpers |
-| `@streetui/devtools` | Graph inspector and debug tools |
-| `@streetui/router` | Client-side routing, navigation, active links, route lifecycle |
-| `@streetui/forms` | Reactive form model + synchronous validation, on signals |
-| `@streetui/context` | Build-time provider/consumer scoping (no prop drilling) |
-| `@streetui/i18n` | Reactive, typed internationalization, on signals |
-| `@streetui/cli` | Developer CLI: `create` / `dev` / `build` / `start`, config, env, project tooling |
+| Initial mount 10k rows | 210.7 ms · 80,031 DOM nodes |
+| Hydrate 10k rows | 149.7 ms · **0 nodes recreated** |
+| Reactive search narrow (10k) | 189.6 ms · 10,004 mutations |
+| Fine-grained toggle 1 of 1,000 | **0 mutations** (only the subscribed node updated) |
+| Router navigations (4 routes) | 32.9 / 415.7 / 50.0 / 33.4 ms |
+
+**Keyed list reorder (10k rows):**
+
+| Operation | Duration |
+|---|---|
+| create 10k | 174.4 ms |
+| append 1k | 99.3 ms |
+| swap ends | 32.9 ms |
+| reverse | 183.0 ms |
+| shuffle | 200.0 ms |
+| update every 10th | 100.6 ms |
 
 ---
 
-## Getting started with the CLI
+## Architecture
 
-```bash
-npx streetui create my-app
-cd my-app && npm install
-npm run dev      # start the dev server with live reload
-npm run build    # production build → dist/client + dist/server
-npm run start    # serve the production build (SSR + hydration)
+```
+packages/
+  core/        Application identity, lifecycle, diagnostics, environment
+  dsl/         Semantic TypeScript DSL (the authoring surface)
+  compiler/    DSL → validation → graph compilation; static SSR plan analysis
+  graph/       Semantic Application Graph (nodes, traversal, validation)
+  runtime/     Application mounting, lifecycle, signal/event integration
+  state/       Reactive signals, derived state, resources, mutations, stores
+  events/      Event bus, DOM event bridge
+  scheduler/   Microtask update scheduler with priority queues
+  dom/         DOM adapter abstraction (BrowserDOMAdapter, ServerDOMAdapter)
+  renderer/    StreetUI's own DOM renderer — mount, patch, reconcile, SSR, hydrate
+  testing/     Test renderer, query helpers, component helpers
+  devtools/    Graph inspector, interaction inspector, DevTools report generator
+  router/      Client-side routing, navigation, route lifecycle
+  forms/       Reactive form model + synchronous validators
+  context/     Build-time provider/consumer scoping (no prop drilling)
+  i18n/        Reactive, typed internationalization
+  cli/         Developer CLI — create/dev/build/start + project tooling
+
+examples/
+  basic-app/         Counter app — full end-to-end
+  streetui-account/  Full platform: router + resources + forms + context + i18n + a11y + SSR
+  streetui-data/     Resources + error boundaries against a real HTTP API
+  streetui-ssr/      SSR + hydration
+  streetui-showcase/ Overlays, transitions, components, a11y, all together
 ```
 
-The CLI scaffolds a real, working server-rendered app (no placeholders, no
-React, no JSX) and drives the existing StreetUI pipeline — it orchestrates
-`create` / `dev` / `build` / `start` without adding a framework layer of its
-own. Full reference, configuration, environment-variable rules, and SSR details
-are in `packages/cli/README.md`.
-
 ---
 
-## Publishing & consuming the packages
-
-Every public package ships as a self-contained npm artifact: dual ESM + CJS
-builds, type declarations for both, `sideEffects: false`, a per-package README
-and LICENSE, and an `exports` map with matching `import`/`require` types. No
-source, tests, benchmarks, temp files, or workspace paths are included in the
-tarballs.
-
-The packaging pipeline lives in `scripts/`:
+## Development
 
 ```bash
-node scripts/apply-publish-metadata.mjs   # normalize package.json publish fields
-node scripts/generate-readmes.mjs         # ensure every package has a README
-node scripts/pack-tarballs.mjs            # npm pack each package → dist-tarballs/
-node scripts/consumer-smoke.mjs           # install the tarballs OUTSIDE the repo
+pnpm install
+pnpm build        # build all 18 packages
+pnpm test         # 863 tests, 0 failures
+pnpm typecheck    # 47 packages
 ```
 
-`pack-tarballs.mjs` rewrites every `workspace:*` range to the concrete version
-before packing, so the tarballs resolve each other with no workspace linking.
-`consumer-smoke.mjs` is the package-quality gate: it creates a throwaway project
-outside the monorepo, installs the packed tarballs **offline** (no registry, no
-`workspace:`, no symlinks), and renders a page through `@streetui/dsl`,
-`@streetui/state`, `@streetui/compiler` and `@streetui/renderer` in both ESM and
-CJS. See `docs/publishing.md` for the full flow and current limitations.
-
 ---
 
-## Production server & security
+## Versioning & release
 
-`streetui start` serves the production build over `node:http` — no additional
-server framework. Static assets are served with correct MIME types,
-`X-Content-Type-Options: nosniff`, and cacheable `Cache-Control` in production
-(`no-cache` in dev). Path traversal is blocked by resolving each request against
-the client directory and rejecting anything that escapes it (including malformed
-percent-encodings and prefix-sibling directories). Render errors return a
-generic `500` in production and only expose stack detail in dev. Details and the
-threat model are in `docs/production-server.md`.
+StreetUI is at **2.1.0**. Every public package shares one coordinated version.
+The v1.0 public surface (168 values, 171 types) is frozen; every addition since
+then is purely additive.
 
----
+```bash
+npm install streetui@2.1.0
+npm install streetui@latest
+```
 
-## Everything composed
-
-`examples/streetui-full-app` is a single universal app that uses **every**
-system at once — signals, i18n, context, forms, resource, SSR, hydration with
-DOM-node identity, and client-side routing — verified end to end under a DOM.
-
----
-
-## Release & versioning
-
-StreetUI is at **1.0.0** — a stabilization release. Every public package shares
-this version, and the public API is frozen under semantic versioning. Upgrading
-from 0.9 is drop-in; there are no breaking public API changes.
-
-- [Public API statement & report](docs/api-v1.0.md) — the frozen surface (168
-  values, 171 types across 17 packages, all stable) and the semver policy.
-- [Migrating to 1.0](docs/migration-to-1.0.md) · [Release process](docs/release-process.md) · [Browser & runtime support](docs/browser-support.md) · [Changelog](CHANGELOG.md)
-
-Two release gates are reported honestly as **BLOCKED** in this build
-environment: real-browser validation (no browser available — validated against a
-spec-compliant DOM instead) and registry publication (no reachable registry —
-proven up to offline tarball install). See the release and browser docs for the
-exact status.
-
-
+- [Changelog](CHANGELOG.md)
+- [Public API statement](docs/api-v1.0.md)
+- [Browser support](docs/browser-support.md)
