@@ -93,6 +93,7 @@ for (const r of SUB_RUNNERS) {
   console.log(`  → ${r.id}: node ${path.relative(repo, r.script)} ${r.args.join(' ')}`);
   const proc = spawnSync(process.execPath, [r.script, ...r.args], {
     cwd: repo, encoding: 'utf8', timeout: 10 * 60 * 1000,
+    env: { ...process.env, CHROMIUM_PATH: env.chromium ?? process.env.CHROMIUM_PATH ?? '' },
   });
   const entry = {
     id: r.id,
