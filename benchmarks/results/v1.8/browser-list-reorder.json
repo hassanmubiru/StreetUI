@@ -1,10 +1,97 @@
 {
   "schema": "browser-list-reorder/v1.4",
-  "status": "BLOCKED",
-  "scope": "isolated 10k keyed-row list reorder (§2): StreetUI + competitors, all ops, recording duration/DOM-mutations/node-count/long-tasks/frame-pacing",
-  "generatedAt": "2026-09-28T08:31:35.234Z",
-  "reason": "Chromium: no Chromium/Chrome binary found (checked CHROMIUM_PATH and standard /usr/bin paths); none installable offline",
-  "harness": "benchmarks/scenarios/browser-list-reorder/scenario.mjs (ready-to-run in-page measurement core) + this runner. No code change is needed to execute where a browser exists.",
-  "fabricationNote": "Per the v1.4 anti-fabrication rule, no browser numbers are estimated or substituted. happy-dom node-side numbers for related scenarios live in streetui-node.json and are NEVER presented as browser numbers.",
-  "data": null
+  "status": "OK",
+  "generatedAt": "2026-09-28T16:03:21.854Z",
+  "environment": {
+    "engine": "Chromium",
+    "chromiumPath": "/usr/bin/google-chrome",
+    "note": "Real-browser numbers. Labelled as Chromium. NOT comparable to happy-dom node numbers."
+  },
+  "policy": "NO ranking, NO winner. Per-framework measurements are reported side by side; the reader draws conclusions.",
+  "frameworks": {
+    "streetui": {
+      "rowCount": 10000,
+      "operations": [
+        {
+          "op": "create10k",
+          "durationMs": 174.4,
+          "domMutations": 0,
+          "nodeCount": 20003,
+          "longTasksDuringOp": 2
+        },
+        {
+          "op": "append 1k",
+          "durationMs": 99.3,
+          "domMutations": 0,
+          "nodeCount": 22003,
+          "longTasksDuringOp": 1
+        },
+        {
+          "op": "prepend 1k",
+          "durationMs": 216.1,
+          "domMutations": 0,
+          "nodeCount": 24003,
+          "longTasksDuringOp": 1
+        },
+        {
+          "op": "insertMiddle 1k",
+          "durationMs": 116.2,
+          "domMutations": 0,
+          "nodeCount": 26003,
+          "longTasksDuringOp": 1
+        },
+        {
+          "op": "removeScattered 1k",
+          "durationMs": 216.2,
+          "domMutations": 0,
+          "nodeCount": 24003,
+          "longTasksDuringOp": 1
+        },
+        {
+          "op": "swapEnds",
+          "durationMs": 32.9,
+          "domMutations": 0,
+          "nodeCount": 24003,
+          "longTasksDuringOp": 0
+        },
+        {
+          "op": "reverse",
+          "durationMs": 183,
+          "domMutations": 0,
+          "nodeCount": 24003,
+          "longTasksDuringOp": 1
+        },
+        {
+          "op": "shuffle",
+          "durationMs": 200,
+          "domMutations": 0,
+          "nodeCount": 24003,
+          "longTasksDuringOp": 1
+        },
+        {
+          "op": "updateEvery10th",
+          "durationMs": 100.6,
+          "domMutations": 0,
+          "nodeCount": 24003,
+          "longTasksDuringOp": 1
+        }
+      ],
+      "longTaskDurationsMs": [
+        61,
+        113,
+        86,
+        212,
+        105,
+        203,
+        178,
+        192,
+        85
+      ],
+      "framePacing": {
+        "frames": 18,
+        "droppedFrames": 9
+      },
+      "note": "Real-engine measurement. Values are meaningful ONLY from a real browser; never run under happy-dom."
+    }
+  }
 }
