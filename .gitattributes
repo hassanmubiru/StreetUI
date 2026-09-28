@@ -1,0 +1,22 @@
+# ── Linguist — tell GitHub which files to exclude from language stats ──────
+#
+# Generated / compiled output: never count toward language percentages.
+# These are build artifacts, not authored source.
+
+# Competitor benchmark dist bundles (compiled by Vite/esbuild, not authored)
+benchmarks/competitors/**/dist-bench/** linguist-generated=true
+
+# Playground / app dist output
+apps/playground/dist/** linguist-generated=true
+apps/*/dist/**          linguist-generated=true
+examples/*/dist/**      linguist-generated=true
+
+# Benchmark scripts are tooling, not the framework source
+benchmarks/**/*.mjs     linguist-documentation=true
+benchmarks/**/*.js      linguist-documentation=true
+scripts/**/*.mjs        linguist-documentation=true
+
+# Config files — not framework source
+*.config.mjs            linguist-documentation=true
+*.config.ts             linguist-documentation=true
+vite.config.*           linguist-documentation=true
