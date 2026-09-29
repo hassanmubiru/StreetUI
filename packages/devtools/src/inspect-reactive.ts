@@ -125,6 +125,57 @@ function errorMessageOf(error: unknown): string {
   return String(error);
 }
 
+// ── Mutations (panel #7) ────────────────────────────────────────────────────
+
+/** The read-only slice of a mutation this module needs. */
+export interface MutationLike {
+  readonly status: ReadonlySignal<ResourceStatus>;
+  readonly data: ReadonlySignal<unknown>;
+  readonly error: ReadonlySignal<unknown>;
+  readonly pending: ReadonlySignal<boolean>;
+}
+
+export interface MutationInspection {
+  readonly status: ResourceStatus;
+  readonly pending: boolean;
+  readonly hasData: boolean;
+  readonly hasError: boolean;
+  /** The error's constructor name (safe — no message/payload). */
+  readonly errorName: string | undefined;
+  /** The error message — only present when `includeData` is set. */
+  readonly errorMessage?: string;
+  /** The most recent result — only present when `includeData` is set. */
+  readonly data?: unknown;
+}
+
+/**
+ * Snapshot a mutation's write-side lifecycle (idle/loading/success/error). The
+ * write-side counterpart to {@link inspectResource}: payload/message hidden
+ * unless opted in, because a mutation result commonly carries user data. Never
+ * triggers the mutation — a pure `peek` over its exposed signals.
+ */
+export function inspectMutation(
+  mutation: MutationLike,
+  options: InspectResourceOptions = {},
+): MutationInspection {
+  const error = mutation.error.peek();
+  const hasError = error !== undefined && error !== null;
+  const base: MutationInspection = {
+    status: mutation.status.peek(),
+    pending: mutation.pending.peek(),
+    hasData: mutation.data.peek() !== undefined,
+    hasError,
+    errorName: hasError ? errorConstructorName(error) : undefined,
+  };
+  if (options.includeData !== true) return base;
+
+  return {
+    ...base,
+    data: mutation.data.peek(),
+    ...(hasError ? { errorMessage: errorMessageOf(error) } : {}),
+  };
+}
+
 // ── Router ──────────────────────────────────────────────────────────────────
 
 export interface RouteMatchLike {

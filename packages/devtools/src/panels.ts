@@ -39,22 +39,32 @@ import { diagnosePerformance, type PerfDiagnostic, type PerfThresholds } from '.
 import {
   inspectSignal,
   inspectResource,
+  inspectMutation,
   inspectRouter,
   inspectForm,
   inspectContext,
   inspectI18n,
   type SignalInspection,
   type ResourceInspection,
+  type MutationInspection,
   type RouterInspection,
   type FormInspection,
   type ContextInspection,
   type I18nInspection,
   type ResourceLike,
+  type MutationLike,
   type RouterLike,
   type FormLike,
   type ContextLike,
   type I18nLike,
 } from './inspect-reactive.js';
+import {
+  inspectEvents,
+  inspectSignalGraph,
+  type EventInspection,
+  type SignalGraph,
+} from './inspect-detail.js';
+import { inspectHydration, type HydrationInspection } from './inspect-ssr.js';
 
 // ── Panel shapes ────────────────────────────────────────────────────────────
 
@@ -112,8 +122,26 @@ export interface DevToolsSnapshot {
   readonly transitions: readonly InspectedTransition[];
   /** Compilation diagnostics (§8). */
   readonly diagnostics: DiagnosticsPanel;
+  /**
+   * Event Inspector (panel #8): every node carrying handlers, with the event
+   * *types* wired (never the handler functions). Structural, deterministic.
+   */
+  readonly events: EventInspection;
+  /**
+   * Signal / Dependency Graph (panel #4): the bipartite signal↔node wiring,
+   * enriched with live kind/observer counts for any signal the app registered
+   * (matched by id against `sources.signalsById`).
+   */
+  readonly signalGraph: SignalGraph;
+  /**
+   * SSR / Hydration Inspector (panel #12): structural static-vs-dynamic split.
+   * Counts only — NOT wall-clock SSR/hydration timings (browser gate BLOCKED).
+   */
+  readonly hydration: HydrationInspection;
   readonly router?: RouterInspection;
   readonly resources?: Readonly<Record<string, ResourceInspection>>;
+  /** Mutation Inspector (panel #7): live write-side lifecycles, by label. */
+  readonly mutations?: Readonly<Record<string, MutationInspection>>;
   readonly forms?: Readonly<Record<string, FormInspection>>;
   readonly contexts?: Readonly<Record<string, ContextInspection>>;
   readonly i18n?: I18nInspection;
@@ -130,8 +158,16 @@ export interface DevToolsSnapshot {
 export interface DevToolsSources {
   /** Live signals to inspect, keyed by a human label shown in the panel. */
   readonly signals?: Readonly<Record<string, ReadonlySignal<unknown>>>;
+  /**
+   * Live signals keyed by their *signal id* (not a human label). Used only to
+   * enrich the Signal/Dependency Graph (panel #4) with live kind/observer
+   * counts. Optional and purely additive — omit for a structure-only graph.
+   */
+  readonly signalsById?: Readonly<Record<string, ReadonlySignal<unknown>>>;
   /** Live resources to inspect, keyed by label. */
   readonly resources?: Readonly<Record<string, ResourceLike>>;
+  /** Live mutations to inspect, keyed by label (panel #7). */
+  readonly mutations?: Readonly<Record<string, MutationLike>>;
   /** The app router, if any. */
   readonly router?: RouterLike;
   /** Live forms to inspect, keyed by label. */
@@ -259,6 +295,17 @@ function capture(
     messages: app.diagnostics.messages,
   };
 
+  // Event wiring (#8), signal/dependency graph (#4) and SSR/hydration split
+  // (#12) are all derived structurally from the one compiled graph. The signal
+  // graph is enriched with live kind/observer counts when the app supplies live
+  // signals keyed by id.
+  const events = inspectEvents(compiled.graph);
+  const signalGraph = inspectSignalGraph(
+    compiled,
+    sources.signalsById !== undefined ? { signalsById: sources.signalsById } : {},
+  );
+  const hydration = inspectHydration(compiled);
+
   const snapshot: DevToolsSnapshot = {
     application,
     graph: app.graph,
@@ -268,9 +315,15 @@ function capture(
     overlays: interactions.overlays,
     transitions: interactions.transitions,
     diagnostics,
+    events,
+    signalGraph,
+    hydration,
     ...(sources.router !== undefined ? { router: inspectRouter(sources.router) } : {}),
     ...(sources.resources !== undefined
       ? { resources: mapInspect(sources.resources, (r) => inspectResource(r)) }
+      : {}),
+    ...(sources.mutations !== undefined
+      ? { mutations: mapInspect(sources.mutations, (m) => inspectMutation(m)) }
       : {}),
     ...(sources.forms !== undefined
       ? { forms: mapInspect(sources.forms, (f) => inspectForm(f)) }
@@ -361,6 +414,13 @@ function formatSnapshot(s: DevToolsSnapshot): string {
     }
   }
 
+  if (s.mutations !== undefined) {
+    lines.push('Mutations:');
+    for (const [label, m] of Object.entries(s.mutations)) {
+      lines.push(`  ${label}: ${m.status}${m.pending ? ' (pending)' : ''}${m.hasError ? ` !${m.errorName}` : ''}`);
+    }
+  }
+
   if (s.forms !== undefined) {
     lines.push('Forms:');
     for (const [label, f] of Object.entries(s.forms)) {
@@ -395,6 +455,24 @@ function formatSnapshot(s: DevToolsSnapshot): string {
   for (const m of s.diagnostics.messages) {
     lines.push(`  ${m}`);
   }
+
+  lines.push(
+    `Events: ${s.events.nodes.length} node(s), ${s.events.totalHandlers} handler(s)` +
+      (Object.keys(s.events.byType).length > 0
+        ? ` · ${Object.entries(s.events.byType).map(([t, n]) => `${t}×${n}`).join(', ')}`
+        : ''),
+  );
+
+  lines.push(
+    `Signal graph: ${s.signalGraph.signals.length} signal(s), ${s.signalGraph.edges.length} binding edge(s)`,
+  );
+
+  const h = s.hydration;
+  lines.push(
+    `SSR/Hydration: ${h.staticNodes}/${h.totalNodes} static (${(h.staticRatio * 100).toFixed(1)}%), ` +
+      `${h.dynamicNodes} dynamic · ${h.staticSubtrees} static subtree(s) · ${h.portals} portal(s), ${h.headAnchors} head anchor(s)`,
+  );
+  lines.push('  (structural counts only — not wall-clock timings; browser gate BLOCKED)');
 
   return lines.join('\n');
 }
