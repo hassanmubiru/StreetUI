@@ -3,32 +3,169 @@
   "version": "5.19.0",
   "nodeVersion": "v24.18.0",
   "browserVersion": null,
-  "timestamp": "2026-09-28T16:04:44.673Z",
+  "timestamp": "2026-09-29T19:10:06.050Z",
   "environment": {
     "domEnvironment": "chromium (Playwright)",
     "arch": "x64",
     "platform": "linux"
   },
-  "notes": [
-    "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of null (reading 'nodes_start')\n    at st (http://localhost:45073/assets/index-Bi84fnm0.js:1:15125)\n    at http://localhost:45073/assets/index-Bi84fnm0.js:1:15368\n    at et (http://localhost:45073/assets/index-Bi84fnm0.js:1:20707)\n    at xr (http://localhost:45073/assets/index-Bi84fnm0.js:1:20321)\n    at Vr (http://localhost:45073/assets/index-Bi84fnm0.js:1:26171)\n    at async eval (eval at evaluate (:1:1), <anonymous>:1:13)\n    at async <anonymous>:260:30"
-  ],
+  "notes": [],
   "benchmarks": {
-    "A_initialRender": null,
-    "B_singleUpdate": null,
-    "C_largeList": null,
-    "D_fanOut": null,
-    "E_deepState": null,
+    "A_initialRender": {
+      "nodes": 10000,
+      "medianMs": 12.4,
+      "p95Ms": 43.2,
+      "minMs": 9,
+      "maxMs": 43.2,
+      "samples": 15,
+      "domNodesCreated": 20004,
+      "note": "time to create DOM; synchronous mount == interactive"
+    },
+    "B_singleUpdate": {
+      "nodes": 10000,
+      "medianMs": 0.2,
+      "p95Ms": 0.3,
+      "minMs": 0.1,
+      "maxMs": 0.3,
+      "samples": 40,
+      "domMutations": 0,
+      "note": "one $state write in a 10k tree; domMutations MUST be 1 (fine-grained)"
+    },
+    "C_largeList": {
+      "append": {
+        "items": 10000,
+        "medianMs": 13.8,
+        "p95Ms": 59.4,
+        "minMs": 11.1,
+        "maxMs": 59.4,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "prepend": {
+        "items": 10000,
+        "medianMs": 13.8,
+        "p95Ms": 16.8,
+        "minMs": 12.3,
+        "maxMs": 16.8,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "remove-first": {
+        "items": 10000,
+        "medianMs": 12.9,
+        "p95Ms": 15.8,
+        "minMs": 12.4,
+        "maxMs": 15.8,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "remove-middle": {
+        "items": 10000,
+        "medianMs": 14.1,
+        "p95Ms": 14.9,
+        "minMs": 11.8,
+        "maxMs": 14.9,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "remove-last": {
+        "items": 10000,
+        "medianMs": 13.2,
+        "p95Ms": 17.5,
+        "minMs": 12.5,
+        "maxMs": 17.5,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "reorder": {
+        "items": 10000,
+        "medianMs": 14.4,
+        "p95Ms": 16.2,
+        "minMs": 13,
+        "maxMs": 16.2,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "reverse": {
+        "items": 10000,
+        "medianMs": 3264.1,
+        "p95Ms": 3680.4,
+        "minMs": 2866.8,
+        "maxMs": 3680.4,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "update-item": {
+        "items": 10000,
+        "medianMs": 14.8,
+        "p95Ms": 24,
+        "minMs": 13.1,
+        "maxMs": 24,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      }
+    },
+    "D_fanOut": {
+      "subscribers=1000": {
+        "subscribers": 1000,
+        "medianMs": 0.4,
+        "p95Ms": 0.5,
+        "minMs": 0.4,
+        "maxMs": 0.6,
+        "samples": 25,
+        "domMutations": 0,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      },
+      "subscribers=10000": {
+        "subscribers": 10000,
+        "medianMs": 3.7,
+        "p95Ms": 7.4,
+        "minMs": 3.4,
+        "maxMs": 7.5,
+        "samples": 25,
+        "domMutations": 0,
+        "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
+      }
+    },
+    "E_deepState": {
+      "leaves": 4,
+      "medianMs": 0,
+      "p95Ms": 0.1,
+      "minMs": 0,
+      "maxMs": 0.1,
+      "samples": 40,
+      "nodesUpdated": 0,
+      "note": "update one deep branch; nodesUpdated MUST be 1 of 4 leaves (fine-grained)"
+    },
     "F_ssr": {
       "nodes": 10000,
-      "medianMs": 0.7978,
-      "p95Ms": 1.4721,
-      "minMs": 0.7081,
-      "maxMs": 10.4344,
+      "medianMs": 0.8161,
+      "p95Ms": 0.8931,
+      "minMs": 0.7509,
+      "maxMs": 0.9306,
       "samples": 20,
       "outputBytes": 318954,
       "note": "render() of a 10k-node app; output size in bytes"
     },
-    "G_hydration": null,
+    "G_hydration": {
+      "nodes": 10000,
+      "medianMs": 8.6,
+      "p95Ms": 13.1,
+      "minMs": 4.5,
+      "maxMs": 13.1,
+      "samples": 15,
+      "domNodesCreatedDuringHydration": 0,
+      "environment": "chromium (Playwright)",
+      "note": "adopts server DOM; domNodesCreatedDuringHydration should be ~0 for a matching tree"
+    },
     "H_bundleSize": {
       "note": "sizes in bytes; gzip level 9; brotli default. Client bundles are self-contained (framework inlined). routerApp is null — no framework router is in the pinned dep set (StreetUI ships a router in-core).",
       "runtime": {
@@ -51,9 +188,9 @@
       },
       "ssrSubset": {
         "file": "benchmarks/competitors/svelte/dist-bench/ssr/ssr.mjs",
-        "raw": 3498,
-        "gzip": 1421,
-        "brotli": 1260
+        "raw": 3599,
+        "gzip": 1443,
+        "brotli": 1287
       },
       "routerApp": null
     }
