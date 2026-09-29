@@ -14,7 +14,6 @@
  */
 
 import { mount, unmount, hydrate, tick } from 'svelte';
-import { render } from 'svelte/server';
 import Flat from './Flat.svelte';
 import OneBound from './OneBound.svelte';
 import FanOut from './FanOut.svelte';
@@ -209,36 +208,47 @@ export async function runBrowserScenarios() {
     };
   }
 
-  // G — Hydration: adopt server markup for the 10k tree.
+  // G — Hydration: adopt server markup for the 10k tree. Svelte 5 is a COMPILED
+  // framework, so the CLIENT bundle cannot server-render itself: the orchestrator
+  // server-renders in Node (SSR-compiled) and injects the markup as
+  // `globalThis.__SOLID_SSR_HTML__` (the shared cross-adapter key). Mirrors Solid.
   {
-    const { html } = render(Flat, { props: { n: N_BIG } });
-    let created = 0;
-    let inst = null;
-    const timing = await measure(
-      (s) => {
-        s.counter.start();
-        inst = hydrate(Flat, { target: s.container, props: { n: N_BIG } });
-        created = s.counter.stop().added;
-      },
-      {
-        iterations: 15,
-        warmup: 4,
-        setup: () => {
-          if (inst) unmount(inst);
-          const container = makeContainer();
-          container.innerHTML = html;
-          return { container, counter: createMutationCounter(container) };
+    const html = globalThis.__SOLID_SSR_HTML__;
+    if (typeof html === 'string') {
+      let created = 0;
+      let inst = null;
+      const timing = await measure(
+        (s) => {
+          s.counter.start();
+          inst = hydrate(Flat, { target: s.container, props: { n: N_BIG } });
+          created = s.counter.stop().added;
         },
-      },
-    );
-    if (inst) unmount(inst);
-    benchmarks.G_hydration = {
-      nodes: N_BIG,
-      ...timing,
-      domNodesCreatedDuringHydration: created,
-      environment: 'chromium (Playwright)',
-      note: 'adopts server DOM; domNodesCreatedDuringHydration should be ~0 for a matching tree',
-    };
+        {
+          iterations: 15,
+          warmup: 4,
+          setup: () => {
+            if (inst) unmount(inst);
+            const container = makeContainer();
+            container.innerHTML = html;
+            return { container, counter: createMutationCounter(container) };
+          },
+        },
+      );
+      if (inst) unmount(inst);
+      benchmarks.G_hydration = {
+        nodes: N_BIG,
+        ...timing,
+        domNodesCreatedDuringHydration: created,
+        environment: 'chromium (Playwright)',
+        note: 'adopts server DOM; domNodesCreatedDuringHydration should be ~0 for a matching tree',
+      };
+    } else {
+      benchmarks.G_hydration = {
+        nodes: N_BIG,
+        status: 'SKIPPED',
+        note: 'Svelte client build cannot server-render (compiled framework); run via benchmarks/run-competitors.mjs which injects __SOLID_SSR_HTML__ from the SSR build. No numbers fabricated.',
+      };
+    }
   }
 
   return benchmarks;
