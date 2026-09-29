@@ -1,7 +1,7 @@
 {
   "schema": "browser-list-reorder/v1.4",
   "status": "OK",
-  "generatedAt": "2026-09-28T16:03:21.854Z",
+  "generatedAt": "2026-09-29T19:08:46.038Z",
   "environment": {
     "engine": "Chromium",
     "chromiumPath": "/usr/bin/google-chrome",
@@ -14,42 +14,42 @@
       "operations": [
         {
           "op": "create10k",
-          "durationMs": 174.4,
+          "durationMs": 179.5,
           "domMutations": 0,
           "nodeCount": 20003,
           "longTasksDuringOp": 2
         },
         {
           "op": "append 1k",
-          "durationMs": 99.3,
+          "durationMs": 102.7,
           "domMutations": 0,
           "nodeCount": 22003,
           "longTasksDuringOp": 1
         },
         {
           "op": "prepend 1k",
-          "durationMs": 216.1,
+          "durationMs": 234.5,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "insertMiddle 1k",
-          "durationMs": 116.2,
+          "durationMs": 116.1,
           "domMutations": 0,
           "nodeCount": 26003,
           "longTasksDuringOp": 1
         },
         {
           "op": "removeScattered 1k",
-          "durationMs": 216.2,
+          "durationMs": 215.8,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "swapEnds",
-          "durationMs": 32.9,
+          "durationMs": 33.1,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 0
@@ -63,29 +63,29 @@
         },
         {
           "op": "shuffle",
-          "durationMs": 200,
+          "durationMs": 232.7,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "updateEvery10th",
-          "durationMs": 100.6,
+          "durationMs": 103.9,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         }
       ],
       "longTaskDurationsMs": [
-        61,
-        113,
+        62,
+        117,
         86,
-        212,
-        105,
-        203,
-        178,
-        192,
-        85
+        229,
+        110,
+        209,
+        174,
+        221,
+        83
       ],
       "framePacing": {
         "frames": 18,
