@@ -101,6 +101,9 @@ async function measure(fn, { warmup = 5, iterations = 25, setup } = {}) {
   };
 }
 const N_BIG = 1e4;
+function renderFlatHtml() {
+  return render(Flat, { props: { n: N_BIG } }).html;
+}
 async function runSSR() {
   let bytes = 0;
   const timing = await measure(
@@ -117,5 +120,6 @@ async function runSSR() {
   };
 }
 export {
+  renderFlatHtml,
   runSSR
 };
