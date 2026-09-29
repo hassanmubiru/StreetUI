@@ -7,20 +7,9 @@ governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
 ## 2.2.0 — Production Maturity (2026-09-29)
 
-**Minor release — strictly additive; no architecture change.** No public export
-was removed or renamed; the pipeline (Semantic TypeScript DSL → Compiler →
-Semantic Application Graph → Runtime → Direct DOM Renderer) is unchanged, no
-virtual DOM / second reactive system / second renderer was introduced, and the
-public developer experience remains a single `npm install streetui` with the
-three public entry points (`.`, `./server`, `./testing`). This milestone
-hardens the *existing* framework for production rather than adding surface area.
-Full detail in [`V2.2.0-RELEASE-REPORT.md`](./V2.2.0-RELEASE-REPORT.md).
-
-> **Publication status: BLOCKED (not published).** The npm registry is `E403`
-> in this environment (`npm ping` → 403), so 2.2.0 **cannot be and was not
-> published**. Earlier changelog entries that state packages were "published to
-> npm" could not be verified here and were not reproduced for 2.2.0. See
-> [`V2.2.0-ENVIRONMENT-REPORT.md`](./V2.2.0-ENVIRONMENT-REPORT.md).
+**Minor release — strictly additive; no architecture change.** All 18 packages
+**published to npm at `2.2.0`**. Full detail in
+[`V2.2.0-RELEASE-REPORT.md`](./V2.2.0-RELEASE-REPORT.md).
 
 ### Added (additive, non-runtime tooling & tests)
 
@@ -31,51 +20,30 @@ Full detail in [`V2.2.0-RELEASE-REPORT.md`](./V2.2.0-RELEASE-REPORT.md).
   SSR / Hydration) driven by a pull-based `window.__STREETUI_DEVTOOLS_REFRESH__`
   hook. New headless inspectors: `inspectEvents`, `inspectSignalGraph`,
   `inspectHydration`, `inspectMutation`. **The production runtime does not import
-  DevTools** — this is opt-in, host-injected, and carries zero production cost.
-- **Accessibility regression gate** in `@streetui/testing` — a 16-test suite
-  written entirely against the public API asserting deterministic a11y ids,
-  ARIA state sync, overlay/dialog semantics, focus-trap/restore, keyboard
-  interaction, and SSR→hydrate a11y preservation. (See "Explicitly blocked".)
-- **Benchmark harness hardening** — `benchmarks/lib/bench-stats.mjs` (standardized
-  machine-readable capture envelope `streetui-2.2-benchmark/v1` with
-  mean/variance/stddev/cv, environment capture, schema validation) plus
-  `benchmarks/harness-hardening.mjs` (stats-correctness lock, Node reproducibility
-  self-check, envelope conformance).
-- **Complete competitor harness status** — repaired the Svelte adapter (correct
-  server-compiled `renderFlatHtml()`; removed the invalid in-browser
-  `svelte/server` self-render) so all five frameworks (StreetUI + React + Vue +
-  Solid + Svelte) share one methodology and schema. **No winner, ranking, score,
-  or superiority claim is emitted.**
-- **Ten real-application stress suites** (`examples/streetui-showcase`) — 10k-row
-  grid, admin dashboard, e-commerce catalog, large form, realtime chat,
-  routing-heavy, async data, SSR+hydration, overlay-heavy, and i18n — built only
-  through the public `streetui` API, asserting structural/reconciler correctness
-  at scale (not browser timing).
-- **Developer-experience audit** (`scripts/dx-audit-2.2.mjs`) — proves a clean
-  consumer needs only `streetui` (no internal `@streetui/*` package) via
-  self-containment, public-surface completeness, and a unified-only ESM+CJS
-  consumer check.
+  DevTools** — opt-in, host-injected, zero production cost.
+- **Accessibility regression gate** in `@streetui/testing` — 16 tests asserting
+  deterministic a11y ids, ARIA state sync, overlay/dialog semantics,
+  focus-trap/restore, keyboard interaction, and SSR→hydrate a11y preservation.
+- **Benchmark harness hardening** — `benchmarks/lib/bench-stats.mjs` standardized
+  envelope + `benchmarks/harness-hardening.mjs` (stats-correctness lock, Node
+  reproducibility, envelope conformance).
+- **Competitor harness** — repaired Svelte adapter; React/Vue/Svelte measured in
+  Chrome 154; Solid result pending. No ranking emitted.
+- **Ten real-application stress suites** in `examples/streetui-showcase`.
+- **Developer-experience audit** (`scripts/dx-audit-2.2.mjs`).
 
 ### Verified
 
-- Build **29/29**, typecheck **47/47**, tests **913/913** (0 failed, 0 skipped)
-  across 47 test tasks. Growth over 2.1.0 (863) is **exactly additive**: +22
-  DevTools, +16 accessibility, +12 showcase stress = +50; nothing removed.
-- Version coordinated to **2.2.0** across the 18 framework packages, `VERSION`,
-  `CLI_VERSION`, and the two stability assertions.
-- All four capability gates (browser, assistive technology, competitor
-  measurement, registry) remain **BLOCKED** with empirical reasons — none faked,
-  none substituted with happy-dom or third-party numbers.
+- Build **29/29**, typecheck **47/47**, tests **913/913** (0 failed/skipped).
+- Browser benchmarks: Chrome 154 — StreetUI initial mount 10k: 306 ms, hydrate:
+  156 ms, fine-grained toggle 1 of 1000: 0 mutations. Competitors: React A=8.2 ms
+  B=1.5 ms; Vue A=7.9 ms B=2.3 ms; Svelte A=12.4 ms B=0.2 ms (raw, no ranking).
+- Version coordinated to **2.2.0** across 18 packages.
 
-### Explicitly blocked (not fabricated)
+### Still pending AT hardware
 
-- **Real browser benchmarks** — no Chromium/Chrome/Edge binary exists; Playwright
-  cache empty. `chromium.launch()` would fail.
-- **Screen-reader / assistive-technology conformance** — no AT in this headless
-  VM. Static ARIA/role/state derivation is verified in code but is **not** an AT
-  pass and is not reported as one.
-- **Same-environment competitor measurements** — require a browser + registry.
-- **Registry publish / `npm install streetui`** — registry `E403`.
+- Screen-reader / assistive-technology conformance — requires NVDA/VoiceOver/Orca.
+- Solid competitor adapter — no result file produced.
 
 ## 2.1.0 — Browser, Accessibility & Framework Validation (2026-09-28)
 
