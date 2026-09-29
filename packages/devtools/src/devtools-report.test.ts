@@ -21,7 +21,7 @@ beforeEach(() => resetIdCounter());
 
 function buildApp(): CompiledApplication {
   const label = signal('dynamic');
-  const app = streetui.app({ name: 'report-demo', version: '2.1.0' });
+  const app = streetui.app({ name: 'report-demo', version: '2.2.0' });
   app.page('home', (page) => {
     page.heading('Report Title');
     page.text(label);

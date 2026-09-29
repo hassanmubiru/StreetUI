@@ -9,14 +9,14 @@ beforeEach(() => resetIdCounter());
 
 describe('inspectApplication', () => {
   it('reports application identity from the compiled metadata', () => {
-    const app = streetui.app({ name: 'my-app', version: '2.1.0' });
+    const app = streetui.app({ name: 'my-app', version: '2.2.0' });
     app.page('home', (page) => {
       page.heading('Hello');
     });
     const compiled = compile(app);
     const snapshot = inspectApplication(compiled);
     expect(snapshot.identity.name).toBe('my-app');
-    expect(snapshot.identity.version).toBe('2.1.0');
+    expect(snapshot.identity.version).toBe('2.2.0');
     expect(typeof snapshot.identity.compiledAt).toBe('number');
   });
 

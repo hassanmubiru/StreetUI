@@ -3,7 +3,7 @@
   "status": "PINS DECLARED; INSTALL BLOCKED",
   "blockedReason": "This environment has no reachable npm registry (GET registry.npmjs.org → 403 Forbidden) and no Chromium/Playwright. Competitor frameworks cannot be installed or benchmarked here. The harness, scenario implementations, and result schema are complete and will run once a registry and a real browser are available; competitor result files are marked BLOCKED rather than fabricated.",
   "streetui": {
-    "version": "1.1.0",
+    "version": "2.2.0",
     "source": "workspace (this repo, single public package)"
   },
   "competitors": {

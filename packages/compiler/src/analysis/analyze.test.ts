@@ -64,7 +64,7 @@ describe('analyzeGraph (v1.2 §3)', () => {
 describe('inspectCompilation (v1.2 §14)', () => {
   it('produces per-node classification and a formatted report', () => {
     const label = signal('tick');
-    const app = streetui.app({ name: 'demo', version: '2.1.0' });
+    const app = streetui.app({ name: 'demo', version: '2.2.0' });
     app.page('home', (p) =>
       p.section('main', (s) => {
         s.text('static', { class: 'a' });
@@ -74,7 +74,7 @@ describe('inspectCompilation (v1.2 §14)', () => {
     const { graph } = compile(app);
     const insp = inspectCompilation(graph);
     expect(insp.name).toBe('demo');
-    expect(insp.version).toBe('2.1.0');
+    expect(insp.version).toBe('2.2.0');
     expect(insp.summary.staticRatio).toBeGreaterThan(0);
     expect(insp.summary.staticRatio).toBeLessThanOrEqual(1);
     // exactly one node reports dynamic text and wants dynamic hydration.
@@ -82,7 +82,7 @@ describe('inspectCompilation (v1.2 §14)', () => {
     expect(dyn.length).toBe(1);
     expect(dyn[0]!.hydration).toBe('verify-dynamic');
     const text = formatInspection(insp);
-    expect(text).toContain('compiler inspection — demo v2.1.0');
+    expect(text).toContain('compiler inspection — demo v2.2.0');
     expect(text).toContain('{text}');
   });
 });
