@@ -1,8 +1,8 @@
-import { c as Signal, d as Subscriber, U as Unsubscribe, R as ReadonlySignal, e as ResourceStatus, f as ResourceOptions, g as Resource, h as ResourceLoaderContext, A as ApplicationId, D as DiagnosticCollector, i as ApplicationGraph, G as GraphNode, C as CompiledApplication, j as HydrationDiagnosticSink, k as SemanticNodeType, P as PageDSL, T as TransitionConfig, l as ContainerDSL, m as SignalKind } from './hydration-diagnostics-Jm3qUydo.js';
-export { n as A11yOptions, o as AppBuilder, p as AppDSL, q as AppOptions, r as ApplicationGraphOptions, s as AsyncBoundaryBranches, B as BaseNode, t as Bindable, u as BindableString, v as BindableText, w as BoundInputOptions, x as ButtonOptions, y as CompileOptions, b as ComponentChildren, z as ComponentContext, a as ComponentDefinition, E as ComponentRender, F as ComponentSetup, b as ContainerBuilder, I as ContainerBuilderImpl, J as ContainerOptions, K as ContentDSL, L as ControlledInputOptions, M as DerivedSignal, N as Diagnostic, O as DiagnosticError, Q as DiagnosticLocation, W as DiagnosticSeverity, X as ErrorBoundaryOptions, Y as ErrorFallbackBuilder, Z as ErrorSource, _ as EventDescriptor, $ as FormBuilder, a0 as FormBuilderImpl, a1 as FormDSL, a2 as FormOptions, a3 as GraphNodeData, a4 as HandlerFn, a5 as HeadContribution, a6 as HeadEntry, a7 as HeadMetadata, a8 as HeadingOptions, H as HydrationDiagnostic, a9 as HydrationMismatchType, aa as ImageOptions, ab as InputOptions, ac as InputOptionsBase, ad as LinkDescriptor, ae as LinkOptions, af as ListBuilder, ag as ListBuilderImpl, ah as ListDSL, ai as ListOptions, aj as ListPlanEntry, ak as MetaDescriptor, al as NodeId, am as NodeMetadata, an as OverlayOptions, ao as PageBuilder, ap as PageBuilderImpl, aq as PortalOptions, ar as PropValue, as as Props, at as ReactiveConsumer, au as ReactiveSource, av as ResolvedTransition, aw as ResourceLoader, ax as SectionBuilder, ay as SectionBuilderImpl, az as SectionDSL, aA as SectionOptions, aB as SerializedGraph, aC as SerializedNode, aD as StateRef, S as StreetApp, aE as StreetUI, aF as TextOptions, aG as TextValue, V as VERSION, aH as WhenOptions, aI as batch, aJ as compile, aK as compileGraph, aL as component, aM as consoleHydrationDiagnosticSink, aN as createHydrationDiagnosticCollector, aO as createNodeId, aP as derived, aQ as effect, aR as formatDiagnostic, aS as formatHydrationDiagnostic, aT as generateApplicationId, aU as generateNodeId, aV as isBatching, aW as isComponentDefinition, aX as isHeadContribution, aY as isTransitionConfig, aZ as nextId, a_ as nodeIdPrefix, a$ as observerCount, b0 as reactiveListItemKey, b1 as reactiveListItemSignature, b2 as resetIdCounter, b3 as resolveHead, b4 as resolveTransition, b5 as resource, b6 as signal, b7 as signalKind, b8 as streetui } from './hydration-diagnostics-Jm3qUydo.js';
-import { L as Lifecycle, C as CleanupRegistry, D as DOMAdapter, N as NodeInstance, R as RenderContext } from './server-DG0tvuRt.js';
-export { H as HeadManager, a as LifecycleHook, b as LifecyclePhase, c as RenderToStringOptions, S as STATE_MARKER_ATTR, d as ServerDOMAdapter, e as createRenderContext, r as readState, f as renderHead, g as renderToString, s as serializeState, h as serverDOMAdapter, w as wireHeadBehavior } from './server-DG0tvuRt.js';
-import { R as RenderHandle, S as StreetRenderer } from './renderer-interface-CPrfslvr.js';
+import { c as Signal, d as Subscriber, U as Unsubscribe, R as ReadonlySignal, e as ResourceStatus, f as ResourceOptions, g as Resource, h as ResourceLoaderContext, A as ApplicationId, D as DiagnosticCollector, i as ApplicationGraph, G as GraphNode, C as CompiledApplication, j as HydrationDiagnosticSink, k as SemanticNodeType, P as PageDSL, T as TransitionConfig, l as ContainerDSL, m as SignalKind } from './hydration-diagnostics-CEhFie5X.js';
+export { n as A11yOptions, o as AppBuilder, p as AppDSL, q as AppOptions, r as ApplicationGraphOptions, s as AsyncBoundaryBranches, B as BaseNode, t as Bindable, u as BindableString, v as BindableText, w as BoundInputOptions, x as ButtonOptions, y as CompileOptions, b as ComponentChildren, z as ComponentContext, a as ComponentDefinition, E as ComponentRender, F as ComponentSetup, b as ContainerBuilder, I as ContainerBuilderImpl, J as ContainerOptions, K as ContentDSL, L as ControlledInputOptions, M as DerivedSignal, N as Diagnostic, O as DiagnosticError, Q as DiagnosticLocation, W as DiagnosticSeverity, X as ErrorBoundaryOptions, Y as ErrorFallbackBuilder, Z as ErrorSource, _ as EventDescriptor, $ as FormBuilder, a0 as FormBuilderImpl, a1 as FormDSL, a2 as FormOptions, a3 as GraphNodeData, a4 as HandlerFn, a5 as HeadContribution, a6 as HeadEntry, a7 as HeadMetadata, a8 as HeadingOptions, H as HydrationDiagnostic, a9 as HydrationMismatchType, aa as ImageOptions, ab as InputOptions, ac as InputOptionsBase, ad as LinkDescriptor, ae as LinkOptions, af as ListBuilder, ag as ListBuilderImpl, ah as ListDSL, ai as ListOptions, aj as ListPlanEntry, ak as MetaDescriptor, al as NodeId, am as NodeMetadata, an as OverlayOptions, ao as PageBuilder, ap as PageBuilderImpl, aq as PortalOptions, ar as PropValue, as as Props, at as ReactiveConsumer, au as ReactiveSource, av as ResolvedTransition, aw as ResourceLoader, ax as SectionBuilder, ay as SectionBuilderImpl, az as SectionDSL, aA as SectionOptions, aB as SerializedGraph, aC as SerializedNode, aD as StateRef, S as StreetApp, aE as StreetUI, aF as TextOptions, aG as TextValue, V as VERSION, aH as WhenOptions, aI as batch, aJ as compile, aK as compileGraph, aL as component, aM as consoleHydrationDiagnosticSink, aN as createHydrationDiagnosticCollector, aO as createNodeId, aP as derived, aQ as effect, aR as formatDiagnostic, aS as formatHydrationDiagnostic, aT as generateApplicationId, aU as generateNodeId, aV as isBatching, aW as isComponentDefinition, aX as isHeadContribution, aY as isTransitionConfig, aZ as nextId, a_ as nodeIdPrefix, a$ as observerCount, b0 as reactiveListItemKey, b1 as reactiveListItemSignature, b2 as resetIdCounter, b3 as resolveHead, b4 as resolveTransition, b5 as resource, b6 as signal, b7 as signalKind, b8 as streetui } from './hydration-diagnostics-CEhFie5X.js';
+import { L as Lifecycle, C as CleanupRegistry, D as DOMAdapter, N as NodeInstance, R as RenderContext } from './server-wz5X8SA9.js';
+export { H as HeadManager, a as LifecycleHook, b as LifecyclePhase, c as RenderToStringOptions, S as STATE_MARKER_ATTR, d as ServerDOMAdapter, e as createRenderContext, r as readState, f as renderHead, g as renderToString, s as serializeState, h as serverDOMAdapter, w as wireHeadBehavior } from './server-wz5X8SA9.js';
+import { R as RenderHandle, S as StreetRenderer } from './renderer-interface-CYJIOjj5.js';
 
 /**
  * A simple reactive store built on top of signals.
@@ -2065,6 +2065,32 @@ interface InspectResourceOptions {
 }
 /** Snapshot a resource's lifecycle. Payload/message hidden unless opted in. */
 declare function inspectResource(resource: ResourceLike, options?: InspectResourceOptions): ResourceInspection;
+/** The read-only slice of a mutation this module needs. */
+interface MutationLike {
+    readonly status: ReadonlySignal<ResourceStatus>;
+    readonly data: ReadonlySignal<unknown>;
+    readonly error: ReadonlySignal<unknown>;
+    readonly pending: ReadonlySignal<boolean>;
+}
+interface MutationInspection {
+    readonly status: ResourceStatus;
+    readonly pending: boolean;
+    readonly hasData: boolean;
+    readonly hasError: boolean;
+    /** The error's constructor name (safe — no message/payload). */
+    readonly errorName: string | undefined;
+    /** The error message — only present when `includeData` is set. */
+    readonly errorMessage?: string;
+    /** The most recent result — only present when `includeData` is set. */
+    readonly data?: unknown;
+}
+/**
+ * Snapshot a mutation's write-side lifecycle (idle/loading/success/error). The
+ * write-side counterpart to {@link inspectResource}: payload/message hidden
+ * unless opted in, because a mutation result commonly carries user data. Never
+ * triggers the mutation — a pure `peek` over its exposed signals.
+ */
+declare function inspectMutation(mutation: MutationLike, options?: InspectResourceOptions): MutationInspection;
 interface RouteMatchLike {
     readonly path: string;
     readonly pattern: string;
@@ -2143,6 +2169,147 @@ interface InspectI18nOptions {
 declare function inspectI18n(i18n: I18nLike, options?: InspectI18nOptions): I18nInspection;
 
 /**
+ * Detailed structural inspectors for DevTools (2.2 Phase 1).
+ *
+ * Two read-only views derived purely from the one compiled graph — no second
+ * graph, no subscriptions, no runtime instrumentation:
+ *
+ *   - `inspectEvents`  — the Event Inspector panel (#8): every node that carries
+ *     event handlers, with the handler *types* it registers (never the handler
+ *     functions themselves).
+ *   - `inspectSignalGraph` — the Signal / Dependency Graph panel (#4): the
+ *     bipartite wiring between distinct signal ids and the graph nodes that bind
+ *     them, optionally enriched with each signal's live `kind` and
+ *     `observerCount` when the caller supplies the live `Signal` instances by id.
+ *
+ * Both are pure: safe to call in a server, a test, or a DevTools panel.
+ */
+
+/** A node that registers one or more event handlers. */
+interface InspectedEventNode {
+    /** The build-order node id. */
+    readonly id: string;
+    /** The node's semantic type (button/input/…). */
+    readonly nodeType: string;
+    /** The stable author-provided key, if any. */
+    readonly key: string | undefined;
+    /** Depth of the node in the graph. */
+    readonly depth: number;
+    /** Event types wired on the node (e.g. `['click', 'keydown']`). Sorted. */
+    readonly eventTypes: readonly string[];
+}
+/** A prod-safe summary of the graph's event wiring. */
+interface EventInspection {
+    /** Every node carrying handlers, in document order. */
+    readonly nodes: readonly InspectedEventNode[];
+    /** Total handler registrations across all nodes. */
+    readonly totalHandlers: number;
+    /** Count of registrations per event type (e.g. `{ click: 3, input: 2 }`). */
+    readonly byType: Readonly<Record<string, number>>;
+}
+/**
+ * List every node that registers event handlers, with the handler *types* it
+ * wires. Reads only the public graph structure (`node.events[].type`); the
+ * handler functions are never surfaced. Document order, deterministic.
+ */
+declare function inspectEvents(graph: ApplicationGraph): EventInspection;
+/** One signal id and the nodes that bind it. */
+interface SignalGraphNode {
+    /** The signal id as recorded in the graph's state references. */
+    readonly signalId: string;
+    /** Distinct graph-node ids that bind this signal. */
+    readonly boundNodeIds: readonly string[];
+    /** Number of binding edges into this signal (may exceed boundNodeIds if a node binds it twice). */
+    readonly bindingCount: number;
+    /** Live signal kind, present only when the live instance was supplied. */
+    readonly kind?: SignalKind;
+    /** Live observer count, present only when the live instance was supplied. */
+    readonly observerCount?: number;
+}
+/** A single binding edge: a node prop is driven by a signal. */
+interface SignalGraphEdge {
+    readonly signalId: string;
+    readonly nodeId: string;
+    readonly nodeType: string;
+    readonly propKey: string;
+}
+/** The bipartite signal↔node wiring of an application. */
+interface SignalGraph {
+    /** Distinct signals bound anywhere in the graph, sorted by id. */
+    readonly signals: readonly SignalGraphNode[];
+    /** Every binding edge, in document order. */
+    readonly edges: readonly SignalGraphEdge[];
+}
+interface InspectSignalGraphOptions {
+    /**
+     * Live `Signal` instances keyed by their signal id. When supplied, each
+     * matching signal in the graph is enriched with its live `kind` and
+     * `observerCount`. Purely additive — omit for a structure-only graph.
+     */
+    readonly signalsById?: Readonly<Record<string, ReadonlySignal<unknown>>>;
+}
+/**
+ * Build the bipartite dependency graph between signals and the nodes that bind
+ * them. Structural by default; pass `signalsById` to enrich with live
+ * kind/observer counts. Deterministic ordering (edges in document order,
+ * signals sorted by id).
+ */
+declare function inspectSignalGraph(compiled: CompiledApplication, options?: InspectSignalGraphOptions): SignalGraph;
+
+/**
+ * SSR / Hydration inspection for DevTools (2.2 Phase 1, panel #12).
+ *
+ * A structural, read-only view of how a compiled application splits into the
+ * parts that are *statically serialized* on the server versus the *dynamic*
+ * parts the client must hydrate. It reuses the compiler's existing
+ * `analyzeGraph` classifier (the very same analysis the SSR static-subtree plan
+ * and the hydration fast-path already consume) so DevTools introduces no second
+ * analysis and no second graph. Nothing is measured at runtime and nothing is
+ * mutated — this is a pure derivation over the one `CompiledApplication`.
+ *
+ * HONEST SCOPE: these are *structural* counts (how many nodes are static, how
+ * many hydrate, how many portals/islands exist). They are NOT wall-clock SSR or
+ * hydration timings — real render/hydrate timing needs a browser, and the
+ * browser gate is BLOCKED in this environment. The panel labels this honestly.
+ */
+
+interface HydrationInspection {
+    /** Total GraphNodes analysed (root included). */
+    readonly totalNodes: number;
+    /** Nodes classified static (no dynamic text/attr/events of their own). */
+    readonly staticNodes: number;
+    /** Maximal whole-static subtrees — the units the SSR plan precomputes verbatim. */
+    readonly staticSubtrees: number;
+    /** Dynamic nodes the client must reconcile/hydrate (total − static). */
+    readonly dynamicNodes: number;
+    /** Nodes with dynamic (signal-bound) text. */
+    readonly dynamicTextNodes: number;
+    /** Nodes with dynamic (signal-bound) attributes. */
+    readonly dynamicAttrNodes: number;
+    /** Nodes carrying event handlers — the interactive surface hydration wires. */
+    readonly eventNodes: number;
+    /** Reactive keyed-list sites. */
+    readonly lists: number;
+    /** Conditional (`when`) sites. */
+    readonly conditionals: number;
+    /** Portal hosts (overlays) — relocated to <body> on hydrate, inlined in SSR. */
+    readonly portals: number;
+    /** `head()` contribution anchors — adopted, never duplicated, on hydrate. */
+    readonly headAnchors: number;
+    /**
+     * Fraction of nodes that are static (0..1), rounded to 4 dp. A high ratio
+     * means most of the document ships as precomputed HTML and hydration only
+     * wires the dynamic remainder. Deterministic; no timing involved.
+     */
+    readonly staticRatio: number;
+}
+/**
+ * Build the SSR/hydration inspection for a compiled application. Pure and
+ * side-effect free — safe in a server, a test, or a DevTools panel.
+ */
+declare function inspectHydration(compiled: CompiledApplication): HydrationInspection;
+
+/**
  * DevTools session & panels — the first real StreetUI DevTools surface.
  *
  * This is a *headless* DevTools layer: it composes the existing read-only
@@ -2213,8 +2380,26 @@ interface DevToolsSnapshot {
     readonly transitions: readonly InspectedTransition[];
     /** Compilation diagnostics (§8). */
     readonly diagnostics: DiagnosticsPanel;
+    /**
+     * Event Inspector (panel #8): every node carrying handlers, with the event
+     * *types* wired (never the handler functions). Structural, deterministic.
+     */
+    readonly events: EventInspection;
+    /**
+     * Signal / Dependency Graph (panel #4): the bipartite signal↔node wiring,
+     * enriched with live kind/observer counts for any signal the app registered
+     * (matched by id against `sources.signalsById`).
+     */
+    readonly signalGraph: SignalGraph;
+    /**
+     * SSR / Hydration Inspector (panel #12): structural static-vs-dynamic split.
+     * Counts only — NOT wall-clock SSR/hydration timings (browser gate BLOCKED).
+     */
+    readonly hydration: HydrationInspection;
     readonly router?: RouterInspection;
     readonly resources?: Readonly<Record<string, ResourceInspection>>;
+    /** Mutation Inspector (panel #7): live write-side lifecycles, by label. */
+    readonly mutations?: Readonly<Record<string, MutationInspection>>;
     readonly forms?: Readonly<Record<string, FormInspection>>;
     readonly contexts?: Readonly<Record<string, ContextInspection>>;
     readonly i18n?: I18nInspection;
@@ -2228,8 +2413,16 @@ interface DevToolsSnapshot {
 interface DevToolsSources {
     /** Live signals to inspect, keyed by a human label shown in the panel. */
     readonly signals?: Readonly<Record<string, ReadonlySignal<unknown>>>;
+    /**
+     * Live signals keyed by their *signal id* (not a human label). Used only to
+     * enrich the Signal/Dependency Graph (panel #4) with live kind/observer
+     * counts. Optional and purely additive — omit for a structure-only graph.
+     */
+    readonly signalsById?: Readonly<Record<string, ReadonlySignal<unknown>>>;
     /** Live resources to inspect, keyed by label. */
     readonly resources?: Readonly<Record<string, ResourceLike>>;
+    /** Live mutations to inspect, keyed by label (panel #7). */
+    readonly mutations?: Readonly<Record<string, MutationLike>>;
     /** The app router, if any. */
     readonly router?: RouterLike;
     /** Live forms to inspect, keyed by label. */
@@ -2321,6 +2514,59 @@ declare function escapeHtml(value: unknown): string;
 declare function renderDevToolsHTML(s: DevToolsSnapshot): string;
 
 /**
+ * Interactive DevTools view (2.2 Phase 1) — a self-contained, 12-panel browser
+ * DevTools surface rendered as ONE HTML document.
+ *
+ * This extends the static `renderDevToolsHTML` (2.0 §8) into a *tabbed,
+ * interactive* tool while preserving every DevTools design constraint:
+ *
+ *   - It consumes ONLY an existing {@link DevToolsSnapshot} (already composed
+ *     from the read-only inspectors). There is NO second framework runtime, NO
+ *     second reactive system, NO second graph, and NO DOM/subscription work at
+ *     render time — this function is a pure string builder.
+ *   - The snapshot is embedded once as inert JSON. A small, dependency-free
+ *     vanilla-JS controller (no framework, no bundler, no network) renders the
+ *     panels from that JSON in the browser: tab switching, component selection,
+ *     and a Refresh button.
+ *   - Refresh is pull-based and never mutates the app: the controller calls an
+ *     optional host hook `window.__STREETUI_DEVTOOLS_REFRESH__()` that, when the
+ *     host provides it, returns a fresh snapshot (e.g. from `session.refresh()`).
+ *     Absent the hook, Refresh is a no-op — DevTools is never pushed to.
+ *   - Every value the controller injects into the DOM is escaped; the embedded
+ *     JSON is `<`-escaped so app data cannot break out of the <script> block.
+ *
+ * The 12 panels map 1:1 to the milestone spec: (1) Component Tree,
+ * (2) Component Inspector, (3) Reactive State, (4) Signal/Dependency Graph,
+ * (5) Router, (6) Resource/Async, (7) Mutation, (8) Event, (9) Overlay,
+ * (10) Performance Timeline, (11) Error Diagnostics, (12) SSR/Hydration.
+ *
+ * HONEST SCOPE: this produces markup + a controller script. That it *renders*
+ * pixels, is screen-reader conformant, or hits 60fps in a real browser is NOT
+ * claimed and has NOT been observed here — no browser/AT exists in this
+ * environment (browser + AT gates remain BLOCKED). What tests verify is that the
+ * document faithfully and safely embeds the snapshot and that the controller
+ * logic is deterministic (exercised under happy-dom, which is NOT a browser).
+ */
+
+interface InteractiveDevToolsOptions {
+    /** Tab id to open first. Defaults to `'components'`. */
+    readonly initialTab?: string;
+    /** Document <title>. Defaults to `StreetUI DevTools — <app name>`. */
+    readonly title?: string;
+}
+/** The 12 panels, in tab order. `id` is stable and used by the controller/tests. */
+declare const DEVTOOLS_TABS: readonly {
+    readonly id: string;
+    readonly label: string;
+}[];
+/**
+ * Render the interactive 12-panel DevTools document for a snapshot. Static,
+ * side-effect-free string builder. Re-run with a fresh snapshot (or let the
+ * in-page Refresh button pull one via the host hook) to reflect new state.
+ */
+declare function renderInteractiveDevTools(snapshot: DevToolsSnapshot, options?: InteractiveDevToolsOptions): string;
+
+/**
  * DevTools report (2.1 §23) — the first *usable* DevTools interface: one call
  * that turns a compiled application into a complete, self-contained HTML page a
  * developer can open in a browser (or save as a static report / inject into a
@@ -2408,4 +2654,4 @@ interface ResolvedConfig {
 /** Identity helper that gives `streetui.config.ts` full type-checking + inference. */
 declare function defineConfig(config: StreetUIConfig): StreetUIConfig;
 
-export { type A11yIds, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, type AuthSession, type AuthSessionConfig, type AuthStatus, BrowserDOMAdapter, CleanupRegistry, type Client, type ClientConfig, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsPanel, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, EventBus, type EventHandler, FOCUSABLE_SELECTOR, type FetchLike, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HttpError, type HttpMethod, HydrationDiagnosticSink, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalOptions, type InspectedComponent, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LoadUser, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type Mutation, type MutationOptions, type MutationStatus, type Mutator, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, RenderContext, RenderHandle, type RequestConfig, type ResolvedConfig, type ResolvedTransitionLike, Resource, type ResourceInspection, type ResourceLike, ResourceLoaderContext, ResourceOptions, ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, TransitionConfig, TransitionController, type TransitionHooks, type TransitionPhase, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createAnnouncer, createApplication, createAuthSession, createBrowserHistory, createClient, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, describeError, diagnosePerformance, email, environment, escapeHtml, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, getResolvedTransition, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectForm, inspectGraph, inspectI18n, inspectInteractions, inspectResource, inspectRouter, inspectSignal, interpolate, linkUpdate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, mutation, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, renderDevToolsHTML, renderDevToolsReport, reportDiagnostic, reportError, required, resolveTag, restoreFocus, routerOutlet, rovingMenu, runElementTransition, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { type A11yIds, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, type AuthSession, type AuthSessionConfig, type AuthStatus, BrowserDOMAdapter, CleanupRegistry, type Client, type ClientConfig, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DEVTOOLS_TABS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsPanel, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, EventBus, type EventHandler, type EventInspection, FOCUSABLE_SELECTOR, type FetchLike, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HttpError, type HttpMethod, HydrationDiagnosticSink, type HydrationInspection, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalGraphOptions, type InspectSignalOptions, type InspectedComponent, type InspectedEventNode, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InteractiveDevToolsOptions, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LoadUser, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type Mutation, type MutationInspection, type MutationLike, type MutationOptions, type MutationStatus, type Mutator, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ReadonlySignal, type ReconcileResult, RenderContext, RenderHandle, type RequestConfig, type ResolvedConfig, type ResolvedTransitionLike, Resource, type ResourceInspection, type ResourceLike, ResourceLoaderContext, ResourceOptions, ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalGraph, type SignalGraphEdge, type SignalGraphNode, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, TransitionConfig, TransitionController, type TransitionHooks, type TransitionPhase, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createAnnouncer, createApplication, createAuthSession, createBrowserHistory, createClient, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, describeError, diagnosePerformance, email, environment, escapeHtml, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, getResolvedTransition, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectEvents, inspectForm, inspectGraph, inspectHydration, inspectI18n, inspectInteractions, inspectMutation, inspectResource, inspectRouter, inspectSignal, inspectSignalGraph, interpolate, linkUpdate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, mutation, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, renderDevToolsHTML, renderDevToolsReport, renderInteractiveDevTools, reportDiagnostic, reportError, required, resolveTag, restoreFocus, routerOutlet, rovingMenu, runElementTransition, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
