@@ -5,6 +5,31 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 2.3.0 — Validation Completion (2026-09-30)
+
+**Validation milestone** — no architecture change, no new subsystem. All 18
+packages **published to npm at `2.3.0`**. Full detail in
+[`V2.3.0-RELEASE-REPORT.md`](./V2.3.0-RELEASE-REPORT.md).
+
+### Verified (real Chrome 154 via Playwright)
+
+- Build **29/29**, typecheck **47/47**, tests **913/913** (0 failed/skipped).
+- StreetUI in-page scenarios: initial mount 10k **217 ms** · hydrate 0 nodes
+  recreated · fine-grained toggle 1/1000 **0 mutations** · reactive search 207 ms.
+- Keyed list reorder: create10k 184.4 ms · append 92.7 ms · swap 32.9 ms.
+- Competitors (raw, no ranking): React A=11 ms B=1.6 ms; Vue A=8.4 ms B=2.4 ms;
+  Svelte A=12.5 ms B=0.2 ms. Solid adapter produces no result (2.4 item).
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+- DevTools runtime independence PASS — dx-audit confirms no production import.
+- Accessibility STRUCTURAL + BEHAVIORAL PASS (16-test public-API gate).
+
+### Still pending AT hardware
+
+- AT/screen-reader conformance — Orca + AT-SPI2 installed; wiring to Chrome 2.4.
+- Solid competitor adapter — no result file; needs live debug run.
+- Visual a11y (contrast, `:focus-visible`) — Chrome available; axe-core integration 2.4.
+- Firefox cross-browser smoke — Firefox present; Playwright wiring 2.4.
+
 ## 2.2.0 — Production Maturity (2026-09-29)
 
 **Minor release — strictly additive; no architecture change.** All 18 packages
