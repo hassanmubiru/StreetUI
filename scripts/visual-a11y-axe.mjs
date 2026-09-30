@@ -126,13 +126,16 @@ try {
     '</script></body></html>';
 
   server = http.createServer((req, res) => { res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(htmlPage); });
-  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  await new Promise((r, reject) => {
+    server.listen(0, '127.0.0.1', r);
+    setTimeout(() => reject(new Error('server listen timeout')), 10000);
+  });
   const { port } = server.address();
 
   browser = await playwright.chromium.launch({ executablePath: chromiumBin });
   const version = browser.version?.() ?? 'unknown';
   const page = await browser.newPage();
-  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
+  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load', timeout: 30000 });
   await page.waitForTimeout(300); // allow mount
 
   await page.addScriptTag({ content: axeSource });
