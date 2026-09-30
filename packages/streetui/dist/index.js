@@ -1,5 +1,5 @@
 // src/version.ts
-var VERSION = "2.3.0";
+var VERSION = "2.4.0";
 
 // ../state/src/signal.ts
 var _activeConsumer = null;
