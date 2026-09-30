@@ -84,21 +84,30 @@ async function buildSSR(fw) {
   const { build } = await getVite();
   const root = path.join(competitorsDir, fw.name);
   const outDir = path.join('dist-bench', 'ssr');
-  await build({
-    root,
-    configFile: path.join(root, 'vite.config.mjs'),
-    logLevel: 'warn',
-    // Bundle the framework into a single self-contained Node ESM file so it is
-    // both runnable (F, renderFlatHtml) and measurable (H.ssrSubset).
-    ssr: { noExternal: true },
-    build: {
-      ssr: fw.ssrEntry,
-      outDir,
-      emptyOutDir: true,
-      minify: false,
-      rollupOptions: { output: { inlineDynamicImports: true, entryFileNames: 'ssr.mjs' } },
-    },
-  });
+  // Set VITE_SSR_BUILD so framework-specific Vite plugins (e.g. vite-plugin-solid)
+  // can detect SSR mode and emit server-compatible code rather than browser code.
+  const origEnv = process.env.VITE_SSR_BUILD;
+  process.env.VITE_SSR_BUILD = '1';
+  try {
+    await build({
+      root,
+      configFile: path.join(root, 'vite.config.mjs'),
+      logLevel: 'warn',
+      // Bundle the framework into a single self-contained Node ESM file so it is
+      // both runnable (F, renderFlatHtml) and measurable (H.ssrSubset).
+      ssr: { noExternal: true },
+      build: {
+        ssr: fw.ssrEntry,
+        outDir,
+        emptyOutDir: true,
+        minify: false,
+        rollupOptions: { output: { inlineDynamicImports: true, entryFileNames: 'ssr.mjs' } },
+      },
+    });
+  } finally {
+    if (origEnv === undefined) delete process.env.VITE_SSR_BUILD;
+    else process.env.VITE_SSR_BUILD = origEnv;
+  }
   return path.join(root, outDir, 'ssr.mjs');
 }
 
