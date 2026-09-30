@@ -73,7 +73,12 @@ function detectEnvironment() {
 
 /** Import the public DevTools view surface from the built package. */
 async function loadDevToolsView() {
-  const tries = ['streetui', '@streetui/devtools'];
+  const tries = [
+    'streetui',
+    '@streetui/devtools',
+    path.join(repo, 'packages', 'devtools', 'dist', 'index.js'),
+    path.join(repo, 'packages', 'streetui', 'dist', 'index.js'),
+  ];
   let lastErr = null;
   for (const spec of tries) {
     try {
