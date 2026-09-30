@@ -55,6 +55,13 @@ async function detectPlaywright() {
 }
 function resolveAxeSource() {
   // axe-core ships a single UMD file we can inject via addScriptTag({ content }).
+  const extraPaths = [
+    path.join(repo, 'benchmarks', 'node_modules', 'axe-core', 'axe.min.js'),
+    path.join(repo, 'node_modules', 'axe-core', 'axe.min.js'),
+  ];
+  for (const p of extraPaths) {
+    try { if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8'); } catch { /* try next */ }
+  }
   try { return fs.readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8'); }
   catch { try { return fs.readFileSync(require.resolve('axe-core'), 'utf8'); } catch { return null; } }
 }
