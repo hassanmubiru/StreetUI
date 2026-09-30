@@ -17,35 +17,35 @@
   },
   "scenarios": {
     "initialMountUsers10k": {
-      "ms": 217,
+      "ms": 307.6,
       "domNodeCount": 80031
     },
     "reactiveSearch": {
       "narrow": {
-        "ms": 207,
+        "ms": 271.69999998807907,
         "domMutations": 10004
       },
       "clear": {
-        "ms": 200.19999998807907,
+        "ms": 347.7999999821186,
         "domMutations": 10004
       }
     },
     "reverse": {
-      "ms": 56.80000001192093,
+      "ms": 86.2000000178814,
       "domMutations": 20002
     },
     "fineGrainedToggle1of1000": {
-      "ms": 0.09999999403953552,
+      "ms": 0.19999998807907104,
       "domMutations": 0
     },
     "routerNavigationMs": [
-      29.2,
-      433.2,
-      49.9,
-      33.5
+      31.9,
+      783.4,
+      99.5,
+      34.5
     ],
     "hydrateUsers10k": {
-      "ms": 169.1,
+      "ms": 254.5,
       "nodesBefore": 80029,
       "nodesAfter": 80029,
       "addedDuringHydration": 0,
@@ -57,30 +57,30 @@
         "frame120Ms": 8.33
       },
       "bigListReorder": {
-        "frames": 3,
-        "maxFrameMs": 441,
-        "longFrames60": 3,
-        "longFrames120": 3
+        "frames": 2,
+        "maxFrameMs": 821.6,
+        "longFrames60": 1,
+        "longFrames120": 2
       }
     },
     "memory": {
       "available": true,
-      "usedJSHeapBefore": 225000000,
-      "usedJSHeapAfter": 225000000,
+      "usedJSHeapBefore": 239000000,
+      "usedJSHeapAfter": 239000000,
       "perCycle": [
-        225000000,
-        225000000,
-        225000000,
-        225000000,
-        225000000,
-        225000000
+        239000000,
+        239000000,
+        239000000,
+        239000000,
+        239000000,
+        239000000
       ],
       "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
     },
     "longTasks": {
-      "count": 11,
-      "totalMs": 3428
+      "count": 12,
+      "totalMs": 4956
     }
   },
-  "timestamp": "2026-09-30T04:11:21.685Z"
+  "timestamp": "2026-09-30T21:08:14.109Z"
 }
