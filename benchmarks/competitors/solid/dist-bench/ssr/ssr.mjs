@@ -2652,6 +2652,24 @@ function renderToString(code, options = {}) {
   if (scripts.length) html = injectScripts(html, scripts, options.nonce);
   return html;
 }
+function ssr(t, ...nodes) {
+  if (nodes.length) {
+    let result = "";
+    for (let i = 0; i < nodes.length; i++) {
+      result += t[i];
+      const node = nodes[i];
+      if (node !== void 0) result += resolveSSRNode(node);
+    }
+    t = result + t[nodes.length];
+  }
+  return {
+    t
+  };
+}
+function ssrHydrationKey() {
+  const hk = getHydrationKey();
+  return hk ? ` data-hk=${hk}` : "";
+}
 function escape(s, attr) {
   const t = typeof s;
   if (t !== "string") {
@@ -2714,6 +2732,10 @@ function resolveSSRNode(node, top) {
   if (t === "function") return resolveSSRNode(node());
   return String(node);
 }
+function getHydrationKey() {
+  const hydrate = sharedConfig.context;
+  return hydrate && !hydrate.noHydrate && sharedConfig.getNextContextId();
+}
 function injectAssets(assets, html) {
   if (!assets || !assets.length) return html;
   let out = "";
@@ -2727,11 +2749,6 @@ function injectScripts(html, scripts, nonce) {
     return html.slice(0, index) + tag + html.slice(index);
   }
   return html + tag;
-}
-function notSup() {
-  throw new Error(
-    "Client-only API called on the server side. Run client-only code in onMount, or conditionally run client-only component with <Show>."
-  );
 }
 const now = () => globalThis.performance.now();
 const round = (x) => Math.round(x * 1e4) / 1e4;
@@ -2759,23 +2776,15 @@ async function measure(fn, { warmup = 5, iterations = 25, setup } = {}) {
   };
 }
 const N_BIG = 1e4;
-var _tmpl$ = /* @__PURE__ */ notSup(), _tmpl$2 = /* @__PURE__ */ notSup();
+var _tmpl$ = ["<section", ' class="main">', "</section>"], _tmpl$2 = ["<div", ' class="row">', "</div>"];
 function FlatList(props) {
   const rows = Array.from({
     length: props.n
   }, (_, i) => i);
-  return (() => {
-    var _el$ = _tmpl$();
-    notSup(_el$, createComponent(Index, {
-      each: rows,
-      children: (i) => (() => {
-        var _el$2 = _tmpl$2();
-        notSup(_el$2, () => `node ${i()}`);
-        return _el$2;
-      })()
-    }));
-    return _el$;
-  })();
+  return ssr(_tmpl$, ssrHydrationKey(), escape(createComponent(Index, {
+    each: rows,
+    children: (i) => ssr(_tmpl$2, ssrHydrationKey(), `node ${escape(i())}`)
+  })));
 }
 function renderFlatHtml() {
   return renderToString(() => createComponent(FlatList, {
