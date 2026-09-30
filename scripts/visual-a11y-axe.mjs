@@ -91,8 +91,10 @@ if (playwright === null || axeSource === null) {
   process.stdout.write(`visual-a11y-axe: BLOCKED — wrote ${outPath} (no fabricated pass).\n`);
   process.exit(0);
 }
-let chromiumBin = null;
-try { chromiumBin = playwright.chromium.executablePath(); } catch { /* older API */ }
+let chromiumBin = process.env.CHROMIUM_PATH || process.env.CHROME_PATH || null;
+if (!chromiumBin) {
+  try { chromiumBin = playwright.chromium.executablePath(); } catch { /* older API */ }
+}
 if (chromiumBin === null || !fs.existsSync(chromiumBin)) {
   write({
     schema: 'streetui-2.4-visual-a11y/v1', layer: 'VISUAL', status: 'BLOCKED',
@@ -127,7 +129,7 @@ try {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const { port } = server.address();
 
-  browser = await playwright.chromium.launch();
+  browser = await playwright.chromium.launch({ executablePath: chromiumBin });
   const version = browser.version?.() ?? 'unknown';
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
