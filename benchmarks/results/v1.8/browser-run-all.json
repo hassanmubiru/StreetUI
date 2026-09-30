@@ -2,7 +2,7 @@
   "schema": "streetui-browser-run-all/v1.8",
   "status": "AVAILABLE",
   "reason": null,
-  "detectedAt": "2026-09-29T19:10:09.584Z",
+  "detectedAt": "2026-09-30T04:12:54.883Z",
   "environment": {
     "runtime": "node v24.18.0",
     "playwright": true,

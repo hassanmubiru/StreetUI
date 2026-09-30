@@ -17,35 +17,35 @@
   },
   "scenarios": {
     "initialMountUsers10k": {
-      "ms": 306.1,
+      "ms": 217,
       "domNodeCount": 80031
     },
     "reactiveSearch": {
       "narrow": {
-        "ms": 248.90000000596046,
+        "ms": 207,
         "domMutations": 10004
       },
       "clear": {
-        "ms": 238.30000001192093,
+        "ms": 200.19999998807907,
         "domMutations": 10004
       }
     },
     "reverse": {
-      "ms": 62.19999998807907,
+      "ms": 56.80000001192093,
       "domMutations": 20002
     },
     "fineGrainedToggle1of1000": {
-      "ms": 0,
+      "ms": 0.09999999403953552,
       "domMutations": 0
     },
     "routerNavigationMs": [
-      30.2,
-      436.9,
-      46.7,
-      32.5
+      29.2,
+      433.2,
+      49.9,
+      33.5
     ],
     "hydrateUsers10k": {
-      "ms": 156.4,
+      "ms": 169.1,
       "nodesBefore": 80029,
       "nodesAfter": 80029,
       "addedDuringHydration": 0,
@@ -57,30 +57,30 @@
         "frame120Ms": 8.33
       },
       "bigListReorder": {
-        "frames": 2,
-        "maxFrameMs": 596.1,
-        "longFrames60": 2,
-        "longFrames120": 2
+        "frames": 3,
+        "maxFrameMs": 441,
+        "longFrames60": 3,
+        "longFrames120": 3
       }
     },
     "memory": {
       "available": true,
-      "usedJSHeapBefore": 239000000,
-      "usedJSHeapAfter": 239000000,
+      "usedJSHeapBefore": 225000000,
+      "usedJSHeapAfter": 225000000,
       "perCycle": [
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000
+        225000000,
+        225000000,
+        225000000,
+        225000000,
+        225000000,
+        225000000
       ],
       "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
     },
     "longTasks": {
-      "count": 10,
-      "totalMs": 3679
+      "count": 11,
+      "totalMs": 3428
     }
   },
-  "timestamp": "2026-09-29T19:08:43.690Z"
+  "timestamp": "2026-09-30T04:11:21.685Z"
 }

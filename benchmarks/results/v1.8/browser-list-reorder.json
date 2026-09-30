@@ -1,7 +1,7 @@
 {
   "schema": "browser-list-reorder/v1.4",
   "status": "OK",
-  "generatedAt": "2026-09-29T19:08:46.038Z",
+  "generatedAt": "2026-09-30T04:11:23.713Z",
   "environment": {
     "engine": "Chromium",
     "chromiumPath": "/usr/bin/google-chrome",
@@ -14,78 +14,78 @@
       "operations": [
         {
           "op": "create10k",
-          "durationMs": 179.5,
+          "durationMs": 184.4,
           "domMutations": 0,
           "nodeCount": 20003,
           "longTasksDuringOp": 2
         },
         {
           "op": "append 1k",
-          "durationMs": 102.7,
+          "durationMs": 92.7,
           "domMutations": 0,
           "nodeCount": 22003,
           "longTasksDuringOp": 1
         },
         {
           "op": "prepend 1k",
-          "durationMs": 234.5,
+          "durationMs": 217,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "insertMiddle 1k",
-          "durationMs": 116.1,
+          "durationMs": 115.8,
           "domMutations": 0,
           "nodeCount": 26003,
           "longTasksDuringOp": 1
         },
         {
           "op": "removeScattered 1k",
-          "durationMs": 215.8,
+          "durationMs": 199.6,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "swapEnds",
-          "durationMs": 33.1,
+          "durationMs": 32.9,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 0
         },
         {
           "op": "reverse",
-          "durationMs": 183,
+          "durationMs": 199.6,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "shuffle",
-          "durationMs": 232.7,
+          "durationMs": 216.5,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         },
         {
           "op": "updateEvery10th",
-          "durationMs": 103.9,
+          "durationMs": 103.5,
           "domMutations": 0,
           "nodeCount": 24003,
           "longTasksDuringOp": 1
         }
       ],
       "longTaskDurationsMs": [
-        62,
+        67,
         117,
-        86,
-        229,
-        110,
-        209,
-        174,
-        221,
-        83
+        79,
+        215,
+        112,
+        190,
+        187,
+        207,
+        89
       ],
       "framePacing": {
         "frames": 18,
