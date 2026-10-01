@@ -185,5 +185,35 @@ export const DOC_SECTIONS: readonly DocSection[] = [
       'errorBoundary provides an onError hook so a failing subtree degrades to a fallback instead of tearing down the page.',
     ],
   },
+  {
+    slug: 'overlays',
+    title: 'Overlays',
+    group: 'UI',
+    summary: 'Dialog, popover, tooltip, dropdown and toast via portals.',
+    paragraphs: [
+      'Overlays render through a portal node that relocates to document.body, stays inline during SSR and re-locates on hydration. Visibility is app-owned state — a plain boolean signal — so opening an overlay is set(true).',
+      'Each overlay carries a descriptor (modal, menu, takesFocus, closeOnEscape, restoreFocus) that drives focus management and keyboard behavior.',
+    ],
+  },
+  {
+    slug: 'accessibility',
+    title: 'Accessibility',
+    group: 'UI',
+    summary: 'Deterministic a11y ids, roles, and focus utilities.',
+    paragraphs: [
+      'StreetUI assigns deterministic ids (resetIdCounter in tests) so labels, controls and ARIA relationships line up between server and client. Overlays wire focus entry and restoration; the focus utilities expose the trap/restore seams.',
+      'Accessibility is validated in four separate layers — structural, behavioral, visual and assistive-technology — and never collapsed into a single score.',
+    ],
+  },
+  {
+    slug: 'transitions',
+    title: 'Transitions',
+    group: 'UI',
+    summary: 'CSS-class transition engine with correct leave-teardown.',
+    paragraphs: [
+      'Transitions attach enter/leave CSS classes around mount and unmount. Leave is deferred until transitionend (or a fallback timeout) and then the element is removed, disposed, forgotten and detached — in that order — so nothing leaks.',
+      'Transitions are keyed by identity, so a reordered list animates moves rather than destroying and recreating nodes.',
+    ],
+  },
   // __MORE_SECTIONS__
 ];
