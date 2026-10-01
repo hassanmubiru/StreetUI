@@ -5,6 +5,35 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## Unreleased — 2.6 Production Website Validation (2026-10-01)
+
+**Validation milestone — no framework code change.** The published `streetui` package's
+runtime, public API (188 exports), and SSR output are **unchanged and byte-identical to
+the v1.6 golden**; version-pinning tests remain at `2.5.0`. All 2.6 work was at the
+example-website and documentation level. Whether to tag a `2.6.0` milestone is deferred to
+the authoritative environment pending its browser-performance and Orca+AT-SPI accessibility
+runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
+
+### Added / changed (website + docs only)
+
+- Per-route SEO/document metadata on `examples/streetui-website/` via the existing
+  `head()` primitive — one complete head layer per route (finding **F-7**).
+- Corrected a prose reference to a non-existent bare `hydrate()` export in the website's
+  Hydration docs.
+- Expanded website regression + SEO test suites (58/58).
+
+### Verified (sandbox, this environment)
+
+- Build 30/30, typecheck 48/48, test 48/48; website 58/58.
+- SSR byte-identity PASS — all 5 routes exact and equal to the v1.6 SHA-256 golden.
+- Client bundle leak-check CLEAN; clean-room packed-artifact execution PASS (ESM + CJS).
+
+### BLOCKED (sandbox; owned by the authoritative environment, not faked)
+
+- Website Core Web Vitals (FCP/LCP/CLS/TTI, Chrome 154 / FF 155).
+- Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
+- Registry-backed `npm install` / `npm publish`.
+
 ## 2.5.0 — Dogfooding: Official Website (2026-10-01)
 
 **Dogfooding milestone** — the official StreetUI website (`examples/streetui-website/`)

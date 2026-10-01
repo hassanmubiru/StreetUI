@@ -1,0 +1,17 @@
+// vitest.config.ts
+import { defineConfig } from "file:///sessions/sweet-gallant-mendel/mnt/StreetUI/node_modules/.pnpm/vitest@2.1.4_@types+node@26.6.2_happy-dom@20.14.5/node_modules/vitest/dist/config.js";
+var vitest_config_default = defineConfig({
+  test: {
+    environment: "happy-dom",
+    include: ["src/**/*.test.ts"],
+    environmentOptions: {
+      happyDOM: {
+        settings: { navigation: { disableMainFrameNavigation: true } }
+      }
+    }
+  }
+});
+export {
+  vitest_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZXN0LmNvbmZpZy50cyJdLAogICJzb3VyY2VzQ29udGVudCI6IFsiY29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2Rpcm5hbWUgPSBcIi9zZXNzaW9ucy9zd2VldC1nYWxsYW50LW1lbmRlbC9tbnQvU3RyZWV0VUkvZXhhbXBsZXMvc3RyZWV0dWktd2Vic2l0ZVwiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9maWxlbmFtZSA9IFwiL3Nlc3Npb25zL3N3ZWV0LWdhbGxhbnQtbWVuZGVsL21udC9TdHJlZXRVSS9leGFtcGxlcy9zdHJlZXR1aS13ZWJzaXRlL3ZpdGVzdC5jb25maWcudHNcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfaW1wb3J0X21ldGFfdXJsID0gXCJmaWxlOi8vL3Nlc3Npb25zL3N3ZWV0LWdhbGxhbnQtbWVuZGVsL21udC9TdHJlZXRVSS9leGFtcGxlcy9zdHJlZXR1aS13ZWJzaXRlL3ZpdGVzdC5jb25maWcudHNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlc3QvY29uZmlnJztcblxuZXhwb3J0IGRlZmF1bHQgZGVmaW5lQ29uZmlnKHtcbiAgdGVzdDoge1xuICAgIGVudmlyb25tZW50OiAnaGFwcHktZG9tJyxcbiAgICBpbmNsdWRlOiBbJ3NyYy8qKi8qLnRlc3QudHMnXSxcbiAgICBlbnZpcm9ubWVudE9wdGlvbnM6IHtcbiAgICAgIGhhcHB5RE9NOiB7XG4gICAgICAgIHNldHRpbmdzOiB7IG5hdmlnYXRpb246IHsgZGlzYWJsZU1haW5GcmFtZU5hdmlnYXRpb246IHRydWUgfSB9LFxuICAgICAgfSxcbiAgICB9LFxuICB9LFxufSk7XG4iXSwKICAibWFwcGluZ3MiOiAiO0FBQXFZLFNBQVMsb0JBQW9CO0FBRWxhLElBQU8sd0JBQVEsYUFBYTtBQUFBLEVBQzFCLE1BQU07QUFBQSxJQUNKLGFBQWE7QUFBQSxJQUNiLFNBQVMsQ0FBQyxrQkFBa0I7QUFBQSxJQUM1QixvQkFBb0I7QUFBQSxNQUNsQixVQUFVO0FBQUEsUUFDUixVQUFVLEVBQUUsWUFBWSxFQUFFLDRCQUE0QixLQUFLLEVBQUU7QUFBQSxNQUMvRDtBQUFBLElBQ0Y7QUFBQSxFQUNGO0FBQ0YsQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K

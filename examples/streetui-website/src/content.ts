@@ -381,6 +381,7 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: readonly ChangelogEntry[] = [
+  { version: '2.5.0', date: '2026', highlights: ['Official website built entirely in StreetUI', 'Per-route SEO/document metadata via head()', 'Published to npm'] },
   { version: '2.4.0', date: '2026', highlights: ['Final validation completion', 'Firefox performance baseline', 'Real AT + visual a11y harnesses'] },
   { version: '2.2.0', date: '2026', highlights: ['Interactive 12-panel DevTools', 'Accessibility regression gate', 'Stress suites'] },
   { version: '2.0.0', date: '2026', highlights: ['Application platform: head, async boundaries, mutations', 'DevTools UI panels'] },
