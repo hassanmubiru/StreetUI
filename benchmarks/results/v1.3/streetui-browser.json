@@ -17,35 +17,35 @@
   },
   "scenarios": {
     "initialMountUsers10k": {
-      "ms": 256,
+      "ms": 210.9,
       "domNodeCount": 80031
     },
     "reactiveSearch": {
       "narrow": {
-        "ms": 229.19999998807907,
+        "ms": 197.30000001192093,
         "domMutations": 10004
       },
       "clear": {
-        "ms": 260.69999998807907,
+        "ms": 213.69999998807907,
         "domMutations": 10004
       }
     },
     "reverse": {
-      "ms": 84.80000001192093,
+      "ms": 62.69999998807907,
       "domMutations": 20002
     },
     "fineGrainedToggle1of1000": {
-      "ms": 0.09999999403953552,
+      "ms": 0,
       "domMutations": 0
     },
     "routerNavigationMs": [
-      33.5,
-      533.9,
-      65.8,
-      31.1
+      28.5,
+      418.9,
+      51,
+      30
     ],
     "hydrateUsers10k": {
-      "ms": 209.6,
+      "ms": 161.5,
       "nodesBefore": 80029,
       "nodesAfter": 80029,
       "addedDuringHydration": 0,
@@ -57,30 +57,30 @@
         "frame120Ms": 8.33
       },
       "bigListReorder": {
-        "frames": 2,
-        "maxFrameMs": 522.5,
-        "longFrames60": 2,
-        "longFrames120": 2
+        "frames": 3,
+        "maxFrameMs": 435.7,
+        "longFrames60": 3,
+        "longFrames120": 3
       }
     },
     "memory": {
       "available": true,
-      "usedJSHeapBefore": 225000000,
-      "usedJSHeapAfter": 225000000,
+      "usedJSHeapBefore": 199000000,
+      "usedJSHeapAfter": 199000000,
       "perCycle": [
-        225000000,
-        225000000,
-        225000000,
-        225000000,
-        225000000,
-        225000000
+        199000000,
+        199000000,
+        199000000,
+        199000000,
+        199000000,
+        199000000
       ],
       "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
     },
     "longTasks": {
-      "count": 15,
-      "totalMs": 3956
+      "count": 10,
+      "totalMs": 3278
     }
   },
-  "timestamp": "2026-10-01T04:01:55.667Z"
+  "timestamp": "2026-10-01T14:17:50.091Z"
 }
