@@ -243,7 +243,7 @@ export const DOC_SECTIONS: readonly DocSection[] = [
     group: 'Rendering',
     summary: 'Adopt server HTML without re-creating the DOM.',
     paragraphs: [
-      'hydrate() walks the existing server DOM and attaches reactivity in place instead of rebuilding it. Deterministic ids make server and client graphs align; mismatches are reported as diagnostics rather than silently patched.',
+'Mounting with hydrate: true (mountRouter) — or hydrateGraph for a single graph — walks the existing server DOM and attaches reactivity in place instead of rebuilding it. Deterministic ids make server and client graphs align; mismatches are reported as diagnostics rather than silently patched.',
       'Static subtrees detected at compile time are serialized once and adopted wholesale, so hydration cost scales with the dynamic parts of the page.',
     ],
   },

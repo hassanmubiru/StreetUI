@@ -1,7 +1,7 @@
 {
   "schema": "streetui-2.1-leak-check/v1",
   "status": "OK",
-  "streetuiVersion": "2.1.0",
+  "streetuiVersion": "2.5.0",
   "method": "esbuild bundle+minify+treeShake, esm/es2020; substring scan of the emitted client bundle for server/CLI/testing/devtools/Node identifiers.",
   "forbiddenGroups": [
     "ssr",
@@ -12,7 +12,7 @@
   ],
   "results": {
     "minimal": {
-      "bytes": 36344,
+      "bytes": 49420,
       "leaks": {
         "ssr": [],
         "cli": [],
@@ -23,7 +23,7 @@
       "clean": true
     },
     "typical": {
-      "bytes": 65456,
+      "bytes": 78798,
       "leaks": {
         "ssr": [],
         "cli": [],
@@ -34,5 +34,5 @@
       "clean": true
     }
   },
-  "timestamp": "2026-09-28T09:37:16.354Z"
+  "timestamp": "2026-10-01T22:50:32.416Z"
 }
