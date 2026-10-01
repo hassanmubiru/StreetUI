@@ -1,4 +1,4 @@
-// packages/core/src/a11y-ids.ts
+// src/a11y-ids.ts
 var UNSAFE = /[^A-Za-z0-9_-]+/g;
 function toIdToken(base) {
   const token = base.trim().replace(UNSAFE, "-").replace(/^-+|-+$/g, "");
@@ -20,7 +20,7 @@ function a11yIds(base) {
   };
 }
 
-// packages/core/src/identity.ts
+// src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -42,7 +42,7 @@ function generateApplicationId(name) {
   return `app:${name}:${nextId()}`;
 }
 
-// packages/core/src/lifecycle.ts
+// src/lifecycle.ts
 var Lifecycle = class {
   _phase = "created";
   _hooks = /* @__PURE__ */ new Map();
@@ -100,10 +100,10 @@ var CleanupRegistry = class {
   }
 };
 
-// packages/core/src/environment.ts
+// src/environment.ts
 function detectEnvironment() {
   try {
-    if (typeof process !== "undefined" && process !== null && typeof process === "object" && process.env?.["VITEST"] === "true") {
+    if (typeof process !== "undefined" && process !== null && typeof process === "object" && (process.env?.["NODE_ENV"] === "test" || process.env?.["VITEST"] === "true")) {
       return "test";
     }
   } catch {
@@ -152,7 +152,7 @@ var Environment = class {
 };
 var environment = new Environment();
 
-// packages/core/src/diagnostics.ts
+// src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -202,7 +202,7 @@ function formatDiagnostic(d) {
   return `[${d.severity.toUpperCase()}] ${d.code}: ${d.message}${loc}`;
 }
 
-// packages/core/src/application.ts
+// src/application.ts
 var Application = class {
   id;
   name;
@@ -246,7 +246,7 @@ function createApplication(options) {
   return new Application(options);
 }
 
-// packages/core/src/node.ts
+// src/node.ts
 var BaseNode = class {
   id;
   type;
@@ -258,7 +258,7 @@ var BaseNode = class {
   }
 };
 
-// packages/core/src/observability.ts
+// src/observability.ts
 function formatDiagnosticContext(context) {
   if (context === void 0) return "";
   const parts = [];
