@@ -143,6 +143,47 @@ export const DOC_SECTIONS: readonly DocSection[] = [
       ].join('\n'),
     },
   },
+  {
+    slug: 'data',
+    title: 'Data',
+    group: 'Routing & Data',
+    summary: 'resource() for reads, mutation() for writes.',
+    paragraphs: [
+      'resource(loader) models asynchronous reads: it exposes loading, error and data as signals and refetches on demand. mutation() models writes and invalidates the resources it affects by explicit local refetch — there is no hidden global cache.',
+      'Both are plain reactive primitives, so the same when()/listOf() wiring that renders synchronous state renders async state too.',
+    ],
+  },
+  {
+    slug: 'forms',
+    title: 'Forms',
+    group: 'Routing & Data',
+    summary: 'Controlled inputs, two-way bind, and validators.',
+    paragraphs: [
+      'form(id, build, { onSubmit }) wraps controlled inputs. An input can be fully controlled with value + onInput, or two-way bound with bind: aSignal. Validation state is just derived() over the field signals.',
+      'Because validity is a signal, you render errors and enable/disable submit with the same when() primitive used everywhere else.',
+    ],
+    code: {
+      label: 'Bound input',
+      code: [
+        "import { signal, derived } from 'streetui';",
+        '',
+        "const email = signal('');",
+        "const valid = derived(() => /.+@.+\\..+/.test(email.get()));",
+        '// in a form builder:',
+        "// form.input({ id: 'email', type: 'email', bind: email });",
+        "// form.when(derived(() => !valid.get()), (c) => c.text('Invalid email', { id: 'err' }));",
+      ].join('\n'),
+    },
+  },
+  {
+    slug: 'async-ui',
+    title: 'Async UI',
+    group: 'Routing & Data',
+    summary: 'asyncBoundary and errorBoundary as sugar over resource + when.',
+    paragraphs: [
+      'asyncBoundary renders loading, error and success branches from a resource. It is sugar over resource + when() with three exhaustive branches — not a second async system.',
+      'errorBoundary provides an onError hook so a failing subtree degrades to a fallback instead of tearing down the page.',
+    ],
+  },
+  // __MORE_SECTIONS__
 ];
-
-// Remaining sections are appended below (see content.extra.ts merge note).
