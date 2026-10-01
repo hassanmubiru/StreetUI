@@ -119,11 +119,147 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
     },
   };
 
-  // __MORE_ROUTES__
+  const api: RouteDefinition = {
+    path: '/api',
+    builder: (page) =>
+      pageLayout(page, { id: 'api', title: 'API Reference', lead: 'The public surface, grouped. Everything imports from streetui.' }, (c) => {
+        for (const group of API_GROUPS) {
+          c.container(`api-group-${slug(group.title)}`, (g) => {
+            g.heading(group.title, { level: 2, id: `api-group-${slug(group.title)}-title` });
+            for (const name of group.exports) {
+              g.text(name, { id: `api-export-${slug(name)}` });
+            }
+          }, { id: `api-group-${slug(group.title)}` });
+        }
+      }),
+  };
+
+  const examples: RouteDefinition = {
+    path: '/examples',
+    builder: (page, ctx: RouteContext) => {
+      // Seed the two-way filter from ?q= on first render for this route.
+      const q = ctx.query.get('q');
+      if (q !== null && q !== deps.examplesFilter.get()) {
+        deps.examplesFilter.set(q);
+      }
+      const filtered = derived<ExampleEntry[]>(() => {
+        const needle = deps.examplesFilter.get().trim().toLowerCase();
+        if (needle === '') return [...EXAMPLES];
+        return EXAMPLES.filter((e) =>
+          `${e.name} ${e.tag} ${e.blurb}`.toLowerCase().includes(needle),
+        );
+      });
+      pageLayout(page, { id: 'examples', title: 'Examples', lead: 'Small apps, each exercising one framework feature.' }, (c) => {
+        c.input({ id: 'examples-filter', type: 'search', placeholder: 'Filter examples…', bind: deps.examplesFilter });
+        c.listOf('examples-list', filtered, (item, _i, row) => {
+          row.heading(item.name, { level: 2, id: `example-${item.id}-name` });
+          row.text(`${item.tag} — ${item.blurb}`, { id: `example-${item.id}-blurb` });
+        }, { id: 'examples-list' });
+        c.when(
+          derived(() => filtered.get().length === 0),
+          (empty) => { empty.text('No examples match that filter.', { id: 'examples-empty' }); },
+        );
+      });
+    },
+  };
+
+  const playground: RouteDefinition = {
+    path: '/playground',
+    builder: (page) =>
+      pageLayout(page, { id: 'playground', title: 'Playground', lead: 'Live demos built in StreetUI itself — real signals, real event handlers.' }, (c) => {
+        buildPlayground(c, deps.playground);
+      }),
+  };
+
+  const benchmarks: RouteDefinition = {
+    path: '/benchmarks',
+    builder: (page) =>
+      pageLayout(page, { id: 'benchmarks', title: 'Benchmarks', lead: 'Methodology, not marketing.' }, (c) => {
+        c.text('Performance numbers are measured in the authoritative benchmark environment (real Chrome and Firefox builds, a reachable registry, controlled hardware). This page documents how those measurements are produced; it never prints a number that was not measured there.', { id: 'benchmarks-intro' });
+        c.heading('What is measured', { level: 2, id: 'benchmarks-what' });
+        c.text('Initial render, keyed-list operations (append, prepend, reorder, update, reverse), SSR serialize cost, hydration cost, and client bundle size — each against a committed, reproducible harness.', { id: 'benchmarks-what-text' });
+        c.heading('What is not claimed', { level: 2, id: 'benchmarks-not' });
+        c.text('No first/second/third ranking against other frameworks is printed here, and no third party’s published figures are reused. Results come only from the measured artifacts of the authoritative run.', { id: 'benchmarks-not-text' });
+        c.link('See the changelog', { href: '/changelog', id: 'benchmarks-changelog' });
+      }),
+  };
+
+  const changelog: RouteDefinition = {
+    path: '/changelog',
+    builder: (page) =>
+      pageLayout(page, { id: 'changelog', title: 'Changelog', lead: 'Notable releases.' }, (c) => {
+        for (const entry of CHANGELOG) {
+          c.container(`changelog-${slug(entry.version)}`, (e) => {
+            e.heading(`v${entry.version}`, { level: 2, id: `changelog-${slug(entry.version)}-title` });
+            e.text(entry.date, { id: `changelog-${slug(entry.version)}-date` });
+            for (let i = 0; i < entry.highlights.length; i++) {
+              e.text(entry.highlights[i]!, { id: `changelog-${slug(entry.version)}-h-${i}` });
+            }
+          }, { id: `changelog-${slug(entry.version)}` });
+        }
+      }),
+  };
+
+  const blogIndex: RouteDefinition = {
+    path: '/blog',
+    builder: (page) =>
+      pageLayout(page, { id: 'blog', title: 'Blog', lead: 'Notes from building the framework.' }, (c) => {
+        for (const post of BLOG_POSTS) {
+          c.container(`blog-${post.slug}`, (p) => {
+            p.link(post.title, { href: `/blog/${post.slug}`, id: `blog-link-${post.slug}` });
+            p.text(post.date, { id: `blog-date-${post.slug}` });
+          }, { id: `blog-${post.slug}` });
+        }
+      }),
+  };
+
+  const blogPost: RouteDefinition = {
+    path: '/blog/:slug',
+    builder: (page, ctx: RouteContext) => {
+      const slugParam = ctx.params.slug ?? '';
+      const post = findPost(slugParam);
+      pageLayout(page, {
+        id: 'blogpost',
+        title: post?.title ?? 'Unknown post',
+        lead: post?.date,
+      }, (c) => {
+        breadcrumb(c, [
+          { label: 'Home', href: '/' },
+          { label: 'Blog', href: '/blog' },
+          { label: post?.title ?? slugParam },
+        ], 'blogpost-crumbs');
+        if (post !== undefined) {
+          post.body.forEach((para, i) => c.text(para, { id: `blogpost-p-${i}` }));
+        } else {
+          c.text(`No blog post named "${slugParam}".`, { id: 'blogpost-missing' });
+        }
+        c.link('Back to blog', { href: '/blog', id: 'blogpost-back' });
+      });
+    },
+  };
+
+  const about: RouteDefinition = {
+    path: '/about',
+    builder: (page) =>
+      pageLayout(page, { id: 'about', title: 'About', lead: 'StreetUI is MIT-licensed and open source.' }, (c) => {
+        c.text('StreetUI is a TypeScript-first UI framework. This website is itself a StreetUI application, used to dogfood the framework end to end.', { id: 'about-text' });
+        c.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'about-github' });
+      }),
+  };
+
+  const notFound: RouteDefinition = {
+    path: '*',
+    builder: (page, ctx: RouteContext) =>
+      pageLayout(page, { id: 'notfound', title: 'Page not found', lead: 'That route does not exist.' }, (c) => {
+        c.text(`No page at ${ctx.path}.`, { id: 'notfound-path' });
+        c.link('Go home', { href: '/', id: 'notfound-home' });
+      }),
+  };
 
   return [
     home, gettingStarted, docsIndex, docsSection,
-    // __ROUTE_LIST__
+    api, examples, playground, benchmarks, changelog,
+    blogIndex, blogPost, about, notFound,
   ];
 }
 
