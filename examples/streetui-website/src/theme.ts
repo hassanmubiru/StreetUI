@@ -57,13 +57,13 @@ export interface ThemeController {
   /** The user's choice: light | dark | system. */
   readonly choice: Signal<ThemeChoice>;
   /** The resolved concrete theme after applying `system`. */
-  readonly resolved: Signal<ResolvedTheme>;
+  readonly resolved: ReadonlySignal<ResolvedTheme>;
   /** Set an explicit choice (persisted). */
   set(choice: ThemeChoice): void;
   /** Advance light → dark → system → light (for a single toggle control). */
   cycle(): void;
   /** Human label for the current choice (bind to the toggle button). */
-  readonly label: Signal<string>;
+  readonly label: ReadonlySignal<string>;
   /** Stop applying the theme to the DOM (disposes the effect). */
   dispose(): void;
 }
