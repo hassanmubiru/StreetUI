@@ -18,7 +18,7 @@ import type { CodeSample } from './content.js';
  */
 export function pageLayout(
   page: PageDSL,
-  opts: { id: string; title: string; lead?: string },
+  opts: { id: string; title: string; lead?: string | undefined },
   body: (content: ContainerDSL) => void,
 ): void {
   page.section(opts.id, (s) => {
