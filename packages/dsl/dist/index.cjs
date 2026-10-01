@@ -17,7 +17,7 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/index.ts
+// packages/dsl/src/index.ts
 var index_exports = {};
 __export(index_exports, {
   AppBuilder: () => AppBuilder,
@@ -39,7 +39,7 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 
-// src/transition.ts
+// packages/dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -80,7 +80,7 @@ function isTransitionConfig(value) {
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
 
-// src/head.ts
+// packages/dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -195,7 +195,7 @@ function isHeadContribution(value) {
   return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
 
-// src/builders.ts
+// packages/dsl/src/builders.ts
 var import_state = require("@streetui/state");
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
@@ -419,6 +419,16 @@ var ContentBuilderBase = class {
       this._graph.registerHandler(handlerKey, options.onClick);
       node.addEvent({ type: "click", handlerKey });
     }
+  }
+  code(source, options = {}) {
+    const props = {};
+    if (options.language !== void 0) props["data-language"] = options.language;
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("code", { parent: this._node, props });
+    const resolved = bindValue(this._graph, node, "text", source);
+    node.setProp("text", resolved);
   }
 };
 var ContainerBuilderBase = class extends ContentBuilderBase {
@@ -809,7 +819,7 @@ var AppBuilder = class {
   }
 };
 
-// src/component.ts
+// packages/dsl/src/component.ts
 function component(setup, options = {}) {
   return {
     __streetui_component: true,
@@ -821,7 +831,7 @@ function isComponentDefinition(value) {
   return value !== null && typeof value === "object" && value.__streetui_component === true;
 }
 
-// src/dsl.ts
+// packages/dsl/src/dsl.ts
 var import_graph = require("@streetui/graph");
 var StreetApp = class {
   _graph;
@@ -852,23 +862,4 @@ var streetui = {
     return new StreetApp(options);
   }
 };
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  AppBuilder,
-  ContainerBuilderImpl,
-  FormBuilderImpl,
-  ListBuilderImpl,
-  PageBuilderImpl,
-  SectionBuilderImpl,
-  StreetApp,
-  component,
-  isComponentDefinition,
-  isHeadContribution,
-  isTransitionConfig,
-  reactiveListItemKey,
-  reactiveListItemSignature,
-  resolveHead,
-  resolveTransition,
-  streetui
-});
 //# sourceMappingURL=index.cjs.map

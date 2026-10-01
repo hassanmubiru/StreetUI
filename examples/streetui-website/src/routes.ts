@@ -35,6 +35,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
         id: 'home',
         title: 'Build UIs from a semantic graph',
         lead: 'A TypeScript-first UI framework with its own reactivity and a keyed real-DOM reconciler — no virtual DOM.',
+        path: '/',
       }, (c) => {
         c.link('Get started', { href: '/getting-started', id: 'home-start' });
         c.link('Read the docs', { href: '/docs', id: 'home-docs' });
@@ -51,7 +52,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const gettingStarted: RouteDefinition = {
     path: '/getting-started',
     builder: (page) =>
-      pageLayout(page, { id: 'start', title: 'Getting Started', lead: 'From install to a mounted app in four steps.' }, (c) => {
+      pageLayout(page, { id: 'start', title: 'Getting Started', lead: 'From install to a mounted app in four steps.', path: '/getting-started' }, (c) => {
         codeExample(c, { label: '1. Install', code: 'npm install streetui' }, 'start-install');
         codeExample(c, {
           label: '2. Define an app',
@@ -77,7 +78,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const docsIndex: RouteDefinition = {
     path: '/docs',
     builder: (page) =>
-      pageLayout(page, { id: 'docs', title: 'Documentation', lead: 'Eighteen sections across the framework.' }, (c) => {
+      pageLayout(page, { id: 'docs', title: 'Documentation', lead: 'Eighteen sections across the framework.', path: '/docs' }, (c) => {
         for (const group of DOC_GROUPS) {
           c.container(`docs-group-${slug(group)}`, (g) => {
             g.heading(group, { level: 2, id: `docs-group-${slug(group)}-title` });
@@ -98,6 +99,8 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
         id: 'docsection',
         title: doc?.title ?? 'Unknown section',
         lead: doc?.summary,
+        path: ctx.path,
+        robots: doc === undefined ? 'noindex' : undefined,
       }, (c) => {
         breadcrumb(c, [
           { label: 'Home', href: '/' },
@@ -122,7 +125,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const api: RouteDefinition = {
     path: '/api',
     builder: (page) =>
-      pageLayout(page, { id: 'api', title: 'API Reference', lead: 'The public surface, grouped. Everything imports from streetui.' }, (c) => {
+      pageLayout(page, { id: 'api', title: 'API Reference', lead: 'The public surface, grouped. Everything imports from streetui.', path: '/api' }, (c) => {
         for (const group of API_GROUPS) {
           c.container(`api-group-${slug(group.title)}`, (g) => {
             g.heading(group.title, { level: 2, id: `api-group-${slug(group.title)}-title` });
@@ -149,7 +152,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
           `${e.name} ${e.tag} ${e.blurb}`.toLowerCase().includes(needle),
         );
       });
-      pageLayout(page, { id: 'examples', title: 'Examples', lead: 'Small apps, each exercising one framework feature.' }, (c) => {
+      pageLayout(page, { id: 'examples', title: 'Examples', lead: 'Small apps, each exercising one framework feature.', path: '/examples' }, (c) => {
         c.input({ id: 'examples-filter', type: 'search', placeholder: 'Filter examples…', bind: deps.examplesFilter });
         c.listOf('examples-list', filtered, (item, _i, row) => {
           row.heading(item.name, { level: 2, id: `example-${item.id}-name` });
@@ -166,7 +169,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const playground: RouteDefinition = {
     path: '/playground',
     builder: (page) =>
-      pageLayout(page, { id: 'playground', title: 'Playground', lead: 'Live demos built in StreetUI itself — real signals, real event handlers.' }, (c) => {
+      pageLayout(page, { id: 'playground', title: 'Playground', lead: 'Live demos built in StreetUI itself — real signals, real event handlers.', path: '/playground' }, (c) => {
         buildPlayground(c, deps.playground);
       }),
   };
@@ -174,7 +177,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const benchmarks: RouteDefinition = {
     path: '/benchmarks',
     builder: (page) =>
-      pageLayout(page, { id: 'benchmarks', title: 'Benchmarks', lead: 'Methodology, not marketing.' }, (c) => {
+      pageLayout(page, { id: 'benchmarks', title: 'Benchmarks', lead: 'Methodology, not marketing.', path: '/benchmarks' }, (c) => {
         c.text('Performance numbers are measured in the authoritative benchmark environment (real Chrome and Firefox builds, a reachable registry, controlled hardware). This page documents how those measurements are produced; it never prints a number that was not measured there.', { id: 'benchmarks-intro' });
         c.heading('What is measured', { level: 2, id: 'benchmarks-what' });
         c.text('Initial render, keyed-list operations (append, prepend, reorder, update, reverse), SSR serialize cost, hydration cost, and client bundle size — each against a committed, reproducible harness.', { id: 'benchmarks-what-text' });
@@ -187,7 +190,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const changelog: RouteDefinition = {
     path: '/changelog',
     builder: (page) =>
-      pageLayout(page, { id: 'changelog', title: 'Changelog', lead: 'Notable releases.' }, (c) => {
+      pageLayout(page, { id: 'changelog', title: 'Changelog', lead: 'Notable releases.', path: '/changelog' }, (c) => {
         for (const entry of CHANGELOG) {
           c.container(`changelog-${slug(entry.version)}`, (e) => {
             e.heading(`v${entry.version}`, { level: 2, id: `changelog-${slug(entry.version)}-title` });
@@ -203,7 +206,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const blogIndex: RouteDefinition = {
     path: '/blog',
     builder: (page) =>
-      pageLayout(page, { id: 'blog', title: 'Blog', lead: 'Notes from building the framework.' }, (c) => {
+      pageLayout(page, { id: 'blog', title: 'Blog', lead: 'Notes from building the framework.', path: '/blog' }, (c) => {
         for (const post of BLOG_POSTS) {
           c.container(`blog-${post.slug}`, (p) => {
             p.link(post.title, { href: `/blog/${post.slug}`, id: `blog-link-${post.slug}` });
@@ -222,6 +225,9 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
         id: 'blogpost',
         title: post?.title ?? 'Unknown post',
         lead: post?.date,
+        description: post?.body[0],
+        path: ctx.path,
+        robots: post === undefined ? 'noindex' : undefined,
       }, (c) => {
         breadcrumb(c, [
           { label: 'Home', href: '/' },
@@ -241,7 +247,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const about: RouteDefinition = {
     path: '/about',
     builder: (page) =>
-      pageLayout(page, { id: 'about', title: 'About', lead: 'StreetUI is MIT-licensed and open source.' }, (c) => {
+      pageLayout(page, { id: 'about', title: 'About', lead: 'StreetUI is MIT-licensed and open source.', path: '/about' }, (c) => {
         c.text('StreetUI is a TypeScript-first UI framework. This website is itself a StreetUI application, used to dogfood the framework end to end.', { id: 'about-text' });
         c.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'about-github' });
       }),
@@ -250,7 +256,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
   const notFound: RouteDefinition = {
     path: '*',
     builder: (page, ctx: RouteContext) =>
-      pageLayout(page, { id: 'notfound', title: 'Page not found', lead: 'That route does not exist.' }, (c) => {
+      pageLayout(page, { id: 'notfound', title: 'Page not found', lead: 'That route does not exist.', path: ctx.path, robots: 'noindex' }, (c) => {
         c.text(`No page at ${ctx.path}.`, { id: 'notfound-path' });
         c.link('Go home', { href: '/', id: 'notfound-home' });
       }),

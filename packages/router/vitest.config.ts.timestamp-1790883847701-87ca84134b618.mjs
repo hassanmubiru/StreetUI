@@ -1,0 +1,20 @@
+// vitest.config.ts
+import { defineConfig } from "file:///sessions/sweet-gallant-mendel/mnt/StreetUI/node_modules/.pnpm/vitest@2.1.4_@types+node@26.6.2_happy-dom@20.14.5/node_modules/vitest/dist/config.js";
+var vitest_config_default = defineConfig({
+  test: {
+    environment: "happy-dom",
+    include: ["src/**/*.test.ts"],
+    // pushState/replaceState + popstate are all we exercise; a real back()/forward()
+    // in happy-dom would otherwise try to *load* the target document over the network.
+    // Disable main-frame navigation so history moves without a resource fetch.
+    environmentOptions: {
+      happyDOM: {
+        settings: { navigation: { disableMainFrameNavigation: true } }
+      }
+    }
+  }
+});
+export {
+  vitest_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZXN0LmNvbmZpZy50cyJdLAogICJzb3VyY2VzQ29udGVudCI6IFsiY29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2Rpcm5hbWUgPSBcIi9zZXNzaW9ucy9zd2VldC1nYWxsYW50LW1lbmRlbC9tbnQvU3RyZWV0VUkvcGFja2FnZXMvcm91dGVyXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCIvc2Vzc2lvbnMvc3dlZXQtZ2FsbGFudC1tZW5kZWwvbW50L1N0cmVldFVJL3BhY2thZ2VzL3JvdXRlci92aXRlc3QuY29uZmlnLnRzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9zZXNzaW9ucy9zd2VldC1nYWxsYW50LW1lbmRlbC9tbnQvU3RyZWV0VUkvcGFja2FnZXMvcm91dGVyL3ZpdGVzdC5jb25maWcudHNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlc3QvY29uZmlnJztcblxuZXhwb3J0IGRlZmF1bHQgZGVmaW5lQ29uZmlnKHtcbiAgdGVzdDoge1xuICAgIGVudmlyb25tZW50OiAnaGFwcHktZG9tJyxcbiAgICBpbmNsdWRlOiBbJ3NyYy8qKi8qLnRlc3QudHMnXSxcbiAgICAvLyBwdXNoU3RhdGUvcmVwbGFjZVN0YXRlICsgcG9wc3RhdGUgYXJlIGFsbCB3ZSBleGVyY2lzZTsgYSByZWFsIGJhY2soKS9mb3J3YXJkKClcbiAgICAvLyBpbiBoYXBweS1kb20gd291bGQgb3RoZXJ3aXNlIHRyeSB0byAqbG9hZCogdGhlIHRhcmdldCBkb2N1bWVudCBvdmVyIHRoZSBuZXR3b3JrLlxuICAgIC8vIERpc2FibGUgbWFpbi1mcmFtZSBuYXZpZ2F0aW9uIHNvIGhpc3RvcnkgbW92ZXMgd2l0aG91dCBhIHJlc291cmNlIGZldGNoLlxuICAgIGVudmlyb25tZW50T3B0aW9uczoge1xuICAgICAgaGFwcHlET006IHtcbiAgICAgICAgc2V0dGluZ3M6IHsgbmF2aWdhdGlvbjogeyBkaXNhYmxlTWFpbkZyYW1lTmF2aWdhdGlvbjogdHJ1ZSB9IH0sXG4gICAgICB9LFxuICAgIH0sXG4gIH0sXG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFBdVcsU0FBUyxvQkFBb0I7QUFFcFksSUFBTyx3QkFBUSxhQUFhO0FBQUEsRUFDMUIsTUFBTTtBQUFBLElBQ0osYUFBYTtBQUFBLElBQ2IsU0FBUyxDQUFDLGtCQUFrQjtBQUFBO0FBQUE7QUFBQTtBQUFBLElBSTVCLG9CQUFvQjtBQUFBLE1BQ2xCLFVBQVU7QUFBQSxRQUNSLFVBQVUsRUFBRSxZQUFZLEVBQUUsNEJBQTRCLEtBQUssRUFBRTtBQUFBLE1BQy9EO0FBQUEsSUFDRjtBQUFBLEVBQ0Y7QUFDRixDQUFDOyIsCiAgIm5hbWVzIjogW10KfQo=

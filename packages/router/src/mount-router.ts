@@ -32,11 +32,23 @@ import type { RouteContext, RouteMatch } from './types.js';
 export const ROUTER_OUTLET_ID = 'streetui-router-outlet';
 
 /**
+ * Stable reconciliation KEY of the outlet container `routerOutlet` emits.
+ *
+ * Hydration adoption is keyed on node identity, so a server render that fills
+ * the outlet inline must emit its container with THIS key (and a matching id)
+ * for the client to adopt the server node instead of silently recreating the
+ * subtree. Exposed so SSR code references one symbol rather than restating the
+ * `'router-outlet'` literal — the outlet contract then has a single source of
+ * truth for both the key and (via {@link ROUTER_OUTLET_ID}) the default id.
+ */
+export const ROUTER_OUTLET_KEY = 'router-outlet';
+
+/**
  * Declare the route outlet inside a shell builder. The router replaces this
  * element's contents on every navigation.
  */
 export function routerOutlet(scope: ContainerDSL, id: string = ROUTER_OUTLET_ID): void {
-  scope.container('router-outlet', () => { /* filled by the router at runtime */ }, { id });
+  scope.container(ROUTER_OUTLET_KEY, () => { /* filled by the router at runtime */ }, { id });
 }
 
 export type ShellBuilder = (shell: PageDSL, router: Router) => void;

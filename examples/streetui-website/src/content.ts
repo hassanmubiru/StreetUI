@@ -14,8 +14,11 @@
 
 export interface CodeSample {
   readonly label: string;
-  /** Source text shown by the <CodeExample> component (escaped at render time). */
+  /** Source text rendered by the first-class `code()` primitive as a semantic
+   * `<pre><code>` block (escaped at the renderer boundary). */
   readonly code: string;
+  /** Optional language hint, emitted as `data-language` on the `<pre>`. */
+  readonly language?: string;
 }
 
 export interface DocSection {

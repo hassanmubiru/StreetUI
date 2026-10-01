@@ -17,7 +17,7 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/index.ts
+// packages/renderer/src/index.ts
 var index_exports = {};
 __export(index_exports, {
   HeadManager: () => HeadManager,
@@ -61,7 +61,7 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 
-// src/render-context.ts
+// packages/renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -73,7 +73,7 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
   };
 }
 
-// src/node-instance.ts
+// packages/renderer/src/node-instance.ts
 var import_core = require("@streetui/core");
 var NodeInstance = class {
   graphNode;
@@ -105,7 +105,7 @@ var NodeInstance = class {
   }
 };
 
-// src/attributes.ts
+// packages/renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -177,7 +177,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// src/events.ts
+// packages/renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -201,10 +201,10 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// src/mount.ts
+// packages/renderer/src/mount.ts
 var import_dom2 = require("@streetui/dom");
 
-// src/tag-map.ts
+// packages/renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -219,6 +219,11 @@ var TAG_MAP = {
   "list-item": "li",
   image: "img",
   link: "a",
+  // A `code()` node renders as a semantic `<pre>` outer element; the mount/
+  // hydrate branches add a single inner `<code>` holding the escaped source
+  // (mirrors how `text` renders `<span>` + an inner text node). One graph
+  // node → one outer element preserves positional hydration.
+  code: "pre",
   component: "div",
   slot: "div",
   fragment: "div",
@@ -239,7 +244,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// src/patch.ts
+// packages/renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -280,7 +285,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// src/reconciliation.ts
+// packages/renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -508,7 +513,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// src/transition.ts
+// packages/renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -689,7 +694,7 @@ var TransitionController = class {
   }
 };
 
-// src/head.ts
+// packages/renderer/src/head.ts
 var import_dom = require("@streetui/dom");
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
@@ -868,7 +873,7 @@ function renderHead(compiled) {
   return out;
 }
 
-// src/mount.ts
+// packages/renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -973,6 +978,23 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     dom.appendChild(parentDom, el2);
+    return instance2;
+  }
+  if (graphNode.type === "code") {
+    const source = String(graphNode.getProp("text") ?? "");
+    const pre = dom.createElement("pre");
+    const codeEl = dom.createElement("code");
+    const textNode = dom.createTextNode(source);
+    dom.appendChild(codeEl, textNode);
+    dom.appendChild(pre, codeEl);
+    applyNodeProps(ctx, graphNode, pre);
+    const instance2 = new NodeInstance(graphNode, pre);
+    ctx.instances.set(graphNode.id, instance2);
+    wireEvents(dom, graph, graphNode, pre, instance2);
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, textUpdate(dom, pre, textNode));
+    }
+    dom.appendChild(parentDom, pre);
     return instance2;
   }
   if (graphNode.type === "link") {
@@ -1277,10 +1299,10 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// src/renderer.ts
+// packages/renderer/src/renderer.ts
 var import_dom3 = require("@streetui/dom");
 
-// src/hydration-diagnostics.ts
+// packages/renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -1311,7 +1333,7 @@ function consoleHydrationDiagnosticSink(logger = console) {
   };
 }
 
-// src/hydrate.ts
+// packages/renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -1363,6 +1385,27 @@ function hydrateNode(ctx, graphNode, domNode, path) {
       wireEvents(dom, graph, graphNode, domNode, instance);
       if (graphNode.stateRefs.length !== 0) {
         wireSignalBindings(ctx, graphNode, instance, buttonUpdate(dom, domNode));
+      }
+      return instance;
+    }
+    case "code": {
+      let codeEl = dom.firstChild(domNode);
+      if (codeEl === null || dom.isTextNode(codeEl)) {
+        const createdCode = dom.createElement("code");
+        dom.appendChild(domNode, createdCode);
+        codeEl = createdCode;
+      }
+      let textNode = dom.firstChild(codeEl);
+      if (textNode === null || !dom.isTextNode(textNode)) {
+        const created = dom.createTextNode(String(graphNode.getProp("text") ?? ""));
+        dom.appendChild(codeEl, created);
+        textNode = created;
+      }
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      wireEvents(dom, graph, graphNode, domNode, instance);
+      if (graphNode.stateRefs.length !== 0) {
+        wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, domNode, textNode));
       }
       return instance;
     }
@@ -1517,6 +1560,8 @@ function expectedTag(ctx, graphNode) {
       return "img";
     case "link":
       return "a";
+    case "code":
+      return "pre";
     case "button":
       return "button";
     default:
@@ -1524,7 +1569,7 @@ function expectedTag(ctx, graphNode) {
   }
 }
 
-// src/render-handle.ts
+// packages/renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -1549,7 +1594,7 @@ var StreetRenderHandle = class {
   }
 };
 
-// src/renderer.ts
+// packages/renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -1590,7 +1635,7 @@ function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
 
-// src/dehydrate.ts
+// packages/renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
@@ -1608,7 +1653,7 @@ function escapeForScript(json) {
 function serializeState(state) {
   if (Object.keys(state).length === 0) return "";
   const json = escapeForScript(JSON.stringify(state));
-  return `<script type="application/json" ${STATE_MARKER_ATTR}>${json}</script>`;
+  return `<script type="application/json" ${STATE_MARKER_ATTR}>${json}<\/script>`;
 }
 function readState(dom, root) {
   const el = dom.querySelector(root, `script[${STATE_MARKER_ATTR}]`);
@@ -1626,10 +1671,10 @@ function readState(dom, root) {
   }
 }
 
-// src/ssr.ts
+// packages/renderer/src/ssr.ts
 var import_dom5 = require("@streetui/dom");
 
-// src/static-ssr-plan.ts
+// packages/renderer/src/static-ssr-plan.ts
 var import_diagnostics = require("@streetui/compiler/diagnostics");
 var import_dom4 = require("@streetui/dom");
 function collectMaximalStaticRoots(graph) {
@@ -1678,7 +1723,7 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// src/ssr.ts
+// packages/renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new import_dom5.ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -1691,45 +1736,4 @@ function renderToString(compiled, options = {}) {
   ctx.instances.clear();
   return html;
 }
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  HeadManager,
-  NodeInstance,
-  STATE_MARKER_ATTR,
-  StreetRenderHandle,
-  StreetRendererImpl,
-  TransitionController,
-  applyNodeProps,
-  applyProp,
-  buttonUpdate,
-  consoleHydrationDiagnosticSink,
-  createHydrationDiagnosticCollector,
-  createRenderContext,
-  createRenderer,
-  formatHydrationDiagnostic,
-  getResolvedTransition,
-  headingUpdate,
-  hydrateGraph,
-  inputUpdate,
-  linkUpdate,
-  mountGraph,
-  mountNode,
-  patchNode,
-  patchProp,
-  readState,
-  reconcileChildren,
-  reconcileChildrenByPlan,
-  renderHead,
-  renderToString,
-  resolveTag,
-  runElementTransition,
-  serializeState,
-  textUpdate,
-  wireComponentBehavior,
-  wireEvents,
-  wireHeadBehavior,
-  wireOverlayBehavior,
-  wireReactiveList,
-  wireSignalBindings
-});
 //# sourceMappingURL=index.cjs.map

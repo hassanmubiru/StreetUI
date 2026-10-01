@@ -1,16 +1,4 @@
-// ../renderer/src/render-context.ts
-function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
-  return {
-    dom,
-    graph,
-    instances: /* @__PURE__ */ new Map(),
-    container,
-    ...hydrationDiagnostics !== void 0 ? { hydrationDiagnostics } : {},
-    ...staticHTML !== void 0 ? { staticHTML } : {}
-  };
-}
-
-// ../core/src/lifecycle.ts
+// packages/core/dist/index.js
 var CleanupRegistry = class {
   _fns = [];
   add(fn) {
@@ -26,135 +14,58 @@ var CleanupRegistry = class {
     this._fns.length = 0;
   }
 };
-
-// ../renderer/src/node-instance.ts
-var NodeInstance = class {
-  graphNode;
-  /** The primary DOM node for this instance (element or text node). */
-  domNode;
-  children = [];
-  cleanup = new CleanupRegistry();
-  constructor(graphNode, domNode) {
-    this.graphNode = graphNode;
-    this.domNode = domNode;
-  }
-  addChild(child) {
-    this.children.push(child);
-  }
-  /** Subscribe to a signal; auto-cleanup on unmount. */
-  trackSignal(sig, handler) {
-    const unsub = sig.subscribe(handler);
-    this.cleanup.add(unsub);
-  }
-  /** Register a raw cleanup fn (DOM event removal, etc.). */
-  trackCleanup(fn) {
-    this.cleanup.add(fn);
-  }
-  dispose() {
-    for (const child of this.children) {
-      child.dispose();
+function detectEnvironment() {
+  try {
+    if (typeof process !== "undefined" && process !== null && typeof process === "object" && process.env?.["VITEST"] === "true") {
+      return "test";
     }
-    this.cleanup.run();
+  } catch {
+  }
+  if (typeof window !== "undefined" && typeof document !== "undefined") {
+    return "browser";
+  }
+  if (typeof self !== "undefined" && typeof self["importScripts"] === "function") {
+    return "worker";
+  }
+  try {
+    if (typeof process !== "undefined" && typeof process === "object") {
+      return "server";
+    }
+  } catch {
+  }
+  return "unknown";
+}
+function detectCapabilities() {
+  return {
+    hasDom: typeof document !== "undefined",
+    hasWindow: typeof window !== "undefined",
+    hasDocument: typeof document !== "undefined",
+    isSecureContext: typeof window !== "undefined" ? window["isSecureContext"] === true : false
+  };
+}
+var Environment = class {
+  kind;
+  capabilities;
+  constructor(kind) {
+    this.kind = kind ?? detectEnvironment();
+    this.capabilities = detectCapabilities();
+  }
+  get isBrowser() {
+    return this.kind === "browser";
+  }
+  get isServer() {
+    return this.kind === "server";
+  }
+  get isTest() {
+    return this.kind === "test";
+  }
+  get isWorker() {
+    return this.kind === "worker";
   }
 };
+var environment = new Environment();
 
-// ../renderer/src/attributes.ts
-var DOM_PROPERTIES = /* @__PURE__ */ new Set([
-  "value",
-  "checked",
-  "selected",
-  "indeterminate",
-  "innerHTML",
-  "textContent",
-  "innerText",
-  "scrollTop",
-  "scrollLeft"
-]);
-var BOOLEAN_ATTRS = /* @__PURE__ */ new Set([
-  "disabled",
-  "readonly",
-  "required",
-  "checked",
-  "selected",
-  "multiple",
-  "autofocus",
-  "autoplay",
-  "controls",
-  "default",
-  "defer",
-  "formnovalidate",
-  "hidden",
-  "ismap",
-  "loop",
-  "novalidate",
-  "open",
-  "reversed",
-  "scoped",
-  "seamless"
-]);
-function applyProp(dom, element, name, value) {
-  if (name.startsWith("_")) return;
-  if (name.startsWith("on")) return;
-  if (DOM_PROPERTIES.has(name)) {
-    dom.setProperty(element, name, value);
-    return;
-  }
-  if (BOOLEAN_ATTRS.has(name)) {
-    if (value === true || value === "" || value === name) {
-      dom.setAttribute(element, name, "");
-    } else {
-      dom.removeAttribute(element, name);
-    }
-    return;
-  }
-  if (name === "class" || name === "className") {
-    dom.setAttribute(element, "class", String(value ?? ""));
-    return;
-  }
-  if (name === "style" && typeof value === "object" && value !== null) {
-    const el = element;
-    const styles = value;
-    for (const [k, v] of Object.entries(styles)) {
-      el.style.setProperty(k, v);
-    }
-    return;
-  }
-  if (value === null || value === void 0 || value === false) {
-    dom.removeAttribute(element, name);
-    return;
-  }
-  dom.setAttribute(element, name, String(value));
-}
-function patchProp(dom, element, name, oldValue, newValue) {
-  if (Object.is(oldValue, newValue)) return;
-  applyProp(dom, element, name, newValue);
-}
-
-// ../renderer/src/events.ts
-function wireEvents(dom, graph, node, element, instance) {
-  if (node.events.length === 0) return;
-  for (const eventDesc of node.events) {
-    const handler = graph.getHandler(eventDesc.handlerKey);
-    if (handler === void 0) continue;
-    const domListener = (domEvent) => {
-      if (eventDesc.type === "input" || eventDesc.type === "change") {
-        const input = domEvent.target;
-        handler(input.value);
-      } else if (eventDesc.type === "submit") {
-        domEvent.preventDefault();
-        handler(domEvent);
-      } else {
-        handler();
-      }
-    };
-    dom.addEventListener(element, eventDesc.type, domListener);
-    instance.trackCleanup(() => {
-      dom.removeEventListener(element, eventDesc.type, domListener);
-    });
-  }
-}
-
-// ../dom/src/server-node.ts
+// packages/dom/dist/index.js
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -366,8 +277,6 @@ function serializeChildren(node) {
   }
   return out;
 }
-
-// ../dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -561,8 +470,6 @@ var ServerDOMAdapter = class {
     return serializeServerNode(asServer(node));
   }
 };
-
-// ../dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -671,7 +578,195 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
 
-// ../renderer/src/tag-map.ts
+// packages/compiler/dist/diagnostics.js
+var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
+function analyzeGraph(graph) {
+  const nodes = /* @__PURE__ */ new Map();
+  const summary = {
+    totalNodes: 0,
+    staticNodes: 0,
+    staticSubtrees: 0,
+    dynamicTextNodes: 0,
+    dynamicAttrNodes: 0,
+    eventNodes: 0,
+    lists: 0,
+    conditionals: 0
+  };
+  const visit = (node) => {
+    let allChildrenStatic = true;
+    for (const child of node.children) {
+      const childSubtreeStatic = visit(child);
+      if (!childSubtreeStatic) allChildrenStatic = false;
+    }
+    let hasDynamicText = false;
+    let hasDynamicAttr = false;
+    for (const ref of node.stateRefs) {
+      if (TEXT_PROP_KEYS.has(ref.propKey)) hasDynamicText = true;
+      else hasDynamicAttr = true;
+    }
+    const hasEvents = node.events.length > 0;
+    const isList = node.type === "reactive-list";
+    const isConditional = node.type === "conditional";
+    const isPortal = node.type === "portal";
+    const isComponent = node.type === "component";
+    const isHead = node.type === "head";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
+    const isStaticSubtree = isStatic && allChildrenStatic;
+    nodes.set(node.id, {
+      isStatic,
+      isStaticSubtree,
+      hasDynamicText,
+      hasDynamicAttr,
+      hasEvents,
+      isList,
+      isConditional
+    });
+    summary.totalNodes += 1;
+    if (isStatic) summary.staticNodes += 1;
+    if (isStaticSubtree) summary.staticSubtrees += 1;
+    if (hasDynamicText) summary.dynamicTextNodes += 1;
+    if (hasDynamicAttr) summary.dynamicAttrNodes += 1;
+    if (hasEvents) summary.eventNodes += 1;
+    if (isList) summary.lists += 1;
+    if (isConditional) summary.conditionals += 1;
+    return isStaticSubtree;
+  };
+  visit(graph.root);
+  return { nodes, summary };
+}
+
+// packages/renderer/dist/index.js
+function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
+  return {
+    dom,
+    graph,
+    instances: /* @__PURE__ */ new Map(),
+    container,
+    ...hydrationDiagnostics !== void 0 ? { hydrationDiagnostics } : {},
+    ...staticHTML !== void 0 ? { staticHTML } : {}
+  };
+}
+var NodeInstance = class {
+  graphNode;
+  /** The primary DOM node for this instance (element or text node). */
+  domNode;
+  children = [];
+  cleanup = new CleanupRegistry();
+  constructor(graphNode, domNode) {
+    this.graphNode = graphNode;
+    this.domNode = domNode;
+  }
+  addChild(child) {
+    this.children.push(child);
+  }
+  /** Subscribe to a signal; auto-cleanup on unmount. */
+  trackSignal(sig, handler) {
+    const unsub = sig.subscribe(handler);
+    this.cleanup.add(unsub);
+  }
+  /** Register a raw cleanup fn (DOM event removal, etc.). */
+  trackCleanup(fn) {
+    this.cleanup.add(fn);
+  }
+  dispose() {
+    for (const child of this.children) {
+      child.dispose();
+    }
+    this.cleanup.run();
+  }
+};
+var DOM_PROPERTIES = /* @__PURE__ */ new Set([
+  "value",
+  "checked",
+  "selected",
+  "indeterminate",
+  "innerHTML",
+  "textContent",
+  "innerText",
+  "scrollTop",
+  "scrollLeft"
+]);
+var BOOLEAN_ATTRS = /* @__PURE__ */ new Set([
+  "disabled",
+  "readonly",
+  "required",
+  "checked",
+  "selected",
+  "multiple",
+  "autofocus",
+  "autoplay",
+  "controls",
+  "default",
+  "defer",
+  "formnovalidate",
+  "hidden",
+  "ismap",
+  "loop",
+  "novalidate",
+  "open",
+  "reversed",
+  "scoped",
+  "seamless"
+]);
+function applyProp(dom, element, name, value) {
+  if (name.startsWith("_")) return;
+  if (name.startsWith("on")) return;
+  if (DOM_PROPERTIES.has(name)) {
+    dom.setProperty(element, name, value);
+    return;
+  }
+  if (BOOLEAN_ATTRS.has(name)) {
+    if (value === true || value === "" || value === name) {
+      dom.setAttribute(element, name, "");
+    } else {
+      dom.removeAttribute(element, name);
+    }
+    return;
+  }
+  if (name === "class" || name === "className") {
+    dom.setAttribute(element, "class", String(value ?? ""));
+    return;
+  }
+  if (name === "style" && typeof value === "object" && value !== null) {
+    const el = element;
+    const styles = value;
+    for (const [k, v] of Object.entries(styles)) {
+      el.style.setProperty(k, v);
+    }
+    return;
+  }
+  if (value === null || value === void 0 || value === false) {
+    dom.removeAttribute(element, name);
+    return;
+  }
+  dom.setAttribute(element, name, String(value));
+}
+function patchProp(dom, element, name, oldValue, newValue) {
+  if (Object.is(oldValue, newValue)) return;
+  applyProp(dom, element, name, newValue);
+}
+function wireEvents(dom, graph, node, element, instance) {
+  if (node.events.length === 0) return;
+  for (const eventDesc of node.events) {
+    const handler = graph.getHandler(eventDesc.handlerKey);
+    if (handler === void 0) continue;
+    const domListener = (domEvent) => {
+      if (eventDesc.type === "input" || eventDesc.type === "change") {
+        const input = domEvent.target;
+        handler(input.value);
+      } else if (eventDesc.type === "submit") {
+        domEvent.preventDefault();
+        handler(domEvent);
+      } else {
+        handler();
+      }
+    };
+    dom.addEventListener(element, eventDesc.type, domListener);
+    instance.trackCleanup(() => {
+      dom.removeEventListener(element, eventDesc.type, domListener);
+    });
+  }
+}
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -686,6 +781,11 @@ var TAG_MAP = {
   "list-item": "li",
   image: "img",
   link: "a",
+  // A `code()` node renders as a semantic `<pre>` outer element; the mount/
+  // hydrate branches add a single inner `<code>` holding the escaped source
+  // (mirrors how `text` renders `<span>` + an inner text node). One graph
+  // node → one outer element preserves positional hydration.
+  code: "pre",
   component: "div",
   slot: "div",
   fragment: "div",
@@ -705,8 +805,6 @@ var TAG_MAP = {
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
-
-// ../renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -746,8 +844,6 @@ function patchNode(ctx, graphNode, propKey, newValue) {
       break;
   }
 }
-
-// ../renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -974,8 +1070,6 @@ function patchExistingInstance(ctx, instance, newNode) {
     }
   }
 }
-
-// ../renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -1144,8 +1238,6 @@ var TransitionController = class {
     };
   }
 };
-
-// ../renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -1322,8 +1414,6 @@ function renderHead(compiled) {
   }
   return out;
 }
-
-// ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -1428,6 +1518,23 @@ function mountNode(ctx, graphNode, parentDom) {
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
     dom.appendChild(parentDom, el2);
+    return instance2;
+  }
+  if (graphNode.type === "code") {
+    const source = String(graphNode.getProp("text") ?? "");
+    const pre = dom.createElement("pre");
+    const codeEl = dom.createElement("code");
+    const textNode = dom.createTextNode(source);
+    dom.appendChild(codeEl, textNode);
+    dom.appendChild(pre, codeEl);
+    applyNodeProps(ctx, graphNode, pre);
+    const instance2 = new NodeInstance(graphNode, pre);
+    ctx.instances.set(graphNode.id, instance2);
+    wireEvents(dom, graph, graphNode, pre, instance2);
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance2, textUpdate(dom, pre, textNode));
+    }
+    dom.appendChild(parentDom, pre);
     return instance2;
   }
   if (graphNode.type === "link") {
@@ -1731,8 +1838,6 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   if (fn === void 0) return;
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
-
-// ../renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
@@ -1767,65 +1872,6 @@ function readState(dom, root) {
     return {};
   }
 }
-
-// ../compiler/dist/diagnostics.js
-var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
-function analyzeGraph(graph) {
-  const nodes = /* @__PURE__ */ new Map();
-  const summary = {
-    totalNodes: 0,
-    staticNodes: 0,
-    staticSubtrees: 0,
-    dynamicTextNodes: 0,
-    dynamicAttrNodes: 0,
-    eventNodes: 0,
-    lists: 0,
-    conditionals: 0
-  };
-  const visit = (node) => {
-    let allChildrenStatic = true;
-    for (const child of node.children) {
-      const childSubtreeStatic = visit(child);
-      if (!childSubtreeStatic) allChildrenStatic = false;
-    }
-    let hasDynamicText = false;
-    let hasDynamicAttr = false;
-    for (const ref of node.stateRefs) {
-      if (TEXT_PROP_KEYS.has(ref.propKey)) hasDynamicText = true;
-      else hasDynamicAttr = true;
-    }
-    const hasEvents = node.events.length > 0;
-    const isList = node.type === "reactive-list";
-    const isConditional = node.type === "conditional";
-    const isPortal = node.type === "portal";
-    const isComponent = node.type === "component";
-    const isHead = node.type === "head";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
-    const isStaticSubtree = isStatic && allChildrenStatic;
-    nodes.set(node.id, {
-      isStatic,
-      isStaticSubtree,
-      hasDynamicText,
-      hasDynamicAttr,
-      hasEvents,
-      isList,
-      isConditional
-    });
-    summary.totalNodes += 1;
-    if (isStatic) summary.staticNodes += 1;
-    if (isStaticSubtree) summary.staticSubtrees += 1;
-    if (hasDynamicText) summary.dynamicTextNodes += 1;
-    if (hasDynamicAttr) summary.dynamicAttrNodes += 1;
-    if (hasEvents) summary.eventNodes += 1;
-    if (isList) summary.lists += 1;
-    if (isConditional) summary.conditionals += 1;
-    return isStaticSubtree;
-  };
-  visit(graph.root);
-  return { nodes, summary };
-}
-
-// ../renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -1871,8 +1917,6 @@ function getStaticSSRPlan(compiled) {
   }
   return plan;
 }
-
-// ../renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -1886,7 +1930,7 @@ function renderToString(compiled, options = {}) {
   return html;
 }
 
-// src/version.ts
+// packages/streetui/src/version.ts
 var VERSION = "2.5.0";
 export {
   STATE_MARKER_ATTR,

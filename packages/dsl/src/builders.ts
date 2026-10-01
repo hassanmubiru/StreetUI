@@ -22,6 +22,7 @@ import type {
   InputOptions,
   LinkOptions,
   ImageOptions,
+  CodeOptions,
   ContainerOptions,
   SectionOptions,
   FormOptions,
@@ -381,6 +382,17 @@ class ContentBuilderBase implements ContentDSL {
       this._graph.registerHandler(handlerKey, options.onClick as () => unknown);
       node.addEvent({ type: 'click', handlerKey });
     }
+  }
+
+  code(source: BindableText, options: CodeOptions = {}): void {
+    const props: Props = {};
+    if (options.language !== undefined) props['data-language'] = options.language;
+    if (options.class !== undefined) props['class'] = options.class;
+    if (options.id !== undefined) props['id'] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode('code', { parent: this._node, props });
+    const resolved = bindValue<TextValue>(this._graph, node, 'text', source);
+    node.setProp('text', resolved);
   }
 }
 

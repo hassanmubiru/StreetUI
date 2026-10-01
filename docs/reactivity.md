@@ -52,6 +52,37 @@ visible.get();  // recomputes only after rows or query changes
 Chained deriveds are fine; the graph tracks dependencies transitively, so a
 derived over a derived only recomputes when a leaf it depends on changes.
 
+### `Signal<T>` vs `ReadonlySignal<T>`
+
+The two reactive types differ by one capability:
+
+- `signal(v)` returns a **`Signal<T>`** — readable (`get`/`peek`/`subscribe`)
+  **and** writable (`set`).
+- `derived(fn)` returns a **`ReadonlySignal<T>`** — readable only; there is no
+  `set`, because its value is computed.
+
+`Signal<T>` is a `ReadonlySignal<T>` (the class implements that interface), so a
+`Signal` is accepted anywhere a `ReadonlySignal` is expected (but not the
+reverse). Type a function parameter as `ReadonlySignal<T>` when it only needs to
+*read* a reactive value — callers can then pass either a `signal` or a
+`derived`:
+
+```ts
+import { type ReadonlySignal, type Signal, signal, derived } from 'streetui';
+
+// Accepts both signals and deriveds, because it only reads.
+function labelFor(count: ReadonlySignal<number>): ReadonlySignal<string> {
+  return derived(() => `${count.get()} items`);
+}
+
+const n: Signal<number> = signal(0);
+labelFor(n);                       // ok — Signal is a ReadonlySignal
+labelFor(derived(() => n.get()));  // ok — derived is already ReadonlySignal
+```
+
+Reserve `Signal<T>` for parameters that must also write (e.g. a two-way `bind`
+target). This keeps APIs honest about whether they mutate reactive state.
+
 In the performance app the entire 10,000-row table is driven by one derived:
 
 ```ts

@@ -10,17 +10,41 @@
 import { derived, type Signal, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import type { CodeSample } from './content.js';
+import { pageHead } from './metadata.js';
 
 /**
  * A consistent page shell: a titled landmark `<section>` wrapping a content
  * container the caller fills. Used by every route for a predictable heading
  * structure (one h1 per page) and a stable `#page-*` / `#*-body` id scheme.
+ *
+ * When `path` is supplied the layout also declares the page's SEO metadata via
+ * `page.head(...)` (title/description/canonical/Open Graph/Twitter), which
+ * overrides the shell's site-wide defaults for this route (Phase 6). `description`
+ * defaults to `lead` when omitted so the human-visible lead and the meta
+ * description stay in agreement.
  */
 export function pageLayout(
   page: PageDSL,
-  opts: { id: string; title: string; lead?: string | undefined },
+  opts: {
+    id: string;
+    title: string;
+    lead?: string | undefined;
+    path?: string | undefined;
+    description?: string | undefined;
+    robots?: string | undefined;
+  },
   body: (content: ContainerDSL) => void,
 ): void {
+  if (opts.path !== undefined) {
+    page.head(
+      pageHead({
+        title: opts.title,
+        description: opts.description ?? opts.lead,
+        path: opts.path,
+        robots: opts.robots,
+      }),
+    );
+  }
   page.section(opts.id, (s) => {
     s.heading(opts.title, { level: 1, id: `${opts.id}-title` });
     if (opts.lead !== undefined) {
@@ -47,15 +71,18 @@ export function navLink(
 }
 
 /**
- * A labeled code block. StreetUI has no first-class preformatted/code node, so
- * this composes a container + a label + the source as text; styling (monospace,
- * wrapping) is CSS on the `code-sample`/`code-sample-src` ids. The source is
- * passed through text() which escapes at the renderer boundary.
+ * A labeled code block built on StreetUI's first-class `code()` primitive. The
+ * label is a `text` node; the source renders as a semantic `<pre><code>` via
+ * `code(...)`, which preserves whitespace and escapes the source at the
+ * renderer boundary (no raw-HTML injection). An optional `language` hint is
+ * forwarded as `data-language` on the `<pre>` for styling / highlighting hooks.
  */
 export function codeExample(scope: ContainerDSL, sample: CodeSample, idBase: string): void {
   scope.container(idBase, (c) => {
     c.text(sample.label, { id: `${idBase}-label` });
-    c.text(sample.code, { id: `${idBase}-src` });
+    const codeOpts: { id: string; language?: string } = { id: `${idBase}-src` };
+    if (sample.language !== undefined) codeOpts.language = sample.language;
+    c.code(sample.code, codeOpts);
   }, { id: `${idBase}` });
 }
 

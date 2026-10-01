@@ -19,6 +19,7 @@ export type SemanticNodeType =
   | 'list-item'
   | 'image'
   | 'link'
+  | 'code'
   | 'component'
   | 'slot'
   | 'fragment'

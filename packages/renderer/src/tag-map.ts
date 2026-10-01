@@ -18,6 +18,11 @@ const TAG_MAP: Partial<Record<SemanticNodeType, string>> = {
   'list-item': 'li',
   image: 'img',
   link: 'a',
+  // A `code()` node renders as a semantic `<pre>` outer element; the mount/
+  // hydrate branches add a single inner `<code>` holding the escaped source
+  // (mirrors how `text` renders `<span>` + an inner text node). One graph
+  // node → one outer element preserves positional hydration.
+  code: 'pre',
   component: 'div',
   slot: 'div',
   fragment: 'div',

@@ -1,4 +1,4 @@
-// src/transition.ts
+// packages/dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -39,7 +39,7 @@ function isTransitionConfig(value) {
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
 
-// src/head.ts
+// packages/dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -154,7 +154,7 @@ function isHeadContribution(value) {
   return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
 
-// src/builders.ts
+// packages/dsl/src/builders.ts
 import { signal, derived, effect } from "@streetui/state";
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
@@ -378,6 +378,16 @@ var ContentBuilderBase = class {
       this._graph.registerHandler(handlerKey, options.onClick);
       node.addEvent({ type: "click", handlerKey });
     }
+  }
+  code(source, options = {}) {
+    const props = {};
+    if (options.language !== void 0) props["data-language"] = options.language;
+    if (options.class !== void 0) props["class"] = options.class;
+    if (options.id !== void 0) props["id"] = options.id;
+    applyA11yProps(props, options);
+    const node = this._graph.createNode("code", { parent: this._node, props });
+    const resolved = bindValue(this._graph, node, "text", source);
+    node.setProp("text", resolved);
   }
 };
 var ContainerBuilderBase = class extends ContentBuilderBase {
@@ -768,7 +778,7 @@ var AppBuilder = class {
   }
 };
 
-// src/component.ts
+// packages/dsl/src/component.ts
 function component(setup, options = {}) {
   return {
     __streetui_component: true,
@@ -780,7 +790,7 @@ function isComponentDefinition(value) {
   return value !== null && typeof value === "object" && value.__streetui_component === true;
 }
 
-// src/dsl.ts
+// packages/dsl/src/dsl.ts
 import { ApplicationGraph } from "@streetui/graph";
 var StreetApp = class {
   _graph;

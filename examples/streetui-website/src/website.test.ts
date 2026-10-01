@@ -52,6 +52,17 @@ describe('routing', () => {
     expect(text(container.querySelector('#docsection-code-src'))).toContain('streetui.app');
   });
 
+  it('renders code samples as a semantic <pre><code> via the code() primitive', async () => {
+    site = mountWebsite(container, { history: createMemoryHistory('/getting-started') });
+    await flushUpdates();
+    const pre = container.querySelector('#start-install-src');
+    expect(pre).not.toBeNull();
+    expect(pre?.tagName.toLowerCase()).toBe('pre');
+    const codeEl = container.querySelector('#start-install-src > code');
+    expect(codeEl).not.toBeNull();
+    expect(text(codeEl)).toBe('npm install streetui');
+  });
+
   it('reads a dynamic :slug param on the blog route', async () => {
     site = mountWebsite(container, { history: createMemoryHistory('/blog/no-virtual-dom') });
     await flushUpdates();

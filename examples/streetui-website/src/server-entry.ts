@@ -12,7 +12,7 @@
  * `serializeState` so the client can resume without recomputation.
  */
 
-import { streetui, compile, renderToString, serializeState, signal } from 'streetui';
+import { streetui, compile, renderToString, renderHead, serializeState, signal } from 'streetui';
 import { createRouter, createMemoryHistory } from 'streetui';
 import type { RouteContext } from 'streetui';
 import { websiteShell, createSearchState } from './shell.js';
@@ -25,6 +25,13 @@ export const STATE_KEY = 'streetui-website';
 export interface RenderResult {
   /** The app body HTML (shell + active route), to place inside the mount node. */
   readonly html: string;
+  /**
+   * The merged document metadata for this route, serialized for `<head>`
+   * (title + meta + link + canonical + Open Graph + Twitter). Each tag carries
+   * the `data-streetui-head` marker so the client adopts it on hydration
+   * without duplicating. Empty string only if the app declares no metadata.
+   */
+  readonly head: string;
   /** A <script> island embedding serialized state for client resume. */
   readonly stateScript: string;
 }
@@ -64,7 +71,9 @@ export function renderWebsite(path: string): RenderResult {
     });
   });
 
-  const html = renderToString(compile(app));
+  const compiled = compile(app);
+  const html = renderToString(compiled);
+  const head = renderHead(compiled);
   const themeChoice = theme.choice.get();
   theme.dispose();
   router.destroy();
@@ -73,5 +82,5 @@ export function renderWebsite(path: string): RenderResult {
     [STATE_KEY]: { path, themeChoice },
   });
 
-  return { html, stateScript };
+  return { html, head, stateScript };
 }

@@ -11,12 +11,28 @@ const FROZEN_VALUE_EXPORTS = [
   'routerOutlet', 'splitTarget',
 ] as const;
 
+// Additive since v2.6 (F-4). ROUTER_OUTLET_KEY exposes the outlet container's
+// reconciliation KEY so SSR code can emit the server-side outlet with the same
+// key the client expects, instead of restating the 'router-outlet' literal.
+const ADDITIVE_VALUE_EXPORTS = ['ROUTER_OUTLET_KEY'] as const;
+
 describe('@streetui/router — public API contract (v1.0 frozen surface)', () => {
   it('exports every frozen public value', () => {
     for (const name of FROZEN_VALUE_EXPORTS) {
       expect(name in API, `missing public export: ${name}`).toBe(true);
       expect((API as Record<string, unknown>)[name]).toBeDefined();
     }
+  });
+
+  it('exports every additive (post-1.0) public value', () => {
+    for (const name of ADDITIVE_VALUE_EXPORTS) {
+      expect(name in API, `missing public export: ${name}`).toBe(true);
+      expect((API as Record<string, unknown>)[name]).toBeDefined();
+    }
+  });
+
+  it('keeps ROUTER_OUTLET_KEY and routerOutlet in agreement', () => {
+    expect(API.ROUTER_OUTLET_KEY).toBe('router-outlet');
   });
 });
 

@@ -13,9 +13,10 @@
 
 import { derived, type Signal, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
-import { routerOutlet } from 'streetui';
+import { routerOutlet, ROUTER_OUTLET_KEY } from 'streetui';
 import { navLink } from './components.js';
 import { PRIMARY_NAV, searchContent, type SearchDoc } from './content.js';
+import { siteHead } from './metadata.js';
 import type { ThemeController } from './theme.js';
 
 export interface ShellContext {
@@ -25,7 +26,7 @@ export interface ShellContext {
   /**
    * Server-only: fill the route outlet inline instead of leaving it for the
    * router to populate at runtime. When provided, the outlet node is emitted
-   * with the SAME key ('router-outlet') and id ('page-outlet') that
+   * with the SAME key (ROUTER_OUTLET_KEY) and id ('page-outlet') that
    * `routerOutlet` uses, so client hydration adopts it node-for-node.
    */
   readonly renderOutlet?: (content: ContainerDSL) => void;
@@ -46,6 +47,12 @@ export function createSearchState(querySignal: Signal<string>): SearchState {
 
 export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   const { router, theme, search } = ctx;
+
+  // App-level default metadata. Declared first so it sits earliest in document
+  // order; each route's own head() (emitted later, inside the outlet) overrides
+  // the keys it sets while inheriting the rest (Phase 6 SEO).
+  shell.head(siteHead());
+
   shell.section('skip', (s) => {
     s.link('Skip to content', { href: '#page-outlet', id: 'skip-link' });
   }, { id: 'site-skip' });
@@ -89,10 +96,12 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
 
   // The active route renders here; the shell above/below persists. The outlet
   // id matches the skip-link target (#page-outlet). On the server we fill it
-  // inline (renderOutlet); on the client the router populates it.
+  // inline (renderOutlet); on the client the router populates it. The server
+  // fill uses the exported ROUTER_OUTLET_KEY so there is one source of truth
+  // for the reconciliation key the client hydration adopts on (F-4).
   if (ctx.renderOutlet !== undefined) {
     const fill = ctx.renderOutlet;
-    shell.container('router-outlet', (c) => fill(c), { id: 'page-outlet' });
+    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet' });
   } else {
     routerOutlet(shell, 'page-outlet');
   }

@@ -17,7 +17,7 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// src/index.ts
+// packages/core/src/index.ts
 var index_exports = {};
 __export(index_exports, {
   Application: () => Application,
@@ -48,7 +48,7 @@ __export(index_exports, {
 });
 module.exports = __toCommonJS(index_exports);
 
-// src/a11y-ids.ts
+// packages/core/src/a11y-ids.ts
 var UNSAFE = /[^A-Za-z0-9_-]+/g;
 function toIdToken(base) {
   const token = base.trim().replace(UNSAFE, "-").replace(/^-+|-+$/g, "");
@@ -70,7 +70,7 @@ function a11yIds(base) {
   };
 }
 
-// src/identity.ts
+// packages/core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -92,7 +92,7 @@ function generateApplicationId(name) {
   return `app:${name}:${nextId()}`;
 }
 
-// src/lifecycle.ts
+// packages/core/src/lifecycle.ts
 var Lifecycle = class {
   _phase = "created";
   _hooks = /* @__PURE__ */ new Map();
@@ -150,10 +150,10 @@ var CleanupRegistry = class {
   }
 };
 
-// src/environment.ts
+// packages/core/src/environment.ts
 function detectEnvironment() {
   try {
-    if (typeof process !== "undefined" && process !== null && typeof process === "object" && (process.env?.["NODE_ENV"] === "test" || process.env?.["VITEST"] === "true")) {
+    if (typeof process !== "undefined" && process !== null && typeof process === "object" && process.env?.["VITEST"] === "true") {
       return "test";
     }
   } catch {
@@ -202,7 +202,7 @@ var Environment = class {
 };
 var environment = new Environment();
 
-// src/diagnostics.ts
+// packages/core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -252,7 +252,7 @@ function formatDiagnostic(d) {
   return `[${d.severity.toUpperCase()}] ${d.code}: ${d.message}${loc}`;
 }
 
-// src/application.ts
+// packages/core/src/application.ts
 var Application = class {
   id;
   name;
@@ -296,7 +296,7 @@ function createApplication(options) {
   return new Application(options);
 }
 
-// src/node.ts
+// packages/core/src/node.ts
 var BaseNode = class {
   id;
   type;
@@ -308,7 +308,7 @@ var BaseNode = class {
   }
 };
 
-// src/observability.ts
+// packages/core/src/observability.ts
 function formatDiagnosticContext(context) {
   if (context === void 0) return "";
   const parts = [];
@@ -387,32 +387,4 @@ function reportError(sink, error, context, options = {}) {
   reportDiagnostic(sink, "error", report.message, report.context);
   return report;
 }
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {
-  Application,
-  BaseNode,
-  CleanupRegistry,
-  DiagnosticCollector,
-  DiagnosticError,
-  Environment,
-  Lifecycle,
-  StreetFrameworkError,
-  a11yIds,
-  consoleDiagnosticSink,
-  createApplication,
-  createNodeId,
-  describeError,
-  environment,
-  formatDiagnostic,
-  formatDiagnosticContext,
-  frameworkError,
-  generateApplicationId,
-  generateNodeId,
-  nextId,
-  nodeIdPrefix,
-  reportDiagnostic,
-  reportError,
-  resetIdCounter,
-  toIdToken
-});
 //# sourceMappingURL=index.cjs.map

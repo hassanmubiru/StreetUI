@@ -120,6 +120,33 @@ function hydrateNode(
       return instance;
     }
 
+    case 'code': {
+      // <pre> with an inner <code> holding a text node (see the code branch in
+      // mount.ts). Adopt the <pre>, descend to the inner <code>'s text node, and
+      // wire the same textUpdate path — writing the 'text' prop to the inner
+      // text node and any other prop to the outer <pre>. Recreate the inner
+      // structure defensively if the server markup is missing it.
+      let codeEl = dom.firstChild(domNode);
+      if (codeEl === null || dom.isTextNode(codeEl)) {
+        const createdCode = dom.createElement('code');
+        dom.appendChild(domNode, createdCode);
+        codeEl = createdCode;
+      }
+      let textNode = dom.firstChild(codeEl as Element);
+      if (textNode === null || !dom.isTextNode(textNode)) {
+        const created = dom.createTextNode(String(graphNode.getProp('text') ?? ''));
+        dom.appendChild(codeEl as Element, created);
+        textNode = created;
+      }
+      const instance = new NodeInstance(graphNode, domNode);
+      ctx.instances.set(graphNode.id, instance);
+      wireEvents(dom, graph, graphNode, domNode, instance);
+      if (graphNode.stateRefs.length !== 0) {
+        wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, domNode, textNode as Text));
+      }
+      return instance;
+    }
+
     case 'image':
     case 'link': {
       // Leaf elements. Links may carry click handlers and — like buttons — a
@@ -366,6 +393,8 @@ function expectedTag(ctx: RenderContext, graphNode: GraphNode): string {
       return 'img';
     case 'link':
       return 'a';
+    case 'code':
+      return 'pre';
     case 'button':
       return 'button';
     default:

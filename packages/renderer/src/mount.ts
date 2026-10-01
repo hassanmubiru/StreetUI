@@ -184,6 +184,35 @@ export function mountNode(
     return instance;
   }
 
+  // Code nodes — semantic <pre><code> preformatted block.
+  // Mirrors the text branch: the outer <pre> carries props (class/id/
+  // data-language), and a single inner <code> holds a text node with the
+  // escaped source. Whitespace is preserved by <pre>; the source is escaped at
+  // the DOM boundary (createTextNode / setTextContent) exactly like text — no
+  // raw-HTML injection. The reactive update path reuses `textUpdate`, which
+  // writes the 'text' prop to the inner text node and any other prop to the
+  // outer <pre>.
+  if (graphNode.type === 'code') {
+    const source = String(graphNode.getProp('text') ?? '');
+    const pre = dom.createElement('pre');
+    const codeEl = dom.createElement('code');
+    const textNode = dom.createTextNode(source);
+    dom.appendChild(codeEl, textNode);
+    dom.appendChild(pre, codeEl);
+    applyNodeProps(ctx, graphNode, pre);
+
+    const instance = new NodeInstance(graphNode, pre);
+    ctx.instances.set(graphNode.id, instance);
+    wireEvents(dom, graph, graphNode, pre, instance);
+
+    if (graphNode.stateRefs.length !== 0) {
+      wireSignalBindings(ctx, graphNode, instance, textUpdate(dom, pre, textNode));
+    }
+
+    dom.appendChild(parentDom, pre);
+    return instance;
+  }
+
   // Link nodes
   if (graphNode.type === 'link') {
     const el = dom.createElement('a') as HTMLAnchorElement;
