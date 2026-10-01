@@ -35,9 +35,19 @@ describe('metadata — siteHead() app-level defaults', () => {
   });
 });
 
-describe('metadata — pageHead() per-route overrides', () => {
+describe('metadata — pageHead() per-route complete head', () => {
   it('suffixes the title with the site name', () => {
     expect(pageHead({ title: 'Docs', path: '/docs' }).title).toBe(`Docs · ${SITE.name}`);
+  });
+
+  it('includes the shared site defaults (single head layer)', () => {
+    const head = pageHead({ title: 'Docs', path: '/docs' });
+    expect(head.charset).toBe('utf-8');
+    expect(head.viewport).toContain('width=device-width');
+    expect(head.themeColor).toBe(SITE.themeColor);
+    expect(head.favicon).toBe('/favicon.svg');
+    expect(head.openGraph?.site_name).toBe(SITE.name);
+    expect(head.twitter?.card).toBe(SITE.twitterCard);
   });
 
   it('builds the canonical and og:url from baseUrl + path', () => {
@@ -62,8 +72,8 @@ describe('metadata — pageHead() per-route overrides', () => {
     expect(head.twitter?.title).toBe(`About · ${SITE.name}`);
   });
 
-  it('omits robots unless explicitly set, and emits noindex when asked', () => {
-    expect('robots' in pageHead({ title: 'Home', path: '/' })).toBe(false);
+  it('defaults robots to index,follow and honours a noindex override', () => {
+    expect(pageHead({ title: 'Home', path: '/' }).robots).toBe('index,follow');
     expect(pageHead({ title: 'Not found', path: '/x', robots: 'noindex' }).robots).toBe(
       'noindex',
     );

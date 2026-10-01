@@ -16,7 +16,6 @@ import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import { routerOutlet, ROUTER_OUTLET_KEY } from 'streetui';
 import { navLink } from './components.js';
 import { PRIMARY_NAV, searchContent, type SearchDoc } from './content.js';
-import { siteHead } from './metadata.js';
 import type { ThemeController } from './theme.js';
 
 export interface ShellContext {
@@ -48,10 +47,13 @@ export function createSearchState(querySignal: Signal<string>): SearchState {
 export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   const { router, theme, search } = ctx;
 
-  // App-level default metadata. Declared first so it sits earliest in document
-  // order; each route's own head() (emitted later, inside the outlet) overrides
-  // the keys it sets while inheriting the rest (Phase 6 SEO).
-  shell.head(siteHead());
+  // NOTE: the document head is declared ONCE, at the route layer (pageHead via
+  // pageLayout) — NOT here. mountRouter renders the shell and each route in
+  // separate render contexts and the browser HeadManager is scoped per context,
+  // so a second head() layer in the shell would not merge with the route's on
+  // the client (it would drop the shell defaults and duplicate tags on
+  // hydration). Declaring the complete head per route keeps one manager in
+  // charge of the whole document.head. See V2.6.0-FRAMEWORK-FINDINGS.md.
 
   shell.section('skip', (s) => {
     s.link('Skip to content', { href: '#page-outlet', id: 'skip-link' });
