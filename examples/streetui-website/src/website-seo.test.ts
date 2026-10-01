@@ -194,6 +194,9 @@ describe('website SEO — hydration adopts server head tags without duplication'
     });
     await flushUpdates();
 
+    // eslint-disable-next-line no-console
+    console.log('HYDRATE HEAD >>>', document.head.innerHTML);
+
     // Still exactly one title / canonical total — the server tags were adopted
     // rather than duplicated (asserted marker-independently on the live head).
     expect(document.head.querySelectorAll('title').length).toBe(1);
