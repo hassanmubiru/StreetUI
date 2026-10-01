@@ -162,16 +162,16 @@ def node(acc, depth=0, maxd=40):
     except Exception: role = '?'
     try: name = acc.name
     except Exception: name = ''
-    out = {'role': role, 'name': name, 'states': states, 'children': []}
+    out = {'role': role, 'name': _name(acc), 'states': states, 'children': []}
     if depth < maxd:
-        for i in range(acc.childCount):
-            try: out['children'].append(node(acc.getChildAtIndex(i), depth+1, maxd))
+        for i in range(_childCount(acc)):
+            try: out['children'].append(node(_child(acc, i), depth+1, maxd))
             except Exception: pass
     return out
 desktop = _Registry.getDesktop(0)
 apps = []
-for i in range(desktop.childCount):
-    try: apps.append(node(desktop.getChildAtIndex(i)))
+for i in range(_childCount(desktop)):
+    try: apps.append(node(_child(desktop, i)))
     except Exception: pass
 json.dump({'apps': apps}, sys.stdout)
 `;
