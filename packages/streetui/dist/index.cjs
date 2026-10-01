@@ -17,9 +17,9 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-// packages/streetui/src/index.ts
-var index_exports = {};
-__export(index_exports, {
+// src/index.ts
+var src_exports = {};
+__export(src_exports, {
   AppBuilder: () => AppBuilder,
   Application: () => Application,
   ApplicationGraph: () => ApplicationGraph,
@@ -209,12 +209,12 @@ __export(index_exports, {
   wireReactiveList: () => wireReactiveList,
   wireSignalBindings: () => wireSignalBindings
 });
-module.exports = __toCommonJS(index_exports);
+module.exports = __toCommonJS(src_exports);
 
-// packages/streetui/src/version.ts
-var VERSION = "2.5.0";
+// src/version.ts
+var VERSION = "2.6.0";
 
-// packages/state/dist/index.js
+// ../state/src/signal.ts
 var _activeConsumer = null;
 function withConsumer(consumer, fn) {
   const prev = _activeConsumer;
@@ -423,6 +423,8 @@ function observerCount(source) {
   const maybe = source;
   return typeof maybe._observerCount === "function" ? maybe._observerCount() : void 0;
 }
+
+// ../state/src/store.ts
 var Store = class {
   _signals;
   constructor(initial) {
@@ -471,6 +473,8 @@ var Store = class {
 function createStore(initial) {
   return new Store(initial);
 }
+
+// ../state/src/resource.ts
 function isAbortError(err) {
   return err instanceof Error && err.name === "AbortError" || typeof DOMException !== "undefined" && err instanceof DOMException && err.name === "AbortError";
 }
@@ -547,6 +551,8 @@ function resource(loader, options = {}) {
     dispose
   };
 }
+
+// ../state/src/mutation.ts
 function mutation(mutator, options = {}) {
   const status = signal("idle");
   const data = signal(void 0);
@@ -602,6 +608,8 @@ function mutation(mutator, options = {}) {
   if (options.onCleanup !== void 0) options.onCleanup(dispose);
   return { status, data, error, pending, mutate, reset, dispose };
 }
+
+// ../state/src/client.ts
 var HttpError = class extends Error {
   status;
   statusText;
@@ -683,6 +691,8 @@ async function parseBody(response) {
   }
   return text;
 }
+
+// ../state/src/auth.ts
 function createAuthSession(config) {
   const session = resource(
     (ctx) => config.loadUser(ctx),
@@ -734,7 +744,7 @@ function createAuthSession(config) {
   };
 }
 
-// packages/core/dist/index.js
+// ../core/src/a11y-ids.ts
 var UNSAFE = /[^A-Za-z0-9_-]+/g;
 function toIdToken(base) {
   const token = base.trim().replace(UNSAFE, "-").replace(/^-+|-+$/g, "");
@@ -755,6 +765,8 @@ function a11yIds(base) {
     id: (suffix) => `${token}-${toIdToken(suffix)}`
   };
 }
+
+// ../core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -775,6 +787,8 @@ function nodeIdPrefix(id) {
 function generateApplicationId(name) {
   return `app:${name}:${nextId()}`;
 }
+
+// ../core/src/lifecycle.ts
 var Lifecycle = class {
   _phase = "created";
   _hooks = /* @__PURE__ */ new Map();
@@ -831,9 +845,11 @@ var CleanupRegistry = class {
     this._fns.length = 0;
   }
 };
+
+// ../core/src/environment.ts
 function detectEnvironment() {
   try {
-    if (typeof process !== "undefined" && process !== null && typeof process === "object" && process.env?.["VITEST"] === "true") {
+    if (typeof process !== "undefined" && process !== null && typeof process === "object" && (process.env?.["NODE_ENV"] === "test" || process.env?.["VITEST"] === "true")) {
       return "test";
     }
   } catch {
@@ -881,6 +897,8 @@ var Environment = class {
   }
 };
 var environment = new Environment();
+
+// ../core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -929,6 +947,8 @@ function formatDiagnostic(d) {
   const loc = d.location !== void 0 ? ` (${[d.location.file, d.location.line, d.location.column].filter(Boolean).join(":")})` : "";
   return `[${d.severity.toUpperCase()}] ${d.code}: ${d.message}${loc}`;
 }
+
+// ../core/src/application.ts
 var Application = class {
   id;
   name;
@@ -971,6 +991,8 @@ var Application = class {
 function createApplication(options) {
   return new Application(options);
 }
+
+// ../core/src/node.ts
 var BaseNode = class {
   id;
   type;
@@ -981,6 +1003,8 @@ var BaseNode = class {
     this.metadata = { createdAt: Date.now() };
   }
 };
+
+// ../core/src/observability.ts
 function formatDiagnosticContext(context) {
   if (context === void 0) return "";
   const parts = [];
@@ -1060,7 +1084,7 @@ function reportError(sink, error, context, options = {}) {
   return report;
 }
 
-// packages/graph/dist/index.js
+// ../graph/src/graph-node.ts
 var GraphNode = class _GraphNode {
   id;
   type;
@@ -1163,6 +1187,8 @@ var GraphNode = class _GraphNode {
     return new _GraphNode(this.type, opts);
   }
 };
+
+// ../graph/src/graph.ts
 var ApplicationGraph = class {
   root;
   name;
@@ -1316,7 +1342,7 @@ var ApplicationGraph = class {
   }
 };
 
-// packages/dsl/dist/index.js
+// ../dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -1356,6 +1382,8 @@ function isTransitionConfig(value) {
   const o = value;
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
+
+// ../dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -1469,6 +1497,8 @@ function resolveHead(config) {
 function isHeadContribution(value) {
   return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
+
+// ../dsl/src/builders.ts
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -2090,6 +2120,8 @@ var AppBuilder = class {
     builder(new PageBuilderImpl(node, this._graph));
   }
 };
+
+// ../dsl/src/component.ts
 function component(setup, options = {}) {
   return {
     __streetui_component: true,
@@ -2100,6 +2132,8 @@ function component(setup, options = {}) {
 function isComponentDefinition(value) {
   return value !== null && typeof value === "object" && value.__streetui_component === true;
 }
+
+// ../dsl/src/dsl.ts
 var StreetApp = class {
   _graph;
   _builder;
@@ -2130,7 +2164,7 @@ var streetui = {
   }
 };
 
-// packages/compiler/dist/index.js
+// ../compiler/src/validation/validator.ts
 function validateGraph(graph) {
   const dc = new DiagnosticCollector();
   dc.merge(graph.validate());
@@ -2185,6 +2219,8 @@ function validateNode(node, dc) {
       break;
   }
 }
+
+// ../compiler/src/transform/transform.ts
 function transformGraph(graph) {
   graph.walk((node, depth) => {
     applyDefaults(node);
@@ -2221,6 +2257,8 @@ function ensureRenderKey(node, depth) {
     node.setProp("_renderKey", key);
   }
 }
+
+// ../compiler/src/compile.ts
 function compile(app, options = {}) {
   const strict = options.strict ?? true;
   const strictWarnings = options.strictWarnings ?? false;
@@ -2264,7 +2302,46 @@ function compileGraph(graph, options = {}) {
   };
 }
 
-// packages/scheduler/dist/index.js
+// ../runtime/src/node-instance.ts
+var RuntimeNodeInstance = class {
+  graphNode;
+  domNode;
+  children = [];
+  cleanup = new CleanupRegistry();
+  _mounted = false;
+  constructor(options) {
+    this.graphNode = options.graphNode;
+    this.domNode = options.domNode;
+  }
+  get isMounted() {
+    return this._mounted;
+  }
+  mount() {
+    this._mounted = true;
+  }
+  unmount() {
+    if (!this._mounted) return;
+    this._mounted = false;
+    for (const child of this.children) {
+      child.unmount();
+    }
+    this.cleanup.run();
+  }
+  addChild(instance) {
+    this.children.push(instance);
+  }
+  /** Subscribe to a signal and register the unsubscribe for cleanup. */
+  trackSignal(signal3, handler) {
+    const unsub = signal3.subscribe(handler);
+    this.cleanup.add(unsub);
+  }
+  /** Register an arbitrary cleanup function (e.g. DOM event removal). */
+  trackCleanup(fn) {
+    this.cleanup.add(fn);
+  }
+};
+
+// ../scheduler/src/scheduler.ts
 var PRIORITY_ORDER = {
   immediate: 0,
   normal: 1,
@@ -2370,44 +2447,7 @@ function flushSync() {
   scheduler.flush();
 }
 
-// packages/runtime/dist/index.js
-var RuntimeNodeInstance = class {
-  graphNode;
-  domNode;
-  children = [];
-  cleanup = new CleanupRegistry();
-  _mounted = false;
-  constructor(options) {
-    this.graphNode = options.graphNode;
-    this.domNode = options.domNode;
-  }
-  get isMounted() {
-    return this._mounted;
-  }
-  mount() {
-    this._mounted = true;
-  }
-  unmount() {
-    if (!this._mounted) return;
-    this._mounted = false;
-    for (const child of this.children) {
-      child.unmount();
-    }
-    this.cleanup.run();
-  }
-  addChild(instance) {
-    this.children.push(instance);
-  }
-  /** Subscribe to a signal and register the unsubscribe for cleanup. */
-  trackSignal(signal2, handler) {
-    const unsub = signal2.subscribe(handler);
-    this.cleanup.add(unsub);
-  }
-  /** Register an arbitrary cleanup function (e.g. DOM event removal). */
-  trackCleanup(fn) {
-    this.cleanup.add(fn);
-  }
-};
+// ../runtime/src/runtime.ts
 var Runtime = class {
   _renderer;
   _scheduler;
@@ -2504,7 +2544,7 @@ function createRuntime(options) {
   return new Runtime(options);
 }
 
-// packages/events/dist/index.js
+// ../events/src/event-types.ts
 function createStreetEvent(type, target, data, originalEvent) {
   let _stopped = false;
   const ev = {
@@ -2523,6 +2563,8 @@ function createStreetEvent(type, target, data, originalEvent) {
   };
   return ev;
 }
+
+// ../events/src/event-bus.ts
 var EventBus = class {
   _handlers = /* @__PURE__ */ new Map();
   on(type, handler) {
@@ -2563,6 +2605,8 @@ var EventBus = class {
   }
 };
 var globalEventBus = new EventBus();
+
+// ../events/src/dom-bridge.ts
 function bindDomEvent(element, domEventType, handler, options) {
   const listener = (e) => {
     const streetEvent = createStreetEvent(domEventType, element, void 0, e);
@@ -2591,7 +2635,7 @@ var DomEventRegistry = class {
   }
 };
 
-// packages/dom/dist/index.js
+// ../dom/src/browser-adapter.ts
 var BrowserDOMAdapter = class {
   createElement(tag, ns) {
     if (ns !== void 0) {
@@ -2694,6 +2738,8 @@ var BrowserDOMAdapter = class {
   }
 };
 var browserDOMAdapter = /* @__PURE__ */ new BrowserDOMAdapter();
+
+// ../dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -2905,6 +2951,8 @@ function serializeChildren(node) {
   }
   return out;
 }
+
+// ../dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -3099,6 +3147,8 @@ var ServerDOMAdapter = class {
   }
 };
 var serverDOMAdapter = /* @__PURE__ */ new ServerDOMAdapter();
+
+// ../dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -3206,6 +3256,8 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
   dom.addEventListener(container, "keydown", onKeydown);
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
+
+// ../dom/src/live-region.ts
 var VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;";
 function makeRegion(dom, politeness) {
   const el = dom.createElement("div");
@@ -3256,64 +3308,7 @@ function createAnnouncer(dom) {
   };
 }
 
-// packages/compiler/dist/diagnostics.js
-var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
-function analyzeGraph(graph) {
-  const nodes = /* @__PURE__ */ new Map();
-  const summary = {
-    totalNodes: 0,
-    staticNodes: 0,
-    staticSubtrees: 0,
-    dynamicTextNodes: 0,
-    dynamicAttrNodes: 0,
-    eventNodes: 0,
-    lists: 0,
-    conditionals: 0
-  };
-  const visit = (node) => {
-    let allChildrenStatic = true;
-    for (const child of node.children) {
-      const childSubtreeStatic = visit(child);
-      if (!childSubtreeStatic) allChildrenStatic = false;
-    }
-    let hasDynamicText = false;
-    let hasDynamicAttr = false;
-    for (const ref of node.stateRefs) {
-      if (TEXT_PROP_KEYS.has(ref.propKey)) hasDynamicText = true;
-      else hasDynamicAttr = true;
-    }
-    const hasEvents = node.events.length > 0;
-    const isList = node.type === "reactive-list";
-    const isConditional = node.type === "conditional";
-    const isPortal = node.type === "portal";
-    const isComponent = node.type === "component";
-    const isHead = node.type === "head";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
-    const isStaticSubtree = isStatic && allChildrenStatic;
-    nodes.set(node.id, {
-      isStatic,
-      isStaticSubtree,
-      hasDynamicText,
-      hasDynamicAttr,
-      hasEvents,
-      isList,
-      isConditional
-    });
-    summary.totalNodes += 1;
-    if (isStatic) summary.staticNodes += 1;
-    if (isStaticSubtree) summary.staticSubtrees += 1;
-    if (hasDynamicText) summary.dynamicTextNodes += 1;
-    if (hasDynamicAttr) summary.dynamicAttrNodes += 1;
-    if (hasEvents) summary.eventNodes += 1;
-    if (isList) summary.lists += 1;
-    if (isConditional) summary.conditionals += 1;
-    return isStaticSubtree;
-  };
-  visit(graph.root);
-  return { nodes, summary };
-}
-
-// packages/renderer/dist/index.js
+// ../renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -3324,6 +3319,8 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
     ...staticHTML !== void 0 ? { staticHTML } : {}
   };
 }
+
+// ../renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -3353,6 +3350,8 @@ var NodeInstance = class {
     this.cleanup.run();
   }
 };
+
+// ../renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -3423,6 +3422,8 @@ function patchProp(dom, element, name, oldValue, newValue) {
   if (Object.is(oldValue, newValue)) return;
   applyProp(dom, element, name, newValue);
 }
+
+// ../renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -3445,6 +3446,8 @@ function wireEvents(dom, graph, node, element, instance) {
     });
   }
 }
+
+// ../renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -3483,6 +3486,8 @@ var TAG_MAP = {
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
+
+// ../renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -3522,6 +3527,8 @@ function patchNode(ctx, graphNode, propKey, newValue) {
       break;
   }
 }
+
+// ../renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -3748,6 +3755,8 @@ function patchExistingInstance(ctx, instance, newNode) {
     }
   }
 }
+
+// ../renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -3927,6 +3936,8 @@ var TransitionController = class {
     };
   }
 };
+
+// ../renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -4103,6 +4114,8 @@ function renderHead(compiled) {
   }
   return out;
 }
+
+// ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -4527,6 +4540,8 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   if (fn === void 0) return;
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
+
+// ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -4556,6 +4571,8 @@ function consoleHydrationDiagnosticSink(logger = console) {
     }
   };
 }
+
+// ../renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -4790,6 +4807,8 @@ function expectedTag(ctx, graphNode) {
       return resolveTag(graphNode.type);
   }
 }
+
+// ../renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -4813,6 +4832,8 @@ var StreetRenderHandle = class {
     this._ctx.instances.clear();
   }
 };
+
+// ../renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -4852,6 +4873,8 @@ var StreetRendererImpl = class {
 function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
+
+// ../renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
@@ -4886,6 +4909,65 @@ function readState(dom, root) {
     return {};
   }
 }
+
+// ../compiler/dist/diagnostics.js
+var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
+function analyzeGraph(graph) {
+  const nodes = /* @__PURE__ */ new Map();
+  const summary = {
+    totalNodes: 0,
+    staticNodes: 0,
+    staticSubtrees: 0,
+    dynamicTextNodes: 0,
+    dynamicAttrNodes: 0,
+    eventNodes: 0,
+    lists: 0,
+    conditionals: 0
+  };
+  const visit = (node) => {
+    let allChildrenStatic = true;
+    for (const child of node.children) {
+      const childSubtreeStatic = visit(child);
+      if (!childSubtreeStatic) allChildrenStatic = false;
+    }
+    let hasDynamicText = false;
+    let hasDynamicAttr = false;
+    for (const ref of node.stateRefs) {
+      if (TEXT_PROP_KEYS.has(ref.propKey)) hasDynamicText = true;
+      else hasDynamicAttr = true;
+    }
+    const hasEvents = node.events.length > 0;
+    const isList = node.type === "reactive-list";
+    const isConditional = node.type === "conditional";
+    const isPortal = node.type === "portal";
+    const isComponent = node.type === "component";
+    const isHead = node.type === "head";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
+    const isStaticSubtree = isStatic && allChildrenStatic;
+    nodes.set(node.id, {
+      isStatic,
+      isStaticSubtree,
+      hasDynamicText,
+      hasDynamicAttr,
+      hasEvents,
+      isList,
+      isConditional
+    });
+    summary.totalNodes += 1;
+    if (isStatic) summary.staticNodes += 1;
+    if (isStaticSubtree) summary.staticSubtrees += 1;
+    if (hasDynamicText) summary.dynamicTextNodes += 1;
+    if (hasDynamicAttr) summary.dynamicAttrNodes += 1;
+    if (hasEvents) summary.eventNodes += 1;
+    if (isList) summary.lists += 1;
+    if (isConditional) summary.conditionals += 1;
+    return isStaticSubtree;
+  };
+  visit(graph.root);
+  return { nodes, summary };
+}
+
+// ../renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -4931,6 +5013,8 @@ function getStaticSSRPlan(compiled) {
   }
   return plan;
 }
+
+// ../renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -4944,7 +5028,7 @@ function renderToString(compiled, options = {}) {
   return html;
 }
 
-// packages/router/dist/index.js
+// ../router/src/matching.ts
 function segments(path) {
   return path.split("/").filter((s) => s.length > 0);
 }
@@ -4998,6 +5082,8 @@ function splitTarget(to) {
     search: withoutHash.slice(qIndex + 1)
   };
 }
+
+// ../router/src/history.ts
 function buildLocation(pathname, search) {
   return { pathname, search };
 }
@@ -5088,6 +5174,8 @@ function createMemoryHistory(initial = "/") {
     }
   };
 }
+
+// ../router/src/router.ts
 var DEFAULT_NOT_FOUND = {
   path: "*",
   builder: (page) => {
@@ -5159,6 +5247,8 @@ function createRouter(options) {
     }
   };
 }
+
+// ../router/src/mount-router.ts
 var ROUTER_OUTLET_ID = "streetui-router-outlet";
 var ROUTER_OUTLET_KEY = "router-outlet";
 function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
@@ -5329,7 +5419,7 @@ function mountRouter(router, options) {
   };
 }
 
-// packages/forms/dist/index.js
+// ../forms/src/validators.ts
 function required(message = "This field is required") {
   return (value) => value.trim().length === 0 ? message : void 0;
 }
@@ -5355,6 +5445,8 @@ function runValidators(value, validators) {
   }
   return void 0;
 }
+
+// ../forms/src/form.ts
 function createForm(config) {
   const names = Object.keys(config.initialValues);
   const validators = config.validators ?? {};
@@ -5507,7 +5599,7 @@ function createForm(config) {
   };
 }
 
-// packages/context/dist/index.js
+// ../context/src/context.ts
 function createContext(defaultValue, description) {
   const id = Symbol(description ?? "streetui.context");
   const stack = [];
@@ -5531,7 +5623,7 @@ function createContext(defaultValue, description) {
   };
 }
 
-// packages/i18n/dist/index.js
+// ../i18n/src/i18n.ts
 var INTERPOLATION = /\{(\w+)\}/g;
 function interpolate(template, params) {
   if (params === void 0) return template;
@@ -5589,7 +5681,7 @@ function createI18n(config) {
   };
 }
 
-// packages/devtools/dist/index.js
+// ../devtools/src/inspector.ts
 function inspectGraph(graph) {
   return inspectNode(graph.root, 0);
 }
@@ -5678,6 +5770,8 @@ function inspectInteractions(graph) {
   });
   return { overlays, transitions };
 }
+
+// ../devtools/src/application.ts
 function collectPerf(node, distinctSignals, acc) {
   acc.totalNodes += 1;
   if (node.depth > acc.maxDepth) acc.maxDepth = node.depth;
@@ -5733,6 +5827,8 @@ function inspectApplication(compiled) {
     }
   };
 }
+
+// ../devtools/src/diagnostics.ts
 var DEFAULT_PERF_THRESHOLDS = {
   maxNodes: 5e3,
   maxDepth: 32,
@@ -5777,6 +5873,8 @@ function diagnosePerformance(compiled, thresholds = {}) {
   }
   return out;
 }
+
+// ../devtools/src/inspect-reactive.ts
 function inspectSignal(source, options = {}) {
   const raw = source.peek();
   let value = raw;
@@ -5877,6 +5975,8 @@ function inspectI18n(i18n, options = {}) {
   const missingKeys = options.checkKeys.filter((k) => !i18n.has(k));
   return { ...base, missingKeys };
 }
+
+// ../devtools/src/inspect-detail.ts
 function inspectEvents(graph) {
   const nodes = [];
   const byType = {};
@@ -5937,6 +6037,8 @@ function inspectSignalGraph(compiled, options = {}) {
   });
   return { signals, edges };
 }
+
+// ../devtools/src/inspect-ssr.ts
 function countType(graph, type) {
   let n = 0;
   graph.walk((node) => {
@@ -5964,6 +6066,8 @@ function inspectHydration(compiled) {
     staticRatio
   };
 }
+
+// ../devtools/src/panels.ts
 function createDevTools(compiled, sources = {}, options = {}) {
   let current = capture(compiled, sources, options);
   return {
@@ -6164,6 +6268,8 @@ function format(value) {
   }
   return String(value);
 }
+
+// ../devtools/src/view.ts
 function escapeHtml(value) {
   const s = typeof value === "string" ? value : stringifyValue(value);
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -6332,6 +6438,8 @@ var DEVTOOLS_CSS = [
   ".st-depth{display:inline-block}.st-depth{width:calc(var(--d,0)*12px)}",
   "code{color:#d7d7e0}"
 ].join("");
+
+// ../devtools/src/interactive.ts
 var DEVTOOLS_TABS = [
   { id: "components", label: "Component Tree" },
   { id: "inspector", label: "Component Inspector" },
@@ -6531,12 +6639,14 @@ var INTERACTIVE_CSS = [
   ".st-dim{color:#8a8a9a}.st-key{color:#7db4ff}.st-err{color:#ff8a8a}.st-empty{color:#6a6a7a}.st-warn{color:#ffce8a;margin:0 0 10px}",
   "code{color:#d7d7e0}"
 ].join("");
+
+// ../devtools/src/devtools-report.ts
 function renderDevToolsReport(compiled, sources = {}, options = {}) {
   const session = createDevTools(compiled, sources, options);
   return renderDevToolsHTML(session.snapshot);
 }
 
-// packages/streetui/src/config.ts
+// src/config.ts
 function defineConfig(config) {
   return config;
 }

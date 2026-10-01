@@ -21,6 +21,7 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var index_exports = {};
 __export(index_exports, {
   ROUTER_OUTLET_ID: () => ROUTER_OUTLET_ID,
+  ROUTER_OUTLET_KEY: () => ROUTER_OUTLET_KEY,
   createBrowserHistory: () => createBrowserHistory,
   createMemoryHistory: () => createMemoryHistory,
   createRouter: () => createRouter,
@@ -263,8 +264,9 @@ var import_renderer = require("@streetui/renderer");
 var import_dom = require("@streetui/dom");
 var import_core = require("@streetui/core");
 var ROUTER_OUTLET_ID = "streetui-router-outlet";
+var ROUTER_OUTLET_KEY = "router-outlet";
 function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
-  scope.container("router-outlet", () => {
+  scope.container(ROUTER_OUTLET_KEY, () => {
   }, { id });
 }
 function isExternalHref(href) {
@@ -433,6 +435,7 @@ function mountRouter(router, options) {
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   ROUTER_OUTLET_ID,
+  ROUTER_OUTLET_KEY,
   createBrowserHistory,
   createMemoryHistory,
   createRouter,

@@ -212,6 +212,17 @@ declare function createRouter(options: RouterOptions): Router;
 /** Default id used for the route outlet element inside a shell. */
 declare const ROUTER_OUTLET_ID = "streetui-router-outlet";
 /**
+ * Stable reconciliation KEY of the outlet container `routerOutlet` emits.
+ *
+ * Hydration adoption is keyed on node identity, so a server render that fills
+ * the outlet inline must emit its container with THIS key (and a matching id)
+ * for the client to adopt the server node instead of silently recreating the
+ * subtree. Exposed so SSR code references one symbol rather than restating the
+ * `'router-outlet'` literal — the outlet contract then has a single source of
+ * truth for both the key and (via {@link ROUTER_OUTLET_ID}) the default id.
+ */
+declare const ROUTER_OUTLET_KEY = "router-outlet";
+/**
  * Declare the route outlet inside a shell builder. The router replaces this
  * element's contents on every navigation.
  */
@@ -254,4 +265,4 @@ interface MountedRouter {
 }
 declare function mountRouter(router: Router, options: MountRouterOptions): MountedRouter;
 
-export { type IsActiveOptions, type MatchResult, type MountRouterOptions, type MountedRouter, type NavigateOptions, ROUTER_OUTLET_ID, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type Router, type RouterHistory, type RouterLocation, type RouterOptions, type ShellBuilder, createBrowserHistory, createMemoryHistory, createRouter, matchPattern, matchRoutes, mountRouter, normalizePath, routerOutlet, splitTarget };
+export { type IsActiveOptions, type MatchResult, type MountRouterOptions, type MountedRouter, type NavigateOptions, ROUTER_OUTLET_ID, ROUTER_OUTLET_KEY, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type Router, type RouterHistory, type RouterLocation, type RouterOptions, type ShellBuilder, createBrowserHistory, createMemoryHistory, createRouter, matchPattern, matchRoutes, mountRouter, normalizePath, routerOutlet, splitTarget };

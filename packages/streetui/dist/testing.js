@@ -1,4 +1,4 @@
-// packages/core/dist/index.js
+// ../core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -12,6 +12,8 @@ function createNodeId(value) {
 function generateNodeId(prefix = "node") {
   return createNodeId(`${prefix}:${nextId()}`);
 }
+
+// ../core/src/lifecycle.ts
 var CleanupRegistry = class {
   _fns = [];
   add(fn) {
@@ -27,56 +29,8 @@ var CleanupRegistry = class {
     this._fns.length = 0;
   }
 };
-function detectEnvironment() {
-  try {
-    if (typeof process !== "undefined" && process !== null && typeof process === "object" && process.env?.["VITEST"] === "true") {
-      return "test";
-    }
-  } catch {
-  }
-  if (typeof window !== "undefined" && typeof document !== "undefined") {
-    return "browser";
-  }
-  if (typeof self !== "undefined" && typeof self["importScripts"] === "function") {
-    return "worker";
-  }
-  try {
-    if (typeof process !== "undefined" && typeof process === "object") {
-      return "server";
-    }
-  } catch {
-  }
-  return "unknown";
-}
-function detectCapabilities() {
-  return {
-    hasDom: typeof document !== "undefined",
-    hasWindow: typeof window !== "undefined",
-    hasDocument: typeof document !== "undefined",
-    isSecureContext: typeof window !== "undefined" ? window["isSecureContext"] === true : false
-  };
-}
-var Environment = class {
-  kind;
-  capabilities;
-  constructor(kind) {
-    this.kind = kind ?? detectEnvironment();
-    this.capabilities = detectCapabilities();
-  }
-  get isBrowser() {
-    return this.kind === "browser";
-  }
-  get isServer() {
-    return this.kind === "server";
-  }
-  get isTest() {
-    return this.kind === "test";
-  }
-  get isWorker() {
-    return this.kind === "worker";
-  }
-};
-var environment = new Environment();
+
+// ../core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -122,7 +76,7 @@ var DiagnosticCollector = class {
   }
 };
 
-// packages/compiler/dist/index.js
+// ../compiler/src/validation/validator.ts
 function validateGraph(graph) {
   const dc = new DiagnosticCollector();
   dc.merge(graph.validate());
@@ -177,6 +131,8 @@ function validateNode(node, dc) {
       break;
   }
 }
+
+// ../compiler/src/transform/transform.ts
 function transformGraph(graph) {
   graph.walk((node, depth) => {
     applyDefaults(node);
@@ -213,6 +169,8 @@ function ensureRenderKey(node, depth) {
     node.setProp("_renderKey", key);
   }
 }
+
+// ../compiler/src/compile.ts
 function compile(app, options = {}) {
   const strict = options.strict ?? true;
   const strictWarnings = options.strictWarnings ?? false;
@@ -239,7 +197,7 @@ function compile(app, options = {}) {
   };
 }
 
-// packages/dom/dist/index.js
+// ../dom/src/browser-adapter.ts
 var BrowserDOMAdapter = class {
   createElement(tag, ns) {
     if (ns !== void 0) {
@@ -341,6 +299,8 @@ var BrowserDOMAdapter = class {
     return Array.from(node.childNodes);
   }
 };
+
+// ../dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -552,6 +512,8 @@ function serializeChildren(node) {
   }
   return out;
 }
+
+// ../dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -745,6 +707,8 @@ var ServerDOMAdapter = class {
     return serializeServerNode(asServer(node));
   }
 };
+
+// ../dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -853,116 +817,7 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
 
-// packages/compiler/dist/diagnostics.js
-var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
-function analyzeGraph(graph) {
-  const nodes = /* @__PURE__ */ new Map();
-  const summary = {
-    totalNodes: 0,
-    staticNodes: 0,
-    staticSubtrees: 0,
-    dynamicTextNodes: 0,
-    dynamicAttrNodes: 0,
-    eventNodes: 0,
-    lists: 0,
-    conditionals: 0
-  };
-  const visit = (node) => {
-    let allChildrenStatic = true;
-    for (const child of node.children) {
-      const childSubtreeStatic = visit(child);
-      if (!childSubtreeStatic) allChildrenStatic = false;
-    }
-    let hasDynamicText = false;
-    let hasDynamicAttr = false;
-    for (const ref of node.stateRefs) {
-      if (TEXT_PROP_KEYS.has(ref.propKey)) hasDynamicText = true;
-      else hasDynamicAttr = true;
-    }
-    const hasEvents = node.events.length > 0;
-    const isList = node.type === "reactive-list";
-    const isConditional = node.type === "conditional";
-    const isPortal = node.type === "portal";
-    const isComponent = node.type === "component";
-    const isHead = node.type === "head";
-    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
-    const isStaticSubtree = isStatic && allChildrenStatic;
-    nodes.set(node.id, {
-      isStatic,
-      isStaticSubtree,
-      hasDynamicText,
-      hasDynamicAttr,
-      hasEvents,
-      isList,
-      isConditional
-    });
-    summary.totalNodes += 1;
-    if (isStatic) summary.staticNodes += 1;
-    if (isStaticSubtree) summary.staticSubtrees += 1;
-    if (hasDynamicText) summary.dynamicTextNodes += 1;
-    if (hasDynamicAttr) summary.dynamicAttrNodes += 1;
-    if (hasEvents) summary.eventNodes += 1;
-    if (isList) summary.lists += 1;
-    if (isConditional) summary.conditionals += 1;
-    return isStaticSubtree;
-  };
-  visit(graph.root);
-  return { nodes, summary };
-}
-function inspectCompilation(graph) {
-  const analysis = analyzeGraph(graph);
-  const nodes = [];
-  const walk = (node, depth) => {
-    const a = analysis.nodes.get(node.id);
-    if (a !== void 0) {
-      const classification = a.isStaticSubtree ? "static-subtree-root" : a.isStatic ? "static" : "dynamic";
-      nodes.push({
-        id: node.id,
-        type: node.type,
-        depth,
-        classification,
-        dynamicText: a.hasDynamicText,
-        dynamicAttrs: a.hasDynamicAttr,
-        events: node.events.map((e) => e.type),
-        boundProps: node.stateRefs.map((r) => r.propKey),
-        isList: a.isList,
-        isConditional: a.isConditional,
-        hydration: a.isStaticSubtree ? "adopt-static" : "verify-dynamic"
-      });
-    }
-    for (const child of node.children) walk(child, depth + 1);
-  };
-  walk(graph.root, 0);
-  const staticRatio = analysis.summary.totalNodes === 0 ? 0 : analysis.summary.staticNodes / analysis.summary.totalNodes;
-  return {
-    name: graph.name,
-    version: graph.version,
-    summary: { ...analysis.summary, staticRatio: +staticRatio.toFixed(4) },
-    nodes
-  };
-}
-function formatInspection(inspection) {
-  const s = inspection.summary;
-  const lines = [];
-  lines.push(`StreetUI compiler inspection \u2014 ${inspection.name} v${inspection.version}`);
-  lines.push(
-    `  nodes=${s.totalNodes} static=${s.staticNodes} staticSubtrees=${s.staticSubtrees} dynamicText=${s.dynamicTextNodes} dynamicAttrs=${s.dynamicAttrNodes} events=${s.eventNodes} lists=${s.lists} conditionals=${s.conditionals} staticRatio=${(s.staticRatio * 100).toFixed(1)}%`
-  );
-  for (const n of inspection.nodes) {
-    const flags = [];
-    if (n.dynamicText) flags.push("text");
-    if (n.dynamicAttrs) flags.push("attr:" + n.boundProps.join(","));
-    if (n.events.length > 0) flags.push("on:" + n.events.join(","));
-    if (n.isList) flags.push("list");
-    if (n.isConditional) flags.push("cond");
-    lines.push(
-      `  ${"  ".repeat(n.depth)}${n.type}#${n.id} [${n.classification}]` + (flags.length > 0 ? ` {${flags.join(" ")}}` : "")
-    );
-  }
-  return lines.join("\n");
-}
-
-// packages/renderer/dist/index.js
+// ../renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -973,6 +828,8 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
     ...staticHTML !== void 0 ? { staticHTML } : {}
   };
 }
+
+// ../renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -1002,6 +859,8 @@ var NodeInstance = class {
     this.cleanup.run();
   }
 };
+
+// ../renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -1072,6 +931,8 @@ function patchProp(dom, element, name, oldValue, newValue) {
   if (Object.is(oldValue, newValue)) return;
   applyProp(dom, element, name, newValue);
 }
+
+// ../renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -1094,6 +955,8 @@ function wireEvents(dom, graph, node, element, instance) {
     });
   }
 }
+
+// ../renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -1132,6 +995,8 @@ var TAG_MAP = {
 function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
+
+// ../renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -1171,6 +1036,8 @@ function patchNode(ctx, graphNode, propKey, newValue) {
       break;
   }
 }
+
+// ../renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -1397,6 +1264,8 @@ function patchExistingInstance(ctx, instance, newNode) {
     }
   }
 }
+
+// ../renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -1565,6 +1434,8 @@ var TransitionController = class {
     };
   }
 };
+
+// ../renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -1715,6 +1586,8 @@ function wireHeadBehavior(ctx, graphNode, instance) {
   }
   instance.trackCleanup(() => manager.unregister(nodeId));
 }
+
+// ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -2139,6 +2012,8 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   if (fn === void 0) return;
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
+
+// ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -2161,6 +2036,8 @@ function createHydrationDiagnosticCollector() {
     }
   };
 }
+
+// ../renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -2395,6 +2272,8 @@ function expectedTag(ctx, graphNode) {
       return resolveTag(graphNode.type);
   }
 }
+
+// ../renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -2418,6 +2297,8 @@ var StreetRenderHandle = class {
     this._ctx.instances.clear();
   }
 };
+
+// ../renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -2457,6 +2338,117 @@ var StreetRendererImpl = class {
 function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
+
+// ../compiler/dist/diagnostics.js
+var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
+function analyzeGraph(graph) {
+  const nodes = /* @__PURE__ */ new Map();
+  const summary = {
+    totalNodes: 0,
+    staticNodes: 0,
+    staticSubtrees: 0,
+    dynamicTextNodes: 0,
+    dynamicAttrNodes: 0,
+    eventNodes: 0,
+    lists: 0,
+    conditionals: 0
+  };
+  const visit = (node) => {
+    let allChildrenStatic = true;
+    for (const child of node.children) {
+      const childSubtreeStatic = visit(child);
+      if (!childSubtreeStatic) allChildrenStatic = false;
+    }
+    let hasDynamicText = false;
+    let hasDynamicAttr = false;
+    for (const ref of node.stateRefs) {
+      if (TEXT_PROP_KEYS.has(ref.propKey)) hasDynamicText = true;
+      else hasDynamicAttr = true;
+    }
+    const hasEvents = node.events.length > 0;
+    const isList = node.type === "reactive-list";
+    const isConditional = node.type === "conditional";
+    const isPortal = node.type === "portal";
+    const isComponent = node.type === "component";
+    const isHead = node.type === "head";
+    const isStatic = node.stateRefs.length === 0 && !hasEvents && !isList && !isConditional && !isPortal && !isComponent && !isHead;
+    const isStaticSubtree = isStatic && allChildrenStatic;
+    nodes.set(node.id, {
+      isStatic,
+      isStaticSubtree,
+      hasDynamicText,
+      hasDynamicAttr,
+      hasEvents,
+      isList,
+      isConditional
+    });
+    summary.totalNodes += 1;
+    if (isStatic) summary.staticNodes += 1;
+    if (isStaticSubtree) summary.staticSubtrees += 1;
+    if (hasDynamicText) summary.dynamicTextNodes += 1;
+    if (hasDynamicAttr) summary.dynamicAttrNodes += 1;
+    if (hasEvents) summary.eventNodes += 1;
+    if (isList) summary.lists += 1;
+    if (isConditional) summary.conditionals += 1;
+    return isStaticSubtree;
+  };
+  visit(graph.root);
+  return { nodes, summary };
+}
+function inspectCompilation(graph) {
+  const analysis = analyzeGraph(graph);
+  const nodes = [];
+  const walk = (node, depth) => {
+    const a = analysis.nodes.get(node.id);
+    if (a !== void 0) {
+      const classification = a.isStaticSubtree ? "static-subtree-root" : a.isStatic ? "static" : "dynamic";
+      nodes.push({
+        id: node.id,
+        type: node.type,
+        depth,
+        classification,
+        dynamicText: a.hasDynamicText,
+        dynamicAttrs: a.hasDynamicAttr,
+        events: node.events.map((e) => e.type),
+        boundProps: node.stateRefs.map((r) => r.propKey),
+        isList: a.isList,
+        isConditional: a.isConditional,
+        hydration: a.isStaticSubtree ? "adopt-static" : "verify-dynamic"
+      });
+    }
+    for (const child of node.children) walk(child, depth + 1);
+  };
+  walk(graph.root, 0);
+  const staticRatio = analysis.summary.totalNodes === 0 ? 0 : analysis.summary.staticNodes / analysis.summary.totalNodes;
+  return {
+    name: graph.name,
+    version: graph.version,
+    summary: { ...analysis.summary, staticRatio: +staticRatio.toFixed(4) },
+    nodes
+  };
+}
+function formatInspection(inspection) {
+  const s = inspection.summary;
+  const lines = [];
+  lines.push(`StreetUI compiler inspection \u2014 ${inspection.name} v${inspection.version}`);
+  lines.push(
+    `  nodes=${s.totalNodes} static=${s.staticNodes} staticSubtrees=${s.staticSubtrees} dynamicText=${s.dynamicTextNodes} dynamicAttrs=${s.dynamicAttrNodes} events=${s.eventNodes} lists=${s.lists} conditionals=${s.conditionals} staticRatio=${(s.staticRatio * 100).toFixed(1)}%`
+  );
+  for (const n of inspection.nodes) {
+    const flags = [];
+    if (n.dynamicText) flags.push("text");
+    if (n.dynamicAttrs) flags.push("attr:" + n.boundProps.join(","));
+    if (n.events.length > 0) flags.push("on:" + n.events.join(","));
+    if (n.isList) flags.push("list");
+    if (n.isConditional) flags.push("cond");
+    lines.push(
+      `  ${"  ".repeat(n.depth)}${n.type}#${n.id} [${n.classification}]` + (flags.length > 0 ? ` {${flags.join(" ")}}` : "")
+    );
+  }
+  return lines.join("\n");
+}
+
+// ../renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -2502,6 +2494,8 @@ function getStaticSSRPlan(compiled) {
   }
   return plan;
 }
+
+// ../renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -2515,7 +2509,74 @@ function renderToString(compiled, options = {}) {
   return html;
 }
 
-// packages/scheduler/dist/index.js
+// ../testing/src/test-renderer.ts
+function render(app) {
+  const compiled = compile(app);
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+  const handle = renderer.mount(compiled, container);
+  return {
+    container,
+    handle,
+    unmount() {
+      handle.unmount();
+      if (container.parentNode !== null) {
+        container.parentNode.removeChild(container);
+      }
+    },
+    flush() {
+      handle.flush();
+    },
+    getByTag(tag) {
+      const el = container.querySelector(tag);
+      if (el === null) {
+        throw new Error(`[StreetUI Testing] Element <${tag}> not found in render output`);
+      }
+      return el;
+    },
+    getAllByTag(tag) {
+      return Array.from(container.querySelectorAll(tag));
+    },
+    getByText(text) {
+      const all = Array.from(container.querySelectorAll("*"));
+      const match = all.find(
+        (el) => el.children.length === 0 && el.textContent?.includes(text)
+      );
+      if (match === void 0) {
+        throw new Error(`[StreetUI Testing] No element with text "${text}" found`);
+      }
+      return match;
+    },
+    getAllByText(text) {
+      return Array.from(container.querySelectorAll("*")).filter(
+        (el) => el.textContent?.includes(text)
+      );
+    },
+    query(selector) {
+      return container.querySelector(selector);
+    },
+    queryAll(selector) {
+      return Array.from(container.querySelectorAll(selector));
+    },
+    find(selector) {
+      const el = container.querySelector(selector);
+      if (el === null) {
+        throw new Error(`[StreetUI Testing] Selector "${selector}" matched nothing`);
+      }
+      return el;
+    }
+  };
+}
+function renderOnce(app, testFn) {
+  const result = render(app);
+  return Promise.resolve(testFn(result)).finally(() => {
+    result.unmount();
+    resetIdCounter();
+  });
+}
+
+// ../scheduler/src/scheduler.ts
 var PRIORITY_ORDER = {
   immediate: 0,
   normal: 1,
@@ -2615,7 +2676,306 @@ function flushSync() {
   scheduler.flush();
 }
 
-// packages/state/dist/index.js
+// ../testing/src/helpers.ts
+async function flushUpdates() {
+  flushSync();
+  await Promise.resolve();
+  flushSync();
+}
+async function waitFor(check, options = {}) {
+  const timeout = options.timeout ?? 1e3;
+  const interval = options.interval ?? 10;
+  const deadline = Date.now() + timeout;
+  let lastError;
+  for (; ; ) {
+    await flushUpdates();
+    try {
+      const result = check();
+      if (result) return result;
+      lastError = new Error("[StreetUI Testing] waitFor: condition was falsy");
+    } catch (err) {
+      lastError = err;
+    }
+    if (Date.now() >= deadline) {
+      throw lastError instanceof Error ? lastError : new Error(String(lastError));
+    }
+    await new Promise((resolve) => setTimeout(resolve, interval));
+  }
+}
+function focus(el) {
+  el.focus?.();
+}
+function blur(el) {
+  el.blur?.();
+}
+function pressKey(key, el = document.activeElement, init = {}) {
+  if (el === null) return;
+  el.dispatchEvent(
+    new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init })
+  );
+}
+function clickOutside(container, target = document.body) {
+  if (container.contains(target)) {
+    throw new Error("[StreetUI Testing] clickOutside: target is inside the container");
+  }
+  target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
+  target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+}
+async function openOverlay(open) {
+  open.set(true);
+  await flushUpdates();
+}
+async function closeOverlay(open) {
+  open.set(false);
+  await flushUpdates();
+}
+async function waitForTransition(el) {
+  el.dispatchEvent(new Event("transitionend", { bubbles: true }));
+  await flushUpdates();
+}
+function findByText(container, text) {
+  const match = Array.from(container.querySelectorAll("*")).find(
+    (el) => el.children.length === 0 && (el.textContent?.includes(text) ?? false)
+  );
+  if (match === void 0) {
+    throw new Error(`[StreetUI Testing] No element with text "${text}" found`);
+  }
+  return match;
+}
+function implicitRole(el) {
+  const tag = el.tagName.toLowerCase();
+  switch (tag) {
+    case "button":
+      return "button";
+    case "a":
+      return el.hasAttribute("href") ? "link" : null;
+    case "nav":
+      return "navigation";
+    case "h1":
+    case "h2":
+    case "h3":
+    case "h4":
+    case "h5":
+    case "h6":
+      return "heading";
+    case "input": {
+      const type = (el.getAttribute("type") ?? "text").toLowerCase();
+      if (type === "checkbox") return "checkbox";
+      if (type === "radio") return "radio";
+      if (type === "button" || type === "submit") return "button";
+      return "textbox";
+    }
+    case "form":
+      return "form";
+    default:
+      return null;
+  }
+}
+function accessibleName(el) {
+  return (el.getAttribute("aria-label") ?? el.textContent ?? "").trim();
+}
+function findAllByRole(container, role, options = {}) {
+  const all = Array.from(container.querySelectorAll("*"));
+  return all.filter((el) => {
+    const explicit = el.getAttribute("role");
+    const matches = explicit === role || explicit === null && implicitRole(el) === role;
+    if (!matches) return false;
+    if (options.name !== void 0) {
+      return accessibleName(el).includes(options.name);
+    }
+    return true;
+  });
+}
+function findByRole(container, role, options = {}) {
+  const matches = findAllByRole(container, role, options);
+  if (matches.length === 0) {
+    const named = options.name !== void 0 ? ` with name "${options.name}"` : "";
+    throw new Error(`[StreetUI Testing] No element with role "${role}"${named} found`);
+  }
+  if (matches.length > 1) {
+    throw new Error(
+      `[StreetUI Testing] Found ${matches.length} elements with role "${role}" \u2014 refine with { name }`
+    );
+  }
+  return matches[0];
+}
+function renderServerThenHydrate(build, options = {}) {
+  resetIdCounter();
+  const serverHtml = renderToString(compile(build()));
+  const container = document.createElement("div");
+  container.innerHTML = serverHtml;
+  document.body.appendChild(container);
+  const collector = options.collectDiagnostics === true ? createHydrationDiagnosticCollector() : void 0;
+  resetIdCounter();
+  const renderer = createRenderer({
+    domAdapter: new BrowserDOMAdapter(),
+    ...collector !== void 0 ? { hydrationDiagnostics: collector.sink } : {}
+  });
+  const handle = renderer.hydrate(compile(build()), container);
+  return {
+    container,
+    serverHtml,
+    handle,
+    diagnostics: collector?.diagnostics ?? [],
+    flush() {
+      handle.flush();
+    },
+    unmount() {
+      handle.unmount();
+      if (container.parentNode !== null) container.parentNode.removeChild(container);
+    }
+  };
+}
+
+// ../dsl/src/transition.ts
+function classes(value) {
+  if (value === void 0) return [];
+  const out = [];
+  for (const token of value.split(/\s+/)) {
+    if (token.length > 0 && !out.includes(token)) out.push(token);
+  }
+  return out;
+}
+function merge(a, b) {
+  const out = [...a];
+  for (const token of b) if (!out.includes(token)) out.push(token);
+  return out;
+}
+function resolveTransition(config) {
+  const n = config.name;
+  const enterActive = merge(
+    classes(config.enter),
+    classes(config.enterActive ?? (n !== void 0 ? `${n}-enter-active` : void 0))
+  );
+  const leaveActive = merge(
+    classes(config.leave),
+    classes(config.leaveActive ?? (n !== void 0 ? `${n}-leave-active` : void 0))
+  );
+  return {
+    enterActive,
+    enterFrom: classes(config.enterFrom ?? (n !== void 0 ? `${n}-enter-from` : void 0)),
+    enterTo: classes(config.enterTo ?? (n !== void 0 ? `${n}-enter-to` : void 0)),
+    leaveActive,
+    leaveFrom: classes(config.leaveFrom ?? (n !== void 0 ? `${n}-leave-from` : void 0)),
+    leaveTo: classes(config.leaveTo ?? (n !== void 0 ? `${n}-leave-to` : void 0)),
+    appear: config.appear ?? false,
+    duration: config.duration ?? 1e3
+  };
+}
+
+// ../dsl/src/head.ts
+function metaDedupKey(m) {
+  if (m.charset !== void 0) return "meta:charset";
+  if (m.name !== void 0) return `meta:name=${m.name}`;
+  if (m.property !== void 0) return `meta:property=${m.property}`;
+  if (m.httpEquiv !== void 0) return `meta:http-equiv=${m.httpEquiv}`;
+  return void 0;
+}
+function metaAttrs(m) {
+  const attrs = {};
+  if (m.charset !== void 0) attrs["charset"] = m.charset;
+  if (m.name !== void 0) attrs["name"] = m.name;
+  if (m.property !== void 0) attrs["property"] = m.property;
+  if (m.httpEquiv !== void 0) attrs["http-equiv"] = m.httpEquiv;
+  if (m.content !== void 0) attrs["content"] = m.content;
+  return attrs;
+}
+function linkAttrs(l) {
+  const attrs = { rel: l.rel, href: l.href };
+  if (l.sizes !== void 0) attrs["sizes"] = l.sizes;
+  if (l.type !== void 0) attrs["type"] = l.type;
+  if (l.media !== void 0) attrs["media"] = l.media;
+  if (l.as !== void 0) attrs["as"] = l.as;
+  if (l.crossorigin !== void 0) attrs["crossorigin"] = l.crossorigin;
+  if (l.hreflang !== void 0) attrs["hreflang"] = l.hreflang;
+  return attrs;
+}
+function resolveHead(config) {
+  const entries = [];
+  if (config.charset !== void 0) {
+    entries.push({ tag: "meta", dedupKey: "meta:charset", attrs: { charset: config.charset } });
+  }
+  if (config.base !== void 0) {
+    entries.push({ tag: "base", dedupKey: "base", attrs: { href: config.base } });
+  }
+  if (config.title !== void 0) {
+    entries.push({ tag: "title", dedupKey: "title", attrs: {}, text: config.title });
+  }
+  if (config.description !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=description",
+      attrs: { name: "description", content: config.description }
+    });
+  }
+  if (config.canonical !== void 0) {
+    entries.push({
+      tag: "link",
+      dedupKey: "link:rel=canonical",
+      attrs: { rel: "canonical", href: config.canonical }
+    });
+  }
+  if (config.robots !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=robots",
+      attrs: { name: "robots", content: config.robots }
+    });
+  }
+  if (config.themeColor !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=theme-color",
+      attrs: { name: "theme-color", content: config.themeColor }
+    });
+  }
+  if (config.viewport !== void 0) {
+    entries.push({
+      tag: "meta",
+      dedupKey: "meta:name=viewport",
+      attrs: { name: "viewport", content: config.viewport }
+    });
+  }
+  if (config.favicon !== void 0) {
+    const l = typeof config.favicon === "string" ? { rel: "icon", href: config.favicon } : config.favicon;
+    entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}`, attrs: linkAttrs(l) });
+  }
+  if (config.openGraph !== void 0) {
+    for (const key of Object.keys(config.openGraph)) {
+      const property = `og:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:property=${property}`,
+        attrs: { property, content: config.openGraph[key] }
+      });
+    }
+  }
+  if (config.twitter !== void 0) {
+    for (const key of Object.keys(config.twitter)) {
+      const name = `twitter:${key}`;
+      entries.push({
+        tag: "meta",
+        dedupKey: `meta:name=${name}`,
+        attrs: { name, content: config.twitter[key] }
+      });
+    }
+  }
+  if (config.meta !== void 0) {
+    for (const m of config.meta) {
+      const key = metaDedupKey(m);
+      if (key === void 0) continue;
+      entries.push({ tag: "meta", dedupKey: key, attrs: metaAttrs(m) });
+    }
+  }
+  if (config.link !== void 0) {
+    for (const l of config.link) {
+      entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}:href=${l.href}`, attrs: linkAttrs(l) });
+    }
+  }
+  return { entries };
+}
+
+// ../state/src/signal.ts
 var _activeConsumer = null;
 function withConsumer(consumer, fn) {
   const prev = _activeConsumer;
@@ -2797,407 +3157,7 @@ function effect(fn) {
   return () => e.dispose();
 }
 
-// packages/graph/dist/index.js
-var GraphNode = class _GraphNode {
-  id;
-  type;
-  key;
-  props;
-  events;
-  stateRefs;
-  children;
-  parent;
-  constructor(type, options = {}) {
-    this.type = type;
-    this.id = options.id ?? generateNodeId(type);
-    this.key = options.key;
-    this.props = options.props ?? {};
-    this.events = options.events ?? [];
-    this.stateRefs = options.stateRefs ?? [];
-    this.children = [];
-    this.parent = null;
-  }
-  // ── Child management ────────────────────────────────────────────────────────
-  appendChild(child) {
-    if (child.parent !== null) {
-      child.parent.removeChild(child);
-    }
-    child.parent = this;
-    this.children.push(child);
-  }
-  insertBefore(child, reference) {
-    const idx = this.children.indexOf(reference);
-    if (idx === -1) {
-      this.appendChild(child);
-      return;
-    }
-    if (child.parent !== null) {
-      child.parent.removeChild(child);
-    }
-    child.parent = this;
-    this.children.splice(idx, 0, child);
-  }
-  removeChild(child) {
-    const idx = this.children.indexOf(child);
-    if (idx === -1) return;
-    this.children.splice(idx, 1);
-    child.parent = null;
-  }
-  replaceChild(newChild, oldChild) {
-    const idx = this.children.indexOf(oldChild);
-    if (idx === -1) {
-      throw new Error(`GraphNode.replaceChild: oldChild is not a child of this node`);
-    }
-    if (newChild.parent !== null) {
-      newChild.parent.removeChild(newChild);
-    }
-    oldChild.parent = null;
-    newChild.parent = this;
-    this.children.splice(idx, 1, newChild);
-  }
-  // ── Prop helpers ────────────────────────────────────────────────────────────
-  setProp(key, value) {
-    this.props = { ...this.props, [key]: value };
-  }
-  getProp(key) {
-    return this.props[key];
-  }
-  // ── Event helpers ───────────────────────────────────────────────────────────
-  addEvent(descriptor) {
-    this.events.push(descriptor);
-  }
-  removeEvent(type) {
-    this.events = this.events.filter((e) => e.type !== type);
-  }
-  // ── Queries ─────────────────────────────────────────────────────────────────
-  get isLeaf() {
-    return this.children.length === 0;
-  }
-  get depth() {
-    let d = 0;
-    let node = this.parent;
-    while (node !== null) {
-      d++;
-      node = node.parent;
-    }
-    return d;
-  }
-  get root() {
-    let node = this;
-    while (node.parent !== null) {
-      node = node.parent;
-    }
-    return node;
-  }
-  /** Shallow clone — does not clone children. */
-  shallowClone() {
-    const opts = {
-      props: { ...this.props },
-      events: [...this.events],
-      stateRefs: [...this.stateRefs]
-    };
-    if (this.key !== void 0) opts.key = this.key;
-    return new _GraphNode(this.type, opts);
-  }
-};
-var ApplicationGraph = class {
-  root;
-  name;
-  version;
-  _nodeIndex = /* @__PURE__ */ new Map();
-  /** Handler registry — maps handlerKey → actual function */
-  handlers = /* @__PURE__ */ new Map();
-  constructor(options) {
-    this.name = options.name;
-    this.version = options.version ?? "0.0.1";
-    this.root = new GraphNode("application", { props: { name: options.name } });
-    this._nodeIndex.set(this.root.id, this.root);
-  }
-  // ── Node creation & attachment ────────────────────────────────────────────
-  createNode(type, options = {}) {
-    const nodeOpts = {};
-    if (options.key !== void 0) nodeOpts.key = options.key;
-    if (options.props !== void 0) nodeOpts.props = options.props;
-    const node = new GraphNode(type, nodeOpts);
-    this._nodeIndex.set(node.id, node);
-    if (options.parent !== void 0) {
-      options.parent.appendChild(node);
-    }
-    return node;
-  }
-  attachNode(node, parent) {
-    this._nodeIndex.set(node.id, node);
-    parent.appendChild(node);
-  }
-  detachNode(node) {
-    if (node.parent !== null) {
-      node.parent.removeChild(node);
-    }
-    this._removeFromIndex(node);
-  }
-  _removeFromIndex(node) {
-    this._nodeIndex.delete(node.id);
-    this._unregisterNodeHandlers(node);
-    for (const child of node.children) {
-      this._removeFromIndex(child);
-    }
-  }
-  /**
-   * Remove every handler-registry entry owned by a single node. A node owns:
-   *  - one entry per event descriptor (its `handlerKey`),
-   *  - one `__signal__<signalId>` entry per state ref (signalIds are namespaced
-   *    by node id, so they are never shared between nodes), and
-   *  - a `__listbuild__<id>` entry if it is a reactive-list.
-   * Called for every node in a detached subtree so removing list items (or
-   * discarding freshly-built-but-unadopted item subtrees) leaves no stale
-   * registrations behind.
-   */
-  _unregisterNodeHandlers(node) {
-    for (const event of node.events) {
-      this.handlers.delete(event.handlerKey);
-    }
-    for (const ref of node.stateRefs) {
-      this.handlers.delete(`__signal__${ref.signalId}`);
-    }
-    this.handlers.delete(`__listbuild__${node.id}`);
-    this.handlers.delete(`__listplan__${node.id}`);
-    this.handlers.delete(`__overlay__${node.id}`);
-    this.handlers.delete(`__component__${node.id}`);
-    this.handlers.delete(`__transition__${node.id}`);
-    this.handlers.delete(`__head__${node.id}`);
-  }
-  // ── Handler registry ──────────────────────────────────────────────────────
-  registerHandler(key, fn) {
-    this.handlers.set(key, fn);
-  }
-  getHandler(key) {
-    return this.handlers.get(key);
-  }
-  /** True if a handler is currently registered under `key`. Inspection helper. */
-  hasHandler(key) {
-    return this.handlers.has(key);
-  }
-  /** Number of currently-registered handlers. Inspection helper. */
-  get handlerCount() {
-    return this.handlers.size;
-  }
-  // ── Lookup ────────────────────────────────────────────────────────────────
-  findById(id) {
-    return this._nodeIndex.get(id);
-  }
-  findAll(predicate) {
-    const results = [];
-    this._walk(this.root, (node) => {
-      if (predicate(node)) results.push(node);
-    });
-    return results;
-  }
-  findByType(type) {
-    return this.findAll((n) => n.type === type);
-  }
-  // ── Traversal ─────────────────────────────────────────────────────────────
-  walk(visitor) {
-    this._walk(this.root, visitor, 0);
-  }
-  _walk(node, visitor, depth = 0) {
-    visitor(node, depth);
-    for (const child of node.children) {
-      this._walk(child, visitor, depth + 1);
-    }
-  }
-  get nodeCount() {
-    return this._nodeIndex.size;
-  }
-  // ── Validation ────────────────────────────────────────────────────────────
-  validate() {
-    const dc = new DiagnosticCollector();
-    this.walk((node) => {
-      for (const event of node.events) {
-        if (!this.handlers.has(event.handlerKey)) {
-          dc.warn(
-            "GRAPH_MISSING_HANDLER",
-            `Node "${node.id}" references handler "${event.handlerKey}" which is not registered`,
-            { nodeId: node.id }
-          );
-        }
-      }
-      if (node.type === "page" && node.parent?.type !== "application") {
-        dc.error(
-          "GRAPH_PAGE_DEPTH",
-          `Page node "${node.id}" must be a direct child of the application root`,
-          { nodeId: node.id }
-        );
-      }
-    });
-    return dc;
-  }
-  // ── Serialization ─────────────────────────────────────────────────────────
-  serialize() {
-    return {
-      name: this.name,
-      version: this.version,
-      root: this._serializeNode(this.root)
-    };
-  }
-  _serializeNode(node) {
-    const result = {
-      id: node.id,
-      type: node.type,
-      key: node.key,
-      props: node.props,
-      events: node.events,
-      stateRefs: node.stateRefs,
-      children: node.children.map((c) => this._serializeNode(c))
-    };
-    return result;
-  }
-};
-
-// packages/dsl/dist/index.js
-function classes(value) {
-  if (value === void 0) return [];
-  const out = [];
-  for (const token of value.split(/\s+/)) {
-    if (token.length > 0 && !out.includes(token)) out.push(token);
-  }
-  return out;
-}
-function merge(a, b) {
-  const out = [...a];
-  for (const token of b) if (!out.includes(token)) out.push(token);
-  return out;
-}
-function resolveTransition(config) {
-  const n = config.name;
-  const enterActive = merge(
-    classes(config.enter),
-    classes(config.enterActive ?? (n !== void 0 ? `${n}-enter-active` : void 0))
-  );
-  const leaveActive = merge(
-    classes(config.leave),
-    classes(config.leaveActive ?? (n !== void 0 ? `${n}-leave-active` : void 0))
-  );
-  return {
-    enterActive,
-    enterFrom: classes(config.enterFrom ?? (n !== void 0 ? `${n}-enter-from` : void 0)),
-    enterTo: classes(config.enterTo ?? (n !== void 0 ? `${n}-enter-to` : void 0)),
-    leaveActive,
-    leaveFrom: classes(config.leaveFrom ?? (n !== void 0 ? `${n}-leave-from` : void 0)),
-    leaveTo: classes(config.leaveTo ?? (n !== void 0 ? `${n}-leave-to` : void 0)),
-    appear: config.appear ?? false,
-    duration: config.duration ?? 1e3
-  };
-}
-function metaDedupKey(m) {
-  if (m.charset !== void 0) return "meta:charset";
-  if (m.name !== void 0) return `meta:name=${m.name}`;
-  if (m.property !== void 0) return `meta:property=${m.property}`;
-  if (m.httpEquiv !== void 0) return `meta:http-equiv=${m.httpEquiv}`;
-  return void 0;
-}
-function metaAttrs(m) {
-  const attrs = {};
-  if (m.charset !== void 0) attrs["charset"] = m.charset;
-  if (m.name !== void 0) attrs["name"] = m.name;
-  if (m.property !== void 0) attrs["property"] = m.property;
-  if (m.httpEquiv !== void 0) attrs["http-equiv"] = m.httpEquiv;
-  if (m.content !== void 0) attrs["content"] = m.content;
-  return attrs;
-}
-function linkAttrs(l) {
-  const attrs = { rel: l.rel, href: l.href };
-  if (l.sizes !== void 0) attrs["sizes"] = l.sizes;
-  if (l.type !== void 0) attrs["type"] = l.type;
-  if (l.media !== void 0) attrs["media"] = l.media;
-  if (l.as !== void 0) attrs["as"] = l.as;
-  if (l.crossorigin !== void 0) attrs["crossorigin"] = l.crossorigin;
-  if (l.hreflang !== void 0) attrs["hreflang"] = l.hreflang;
-  return attrs;
-}
-function resolveHead(config) {
-  const entries = [];
-  if (config.charset !== void 0) {
-    entries.push({ tag: "meta", dedupKey: "meta:charset", attrs: { charset: config.charset } });
-  }
-  if (config.base !== void 0) {
-    entries.push({ tag: "base", dedupKey: "base", attrs: { href: config.base } });
-  }
-  if (config.title !== void 0) {
-    entries.push({ tag: "title", dedupKey: "title", attrs: {}, text: config.title });
-  }
-  if (config.description !== void 0) {
-    entries.push({
-      tag: "meta",
-      dedupKey: "meta:name=description",
-      attrs: { name: "description", content: config.description }
-    });
-  }
-  if (config.canonical !== void 0) {
-    entries.push({
-      tag: "link",
-      dedupKey: "link:rel=canonical",
-      attrs: { rel: "canonical", href: config.canonical }
-    });
-  }
-  if (config.robots !== void 0) {
-    entries.push({
-      tag: "meta",
-      dedupKey: "meta:name=robots",
-      attrs: { name: "robots", content: config.robots }
-    });
-  }
-  if (config.themeColor !== void 0) {
-    entries.push({
-      tag: "meta",
-      dedupKey: "meta:name=theme-color",
-      attrs: { name: "theme-color", content: config.themeColor }
-    });
-  }
-  if (config.viewport !== void 0) {
-    entries.push({
-      tag: "meta",
-      dedupKey: "meta:name=viewport",
-      attrs: { name: "viewport", content: config.viewport }
-    });
-  }
-  if (config.favicon !== void 0) {
-    const l = typeof config.favicon === "string" ? { rel: "icon", href: config.favicon } : config.favicon;
-    entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}`, attrs: linkAttrs(l) });
-  }
-  if (config.openGraph !== void 0) {
-    for (const key of Object.keys(config.openGraph)) {
-      const property = `og:${key}`;
-      entries.push({
-        tag: "meta",
-        dedupKey: `meta:property=${property}`,
-        attrs: { property, content: config.openGraph[key] }
-      });
-    }
-  }
-  if (config.twitter !== void 0) {
-    for (const key of Object.keys(config.twitter)) {
-      const name = `twitter:${key}`;
-      entries.push({
-        tag: "meta",
-        dedupKey: `meta:name=${name}`,
-        attrs: { name, content: config.twitter[key] }
-      });
-    }
-  }
-  if (config.meta !== void 0) {
-    for (const m of config.meta) {
-      const key = metaDedupKey(m);
-      if (key === void 0) continue;
-      entries.push({ tag: "meta", dedupKey: key, attrs: metaAttrs(m) });
-    }
-  }
-  if (config.link !== void 0) {
-    for (const l of config.link) {
-      entries.push({ tag: "link", dedupKey: `link:rel=${l.rel}:href=${l.href}`, attrs: linkAttrs(l) });
-    }
-  }
-  return { entries };
-}
+// ../dsl/src/builders.ts
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -3819,6 +3779,266 @@ var AppBuilder = class {
     builder(new PageBuilderImpl(node, this._graph));
   }
 };
+
+// ../graph/src/graph-node.ts
+var GraphNode = class _GraphNode {
+  id;
+  type;
+  key;
+  props;
+  events;
+  stateRefs;
+  children;
+  parent;
+  constructor(type, options = {}) {
+    this.type = type;
+    this.id = options.id ?? generateNodeId(type);
+    this.key = options.key;
+    this.props = options.props ?? {};
+    this.events = options.events ?? [];
+    this.stateRefs = options.stateRefs ?? [];
+    this.children = [];
+    this.parent = null;
+  }
+  // ── Child management ────────────────────────────────────────────────────────
+  appendChild(child) {
+    if (child.parent !== null) {
+      child.parent.removeChild(child);
+    }
+    child.parent = this;
+    this.children.push(child);
+  }
+  insertBefore(child, reference) {
+    const idx = this.children.indexOf(reference);
+    if (idx === -1) {
+      this.appendChild(child);
+      return;
+    }
+    if (child.parent !== null) {
+      child.parent.removeChild(child);
+    }
+    child.parent = this;
+    this.children.splice(idx, 0, child);
+  }
+  removeChild(child) {
+    const idx = this.children.indexOf(child);
+    if (idx === -1) return;
+    this.children.splice(idx, 1);
+    child.parent = null;
+  }
+  replaceChild(newChild, oldChild) {
+    const idx = this.children.indexOf(oldChild);
+    if (idx === -1) {
+      throw new Error(`GraphNode.replaceChild: oldChild is not a child of this node`);
+    }
+    if (newChild.parent !== null) {
+      newChild.parent.removeChild(newChild);
+    }
+    oldChild.parent = null;
+    newChild.parent = this;
+    this.children.splice(idx, 1, newChild);
+  }
+  // ── Prop helpers ────────────────────────────────────────────────────────────
+  setProp(key, value) {
+    this.props = { ...this.props, [key]: value };
+  }
+  getProp(key) {
+    return this.props[key];
+  }
+  // ── Event helpers ───────────────────────────────────────────────────────────
+  addEvent(descriptor) {
+    this.events.push(descriptor);
+  }
+  removeEvent(type) {
+    this.events = this.events.filter((e) => e.type !== type);
+  }
+  // ── Queries ─────────────────────────────────────────────────────────────────
+  get isLeaf() {
+    return this.children.length === 0;
+  }
+  get depth() {
+    let d = 0;
+    let node = this.parent;
+    while (node !== null) {
+      d++;
+      node = node.parent;
+    }
+    return d;
+  }
+  get root() {
+    let node = this;
+    while (node.parent !== null) {
+      node = node.parent;
+    }
+    return node;
+  }
+  /** Shallow clone — does not clone children. */
+  shallowClone() {
+    const opts = {
+      props: { ...this.props },
+      events: [...this.events],
+      stateRefs: [...this.stateRefs]
+    };
+    if (this.key !== void 0) opts.key = this.key;
+    return new _GraphNode(this.type, opts);
+  }
+};
+
+// ../graph/src/graph.ts
+var ApplicationGraph = class {
+  root;
+  name;
+  version;
+  _nodeIndex = /* @__PURE__ */ new Map();
+  /** Handler registry — maps handlerKey → actual function */
+  handlers = /* @__PURE__ */ new Map();
+  constructor(options) {
+    this.name = options.name;
+    this.version = options.version ?? "0.0.1";
+    this.root = new GraphNode("application", { props: { name: options.name } });
+    this._nodeIndex.set(this.root.id, this.root);
+  }
+  // ── Node creation & attachment ────────────────────────────────────────────
+  createNode(type, options = {}) {
+    const nodeOpts = {};
+    if (options.key !== void 0) nodeOpts.key = options.key;
+    if (options.props !== void 0) nodeOpts.props = options.props;
+    const node = new GraphNode(type, nodeOpts);
+    this._nodeIndex.set(node.id, node);
+    if (options.parent !== void 0) {
+      options.parent.appendChild(node);
+    }
+    return node;
+  }
+  attachNode(node, parent) {
+    this._nodeIndex.set(node.id, node);
+    parent.appendChild(node);
+  }
+  detachNode(node) {
+    if (node.parent !== null) {
+      node.parent.removeChild(node);
+    }
+    this._removeFromIndex(node);
+  }
+  _removeFromIndex(node) {
+    this._nodeIndex.delete(node.id);
+    this._unregisterNodeHandlers(node);
+    for (const child of node.children) {
+      this._removeFromIndex(child);
+    }
+  }
+  /**
+   * Remove every handler-registry entry owned by a single node. A node owns:
+   *  - one entry per event descriptor (its `handlerKey`),
+   *  - one `__signal__<signalId>` entry per state ref (signalIds are namespaced
+   *    by node id, so they are never shared between nodes), and
+   *  - a `__listbuild__<id>` entry if it is a reactive-list.
+   * Called for every node in a detached subtree so removing list items (or
+   * discarding freshly-built-but-unadopted item subtrees) leaves no stale
+   * registrations behind.
+   */
+  _unregisterNodeHandlers(node) {
+    for (const event of node.events) {
+      this.handlers.delete(event.handlerKey);
+    }
+    for (const ref of node.stateRefs) {
+      this.handlers.delete(`__signal__${ref.signalId}`);
+    }
+    this.handlers.delete(`__listbuild__${node.id}`);
+    this.handlers.delete(`__listplan__${node.id}`);
+    this.handlers.delete(`__overlay__${node.id}`);
+    this.handlers.delete(`__component__${node.id}`);
+    this.handlers.delete(`__transition__${node.id}`);
+    this.handlers.delete(`__head__${node.id}`);
+  }
+  // ── Handler registry ──────────────────────────────────────────────────────
+  registerHandler(key, fn) {
+    this.handlers.set(key, fn);
+  }
+  getHandler(key) {
+    return this.handlers.get(key);
+  }
+  /** True if a handler is currently registered under `key`. Inspection helper. */
+  hasHandler(key) {
+    return this.handlers.has(key);
+  }
+  /** Number of currently-registered handlers. Inspection helper. */
+  get handlerCount() {
+    return this.handlers.size;
+  }
+  // ── Lookup ────────────────────────────────────────────────────────────────
+  findById(id) {
+    return this._nodeIndex.get(id);
+  }
+  findAll(predicate) {
+    const results = [];
+    this._walk(this.root, (node) => {
+      if (predicate(node)) results.push(node);
+    });
+    return results;
+  }
+  findByType(type) {
+    return this.findAll((n) => n.type === type);
+  }
+  // ── Traversal ─────────────────────────────────────────────────────────────
+  walk(visitor) {
+    this._walk(this.root, visitor, 0);
+  }
+  _walk(node, visitor, depth = 0) {
+    visitor(node, depth);
+    for (const child of node.children) {
+      this._walk(child, visitor, depth + 1);
+    }
+  }
+  get nodeCount() {
+    return this._nodeIndex.size;
+  }
+  // ── Validation ────────────────────────────────────────────────────────────
+  validate() {
+    const dc = new DiagnosticCollector();
+    this.walk((node) => {
+      for (const event of node.events) {
+        if (!this.handlers.has(event.handlerKey)) {
+          dc.warn(
+            "GRAPH_MISSING_HANDLER",
+            `Node "${node.id}" references handler "${event.handlerKey}" which is not registered`,
+            { nodeId: node.id }
+          );
+        }
+      }
+      if (node.type === "page" && node.parent?.type !== "application") {
+        dc.error(
+          "GRAPH_PAGE_DEPTH",
+          `Page node "${node.id}" must be a direct child of the application root`,
+          { nodeId: node.id }
+        );
+      }
+    });
+    return dc;
+  }
+  // ── Serialization ─────────────────────────────────────────────────────────
+  serialize() {
+    return {
+      name: this.name,
+      version: this.version,
+      root: this._serializeNode(this.root)
+    };
+  }
+  _serializeNode(node) {
+    const result = {
+      id: node.id,
+      type: node.type,
+      key: node.key,
+      props: node.props,
+      events: node.events,
+      stateRefs: node.stateRefs,
+      children: node.children.map((c) => this._serializeNode(c))
+    };
+    return result;
+  }
+};
+
+// ../dsl/src/dsl.ts
 var StreetApp = class {
   _graph;
   _builder;
@@ -3849,221 +4069,7 @@ var streetui = {
   }
 };
 
-// packages/testing/dist/index.js
-function render(app) {
-  const compiled = compile(app);
-  const container = document.createElement("div");
-  document.body.appendChild(container);
-  const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
-  const handle = renderer.mount(compiled, container);
-  return {
-    container,
-    handle,
-    unmount() {
-      handle.unmount();
-      if (container.parentNode !== null) {
-        container.parentNode.removeChild(container);
-      }
-    },
-    flush() {
-      handle.flush();
-    },
-    getByTag(tag) {
-      const el = container.querySelector(tag);
-      if (el === null) {
-        throw new Error(`[StreetUI Testing] Element <${tag}> not found in render output`);
-      }
-      return el;
-    },
-    getAllByTag(tag) {
-      return Array.from(container.querySelectorAll(tag));
-    },
-    getByText(text) {
-      const all = Array.from(container.querySelectorAll("*"));
-      const match = all.find(
-        (el) => el.children.length === 0 && el.textContent?.includes(text)
-      );
-      if (match === void 0) {
-        throw new Error(`[StreetUI Testing] No element with text "${text}" found`);
-      }
-      return match;
-    },
-    getAllByText(text) {
-      return Array.from(container.querySelectorAll("*")).filter(
-        (el) => el.textContent?.includes(text)
-      );
-    },
-    query(selector) {
-      return container.querySelector(selector);
-    },
-    queryAll(selector) {
-      return Array.from(container.querySelectorAll(selector));
-    },
-    find(selector) {
-      const el = container.querySelector(selector);
-      if (el === null) {
-        throw new Error(`[StreetUI Testing] Selector "${selector}" matched nothing`);
-      }
-      return el;
-    }
-  };
-}
-function renderOnce(app, testFn) {
-  const result = render(app);
-  return Promise.resolve(testFn(result)).finally(() => {
-    result.unmount();
-    resetIdCounter();
-  });
-}
-async function flushUpdates() {
-  flushSync();
-  await Promise.resolve();
-  flushSync();
-}
-async function waitFor(check, options = {}) {
-  const timeout = options.timeout ?? 1e3;
-  const interval = options.interval ?? 10;
-  const deadline = Date.now() + timeout;
-  let lastError;
-  for (; ; ) {
-    await flushUpdates();
-    try {
-      const result = check();
-      if (result) return result;
-      lastError = new Error("[StreetUI Testing] waitFor: condition was falsy");
-    } catch (err) {
-      lastError = err;
-    }
-    if (Date.now() >= deadline) {
-      throw lastError instanceof Error ? lastError : new Error(String(lastError));
-    }
-    await new Promise((resolve) => setTimeout(resolve, interval));
-  }
-}
-function focus(el) {
-  el.focus?.();
-}
-function blur(el) {
-  el.blur?.();
-}
-function pressKey(key, el = document.activeElement, init = {}) {
-  if (el === null) return;
-  el.dispatchEvent(
-    new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...init })
-  );
-}
-function clickOutside(container, target = document.body) {
-  if (container.contains(target)) {
-    throw new Error("[StreetUI Testing] clickOutside: target is inside the container");
-  }
-  target.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, cancelable: true }));
-  target.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
-}
-async function openOverlay(open) {
-  open.set(true);
-  await flushUpdates();
-}
-async function closeOverlay(open) {
-  open.set(false);
-  await flushUpdates();
-}
-async function waitForTransition(el) {
-  el.dispatchEvent(new Event("transitionend", { bubbles: true }));
-  await flushUpdates();
-}
-function findByText(container, text) {
-  const match = Array.from(container.querySelectorAll("*")).find(
-    (el) => el.children.length === 0 && (el.textContent?.includes(text) ?? false)
-  );
-  if (match === void 0) {
-    throw new Error(`[StreetUI Testing] No element with text "${text}" found`);
-  }
-  return match;
-}
-function implicitRole(el) {
-  const tag = el.tagName.toLowerCase();
-  switch (tag) {
-    case "button":
-      return "button";
-    case "a":
-      return el.hasAttribute("href") ? "link" : null;
-    case "nav":
-      return "navigation";
-    case "h1":
-    case "h2":
-    case "h3":
-    case "h4":
-    case "h5":
-    case "h6":
-      return "heading";
-    case "input": {
-      const type = (el.getAttribute("type") ?? "text").toLowerCase();
-      if (type === "checkbox") return "checkbox";
-      if (type === "radio") return "radio";
-      if (type === "button" || type === "submit") return "button";
-      return "textbox";
-    }
-    case "form":
-      return "form";
-    default:
-      return null;
-  }
-}
-function accessibleName(el) {
-  return (el.getAttribute("aria-label") ?? el.textContent ?? "").trim();
-}
-function findAllByRole(container, role, options = {}) {
-  const all = Array.from(container.querySelectorAll("*"));
-  return all.filter((el) => {
-    const explicit = el.getAttribute("role");
-    const matches = explicit === role || explicit === null && implicitRole(el) === role;
-    if (!matches) return false;
-    if (options.name !== void 0) {
-      return accessibleName(el).includes(options.name);
-    }
-    return true;
-  });
-}
-function findByRole(container, role, options = {}) {
-  const matches = findAllByRole(container, role, options);
-  if (matches.length === 0) {
-    const named = options.name !== void 0 ? ` with name "${options.name}"` : "";
-    throw new Error(`[StreetUI Testing] No element with role "${role}"${named} found`);
-  }
-  if (matches.length > 1) {
-    throw new Error(
-      `[StreetUI Testing] Found ${matches.length} elements with role "${role}" \u2014 refine with { name }`
-    );
-  }
-  return matches[0];
-}
-function renderServerThenHydrate(build, options = {}) {
-  resetIdCounter();
-  const serverHtml = renderToString(compile(build()));
-  const container = document.createElement("div");
-  container.innerHTML = serverHtml;
-  document.body.appendChild(container);
-  const collector = options.collectDiagnostics === true ? createHydrationDiagnosticCollector() : void 0;
-  resetIdCounter();
-  const renderer = createRenderer({
-    domAdapter: new BrowserDOMAdapter(),
-    ...collector !== void 0 ? { hydrationDiagnostics: collector.sink } : {}
-  });
-  const handle = renderer.hydrate(compile(build()), container);
-  return {
-    container,
-    serverHtml,
-    handle,
-    diagnostics: collector?.diagnostics ?? [],
-    flush() {
-      handle.flush();
-    },
-    unmount() {
-      handle.unmount();
-      if (container.parentNode !== null) container.parentNode.removeChild(container);
-    }
-  };
-}
+// ../testing/src/component.ts
 var COMPONENT_ATTR = "data-streetui-component";
 function renderComponent(def, props, children) {
   const app = streetui.app({ name: `test:${def.name}` });
@@ -4120,8 +4126,8 @@ function trigger(el, type, init = {}) {
   el.dispatchEvent(event);
 }
 
-// packages/streetui/src/version.ts
-var VERSION = "2.5.0";
+// src/version.ts
+var VERSION = "2.6.0";
 export {
   VERSION,
   analyzeGraph,

@@ -228,8 +228,9 @@ import { createRenderer, runElementTransition } from "@streetui/renderer";
 import { BrowserDOMAdapter } from "@streetui/dom";
 import { CleanupRegistry } from "@streetui/core";
 var ROUTER_OUTLET_ID = "streetui-router-outlet";
+var ROUTER_OUTLET_KEY = "router-outlet";
 function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
-  scope.container("router-outlet", () => {
+  scope.container(ROUTER_OUTLET_KEY, () => {
   }, { id });
 }
 function isExternalHref(href) {
@@ -397,6 +398,7 @@ function mountRouter(router, options) {
 }
 export {
   ROUTER_OUTLET_ID,
+  ROUTER_OUTLET_KEY,
   createBrowserHistory,
   createMemoryHistory,
   createRouter,
