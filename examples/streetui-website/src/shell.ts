@@ -12,7 +12,7 @@
  */
 
 import { derived, type Signal } from 'streetui';
-import type { PageDSL, Router } from 'streetui';
+import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import { routerOutlet } from 'streetui';
 import { navLink } from './components.js';
 import { PRIMARY_NAV, searchContent, type SearchDoc } from './content.js';
@@ -22,6 +22,13 @@ export interface ShellContext {
   readonly router: Router;
   readonly theme: ThemeController;
   readonly search: SearchState;
+  /**
+   * Server-only: fill the route outlet inline instead of leaving it for the
+   * router to populate at runtime. When provided, the outlet node is emitted
+   * with the SAME key ('router-outlet') and id ('page-outlet') that
+   * `routerOutlet` uses, so client hydration adopts it node-for-node.
+   */
+  readonly renderOutlet?: (content: ContainerDSL) => void;
 }
 
 export interface SearchState {
@@ -39,8 +46,6 @@ export function createSearchState(querySignal: Signal<string>): SearchState {
 
 export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   const { router, theme, search } = ctx;
-
-  // Skip link — first focusable, jumps past the nav to the route content.
   shell.section('skip', (s) => {
     s.link('Skip to content', { href: '#page-outlet', id: 'skip-link' });
   }, { id: 'site-skip' });
@@ -83,8 +88,14 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   }, { id: 'site-nav' });
 
   // The active route renders here; the shell above/below persists. The outlet
-  // id matches the skip-link target (#page-outlet).
-  routerOutlet(shell, 'page-outlet');
+  // id matches the skip-link target (#page-outlet). On the server we fill it
+  // inline (renderOutlet); on the client the router populates it.
+  if (ctx.renderOutlet !== undefined) {
+    const fill = ctx.renderOutlet;
+    shell.container('router-outlet', (c) => fill(c), { id: 'page-outlet' });
+  } else {
+    routerOutlet(shell, 'page-outlet');
+  }
 
   shell.section('footer', (f) => {
     f.text('Built with StreetUI — this site is a StreetUI application.', { id: 'footer-text' });
