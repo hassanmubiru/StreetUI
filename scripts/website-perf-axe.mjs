@@ -69,10 +69,48 @@ function resolveAxe() {
 }
 const axeSource = resolveAxe();
 
-// ── Static file server ──────────────────────────────────────────────────────
+// ── Static file server — bundles browser-entry.js with streetui inlined ──────
+async function buildBundledEntry() {
+  // Find esbuild
+  const esbuildCandidates = [
+    path.join(repo, 'benchmarks', 'node_modules', 'esbuild', 'lib', 'main.js'),
+    path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'),
+  ];
+  let esbuild = null;
+  for (const c of esbuildCandidates) {
+    try { esbuild = await import(c); if (esbuild?.build) break; } catch {}
+  }
+  if (!esbuild) throw new Error('esbuild not found');
+
+  const result = await esbuild.build({
+    entryPoints: [path.join(siteDir, 'dist', 'browser-entry.js')],
+    bundle: true,
+    format: 'esm',
+    write: false,
+    target: 'es2020',
+    absWorkingDir: siteDir,
+    logLevel: 'silent',
+  });
+  return result.outputFiles[0].text;
+}
+
+let bundledJs = null;
+try {
+  bundledJs = await buildBundledEntry();
+  console.log('bundled browser-entry with streetui inlined, size:', bundledJs.length);
+} catch (e) {
+  console.error('bundle failed, falling back to external streetui:', e.message);
+}
+
 function createServer() {
   const server = http.createServer((req, res) => {
     let urlPath = req.url?.split('?')[0] ?? '/';
+    // Serve the bundled entry that has streetui inlined
+    if (urlPath === '/dist/browser-entry.js' && bundledJs) {
+      res.writeHead(200, { 'Content-Type': 'application/javascript' });
+      res.end(bundledJs);
+      return;
+    }
     if (urlPath === '/' || !path.extname(urlPath)) urlPath = '/index.html';
     const filePath = path.join(siteDir, urlPath);
     const ext = path.extname(filePath);
@@ -81,7 +119,6 @@ function createServer() {
       res.writeHead(200, { 'Content-Type': MIME[ext] ?? 'application/octet-stream' });
       res.end(data);
     } catch {
-      // SPA fallback — serve index.html for all unknown paths
       const idx = fs.readFileSync(path.join(siteDir, 'index.html'));
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(idx);
