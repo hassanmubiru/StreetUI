@@ -1,5 +1,5 @@
 
-> @streetui/core@2.3.0 build /home/error51/Downloads/StreetUI/packages/core
+> @streetui/core@2.5.0 build /home/error51/Downloads/StreetUI/packages/core
 > tsup
 
 CLI Building entry: src/index.ts
@@ -17,6 +17,6 @@ CJS dist/index.cjs     11.98 KB
 CJS dist/index.cjs.map 34.13 KB
 CJS ⚡️ Build success in 13ms
 DTS Build start
-DTS ⚡️ Build success in 446ms
+DTS ⚡️ Build success in 392ms
 DTS dist/index.d.ts  16.32 KB
 DTS dist/index.d.cts 16.32 KB
