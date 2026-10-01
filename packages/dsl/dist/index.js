@@ -1,4 +1,4 @@
-// packages/dsl/src/transition.ts
+// src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -39,7 +39,7 @@ function isTransitionConfig(value) {
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
 
-// packages/dsl/src/head.ts
+// src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -154,7 +154,7 @@ function isHeadContribution(value) {
   return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
 
-// packages/dsl/src/builders.ts
+// src/builders.ts
 import { signal, derived, effect } from "@streetui/state";
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
@@ -778,7 +778,7 @@ var AppBuilder = class {
   }
 };
 
-// packages/dsl/src/component.ts
+// src/component.ts
 function component(setup, options = {}) {
   return {
     __streetui_component: true,
@@ -790,7 +790,7 @@ function isComponentDefinition(value) {
   return value !== null && typeof value === "object" && value.__streetui_component === true;
 }
 
-// packages/dsl/src/dsl.ts
+// src/dsl.ts
 import { ApplicationGraph } from "@streetui/graph";
 var StreetApp = class {
   _graph;

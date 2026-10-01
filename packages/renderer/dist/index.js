@@ -1,4 +1,4 @@
-// packages/renderer/src/render-context.ts
+// src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -10,7 +10,7 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
   };
 }
 
-// packages/renderer/src/node-instance.ts
+// src/node-instance.ts
 import { CleanupRegistry } from "@streetui/core";
 var NodeInstance = class {
   graphNode;
@@ -42,7 +42,7 @@ var NodeInstance = class {
   }
 };
 
-// packages/renderer/src/attributes.ts
+// src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -114,7 +114,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// packages/renderer/src/events.ts
+// src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -138,7 +138,7 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// packages/renderer/src/mount.ts
+// src/mount.ts
 import {
   focusInitial,
   trapFocus,
@@ -149,7 +149,7 @@ import {
   restoreFocus
 } from "@streetui/dom";
 
-// packages/renderer/src/tag-map.ts
+// src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -189,7 +189,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// packages/renderer/src/patch.ts
+// src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -230,7 +230,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// packages/renderer/src/reconciliation.ts
+// src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -458,7 +458,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// packages/renderer/src/transition.ts
+// src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -639,7 +639,7 @@ var TransitionController = class {
   }
 };
 
-// packages/renderer/src/head.ts
+// src/head.ts
 import { ServerDOMAdapter } from "@streetui/dom";
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
@@ -818,7 +818,7 @@ function renderHead(compiled) {
   return out;
 }
 
-// packages/renderer/src/mount.ts
+// src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -1244,10 +1244,10 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// packages/renderer/src/renderer.ts
+// src/renderer.ts
 import { BrowserDOMAdapter } from "@streetui/dom";
 
-// packages/renderer/src/hydration-diagnostics.ts
+// src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -1278,7 +1278,7 @@ function consoleHydrationDiagnosticSink(logger = console) {
   };
 }
 
-// packages/renderer/src/hydrate.ts
+// src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -1514,7 +1514,7 @@ function expectedTag(ctx, graphNode) {
   }
 }
 
-// packages/renderer/src/render-handle.ts
+// src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -1539,7 +1539,7 @@ var StreetRenderHandle = class {
   }
 };
 
-// packages/renderer/src/renderer.ts
+// src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -1580,7 +1580,7 @@ function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
 
-// packages/renderer/src/dehydrate.ts
+// src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
@@ -1598,7 +1598,7 @@ function escapeForScript(json) {
 function serializeState(state) {
   if (Object.keys(state).length === 0) return "";
   const json = escapeForScript(JSON.stringify(state));
-  return `<script type="application/json" ${STATE_MARKER_ATTR}>${json}<\/script>`;
+  return `<script type="application/json" ${STATE_MARKER_ATTR}>${json}</script>`;
 }
 function readState(dom, root) {
   const el = dom.querySelector(root, `script[${STATE_MARKER_ATTR}]`);
@@ -1616,10 +1616,10 @@ function readState(dom, root) {
   }
 }
 
-// packages/renderer/src/ssr.ts
+// src/ssr.ts
 import { ServerDOMAdapter as ServerDOMAdapter3 } from "@streetui/dom";
 
-// packages/renderer/src/static-ssr-plan.ts
+// src/static-ssr-plan.ts
 import { analyzeGraph } from "@streetui/compiler/diagnostics";
 import { ServerDOMAdapter as ServerDOMAdapter2 } from "@streetui/dom";
 function collectMaximalStaticRoots(graph) {
@@ -1668,7 +1668,7 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// packages/renderer/src/ssr.ts
+// src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter3();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);

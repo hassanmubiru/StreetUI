@@ -339,60 +339,60 @@ type BindableText = TextValue | ReadonlySignal<TextValue>;
  */
 interface A11yOptions {
     /** ARIA role (e.g. 'dialog', 'alert', 'status', 'navigation'). */
-    readonly role?: string;
+    readonly role?: string | undefined;
     /** tabindex value. Use 0 to make an element focusable, -1 to remove from tab order. */
-    readonly tabIndex?: number;
+    readonly tabIndex?: number | undefined;
     /** aria-label — an accessible name when no visible label element exists. */
-    readonly ariaLabel?: string;
+    readonly ariaLabel?: string | undefined;
     /** aria-labelledby — id(s) of the element(s) that label this one. */
-    readonly ariaLabelledBy?: string;
+    readonly ariaLabelledBy?: string | undefined;
     /** aria-describedby — id(s) of the element(s) that describe this one. */
-    readonly ariaDescribedBy?: string;
+    readonly ariaDescribedBy?: string | undefined;
     /** aria-expanded — for disclosure widgets (rendered as the string "true"/"false"). */
-    readonly ariaExpanded?: boolean;
+    readonly ariaExpanded?: boolean | undefined;
     /** aria-controls — id of the element this one controls. */
-    readonly ariaControls?: string;
+    readonly ariaControls?: string | undefined;
     /** aria-hidden — hide decorative content from assistive tech. */
-    readonly ariaHidden?: boolean;
+    readonly ariaHidden?: boolean | undefined;
     /** aria-live — announce dynamic changes ('polite' | 'assertive' | 'off'). */
-    readonly ariaLive?: 'off' | 'polite' | 'assertive';
+    readonly ariaLive?: 'off' | 'polite' | 'assertive' | undefined;
     /** aria-current — mark the current item in a set (e.g. 'page' for active nav). */
-    readonly ariaCurrent?: boolean | 'page' | 'step' | 'location' | 'date' | 'time';
+    readonly ariaCurrent?: boolean | 'page' | 'step' | 'location' | 'date' | 'time' | undefined;
     /** aria-invalid — mark a form field as failing validation. */
-    readonly ariaInvalid?: boolean;
+    readonly ariaInvalid?: boolean | undefined;
     /** aria-required — mark a form field as required. */
-    readonly ariaRequired?: boolean;
+    readonly ariaRequired?: boolean | undefined;
     /** aria-modal — mark a dialog as modal (content outside is inert to AT). */
-    readonly ariaModal?: boolean;
+    readonly ariaModal?: boolean | undefined;
     /** aria-owns — id(s) of elements owned by this one when the DOM can't express it. */
-    readonly ariaOwns?: string;
+    readonly ariaOwns?: string | undefined;
     /** aria-activedescendant — id of the active option in a composite widget (menu/listbox/combobox). */
-    readonly ariaActiveDescendant?: string;
+    readonly ariaActiveDescendant?: string | undefined;
     /** aria-haspopup — the element opens a popup ('menu' | 'listbox' | 'dialog' | 'grid' | 'tree' | true). */
-    readonly ariaHasPopup?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
+    readonly ariaHasPopup?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog' | undefined;
     /** aria-selected — selection state within a composite widget. */
-    readonly ariaSelected?: boolean;
+    readonly ariaSelected?: boolean | undefined;
 }
 interface TextOptions extends A11yOptions {
-    readonly class?: string;
-    readonly id?: string;
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
 }
 interface HeadingOptions extends TextOptions {
-    readonly level?: 1 | 2 | 3 | 4 | 5 | 6;
+    readonly level?: 1 | 2 | 3 | 4 | 5 | 6 | undefined;
 }
 interface ButtonOptions extends A11yOptions {
-    readonly class?: string;
-    readonly id?: string;
-    readonly disabled?: Bindable<boolean>;
-    readonly onClick?: () => void;
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
+    readonly disabled?: Bindable<boolean> | undefined;
+    readonly onClick?: (() => void) | undefined;
 }
 interface InputOptionsBase extends A11yOptions {
-    readonly class?: string;
-    readonly id?: string;
-    readonly type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';
-    readonly placeholder?: string;
-    readonly disabled?: Bindable<boolean>;
-    readonly onChange?: (value: string) => void;
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
+    readonly type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | undefined;
+    readonly placeholder?: string | undefined;
+    readonly disabled?: Bindable<boolean> | undefined;
+    readonly onChange?: ((value: string) => void) | undefined;
 }
 /**
  * Explicitly-controlled input: supply `value` and/or `onInput` yourself.
@@ -401,8 +401,8 @@ interface InputOptionsBase extends A11yOptions {
  * the type checker rather than resolved silently at runtime.
  */
 interface ControlledInputOptions extends InputOptionsBase {
-    readonly value?: Bindable<string>;
-    readonly onInput?: (value: string) => void;
+    readonly value?: Bindable<string> | undefined;
+    readonly onInput?: ((value: string) => void) | undefined;
     readonly bind?: never;
 }
 /**
@@ -417,24 +417,37 @@ interface BoundInputOptions extends InputOptionsBase {
 }
 type InputOptions = ControlledInputOptions | BoundInputOptions;
 interface LinkOptions extends A11yOptions {
-    readonly class?: string;
-    readonly id?: string;
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
     readonly href: string;
-    readonly external?: boolean;
-    readonly onClick?: () => void;
+    readonly external?: boolean | undefined;
+    readonly onClick?: (() => void) | undefined;
 }
 interface ImageOptions extends A11yOptions {
-    readonly class?: string;
-    readonly id?: string;
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
     readonly src: string;
     readonly alt: string;
-    readonly width?: number;
-    readonly height?: number;
+    readonly width?: number | undefined;
+    readonly height?: number | undefined;
+}
+/**
+ * Options for the `code` leaf — a semantic preformatted code block that renders
+ * as `<pre><code>…</code></pre>` with the source escaped at the renderer
+ * boundary (no raw-HTML injection). An optional `language` hint is emitted as a
+ * `data-language` attribute on the outer `<pre>` for styling / highlighting
+ * hooks; it is purely declarative and never parsed or executed by the
+ * framework.
+ */
+interface CodeOptions extends A11yOptions {
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
+    readonly language?: string | undefined;
 }
 interface ContainerOptions extends A11yOptions {
-    readonly class?: string;
-    readonly id?: string;
-    readonly key?: string;
+    readonly class?: string | undefined;
+    readonly id?: string | undefined;
+    readonly key?: string | undefined;
     /**
      * Enter/leave transition for this element (§2). CSS class-based and
      * browser-only: on the server it is ignored (deterministic SSR output). The
@@ -443,12 +456,12 @@ interface ContainerOptions extends A11yOptions {
      * before the element is removed and disposed — the reconciler defers teardown
      * until the transition completes.
      */
-    readonly transition?: TransitionConfig;
+    readonly transition?: TransitionConfig | undefined;
 }
 interface SectionOptions extends ContainerOptions {
 }
 interface FormOptions extends ContainerOptions {
-    readonly onSubmit?: (e: Event) => void;
+    readonly onSubmit?: ((e: Event) => void) | undefined;
 }
 interface ListOptions extends ContainerOptions {
     /**
@@ -458,14 +471,14 @@ interface ListOptions extends ContainerOptions {
      * reclaimed (leave→enter). `transition` (inherited) applies to the list
      * container itself; `itemTransition` applies to its rows.
      */
-    readonly itemTransition?: TransitionConfig;
+    readonly itemTransition?: TransitionConfig | undefined;
 }
 /** Options for `when()` (§2 conditional transitions). */
 interface WhenOptions {
     /** Transition applied to the active branch as it mounts/unmounts. */
-    readonly transition?: TransitionConfig;
+    readonly transition?: TransitionConfig | undefined;
     /** Also animate the branch present on the initial mount (appear). */
-    readonly appear?: boolean;
+    readonly appear?: boolean | undefined;
 }
 /** Options for a plain portal (mount children into `document.body`). */
 interface PortalOptions extends ContainerOptions {
@@ -483,13 +496,13 @@ interface OverlayOptions extends ContainerOptions {
     /** Reactive open/visibility state. When it flips, the panel mounts/unmounts. */
     readonly open: Bindable<boolean>;
     /** Requested-close callback (fired on Escape when `closeOnEscape`). Flip `open` here. */
-    readonly onClose?: () => void;
+    readonly onClose?: (() => void) | undefined;
     /** Restore focus to the previously-focused element on close. Default: per-kind. */
-    readonly restoreFocus?: boolean;
+    readonly restoreFocus?: boolean | undefined;
     /** id of the element to focus first when the overlay opens (else first focusable). */
-    readonly initialFocusId?: string;
+    readonly initialFocusId?: string | undefined;
     /** Escape key invokes `onClose`. Default: per-kind. */
-    readonly closeOnEscape?: boolean;
+    readonly closeOnEscape?: boolean | undefined;
 }
 type SectionBuilder = (section: SectionDSL) => void;
 type ContainerBuilder = (container: ContainerDSL) => void;
@@ -507,9 +520,9 @@ interface ErrorBoundaryOptions {
      * Reactive error source(s) to observe — typically a resource's `error` signal.
      * When any becomes non-null, the fallback replaces the body.
      */
-    readonly source?: ErrorSource | ReadonlyArray<ErrorSource>;
+    readonly source?: ErrorSource | ReadonlyArray<ErrorSource> | undefined;
     /** Invoked by the fallback's `retry()`, before the body is re-attempted (e.g. `resource.refetch`). */
-    readonly onRetry?: () => void;
+    readonly onRetry?: (() => void) | undefined;
     /**
      * Error-reporting hook (§6/§7). Called with the current error each time the
      * boundary ENTERS its error state (i.e. when the fallback mounts), including
@@ -518,7 +531,7 @@ interface ErrorBoundaryOptions {
      * boundary's behavior, and receives the same `unknown` error the fallback
      * sees (no sensitive framework internals are injected).
      */
-    readonly onError?: (error: unknown) => void;
+    readonly onError?: ((error: unknown) => void) | undefined;
 }
 /**
  * Branch builders for {@link ContainerDSL.asyncBoundary} — the loading / error /
@@ -532,12 +545,12 @@ interface ErrorBoundaryOptions {
  */
 interface AsyncBoundaryBranches<T> {
     /** Shown while the resource is idle or performing its first load (no data yet). */
-    readonly loading?: (content: ContainerDSL) => void;
+    readonly loading?: ((content: ContainerDSL) => void) | undefined;
     /**
      * Shown while the resource is in its error state. Receives the current error
      * and a `retry()` that re-runs the loader (a thin wrapper over `refetch`).
      */
-    readonly error?: (content: ContainerDSL, error: unknown, retry: () => void) => void;
+    readonly error?: ((content: ContainerDSL, error: unknown, retry: () => void) => void) | undefined;
     /**
      * Shown once the resource has data (including while a refetch keeps the old
      * value visible). Receives the data as a `ReadonlySignal<T>` so the branch can
@@ -552,6 +565,14 @@ interface ContentDSL {
     input(options?: InputOptions): void;
     image(options: ImageOptions): void;
     link(label: BindableText, options: LinkOptions): void;
+    /**
+     * Preformatted code block rendering as `<pre><code>…</code></pre>`. The source
+     * is escaped at the renderer boundary (never injected as raw HTML), whitespace
+     * is preserved by the semantic `<pre>`, and an optional `language` hint is
+     * emitted as `data-language` on the `<pre>`. SSR- and hydration-safe; reuses
+     * the same text binding/escaping machinery as `text`.
+     */
+    code(source: BindableText, options?: CodeOptions): void;
 }
 interface ContainerDSL extends ContentDSL {
     section(key: string, builder: SectionBuilder, options?: SectionOptions): void;
@@ -713,6 +734,7 @@ declare class ContentBuilderBase implements ContentDSL {
     input(options?: InputOptions): void;
     image(options: ImageOptions): void;
     link(label: BindableText, options: LinkOptions): void;
+    code(source: BindableText, options?: CodeOptions): void;
 }
 declare class ContainerBuilderBase extends ContentBuilderBase implements ContainerDSL {
     section(key: string, builder: SectionBuilder, options?: SectionOptions): void;
@@ -825,4 +847,4 @@ interface StreetUI {
 }
 declare const streetui: StreetUI;
 
-export { type A11yOptions, AppBuilder, type AppDSL, type AppOptions, type AsyncBoundaryBranches, type Bindable, type BindableString, type BindableText, type BoundInputOptions, type ButtonOptions, type ContainerBuilder as ComponentChildren, type ComponentContext, type ComponentDefinition, type ComponentRender, type ComponentSetup, type ContainerBuilder, ContainerBuilderImpl, type ContainerDSL, type ContainerOptions, type ContentDSL, type ControlledInputOptions, type ErrorBoundaryOptions, type ErrorFallbackBuilder, type ErrorSource, type FormBuilder, FormBuilderImpl, type FormDSL, type FormOptions, type HeadContribution, type HeadEntry, type HeadMetadata, type HeadingOptions, type ImageOptions, type InputOptions, type InputOptionsBase, type LinkDescriptor, type LinkOptions, type ListBuilder, ListBuilderImpl, type ListDSL, type ListOptions, type ListPlanEntry, type MetaDescriptor, type OverlayOptions, type PageBuilder, PageBuilderImpl, type PageDSL, type PortalOptions, type ResolvedTransition, type SectionBuilder, SectionBuilderImpl, type SectionDSL, type SectionOptions, StreetApp, type StreetUI, type TextOptions, type TextValue, type TransitionConfig, type WhenOptions, component, isComponentDefinition, isHeadContribution, isTransitionConfig, reactiveListItemKey, reactiveListItemSignature, resolveHead, resolveTransition, streetui };
+export { type A11yOptions, AppBuilder, type AppDSL, type AppOptions, type AsyncBoundaryBranches, type Bindable, type BindableString, type BindableText, type BoundInputOptions, type ButtonOptions, type CodeOptions, type ContainerBuilder as ComponentChildren, type ComponentContext, type ComponentDefinition, type ComponentRender, type ComponentSetup, type ContainerBuilder, ContainerBuilderImpl, type ContainerDSL, type ContainerOptions, type ContentDSL, type ControlledInputOptions, type ErrorBoundaryOptions, type ErrorFallbackBuilder, type ErrorSource, type FormBuilder, FormBuilderImpl, type FormDSL, type FormOptions, type HeadContribution, type HeadEntry, type HeadMetadata, type HeadingOptions, type ImageOptions, type InputOptions, type InputOptionsBase, type LinkDescriptor, type LinkOptions, type ListBuilder, ListBuilderImpl, type ListDSL, type ListOptions, type ListPlanEntry, type MetaDescriptor, type OverlayOptions, type PageBuilder, PageBuilderImpl, type PageDSL, type PortalOptions, type ResolvedTransition, type SectionBuilder, SectionBuilderImpl, type SectionDSL, type SectionOptions, StreetApp, type StreetUI, type TextOptions, type TextValue, type TransitionConfig, type WhenOptions, component, isComponentDefinition, isHeadContribution, isTransitionConfig, reactiveListItemKey, reactiveListItemSignature, resolveHead, resolveTransition, streetui };
