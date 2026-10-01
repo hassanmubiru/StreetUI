@@ -85,7 +85,7 @@ export function note(scope: ContainerDSL, value: string | Signal<string>, id: st
 }
 
 /** A derived "N results" style count label. */
-export function countLabel(source: Signal<{ length: number }>, noun: string): Signal<string> {
+export function countLabel(source: Signal<{ length: number }>, noun: string): ReadonlySignal<string> {
   return derived(() => {
     const n = source.get().length;
     return `${n} ${noun}${n === 1 ? '' : 's'}`;
