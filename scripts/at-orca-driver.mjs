@@ -146,11 +146,19 @@ except ImportError:
         @staticmethod
         def getDesktop(i): return _atspi.get_desktop(i)
     def _stateToString(s): return s.value_name if hasattr(s,'value_name') else str(s)
+def _childCount(acc):
+    return acc.get_child_count() if hasattr(acc,'get_child_count') else acc.childCount
+def _child(acc, i):
+    return acc.get_child_at_index(i) if hasattr(acc,'get_child_at_index') else acc.getChildAtIndex(i)
+def _role(acc):
+    return acc.get_role_name() if hasattr(acc,'get_role_name') else acc.getRoleName()
+def _name(acc):
+    return acc.get_name() if hasattr(acc,'get_name') else getattr(acc,'name','')
 def node(acc, depth=0, maxd=40):
     try:
         st = acc.getState(); states = [_stateToString(s) for s in st.getStates()]
     except Exception: states = []
-    try: role = acc.getRoleName()
+    try: role = _role(acc)
     except Exception: role = '?'
     try: name = acc.name
     except Exception: name = ''
