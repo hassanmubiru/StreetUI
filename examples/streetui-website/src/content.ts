@@ -215,5 +215,54 @@ export const DOC_SECTIONS: readonly DocSection[] = [
       'Transitions are keyed by identity, so a reordered list animates moves rather than destroying and recreating nodes.',
     ],
   },
+  {
+    slug: 'ssr',
+    title: 'Server-Side Rendering',
+    group: 'Rendering',
+    summary: 'renderToString and serializeState on the server.',
+    paragraphs: [
+      'renderToString(compile(app)) produces HTML from the ServerDOMAdapter. serializeState embeds the reactive state so the client can resume without re-fetching. SSR output is byte-identical for a given app and seed, which is asserted route-by-route.',
+      'Server-only helpers import from streetui/server so the SSR serializer never leaks into client bundles.',
+    ],
+    code: {
+      label: 'Render on the server',
+      code: [
+        "import { compile } from 'streetui';",
+        "import { renderToString } from 'streetui/server';",
+        '',
+        'const html = renderToString(compile(app));',
+      ].join('\n'),
+    },
+  },
+  {
+    slug: 'hydration',
+    title: 'Hydration',
+    group: 'Rendering',
+    summary: 'Adopt server HTML without re-creating the DOM.',
+    paragraphs: [
+      'hydrate() walks the existing server DOM and attaches reactivity in place instead of rebuilding it. Deterministic ids make server and client graphs align; mismatches are reported as diagnostics rather than silently patched.',
+      'Static subtrees detected at compile time are serialized once and adopted wholesale, so hydration cost scales with the dynamic parts of the page.',
+    ],
+  },
+  {
+    slug: 'testing',
+    title: 'Testing',
+    group: 'Tooling',
+    summary: 'render, findByRole, waitFor and renderServerThenHydrate.',
+    paragraphs: [
+      'streetui/testing renders a real app into happy-dom with the same renderer production uses. render(app) returns query helpers; findByRole/findByText locate nodes; waitFor polls async state; renderServerThenHydrate runs the full SSR→hydrate path and can assert zero mismatches.',
+      'There is no private-graph access and no second assertion framework — tests drive the app exactly as a user would.',
+    ],
+    code: {
+      label: 'A test',
+      code: [
+        "import { render, findByRole } from 'streetui/testing';",
+        '',
+        'const { container, unmount } = render(app);',
+        "const btn = findByRole(container, 'button', { name: 'Increment' });",
+        'unmount();',
+      ].join('\n'),
+    },
+  },
   // __MORE_SECTIONS__
 ];
