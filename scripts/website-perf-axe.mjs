@@ -154,7 +154,7 @@ const VITALS_SCRIPT = `
     ? performance.timing.domInteractive - performance.timing.navigationStart
     : performance.getEntriesByType('navigation')[0]?.domInteractive ?? null);
 
-  setTimeout(() => resolve(out), 2000);
+  setTimeout(() => resolve(out), 500);
 })`;
 
 const ROUTES = ['/', '/getting-started', '/docs', '/docs/reactivity', '/docs/routing',
@@ -173,6 +173,7 @@ async function measureEngine(browserType, executablePath, label, { port }) {
     page.on('pageerror', e => errors.push(`[${route}] ${e.message.slice(0, 100)}`));
     try {
       await page.goto(`http://127.0.0.1:${port}${route}`, { waitUntil: 'networkidle', timeout: 15000 });
+      await page.waitForTimeout(800); // let paint observers fire
       const vitals = await page.evaluate(new Function(`return (${VITALS_SCRIPT})()`));
       results[route] = vitals;
     } catch (e) {
@@ -252,7 +253,7 @@ function findFirefox() {
 
 // ── Main ────────────────────────────────────────────────────────────────────
 const { server, port } = await createServer();
-console.log(`serving website on port ${port}`);
+console.log(`serving website on port ${port} (bundled=${!!bundledJs})`);
 process.env.PLAYWRIGHT_BROWSERS_PATH = playwrightBrowsers;
 
 try {
