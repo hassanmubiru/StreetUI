@@ -5,6 +5,41 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 2.5.0 — Dogfooding: Official Website (2026-10-01)
+
+**Dogfooding milestone** — the official StreetUI website (`examples/streetui-website/`)
+built entirely with StreetUI as a production app. 18 packages **published to npm at
+`2.5.0`**. Full detail in [`V2.5.0-DOGFOODING-REPORT.md`](./V2.5.0-DOGFOODING-REPORT.md).
+
+### Added
+
+- **`examples/streetui-website/`** — complete documentation + marketing site: 13 routes,
+  18 doc sections, interactive playground, SSR + hydration, theme toggle, docs search —
+  all through the public `streetui` API exactly as an external consumer would.
+
+### Framework findings (see `V2.5.0-FRAMEWORK-FINDINGS.md`)
+
+- F-1: No first-class `code`/`pre` node (proposed, not yet shipped)
+- F-2/F-5: `ReadonlySignal` annotation + `URLSearchParams` shape — docs gap
+- F-3: Optional DSL fields under `exactOptionalPropertyTypes` — type-only fix proposed
+- F-4: Router outlet id/key three-way agreement — docs recipe proposed
+- F-6: `tsup` EPERM in sandbox — environment-only, not a framework defect
+
+### Verified
+
+- Build 30/30, typecheck 47/47, website tests 13/13, framework tests 913/913.
+- Chrome 153: mount 205.5 ms · hydrate 157.2 ms · fine-grained toggle **0 mutations** — no regression vs 2.3.
+- Firefox 155: mount 307 ms · hydrate 219 ms.
+- axe-core visual a11y: **0 violations** (Chrome 154).
+- AT-SPI tree captured: Orca 46.1 · Chrome accessible tree confirmed.
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+
+### Still pending
+
+- Literal Orca speech-dispatcher log capture (2.6)
+- Core Web Vitals from served website (FCP/LCP/TTI/CLS) (2.6)
+- Solid browser scenarios A-E (client bundle error in Solid, not StreetUI)
+
 ## 2.4.0 — Validation Completion (2026-10-01)
 
 **Validation milestone** — no architecture change, no new public API. All 18
