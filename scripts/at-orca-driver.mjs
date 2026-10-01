@@ -201,7 +201,8 @@ try {
   const { port } = server.address();
 
   // NON-headless so AT-SPI can attach to a real window.
-  browser = await playwright.chromium.launch({ headless: false, args: ['--force-renderer-accessibility'] });
+  const chromeBinAt = process.env.CHROMIUM_PATH || process.env.CHROME_PATH || '/usr/bin/google-chrome';
+  browser = await playwright.chromium.launch({ executablePath: chromeBinAt, headless: false, args: ['--force-renderer-accessibility'] });
   const page = await browser.newPage();
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
   await page.waitForTimeout(800);
