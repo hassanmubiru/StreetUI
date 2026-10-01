@@ -264,5 +264,34 @@ export const DOC_SECTIONS: readonly DocSection[] = [
       ].join('\n'),
     },
   },
-  // __MORE_SECTIONS__
+  {
+    slug: 'devtools',
+    title: 'DevTools',
+    group: 'Tooling',
+    summary: 'Headless inspection snapshot + 12 panels.',
+    paragraphs: [
+      'DevTools build a snapshot of the running app — components, reactive state, signal graph, router, resources, mutations, events, overlays, performance, diagnostics and SSR/hydration — exposed as data and as a DOM-free, host-injectable view.',
+      'The production runtime never imports DevTools; inspection is strictly additive and sensitive values are redacted by default.',
+    ],
+  },
+  {
+    slug: 'cli',
+    title: 'CLI',
+    group: 'Tooling',
+    summary: 'Scaffold, build and serve from one binary.',
+    paragraphs: [
+      'The streetui CLI scaffolds projects, builds them with esbuild, and serves them. esbuild is the only runtime dependency and is used solely by the CLI binaries — never pulled into an application bundle.',
+      'Project configuration is declared with defineConfig in streetui.config.ts.',
+    ],
+  },
+  {
+    slug: 'deployment',
+    title: 'Deployment',
+    group: 'Tooling',
+    summary: 'Ship a server-rendered, hydrating app.',
+    paragraphs: [
+      'A deployed StreetUI app renders each route to HTML on the server, serializes state, and ships a client bundle that hydrates the markup. The public install stays npm install streetui; nothing about distribution fragments the package.',
+      'Because SSR output is deterministic, caching and byte-identity checks are straightforward in CI.',
+    ],
+  },
 ];
