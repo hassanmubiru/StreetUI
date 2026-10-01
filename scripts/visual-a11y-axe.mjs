@@ -36,7 +36,10 @@ import { createRequire } from 'node:module';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const appDir = path.join(repo, 'examples', 'streetui-performance-app');
-const outPath = path.join(repo, 'benchmarks', 'results', 'v2.4', 'visual-a11y.json');
+const outFlag = process.argv.find((a) => a.startsWith('--out='));
+const outPath = outFlag
+  ? outFlag.slice('--out='.length)
+  : path.join(repo, 'benchmarks', 'results', 'v2.5', 'visual-a11y.json');
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 
 const require = createRequire(import.meta.url);

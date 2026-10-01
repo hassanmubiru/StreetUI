@@ -29,7 +29,10 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const appDir = path.join(repo, 'examples', 'streetui-performance-app');
-const outPath = path.join(repo, 'benchmarks', 'results', 'v2.4', 'streetui-firefox.json');
+const outFlag = process.argv.find((a) => a.startsWith('--out='));
+const outPath = outFlag
+  ? outFlag.slice('--out='.length)
+  : path.join(repo, 'benchmarks', 'results', 'v2.5', 'streetui-firefox.json');
 fs.mkdirSync(path.dirname(outPath), { recursive: true });
 
 const write = (obj) => fs.writeFileSync(outPath, JSON.stringify(obj, null, 2) + '\n');
