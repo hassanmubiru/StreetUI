@@ -82,8 +82,9 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
     }, { id: 'search-region' });
   }, { id: 'site-nav' });
 
-  // The active route renders here; the shell above/below persists.
-  routerOutlet(shell);
+  // The active route renders here; the shell above/below persists. The outlet
+  // id matches the skip-link target (#page-outlet).
+  routerOutlet(shell, 'page-outlet');
 
   shell.section('footer', (f) => {
     f.text('Built with StreetUI — this site is a StreetUI application.', { id: 'footer-text' });
