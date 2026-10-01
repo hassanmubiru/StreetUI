@@ -1,0 +1,22 @@
+{
+  "name": "@streetui/example-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The official StreetUI website — a real production application built entirely with StreetUI (dogfooding for 2.5.0).",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "streetui": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
