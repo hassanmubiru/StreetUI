@@ -64,8 +64,11 @@ function a11yBusRunning() {
 function pyatspiAvailable() {
   const py = which('python3');
   if (!py) return false;
+  // Try direct pyatspi first, then PyGObject gi.repository.Atspi (same underlying library).
   const r = spawnSync('python3', ['-c', 'import pyatspi'], { encoding: 'utf8' });
-  return r.status === 0;
+  if (r.status === 0) return true;
+  const r2 = spawnSync('python3', ['-c', "import gi; gi.require_version('Atspi','2.0'); from gi.repository import Atspi"], { encoding: 'utf8' });
+  return r2.status === 0;
 }
 
 function probe() {
@@ -130,11 +133,22 @@ if (!playwright) {
 }
 
 // Embedded pyatspi walker: dumps the accessibility tree (role, name, states) as JSON.
+// Supports both `pyatspi` and `gi.repository.Atspi` (same underlying AT-SPI2 library).
 const PYATSPI_WALK = `
-import json, sys, pyatspi
+import json, sys
+try:
+    import pyatspi
+    _Registry = pyatspi.Registry
+    _stateToString = pyatspi.stateToString
+except ImportError:
+    import gi; gi.require_version('Atspi','2.0'); from gi.repository import Atspi as _atspi
+    class _Registry:
+        @staticmethod
+        def getDesktop(i): return _atspi.get_desktop(i)
+    def _stateToString(s): return s.value_name if hasattr(s,'value_name') else str(s)
 def node(acc, depth=0, maxd=40):
     try:
-        st = acc.getState(); states = [pyatspi.stateToString(s) for s in st.getStates()]
+        st = acc.getState(); states = [_stateToString(s) for s in st.getStates()]
     except Exception: states = []
     try: role = acc.getRoleName()
     except Exception: role = '?'
@@ -146,7 +160,7 @@ def node(acc, depth=0, maxd=40):
             try: out['children'].append(node(acc.getChildAtIndex(i), depth+1, maxd))
             except Exception: pass
     return out
-desktop = pyatspi.Registry.getDesktop(0)
+desktop = _Registry.getDesktop(0)
 apps = []
 for i in range(desktop.childCount):
     try: apps.append(node(desktop.getChildAtIndex(i)))
@@ -156,15 +170,22 @@ json.dump({'apps': apps}, sys.stdout)
 
 let server = null, browser = null;
 try {
-  const appDir = path.join(repo, 'examples', 'streetui-performance-app');
-  const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
-  const build = await esbuild.build({
-    entryPoints: [path.join(appDir, 'src', 'bench-browser.ts')],
-    bundle: true, format: 'esm', write: false, target: 'es2020', absWorkingDir: appDir,
-    define: { 'Buffer.byteLength': '__bufferByteLength' },
-    banner: { js: 'const __bufferByteLength=(s)=>new TextEncoder().encode(s).length;' },
-  });
-  const js = build.outputFiles[0].text;
+  const appDirAt = path.join(repo, 'examples', 'streetui-performance-app');
+  const prebuiltAt = path.join(appDirAt, 'dist', 'bench-browser.js');
+  let jsAt;
+  if (fs.existsSync(prebuiltAt)) {
+    jsAt = fs.readFileSync(prebuiltAt, 'utf8');
+  } else {
+    const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
+    const build = await esbuild.build({
+      entryPoints: [path.join(appDirAt, 'src', 'bench-browser.ts')],
+      bundle: true, format: 'esm', write: false, target: 'es2020', absWorkingDir: appDirAt,
+      define: { 'Buffer.byteLength': '__bufferByteLength' },
+      banner: { js: 'const __bufferByteLength=(s)=>new TextEncoder().encode(s).length;' },
+    });
+    jsAt = build.outputFiles[0].text;
+  }
+  const js = jsAt;
   const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>streetui at</title></head><body><div id="app"></div><script type="module">' + js + '\ntry{ (window.__mount||window.__bench)?.(document.getElementById("app")); }catch(e){}</script></body></html>';
   const http = await import('node:http');
   server = http.createServer((_q, res) => { res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(html); });
