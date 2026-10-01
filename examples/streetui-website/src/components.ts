@@ -7,7 +7,7 @@
  * repeating the shell/layout/code-block structure in every route.
  */
 
-import { derived, type Signal } from 'streetui';
+import { derived, type Signal, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import type { CodeSample } from './content.js';
 
