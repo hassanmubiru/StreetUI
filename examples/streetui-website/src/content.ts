@@ -1,0 +1,148 @@
+/**
+ * StreetUI Website — content model.
+ *
+ * Pure data (no framework calls) describing every documentation section, the
+ * navigation tree, the examples gallery, changelog entries and blog posts. The
+ * route builders in `routes.ts` turn this data into real StreetUI page trees.
+ *
+ * Keeping content as plain, typed data (not hand-written per-page builders) is
+ * itself a dogfooding decision: it lets ONE `/docs/:section` route render all
+ * sections, lets the search index be derived mechanically, and keeps the DSL
+ * code free of prose. Every code snippet below is real, runnable StreetUI
+ * public API — the site documents the framework it is built with.
+ */
+
+export interface CodeSample {
+  readonly label: string;
+  /** Source text shown by the <CodeExample> component (escaped at render time). */
+  readonly code: string;
+}
+
+export interface DocSection {
+  readonly slug: string;
+  readonly title: string;
+  /** Grouping shown in the docs sidebar. */
+  readonly group: 'Introduction' | 'Core' | 'Routing & Data' | 'UI' | 'Rendering' | 'Tooling';
+  readonly summary: string;
+  readonly paragraphs: readonly string[];
+  readonly code?: CodeSample;
+}
+
+/**
+ * The 18 documentation sections. Order is the sidebar order; `group` buckets
+ * them. Bodies are intentionally concise — the point of the site is to exercise
+ * StreetUI, and every snippet is drawn from the real public API surface
+ * (`import { … } from 'streetui'`).
+ */
+export const DOC_SECTIONS: readonly DocSection[] = [
+  {
+    slug: 'introduction',
+    title: 'Introduction',
+    group: 'Introduction',
+    summary: 'What StreetUI is and the pipeline every app flows through.',
+    paragraphs: [
+      'StreetUI is a TypeScript-first UI framework with its own fine-grained reactivity and a keyed real-DOM reconciler. There is no virtual DOM and no second runtime.',
+      'Every application flows through one pipeline: a semantic TypeScript DSL compiles to a semantic application graph, the runtime binds signals to that graph, and the renderer patches the real DOM directly.',
+      'You install and import exactly one package: streetui. Server-only helpers live at streetui/server and test utilities at streetui/testing.',
+    ],
+    code: {
+      label: 'Install',
+      code: 'npm install streetui',
+    },
+  },
+  {
+    slug: 'core-concepts',
+    title: 'Core Concepts',
+    group: 'Core',
+    summary: 'Apps, pages, sections, and the builder DSL.',
+    paragraphs: [
+      'An app is created with streetui.app({ name, version }) and declares pages with app.page(id, build). Inside a page you compose sections and containers, and inside those you place headings, text, links, buttons, inputs, forms and lists.',
+      'The DSL is a builder: you receive a scope object and call methods on it, rather than returning element trees. Every builder call takes a stable id so the compiler, renderer and tests can address the node deterministically.',
+    ],
+    code: {
+      label: 'A page',
+      code: [
+        "import { streetui, compile } from 'streetui';",
+        '',
+        "const app = streetui.app({ name: 'Hello', version: '1.0.0' });",
+        "app.page('home', (page) => {",
+        "  page.section('hero', (s) => {",
+        "    s.heading('Hello StreetUI', { level: 1, id: 'title' });",
+        "    s.text('Built from a semantic graph.', { id: 'tagline' });",
+        '  }, { id: \'hero\' });',
+        '});',
+        '',
+        'const compiled = compile(app);',
+      ].join('\n'),
+    },
+  },
+  {
+    slug: 'architecture',
+    title: 'Architecture',
+    group: 'Core',
+    summary: 'DSL → compiler → semantic graph → runtime → renderer.',
+    paragraphs: [
+      'The compiler turns the DSL into a semantic application graph: a serializable description of nodes, their props, their reactive bindings and their event wiring.',
+      'The runtime walks that graph once to mount it, subscribing DOM updates to the exact signals they read. The renderer owns the real DOM and performs keyed reconciliation; element identity is preserved across updates.',
+      'Because the graph is explicit, the same compiled app can be mounted in a browser, rendered to a string on the server, or hydrated against server HTML — no separate code path per target.',
+    ],
+  },
+  {
+    slug: 'components',
+    title: 'Components',
+    group: 'Core',
+    summary: 'First-class component() definitions on the same pipeline.',
+    paragraphs: [
+      'component() defines a reusable unit with its own setup that runs once at build time. Components receive props (plain values or signals) and compose the same builder DSL as pages — they are not a second rendering system.',
+      'Signal-valued props stay reactive without re-running setup, so a component updates in place through the keyed reconciler.',
+    ],
+  },
+  {
+    slug: 'reactivity',
+    title: 'Reactivity',
+    group: 'Core',
+    summary: 'signal, derived, effect and batch.',
+    paragraphs: [
+      'State lives in signals. signal(value) returns a handle with get/set/update/peek. derived(fn) is a cached computation that tracks the signals it reads. effect(fn) runs a side effect and re-runs when its dependencies change, returning a cleanup function.',
+      'Reads inside text(), when() and listOf() subscribe automatically, so updating a signal patches exactly the DOM that depends on it.',
+    ],
+    code: {
+      label: 'Signals',
+      code: [
+        "import { signal, derived, effect } from 'streetui';",
+        '',
+        'const count = signal(0);',
+        'const doubled = derived(() => count.get() * 2);',
+        'const stop = effect(() => console.log(doubled.get()));',
+        '',
+        'count.update((n) => n + 1); // doubled recomputes, effect re-runs',
+        'stop(); // dispose the effect',
+      ].join('\n'),
+    },
+  },
+  {
+    slug: 'routing',
+    title: 'Routing',
+    group: 'Routing & Data',
+    summary: 'createRouter, mountRouter, outlets, params and active links.',
+    paragraphs: [
+      'The router maps path patterns to route builders. createRouter({ routes, history }) builds it; mountRouter(router, { container, shell, hydrate }) mounts a persistent shell and renders the active route into routerOutlet(shell).',
+      'A builder receives (page, ctx) where ctx.params holds dynamic segments and ctx.query is the parsed query string. router.isActive(href, { exact }) is a signal you can drive active-link styling with, and router.navigate(path) changes routes without a full reload.',
+    ],
+    code: {
+      label: 'Routes',
+      code: [
+        "import { createRouter, mountRouter, routerOutlet } from 'streetui';",
+        '',
+        'const routes = [',
+        "  { path: '/', builder: (page) => page.section('h', (s) => s.heading('Home', { id: 'h', level: 1 })) },",
+        "  { path: '/docs/:section', builder: (page, ctx) =>",
+        "      page.section('d', (s) => s.text(ctx.params.section ?? '', { id: 'sec' })) },",
+        "  { path: '*', builder: (page) => page.section('nf', (s) => s.heading('404', { id: 'nf', level: 1 })) },",
+        '];',
+      ].join('\n'),
+    },
+  },
+];
+
+// Remaining sections are appended below (see content.extra.ts merge note).
