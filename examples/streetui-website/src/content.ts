@@ -295,3 +295,168 @@ export const DOC_SECTIONS: readonly DocSection[] = [
     ],
   },
 ];
+
+/** Look up a documentation section by slug. */
+export function findDoc(slug: string): DocSection | undefined {
+  return DOC_SECTIONS.find((d) => d.slug === slug);
+}
+
+/** The sidebar groups, in display order, with their sections. */
+export const DOC_GROUPS: readonly DocSection['group'][] = [
+  'Introduction',
+  'Core',
+  'Routing & Data',
+  'UI',
+  'Rendering',
+  'Tooling',
+];
+
+export function docsInGroup(group: DocSection['group']): DocSection[] {
+  return DOC_SECTIONS.filter((d) => d.group === group);
+}
+
+// ── Top-level navigation ────────────────────────────────────────────────────
+export interface NavItem {
+  readonly label: string;
+  readonly href: string;
+  readonly id: string;
+  /** Active match is exact (used for "/" so it isn't active everywhere). */
+  readonly exact?: boolean;
+}
+
+export const PRIMARY_NAV: readonly NavItem[] = [
+  { label: 'Home', href: '/', id: 'nav-home', exact: true },
+  { label: 'Getting Started', href: '/getting-started', id: 'nav-start' },
+  { label: 'Docs', href: '/docs', id: 'nav-docs' },
+  { label: 'API', href: '/api', id: 'nav-api' },
+  { label: 'Examples', href: '/examples', id: 'nav-examples' },
+  { label: 'Playground', href: '/playground', id: 'nav-playground' },
+  { label: 'Benchmarks', href: '/benchmarks', id: 'nav-benchmarks' },
+  { label: 'Blog', href: '/blog', id: 'nav-blog' },
+  { label: 'Changelog', href: '/changelog', id: 'nav-changelog' },
+];
+
+// ── Examples gallery ────────────────────────────────────────────────────────
+export interface ExampleEntry {
+  readonly id: number;
+  readonly name: string;
+  readonly tag: string;
+  readonly blurb: string;
+}
+
+export const EXAMPLES: readonly ExampleEntry[] = [
+  { id: 1, name: 'Counter', tag: 'state', blurb: 'A signal, three buttons, bound text.' },
+  { id: 2, name: 'Reactive list', tag: 'list', blurb: 'listOf over a signal with keyed reconciliation.' },
+  { id: 3, name: 'Contact form', tag: 'forms', blurb: 'Controlled inputs, derived validity, submit.' },
+  { id: 4, name: 'Conditional panel', tag: 'when', blurb: 'when() mounts/removes a subtree.' },
+  { id: 5, name: 'Router', tag: 'router', blurb: 'Nested shell, params, active links, 404.' },
+  { id: 6, name: 'Resource fetch', tag: 'data', blurb: 'Async read with loading/error/success.' },
+  { id: 7, name: 'Dialog overlay', tag: 'overlays', blurb: 'Portal, focus trap, Escape to close.' },
+  { id: 8, name: 'SSR + hydrate', tag: 'ssr', blurb: 'Byte-identical server HTML, resumed on the client.' },
+];
+
+// ── API reference (grouped export listing, grounded in the real surface) ─────
+export interface ApiGroup {
+  readonly title: string;
+  readonly exports: readonly string[];
+}
+
+export const API_GROUPS: readonly ApiGroup[] = [
+  { title: 'Reactivity', exports: ['signal', 'derived', 'effect', 'batch', 'resource'] },
+  { title: 'DSL', exports: ['streetui', 'compile'] },
+  { title: 'Runtime & Renderer', exports: ['createRuntime', 'createRenderer', 'BrowserDOMAdapter', 'ServerDOMAdapter'] },
+  { title: 'SSR', exports: ['renderToString', 'serializeState', 'readState'] },
+  { title: 'Router', exports: ['createRouter', 'mountRouter', 'routerOutlet', 'createBrowserHistory', 'createMemoryHistory'] },
+  { title: 'Testing', exports: ['render', 'renderServerThenHydrate', 'findByRole', 'findByText', 'waitFor'] },
+];
+
+// ── Changelog ───────────────────────────────────────────────────────────────
+export interface ChangelogEntry {
+  readonly version: string;
+  readonly date: string;
+  readonly highlights: readonly string[];
+}
+
+export const CHANGELOG: readonly ChangelogEntry[] = [
+  { version: '2.4.0', date: '2026', highlights: ['Final validation completion', 'Firefox performance baseline', 'Real AT + visual a11y harnesses'] },
+  { version: '2.2.0', date: '2026', highlights: ['Interactive 12-panel DevTools', 'Accessibility regression gate', 'Stress suites'] },
+  { version: '2.0.0', date: '2026', highlights: ['Application platform: head, async boundaries, mutations', 'DevTools UI panels'] },
+  { version: '1.0.0', date: '2026', highlights: ['Stable, frozen public API', 'Single streetui package'] },
+];
+
+// ── Blog ────────────────────────────────────────────────────────────────────
+export interface BlogPost {
+  readonly slug: string;
+  readonly title: string;
+  readonly date: string;
+  readonly body: readonly string[];
+}
+
+export const BLOG_POSTS: readonly BlogPost[] = [
+  {
+    slug: 'dogfooding-the-website',
+    title: 'This website is built with StreetUI',
+    date: '2026',
+    body: [
+      'The site you are reading is a StreetUI application. Every page is a route; the nav, theme toggle and docs search are StreetUI signals and builders.',
+      'Building it is how we find the framework’s rough edges before you do.',
+    ],
+  },
+  {
+    slug: 'no-virtual-dom',
+    title: 'Why there is no virtual DOM',
+    date: '2026',
+    body: [
+      'StreetUI compiles your app to a semantic graph and binds updates to the exact signals they read, so the renderer patches only what changed.',
+      'That makes reconciliation keyed and identity-preserving without a diff of a shadow tree.',
+    ],
+  },
+];
+
+export function findPost(slug: string): BlogPost | undefined {
+  return BLOG_POSTS.find((p) => p.slug === slug);
+}
+
+// ── Search index (derived mechanically from the content above) ───────────────
+export interface SearchDoc {
+  readonly title: string;
+  readonly href: string;
+  readonly kind: 'doc' | 'example' | 'blog' | 'api';
+  readonly haystack: string;
+}
+
+export const SEARCH_INDEX: readonly SearchDoc[] = [
+  ...DOC_SECTIONS.map((d): SearchDoc => ({
+    title: d.title,
+    href: `/docs/${d.slug}`,
+    kind: 'doc',
+    haystack: `${d.title} ${d.summary} ${d.paragraphs.join(' ')}`.toLowerCase(),
+  })),
+  ...EXAMPLES.map((e): SearchDoc => ({
+    title: e.name,
+    href: '/examples',
+    kind: 'example',
+    haystack: `${e.name} ${e.tag} ${e.blurb}`.toLowerCase(),
+  })),
+  ...BLOG_POSTS.map((p): SearchDoc => ({
+    title: p.title,
+    href: `/blog/${p.slug}`,
+    kind: 'blog',
+    haystack: `${p.title} ${p.body.join(' ')}`.toLowerCase(),
+  })),
+  ...API_GROUPS.flatMap((g): SearchDoc[] =>
+    g.exports.map((name) => ({
+      title: name,
+      href: '/api',
+      kind: 'api',
+      haystack: `${name} ${g.title}`.toLowerCase(),
+    })),
+  ),
+];
+
+/** Case-insensitive substring search over the derived index. */
+export function searchContent(query: string): SearchDoc[] {
+  const q = query.trim().toLowerCase();
+  if (q === '') return [];
+  return SEARCH_INDEX.filter((d) => d.haystack.includes(q)).slice(0, 10);
+}
