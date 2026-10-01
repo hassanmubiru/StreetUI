@@ -108,15 +108,22 @@ if (chromiumBin === null || !fs.existsSync(chromiumBin)) {
 let server = null;
 let browser = null;
 try {
-  const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
-  const build = await esbuild.build({
-    entryPoints: [path.join(appDir, 'src', 'bench-browser.ts')],
-    bundle: true, format: 'esm', write: false, sourcemap: false, target: 'es2020',
-    absWorkingDir: appDir,
-    define: { 'Buffer.byteLength': '__bufferByteLength' },
-    banner: { js: 'const __bufferByteLength = (s, enc) => new TextEncoder().encode(s).length;' },
-  });
-  const js = build.outputFiles[0].text;
+  // Use the pre-built dist if available (avoids slow runtime bundling).
+  const prebuilt = path.join(appDir, 'dist', 'bench-browser.js');
+  let js;
+  if (fs.existsSync(prebuilt)) {
+    js = fs.readFileSync(prebuilt, 'utf8');
+  } else {
+    const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
+    const build = await esbuild.build({
+      entryPoints: [path.join(appDir, 'src', 'bench-browser.ts')],
+      bundle: true, format: 'esm', write: false, sourcemap: false, target: 'es2020',
+      absWorkingDir: appDir,
+      define: { 'Buffer.byteLength': '__bufferByteLength' },
+      banner: { js: 'const __bufferByteLength = (s, enc) => new TextEncoder().encode(s).length;' },
+    });
+    js = build.outputFiles[0].text;
+  }
   // Mount the real app for scanning. bench-browser exposes window.__bench(); we
   // also mount the app into #app so axe has real rendered DOM to analyze.
   const htmlPage =
