@@ -65,14 +65,12 @@ export function renderWebsite(path: string): RenderResult {
   });
 
   const html = renderToString(compile(app));
+  const themeChoice = theme.choice.get();
   theme.dispose();
   router.destroy();
 
   const stateScript = serializeState({
-    [STATE_KEY]: {
-      path,
-      themeChoice: theme.choice.peek?.() ?? 'system',
-    },
+    [STATE_KEY]: { path, themeChoice },
   });
 
   return { html, stateScript };
