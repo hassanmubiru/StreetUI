@@ -33,7 +33,7 @@ export interface ShellContext {
 
 export interface SearchState {
   readonly query: Signal<string>;
-  readonly results: Signal<SearchDoc[]>;
+  readonly results: ReadonlySignal<SearchDoc[]>;
 }
 
 /** Build the search state (query signal + derived results over the index). */

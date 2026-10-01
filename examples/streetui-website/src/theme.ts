@@ -11,7 +11,7 @@
  * hydrated app container).
  */
 
-import { signal, derived, effect, type Signal } from 'streetui';
+import { signal, derived, effect, type Signal, type ReadonlySignal } from 'streetui';
 
 export type ThemeChoice = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
