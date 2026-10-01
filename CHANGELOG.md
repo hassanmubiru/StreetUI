@@ -5,6 +5,40 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 2.4.0 — Validation Completion (2026-10-01)
+
+**Validation milestone** — no architecture change, no new public API. All 18
+packages **published to npm at `2.4.0`**. Full detail in
+[`V2.4.0-RELEASE-REPORT.md`](./V2.4.0-RELEASE-REPORT.md).
+
+### Verified (new in 2.4)
+
+- DevTools 12-panel interaction validated in **Chrome 154 + Firefox 155** — all
+  panels render, 0 console errors, refresh hook, safety checks all PASS.
+- Visual a11y (axe-core): **0 color-contrast violations**, 0 wcag2a/wcag2aa
+  violations on rendered app (Chrome 154).
+- AT-SPI2 tree captured: Orca 46.1 + `org.a11y.Bus` running; Chrome appears in
+  live accessibility tree with correct roles/names. Literal speech pending.
+- Firefox 155 first performance baseline: mount 10k 335 ms · hydrate 209 ms.
+- Cross-browser smoke PASS: Chrome 154 + Firefox 155 (0 errors both engines).
+- Solid SSR fix shipped: `F_ssr = 1.82 ms`, H bundle measured. Browser A-E
+  pending (Solid client bundle error, not a StreetUI issue).
+- Build 29/29 · typecheck 47/47 · tests **913/913** (0 failed/skipped).
+
+### Harness fixes (infrastructure only)
+
+- `benchmarks/browser/devtools-interaction.mjs` — direct dist path fallback
+- `scripts/visual-a11y-axe.mjs` — axe-core path discovery, pre-built dist, Chrome path
+- `scripts/at-orca-driver.mjs` — `gi.repository.Atspi` support, pre-built dist, non-headless Chrome path
+- `benchmarks/competitors/solid/vite.config.mjs` — `ssr: isSsr` via `VITE_SSR_BUILD` env
+- `benchmarks/run-competitors.mjs` — sets `VITE_SSR_BUILD=1` for Solid SSR builds
+
+### Still pending
+
+- Literal Orca speech capture (speech-dispatcher log)
+- Solid browser scenarios A-E (non-hydratable client bundle)
+- Safari/WebKit (macOS required)
+
 ## 2.3.0 — Validation Completion (2026-09-30)
 
 **Validation milestone** — no architecture change, no new subsystem. All 18
