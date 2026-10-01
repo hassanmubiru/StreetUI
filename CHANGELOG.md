@@ -34,6 +34,33 @@ runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
 - Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
 - Registry-backed `npm install` / `npm publish`.
 
+## 2.6.0 — Production Website Validation (2026-10-01)
+
+**Validation milestone** — website performance, accessibility, and SEO. All 18 packages
+**published to npm at `2.6.0`**. Full detail in
+[`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
+
+### Added
+
+- **`examples/streetui-website/`** SEO/metadata layer — per-route `<title>`,
+  `<meta description>`, canonical, robots using the `head()` primitive.
+
+### Verified
+
+- Build 30/30, typecheck 48/48, tests 913/913 (framework) + 58/58 (website).
+- **Website Web Vitals** (served, real browser):
+  - Chrome 154: FCP **42 ms** median · LCP **42 ms** · **CLS = 0** all routes · TTI **9 ms** · route nav 216 ms · 0 console errors
+  - Firefox 155: FCP **50 ms** median · 0 console errors
+- **axe-core PASS** — 0 violations across all 10 routes (Chrome 154, `wcag2a`/`wcag2aa`)
+- AT-SPI tree captured: Orca 46.1 · Chrome accessible tree confirmed.
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+
+### Still pending
+
+- Literal Orca speech capture per flow (2.7)
+- Full Lighthouse audit with minified bundle (2.7)
+- Solid browser scenarios A-E (Solid client bundle error, not StreetUI)
+
 ## 2.5.0 — Dogfooding: Official Website (2026-10-01)
 
 **Dogfooding milestone** — the official StreetUI website (`examples/streetui-website/`)
