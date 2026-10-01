@@ -11,7 +11,7 @@
  * line, and the theme toggle is a real <button> with a reactive label.
  */
 
-import { derived, type Signal } from 'streetui';
+import { derived, type Signal, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import { routerOutlet } from 'streetui';
 import { navLink } from './components.js';
