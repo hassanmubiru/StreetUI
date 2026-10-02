@@ -365,4 +365,525 @@ declare function describeError(error: unknown, context?: DiagnosticContext, opti
  */
 declare function reportError(sink: DiagnosticSink | undefined, error: unknown, context?: DiagnosticContext, options?: ErrorReportOptions): ErrorReport;
 
-export { type A11yIds, Application, type ApplicationId, type ApplicationOptions, BaseNode, CleanupRegistry, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type SemanticNodeType, StreetFrameworkError, a11yIds, consoleDiagnosticSink, createApplication, createNodeId, describeError, environment, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateNodeId, nextId, nodeIdPrefix, reportDiagnostic, reportError, resetIdCounter, toIdToken };
+/**
+ * StreetUI styling — canonical style model + stable identity.
+ *
+ * A *style* is pure, serializable data describing appearance (§1 Q1). This module
+ * defines the authoring type model and the compile-time canonicalization that
+ * turns any `StyleDef` into (a) a deterministic, order-independent canonical form
+ * and (b) a stable class identity `s-<hash>`. Identical styles → identical
+ * canonical form → identical identity → one shared CSS rule (§18 dedup).
+ *
+ * This file is pure and DOM-free: it never touches the graph, a signal, or the
+ * renderer. It is the foundation the registry (`registry.ts`), CSS generator
+ * (`css.ts`) and authoring API (`style.ts`) build on.
+ */
+/** A raw CSS value: a string (`'1px solid'`) or a number (lengths → px). */
+type CSSValue = string | number;
+/** The responsive breakpoint keys, smallest → largest. `base` is unconditional. */
+type Breakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
+/** A value that may vary by breakpoint. A bare value means "all breakpoints". */
+type ResponsiveValue<T> = T | Partial<Record<Breakpoint, T>>;
+/** Native CSS pseudo-states the browser owns (styled via CSS, never JS). */
+type PseudoState = 'hover' | 'focus' | 'focusVisible' | 'focusWithin' | 'active' | 'disabled' | 'checked' | 'firstChild' | 'lastChild';
+/** Reactive component/application states (distinct from native pseudo states). */
+type ComponentState = 'open' | 'closed' | 'active' | 'selected' | 'expanded' | 'collapsed' | 'loading' | 'error' | 'disabled' | 'invalid' | 'busy' | 'current';
+/**
+ * A set of CSS declarations. Keys are camelCase CSS property names; values may be
+ * responsive. The curated property surface gives autocomplete and rejects unknown
+ * keys under strict object-literal checking (§23) without pulling an external
+ * `csstype` dependency. Unlisted-but-valid CSS can still be set via the inline
+ * `style` prop escape hatch on an element (precedence §5).
+ */
+interface StyleProperties {
+    readonly display?: ResponsiveValue<CSSValue>;
+    readonly position?: ResponsiveValue<CSSValue>;
+    readonly inset?: ResponsiveValue<CSSValue>;
+    readonly top?: ResponsiveValue<CSSValue>;
+    readonly right?: ResponsiveValue<CSSValue>;
+    readonly bottom?: ResponsiveValue<CSSValue>;
+    readonly left?: ResponsiveValue<CSSValue>;
+    readonly zIndex?: ResponsiveValue<CSSValue>;
+    readonly width?: ResponsiveValue<CSSValue>;
+    readonly minWidth?: ResponsiveValue<CSSValue>;
+    readonly maxWidth?: ResponsiveValue<CSSValue>;
+    readonly height?: ResponsiveValue<CSSValue>;
+    readonly minHeight?: ResponsiveValue<CSSValue>;
+    readonly maxHeight?: ResponsiveValue<CSSValue>;
+    readonly margin?: ResponsiveValue<CSSValue>;
+    readonly marginTop?: ResponsiveValue<CSSValue>;
+    readonly marginRight?: ResponsiveValue<CSSValue>;
+    readonly marginBottom?: ResponsiveValue<CSSValue>;
+    readonly marginLeft?: ResponsiveValue<CSSValue>;
+    readonly padding?: ResponsiveValue<CSSValue>;
+    readonly paddingTop?: ResponsiveValue<CSSValue>;
+    readonly paddingRight?: ResponsiveValue<CSSValue>;
+    readonly paddingBottom?: ResponsiveValue<CSSValue>;
+    readonly paddingLeft?: ResponsiveValue<CSSValue>;
+    readonly gap?: ResponsiveValue<CSSValue>;
+    readonly rowGap?: ResponsiveValue<CSSValue>;
+    readonly columnGap?: ResponsiveValue<CSSValue>;
+    readonly flex?: ResponsiveValue<CSSValue>;
+    readonly flexDirection?: ResponsiveValue<CSSValue>;
+    readonly flexWrap?: ResponsiveValue<CSSValue>;
+    readonly flexGrow?: ResponsiveValue<CSSValue>;
+    readonly flexShrink?: ResponsiveValue<CSSValue>;
+    readonly flexBasis?: ResponsiveValue<CSSValue>;
+    readonly alignItems?: ResponsiveValue<CSSValue>;
+    readonly alignSelf?: ResponsiveValue<CSSValue>;
+    readonly justifyContent?: ResponsiveValue<CSSValue>;
+    readonly justifySelf?: ResponsiveValue<CSSValue>;
+    readonly gridTemplateColumns?: ResponsiveValue<CSSValue>;
+    readonly gridTemplateRows?: ResponsiveValue<CSSValue>;
+    readonly gridColumn?: ResponsiveValue<CSSValue>;
+    readonly gridRow?: ResponsiveValue<CSSValue>;
+    readonly placeItems?: ResponsiveValue<CSSValue>;
+    readonly color?: ResponsiveValue<CSSValue>;
+    readonly background?: ResponsiveValue<CSSValue>;
+    readonly backgroundColor?: ResponsiveValue<CSSValue>;
+    readonly borderColor?: ResponsiveValue<CSSValue>;
+    readonly border?: ResponsiveValue<CSSValue>;
+    readonly borderWidth?: ResponsiveValue<CSSValue>;
+    readonly borderStyle?: ResponsiveValue<CSSValue>;
+    readonly borderRadius?: ResponsiveValue<CSSValue>;
+    readonly boxShadow?: ResponsiveValue<CSSValue>;
+    readonly outline?: ResponsiveValue<CSSValue>;
+    readonly opacity?: ResponsiveValue<CSSValue>;
+    readonly fontFamily?: ResponsiveValue<CSSValue>;
+    readonly fontSize?: ResponsiveValue<CSSValue>;
+    readonly fontWeight?: ResponsiveValue<CSSValue>;
+    readonly lineHeight?: ResponsiveValue<CSSValue>;
+    readonly letterSpacing?: ResponsiveValue<CSSValue>;
+    readonly textAlign?: ResponsiveValue<CSSValue>;
+    readonly textDecoration?: ResponsiveValue<CSSValue>;
+    readonly textTransform?: ResponsiveValue<CSSValue>;
+    readonly whiteSpace?: ResponsiveValue<CSSValue>;
+    readonly overflow?: ResponsiveValue<CSSValue>;
+    readonly overflowX?: ResponsiveValue<CSSValue>;
+    readonly overflowY?: ResponsiveValue<CSSValue>;
+    readonly cursor?: ResponsiveValue<CSSValue>;
+    readonly transition?: ResponsiveValue<CSSValue>;
+    readonly transform?: ResponsiveValue<CSSValue>;
+    readonly appearance?: ResponsiveValue<CSSValue>;
+    readonly userSelect?: ResponsiveValue<CSSValue>;
+    readonly pointerEvents?: ResponsiveValue<CSSValue>;
+    /** Reactive CSS custom properties (`--name`) — the signal-driven channel (§6). */
+    readonly vars?: Readonly<Record<`--${string}`, CSSValue>>;
+}
+/**
+ * A full style definition: base declarations plus optional pseudo-state,
+ * component-state and a11y-state overrides. Each override block is itself a set
+ * of (non-responsive) declarations.
+ */
+interface StyleDef extends StyleProperties {
+    /** Native pseudo-state overrides (`:hover`, `:focus-visible`, …) — §9. */
+    readonly on?: Partial<Record<PseudoState, StyleProperties>>;
+    /** Component-state overrides → `[data-<state>]` selectors — §10. */
+    readonly when?: Partial<Record<ComponentState, StyleProperties>>;
+}
+/** A canonical, order-independent, JSON-serializable form of a `StyleDef`. */
+type CanonicalStyle = string;
+/** camelCase → kebab-case CSS property name (`backgroundColor` → `background-color`). */
+declare function cssPropName(camel: string): string;
+/** Format a CSS value: unitless numbers on length props get `px`; others pass through. */
+declare function cssValue(prop: string, value: CSSValue): string;
+/** Produce the canonical form of a style definition (stable across key order). */
+declare function canonicalize(def: StyleDef): CanonicalStyle;
+/**
+ * FNV-1a (two seeds) → a stable, dependency-free class identity. Two 32-bit
+ * passes are concatenated in base36 to make collisions between distinct styles
+ * astronomically unlikely for realistic app style counts. Deterministic: the
+ * same canonical form always yields the same id on server and client (§11/§12).
+ */
+declare function hashIdentity(canonical: CanonicalStyle): string;
+/** Convenience: canonical form + identity in one call. */
+declare function identityOf(def: StyleDef): {
+    canonical: CanonicalStyle;
+    id: string;
+};
+
+/**
+ * StreetUI styling — the deduplicated CSS rule registry (§15/§18).
+ *
+ * A single module-level registry maps a *style identity* (`s-<hash>`) to the CSS
+ * rule text for that style. Registration is idempotent: registering the same
+ * identity twice with identical content is a no-op, so 10,000 elements that share
+ * a style produce exactly one rule (§18). The registry is keyed by identity —
+ * **never** by node or element — so it holds only bounded rule strings and
+ * unmounting nodes never strands state in it (§17 memory-leak avoidance).
+ *
+ * Ordering is deterministic (insertion order within fixed category bands), so
+ * serialization is byte-stable across runs (§11/§16). An empty registry
+ * serializes to the empty string, mirroring `renderHead` — so a route that
+ * declares no styles emits no `<style>` block and stays byte-identical.
+ */
+/** Category bands fix the serialization order regardless of registration order. */
+type StyleBand = 'tokens' | 'base' | 'responsive' | 'state' | 'variant';
+declare class StyleRegistry {
+    private readonly _entries;
+    private _seq;
+    /** True once the registry has adopted a server-emitted stylesheet (§12). */
+    private _adopted;
+    /**
+     * Register (idempotently) the CSS for a style identity. Returns the identity so
+     * callers can chain. Re-registering an existing id with the same css is a no-op;
+     * with different css it keeps the first registration (identity is content-derived,
+     * so this cannot happen for honest input and signals a hash collision if it does).
+     */
+    register(id: string, band: StyleBand, css: string): string;
+    /** Whether an identity is already present (server-adopted or locally registered). */
+    has(id: string): boolean;
+    /** Number of distinct rules held (bounded by source diversity, not instances). */
+    get size(): number;
+    /**
+     * Seed the registry from identities a server stylesheet already shipped (§12).
+     * We only need the *keys* to avoid re-emitting duplicates; the rule text is
+     * already in the adopted `<style>` element, so a placeholder css is stored.
+     */
+    adoptServerIdentities(ids: Iterable<string>): void;
+    get adopted(): boolean;
+    /** Serialize all rules to a single CSS string in deterministic band order. */
+    serializeCSS(): string;
+    /** The ordered list of identities present (for the `data-streetui-css-keys` attr). */
+    identities(): string[];
+    /** Clear everything — test isolation and per-process reset only. */
+    reset(): void;
+}
+/**
+ * The process-wide registry instance. Because consuming packages (`dsl` authoring
+ * and `renderer` SSR) both resolve `@streetui/core` to the *same* module, they
+ * share this one instance — the authoring side registers rules and the SSR side
+ * serializes them, with no cross-package plumbing.
+ */
+declare const styleRegistry: StyleRegistry;
+
+/**
+ * StreetUI styling — compile-time CSS generation (§7-§10, §15).
+ *
+ * Turns a `StyleDef` + its stable identity into CSS rule text. All generation is
+ * pure and happens at author/compile time; nothing here runs per render. Output
+ * is deterministic (properties sorted, fixed media order) so identities and bytes
+ * are stable across server and client (§11/§16).
+ *
+ * Property values that are objects of the shape `{ base, sm, md, lg, xl }` expand
+ * to a base declaration plus `@media (min-width: …)` blocks (§7). Pseudo states
+ * (`on`) become `.id:hover` etc. (§9). Component states (`when`) become
+ * `.id[data-<state>]` selectors driven reactively by a data attribute (§10).
+ */
+
+/** Default breakpoint minimum widths (px). Mirrors the default token breakpoints. */
+declare const BREAKPOINTS: Readonly<Record<Exclude<Breakpoint, 'base'>, number>>;
+/** `data-<state>` attribute name a component state maps to (§10). */
+declare function stateAttr(state: ComponentState): string;
+interface GeneratedCSS {
+    /** Base rule + any responsive `@media` blocks. */
+    readonly base: string;
+    /** Pseudo-state and component-state rules (empty string when none). */
+    readonly state: string;
+    /** Whether the style declares any responsive values (for registry banding). */
+    readonly hasResponsive: boolean;
+}
+/**
+ * Generate the CSS for a style identity. The caller registers `base` under the
+ * `base`/`responsive` band and `state` under the `state` band.
+ */
+declare function generateCSS(id: string, def: StyleDef): GeneratedCSS;
+
+/**
+ * StreetUI styling — first-class design tokens + theming (§6/§7/§16).
+ *
+ * Tokens are declared as a nested tree of named values and compiled to CSS custom
+ * properties emitted once under `:root`, with dark-mode values emitted under
+ * `[data-theme="dark"]`. A token *reference* is the string `var(--name)`, usable
+ * anywhere a CSS value is expected inside a `StyleDef`. Dark mode therefore never
+ * duplicates a style definition — it only re-points the variables (§7/§16).
+ *
+ * SSR/hydration safety: the token CSS is registered in the shared style registry
+ * (tokens band) and serialized into the single `<style data-streetui-css>` block
+ * like any other rule, so the server ships the variables and the client adopts
+ * them. Switching theme is a single `data-theme` attribute flip on the root
+ * element — no restyle work, no re-render (§16).
+ */
+type TokenLeaf = string | number;
+interface TokenTree {
+    readonly [key: string]: TokenLeaf | TokenTree;
+}
+/** The ref tree mirrors the input shape; every leaf becomes a `var(--…)` string. */
+type TokenRefs<T> = {
+    readonly [K in keyof T]: T[K] extends TokenLeaf ? string : T[K] extends TokenTree ? TokenRefs<T[K]> : never;
+};
+interface ThemeTokenDef<L extends TokenTree> {
+    /** Base (light) token values — required; defines the full token surface. */
+    readonly light: L;
+    /** Dark overrides — a partial subset; unlisted tokens inherit the light value. */
+    readonly dark?: DeepPartial<L>;
+}
+type DeepPartial<T> = {
+    [K in keyof T]?: T[K] extends TokenLeaf ? TokenLeaf : T[K] extends TokenTree ? DeepPartial<T[K]> : never;
+};
+interface ThemeTokens<L extends TokenTree> {
+    /** Token references (`var(--…)`) mirroring the declared tree. */
+    readonly ref: TokenRefs<L>;
+    /** The generated CSS for `:root` and `[data-theme="dark"]`. */
+    readonly css: string;
+    /** The stable identity under which this token block is registered. */
+    readonly id: string;
+}
+/**
+ * Declare a set of design tokens. Returns typed references and registers the
+ * generated `:root` / `[data-theme="dark"]` CSS in the shared registry (idempotent).
+ */
+declare function createThemeTokens<L extends TokenTree>(def: ThemeTokenDef<L>): ThemeTokens<L>;
+/**
+ * The default StreetUI semantic token set (§6/§7). Covers color surfaces, content,
+ * borders, accent, focus and danger semantics, plus spacing, radii, typography,
+ * shadows, z-index, durations, easings and breakpoints. Dark mode re-points only
+ * the color semantics; structural tokens (spacing, radii, …) are theme-invariant.
+ */
+declare const DEFAULT_TOKENS: {
+    readonly surface: {
+        readonly background: "#ffffff";
+        readonly raised: "#f7f7f8";
+        readonly sunken: "#eeeef1";
+        readonly overlay: "rgba(17,17,20,0.55)";
+    };
+    readonly content: {
+        readonly primary: "#17171a";
+        readonly secondary: "#55555f";
+        readonly muted: "#8a8a95";
+        readonly inverse: "#ffffff";
+    };
+    readonly border: {
+        readonly default: "#e3e3e8";
+        readonly strong: "#c9c9d1";
+        readonly subtle: "#f0f0f3";
+    };
+    readonly accent: {
+        readonly primary: "#4f46e5";
+        readonly hover: "#4338ca";
+        readonly contrast: "#ffffff";
+    };
+    readonly focus: {
+        readonly ring: "#6366f1";
+    };
+    readonly danger: {
+        readonly surface: "#fef2f2";
+        readonly border: "#fecaca";
+        readonly content: "#b91c1c";
+        readonly solid: "#dc2626";
+    };
+    readonly success: {
+        readonly content: "#15803d";
+        readonly solid: "#16a34a";
+    };
+    readonly space: {
+        readonly '0': "0";
+        readonly '1': "4px";
+        readonly '2': "8px";
+        readonly '3': "12px";
+        readonly '4': "16px";
+        readonly '5': "24px";
+        readonly '6': "32px";
+        readonly '8': "48px";
+        readonly '10': "64px";
+    };
+    readonly radius: {
+        readonly sm: "4px";
+        readonly md: "8px";
+        readonly lg: "12px";
+        readonly xl: "16px";
+        readonly full: "9999px";
+    };
+    readonly font: {
+        readonly sans: "ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+        readonly mono: "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+    };
+    readonly size: {
+        readonly xs: "12px";
+        readonly sm: "14px";
+        readonly md: "16px";
+        readonly lg: "18px";
+        readonly xl: "24px";
+        readonly '2xl': "32px";
+        readonly '3xl': "44px";
+    };
+    readonly weight: {
+        readonly normal: "400";
+        readonly medium: "500";
+        readonly semibold: "600";
+        readonly bold: "700";
+    };
+    readonly leading: {
+        readonly tight: "1.2";
+        readonly normal: "1.5";
+        readonly relaxed: "1.7";
+    };
+    readonly shadow: {
+        readonly sm: "0 1px 2px rgba(17,17,20,0.08)";
+        readonly md: "0 4px 12px rgba(17,17,20,0.1)";
+        readonly lg: "0 12px 32px rgba(17,17,20,0.16)";
+    };
+    readonly z: {
+        readonly base: "0";
+        readonly dropdown: "1000";
+        readonly overlay: "1100";
+        readonly toast: "1200";
+    };
+    readonly duration: {
+        readonly fast: "120ms";
+        readonly base: "200ms";
+        readonly slow: "320ms";
+    };
+    readonly easing: {
+        readonly standard: "cubic-bezier(0.2,0,0,1)";
+        readonly emphasized: "cubic-bezier(0.3,0,0,1)";
+    };
+};
+/** The ready-to-use default theme tokens, registered on import. */
+declare const tokens: ThemeTokens<{
+    readonly surface: {
+        readonly background: "#ffffff";
+        readonly raised: "#f7f7f8";
+        readonly sunken: "#eeeef1";
+        readonly overlay: "rgba(17,17,20,0.55)";
+    };
+    readonly content: {
+        readonly primary: "#17171a";
+        readonly secondary: "#55555f";
+        readonly muted: "#8a8a95";
+        readonly inverse: "#ffffff";
+    };
+    readonly border: {
+        readonly default: "#e3e3e8";
+        readonly strong: "#c9c9d1";
+        readonly subtle: "#f0f0f3";
+    };
+    readonly accent: {
+        readonly primary: "#4f46e5";
+        readonly hover: "#4338ca";
+        readonly contrast: "#ffffff";
+    };
+    readonly focus: {
+        readonly ring: "#6366f1";
+    };
+    readonly danger: {
+        readonly surface: "#fef2f2";
+        readonly border: "#fecaca";
+        readonly content: "#b91c1c";
+        readonly solid: "#dc2626";
+    };
+    readonly success: {
+        readonly content: "#15803d";
+        readonly solid: "#16a34a";
+    };
+    readonly space: {
+        readonly '0': "0";
+        readonly '1': "4px";
+        readonly '2': "8px";
+        readonly '3': "12px";
+        readonly '4': "16px";
+        readonly '5': "24px";
+        readonly '6': "32px";
+        readonly '8': "48px";
+        readonly '10': "64px";
+    };
+    readonly radius: {
+        readonly sm: "4px";
+        readonly md: "8px";
+        readonly lg: "12px";
+        readonly xl: "16px";
+        readonly full: "9999px";
+    };
+    readonly font: {
+        readonly sans: "ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+        readonly mono: "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+    };
+    readonly size: {
+        readonly xs: "12px";
+        readonly sm: "14px";
+        readonly md: "16px";
+        readonly lg: "18px";
+        readonly xl: "24px";
+        readonly '2xl': "32px";
+        readonly '3xl': "44px";
+    };
+    readonly weight: {
+        readonly normal: "400";
+        readonly medium: "500";
+        readonly semibold: "600";
+        readonly bold: "700";
+    };
+    readonly leading: {
+        readonly tight: "1.2";
+        readonly normal: "1.5";
+        readonly relaxed: "1.7";
+    };
+    readonly shadow: {
+        readonly sm: "0 1px 2px rgba(17,17,20,0.08)";
+        readonly md: "0 4px 12px rgba(17,17,20,0.1)";
+        readonly lg: "0 12px 32px rgba(17,17,20,0.16)";
+    };
+    readonly z: {
+        readonly base: "0";
+        readonly dropdown: "1000";
+        readonly overlay: "1100";
+        readonly toast: "1200";
+    };
+    readonly duration: {
+        readonly fast: "120ms";
+        readonly base: "200ms";
+        readonly slow: "320ms";
+    };
+    readonly easing: {
+        readonly standard: "cubic-bezier(0.2,0,0,1)";
+        readonly emphasized: "cubic-bezier(0.3,0,0,1)";
+    };
+}>;
+
+/**
+ * StreetUI styling — the public authoring API: `style()` and `styleVariants()`.
+ *
+ * `style(def)` canonicalizes a definition, registers its deduplicated CSS once,
+ * and returns the stable class token (a plain string) to spread onto an element's
+ * `class` (§2/§5/§18). Being a plain string makes it trivially composable and
+ * tree-shakeable with no runtime dependency. A *static* `style()` call opens no
+ * signal, no subscription and no effect (§3) — it is pure compile-time data.
+ *
+ * `styleVariants(cfg)` builds a type-safe family of styles. Variant group keys and
+ * values are mapped types, so selecting an unknown group or value is a TypeScript
+ * error (§11/§23) — no stringly-typed variant names. The returned function yields
+ * the merged, deduped class list for a selection.
+ */
+
+/**
+ * Register a style definition and return its class token. Idempotent: the same
+ * definition always maps to the same token and a single shared CSS rule.
+ */
+declare function style(def: StyleDef): string;
+/** Join class tokens/strings, dropping falsy entries. `cx('a', cond && 'b')`. */
+declare function cx(...parts: Array<string | false | null | undefined>): string;
+type VariantGroups = Record<string, Record<string, StyleDef>>;
+interface VariantConfig<V extends VariantGroups> {
+    /** Shared declarations applied to every variant combination. */
+    readonly base?: StyleDef;
+    /** Named variant groups; each maps a value name to its own `StyleDef`. */
+    readonly variants: V;
+    /** Default selection used when a group is omitted at call time. */
+    readonly defaultVariants?: {
+        readonly [K in keyof V]?: keyof V[K];
+    };
+}
+/** A selection object: for each group, an optional value from that group. */
+type VariantSelection<V extends VariantGroups> = {
+    readonly [K in keyof V]?: keyof V[K];
+};
+/** The callable produced by `styleVariants` — `button({ intent:'danger' })`. */
+type VariantFn<V extends VariantGroups> = (selection?: VariantSelection<V>) => string;
+/**
+ * Build a type-safe variant family. All base and variant-value styles are
+ * registered up front (each as its own deduped identity), so calling the returned
+ * function only *selects* among precompiled classes — no runtime style work (§11).
+ */
+declare function styleVariants<V extends VariantGroups>(cfg: VariantConfig<V>): VariantFn<V>;
+
+export { type A11yIds, Application, type ApplicationId, type ApplicationOptions, BREAKPOINTS, BaseNode, type Breakpoint, type CSSValue, type CanonicalStyle, CleanupRegistry, type ComponentState, DEFAULT_TOKENS, type DeepPartial, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, type GeneratedCSS, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type PseudoState, type ResponsiveValue, type SemanticNodeType, StreetFrameworkError, type StyleBand, type StyleDef, type StyleProperties, StyleRegistry, type ThemeTokenDef, type ThemeTokens, type TokenLeaf, type TokenRefs, type TokenTree, type VariantConfig, type VariantFn, type VariantGroups, type VariantSelection, a11yIds, canonicalize, consoleDiagnosticSink, createApplication, createNodeId, createThemeTokens, cssPropName, cssValue, cx, describeError, environment, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateCSS, generateNodeId, hashIdentity, identityOf, nextId, nodeIdPrefix, reportDiagnostic, reportError, resetIdCounter, stateAttr, style, styleRegistry, styleVariants, toIdToken, tokens };
