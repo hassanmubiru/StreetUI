@@ -965,7 +965,7 @@ declare function reactiveVarValue(prop: string, value: CSSValue): string;
 
 /** A spacing-scale key resolved against the `--space-*` tokens. */
 type SpaceKey = keyof typeof tokens.ref.space;
-interface ContainerOptions {
+interface ContainerStyleOptions {
     /** Max content width (default `1120px`). A number is treated as `px`. */
     readonly max?: CSSValue;
     /** Horizontal padding as a space-scale key (default `'4'`). */
@@ -974,7 +974,7 @@ interface ContainerOptions {
     readonly center?: boolean;
 }
 /** A width-capped, centered content column with symmetric horizontal padding. */
-declare function container(opts?: ContainerOptions): string;
+declare function container(opts?: ContainerStyleOptions): string;
 interface StackOptions {
     /** Gap between children as a space-scale key (default `'4'`). */
     readonly gap?: SpaceKey;
@@ -1035,12 +1035,12 @@ declare const layout: {
  * monospace, token surface, and sensible wrapping without an external prose sheet.
  */
 type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
-interface HeadingOptions {
+interface HeadingStyleOptions {
     /** Semantic heading level 1–6 (drives size + weight). Default `2`. */
     readonly level?: HeadingLevel;
 }
 /** A display heading sized from the type scale by level. */
-declare function heading(opts?: HeadingOptions): string;
+declare function heading(opts?: HeadingStyleOptions): string;
 interface BodyOptions {
     /** Secondary (muted) body colour instead of primary. Default `false`. */
     readonly muted?: boolean;
@@ -1244,4 +1244,4 @@ declare const animation: {
     readonly keyframes: Readonly<Record<string, string>>;
 };
 
-export { type A11yIds, type AnimateOptions, type AnimationName, Application, type ApplicationId, type ApplicationOptions, BREAKPOINTS, BaseNode, type BodyOptions, type Breakpoint, type CSSValue, type CanonicalStyle, type CenterOptions, CleanupRegistry, type ComponentState, type ContainerOptions, DEFAULT_TOKENS, type DeepPartial, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, type DurationKey, type EasingKey, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, type FocusRingOptions, type GeneratedCSS, type GridOptions, type HeadingLevel, type HeadingOptions, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type PseudoState, type ReactiveStyle, type ResponsiveValue, type RowOptions, type SemanticNodeType, type SpaceKey, type SpacerOptions, type StackOptions, StreetFrameworkError, type StyleBand, type StyleDef, type StyleProperties, StyleRegistry, type ThemeTokenDef, type ThemeTokens, type TokenLeaf, type TokenRefs, type TokenTree, type TransitionOptions, type VariantConfig, type VariantFn, type VariantGroups, type VariantSelection, a11y, a11yIds, animate, animation, backdrop, blockquote, body, button, canonicalize, caption, center, code, consoleDiagnosticSink, container, createApplication, createNodeId, createThemeTokens, cssPropName, cssValue, cx, describeError, dialog, dropdown, dropdownItem, environment, field, fieldError, fieldHelp, fieldLabel, focusRing, form, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateCSS, generateNodeId, grid, hashIdentity, heading, identityOf, input, label, layout, link, list, nextId, nodeIdPrefix, overlay, popover, pre, reactiveVarName, reactiveVarValue, reportDiagnostic, reportError, resetIdCounter, row, skipLink, spacer, stack, stateAttr, style, styleRegistry, styleVariants, styleWithVars, text, toIdToken, toast, tokens, tooltip, transition, visuallyHidden };
+export { type A11yIds, type AnimateOptions, type AnimationName, Application, type ApplicationId, type ApplicationOptions, BREAKPOINTS, BaseNode, type BodyOptions, type Breakpoint, type CSSValue, type CanonicalStyle, type CenterOptions, CleanupRegistry, type ComponentState, type ContainerStyleOptions, DEFAULT_TOKENS, type DeepPartial, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, type DurationKey, type EasingKey, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, type FocusRingOptions, type GeneratedCSS, type GridOptions, type HeadingLevel, type HeadingStyleOptions, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type PseudoState, type ReactiveStyle, type ResponsiveValue, type RowOptions, type SemanticNodeType, type SpaceKey, type SpacerOptions, type StackOptions, StreetFrameworkError, type StyleBand, type StyleDef, type StyleProperties, StyleRegistry, type ThemeTokenDef, type ThemeTokens, type TokenLeaf, type TokenRefs, type TokenTree, type TransitionOptions, type VariantConfig, type VariantFn, type VariantGroups, type VariantSelection, a11y, a11yIds, animate, animation, backdrop, blockquote, body, button, canonicalize, caption, center, code, consoleDiagnosticSink, container, createApplication, createNodeId, createThemeTokens, cssPropName, cssValue, cx, describeError, dialog, dropdown, dropdownItem, environment, field, fieldError, fieldHelp, fieldLabel, focusRing, form, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateCSS, generateNodeId, grid, hashIdentity, heading, identityOf, input, label, layout, link, list, nextId, nodeIdPrefix, overlay, popover, pre, reactiveVarName, reactiveVarValue, reportDiagnostic, reportError, resetIdCounter, row, skipLink, spacer, stack, stateAttr, style, styleRegistry, styleVariants, styleWithVars, text, toIdToken, toast, tokens, tooltip, transition, visuallyHidden };
