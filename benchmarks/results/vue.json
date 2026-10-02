@@ -3,7 +3,7 @@
   "version": "3.5.13",
   "nodeVersion": "v24.18.0",
   "browserVersion": null,
-  "timestamp": "2026-10-01T18:49:54.573Z",
+  "timestamp": "2026-10-02T05:43:52.743Z",
   "environment": {
     "domEnvironment": "chromium (Playwright)",
     "arch": "x64",
@@ -13,20 +13,20 @@
   "benchmarks": {
     "A_initialRender": {
       "nodes": 10000,
-      "medianMs": 7.9,
-      "p95Ms": 11.3,
+      "medianMs": 8.1,
+      "p95Ms": 15.7,
       "minMs": 7.1,
-      "maxMs": 11.3,
+      "maxMs": 15.7,
       "samples": 15,
       "domNodesCreated": 20002,
       "note": "time to create DOM; synchronous mount == interactive"
     },
     "B_singleUpdate": {
       "nodes": 10000,
-      "medianMs": 2.2,
-      "p95Ms": 2.4,
-      "minMs": 1.9,
-      "maxMs": 2.5,
+      "medianMs": 2.4,
+      "p95Ms": 2.7,
+      "minMs": 2.1,
+      "maxMs": 15,
       "samples": 40,
       "domMutations": 0,
       "note": "one ref write in a 10k tree; domMutations MUST be 1 (targeted, no subtree re-render)"
@@ -34,25 +34,75 @@
     "C_largeList": {
       "append": {
         "items": 10000,
-        "medianMs": 5.1,
-        "p95Ms": 27.3,
-        "minMs": 4.2,
-        "maxMs": 27.3,
+        "medianMs": 5,
+        "p95Ms": 13.6,
+        "minMs": 4,
+        "maxMs": 13.6,
         "samples": 12,
         "domNodesCreated": 0,
         "domNodesRemoved": 0
       },
       "prepend": {
         "items": 10000,
-        "medianMs": 4.9,
-        "p95Ms": 5.5,
-        "minMs": 4.5,
-        "maxMs": 5.5,
+        "medianMs": 4.4,
+        "p95Ms": 7.3,
+        "minMs": 4.2,
+        "maxMs": 7.3,
         "samples": 12,
         "domNodesCreated": 0,
         "domNodesRemoved": 0
       },
       "remove-first": {
+        "items": 10000,
+        "medianMs": 5.4,
+        "p95Ms": 18.1,
+        "minMs": 4.9,
+        "maxMs": 18.1,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "remove-middle": {
+        "items": 10000,
+        "medianMs": 5.5,
+        "p95Ms": 8.1,
+        "minMs": 4.8,
+        "maxMs": 8.1,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "remove-last": {
+        "items": 10000,
+        "medianMs": 5.6,
+        "p95Ms": 17.6,
+        "minMs": 5,
+        "maxMs": 17.6,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "reorder": {
+        "items": 10000,
+        "medianMs": 6.2,
+        "p95Ms": 7.9,
+        "minMs": 5.6,
+        "maxMs": 7.9,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "reverse": {
+        "items": 10000,
+        "medianMs": 16.9,
+        "p95Ms": 29.8,
+        "minMs": 15.9,
+        "maxMs": 29.8,
+        "samples": 12,
+        "domNodesCreated": 0,
+        "domNodesRemoved": 0
+      },
+      "update-item": {
         "items": 10000,
         "medianMs": 5.5,
         "p95Ms": 7.5,
@@ -61,75 +111,25 @@
         "samples": 12,
         "domNodesCreated": 0,
         "domNodesRemoved": 0
-      },
-      "remove-middle": {
-        "items": 10000,
-        "medianMs": 6.3,
-        "p95Ms": 9.2,
-        "minMs": 6,
-        "maxMs": 9.2,
-        "samples": 12,
-        "domNodesCreated": 0,
-        "domNodesRemoved": 0
-      },
-      "remove-last": {
-        "items": 10000,
-        "medianMs": 5.6,
-        "p95Ms": 8.1,
-        "minMs": 5.3,
-        "maxMs": 8.1,
-        "samples": 12,
-        "domNodesCreated": 0,
-        "domNodesRemoved": 0
-      },
-      "reorder": {
-        "items": 10000,
-        "medianMs": 6.6,
-        "p95Ms": 21.7,
-        "minMs": 6.1,
-        "maxMs": 21.7,
-        "samples": 12,
-        "domNodesCreated": 0,
-        "domNodesRemoved": 0
-      },
-      "reverse": {
-        "items": 10000,
-        "medianMs": 17,
-        "p95Ms": 22.4,
-        "minMs": 16.3,
-        "maxMs": 22.4,
-        "samples": 12,
-        "domNodesCreated": 0,
-        "domNodesRemoved": 0
-      },
-      "update-item": {
-        "items": 10000,
-        "medianMs": 5.9,
-        "p95Ms": 9.2,
-        "minMs": 5.5,
-        "maxMs": 9.2,
-        "samples": 12,
-        "domNodesCreated": 0,
-        "domNodesRemoved": 0
       }
     },
     "D_fanOut": {
       "subscribers=1000": {
         "subscribers": 1000,
-        "medianMs": 1,
-        "p95Ms": 1.1,
-        "minMs": 0.9,
-        "maxMs": 1.1,
+        "medianMs": 0.9,
+        "p95Ms": 1.2,
+        "minMs": 0.8,
+        "maxMs": 1.2,
         "samples": 25,
         "domMutations": 0,
         "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
       },
       "subscribers=10000": {
         "subscribers": 10000,
-        "medianMs": 10.1,
-        "p95Ms": 15.2,
-        "minMs": 9.7,
-        "maxMs": 15.8,
+        "medianMs": 10.3,
+        "p95Ms": 12.9,
+        "minMs": 9.5,
+        "maxMs": 35.2,
         "samples": 25,
         "domMutations": 0,
         "note": "one write updates exactly `subscribers` text nodes; no wasted computation"
@@ -147,20 +147,20 @@
     },
     "F_ssr": {
       "nodes": 10000,
-      "medianMs": 2.9216,
-      "p95Ms": 4.5409,
-      "minMs": 2.7787,
-      "maxMs": 4.7205,
+      "medianMs": 3.1655,
+      "p95Ms": 5.2821,
+      "minMs": 2.9923,
+      "maxMs": 6.0708,
       "samples": 20,
       "outputBytes": 318922,
       "note": "renderToString of a 10k-node app; output size in bytes"
     },
     "G_hydration": {
       "nodes": 10000,
-      "medianMs": 3.9,
-      "p95Ms": 20.9,
-      "minMs": 3.5,
-      "maxMs": 20.9,
+      "medianMs": 4.3,
+      "p95Ms": 19.9,
+      "minMs": 3.7,
+      "maxMs": 19.9,
       "samples": 15,
       "domNodesCreatedDuringHydration": 0,
       "environment": "chromium (Playwright)",
