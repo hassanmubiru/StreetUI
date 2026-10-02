@@ -13,12 +13,17 @@
  */
 
 import { streetui, compile, renderToString, renderHead, serializeState, signal } from 'streetui';
+import { renderStyles, styleRegistry } from 'streetui';
 import { createRouter, createMemoryHistory } from 'streetui';
 import type { RouteContext } from 'streetui';
 import { websiteShell, createSearchState } from './shell.js';
 import { createTheme } from './theme.js';
 import { createPlaygroundState } from './playground.js';
 import { buildRoutes } from './routes.js';
+// Importing the design system registers every website style token into the
+// shared styleRegistry at module load (SSR determinism, §15/§16), so the
+// serialized stylesheet below is complete and identical for every route.
+import './design-system.js';
 
 export const STATE_KEY = 'streetui-website';
 
