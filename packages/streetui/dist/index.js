@@ -1,5 +1,5 @@
 // src/version.ts
-var VERSION = "2.6.0";
+var VERSION = "2.7.0";
 
 // ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/signal.ts
 var _activeConsumer = null;
