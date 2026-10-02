@@ -264,4 +264,213 @@ const hero: Showcase = {
   },
 };
 
-// APPEND_MARKER
+// ── 10. Navbar ───────────────────────────────────────────────────────────────
+
+const navbarDemo: Showcase = {
+  id: 'navbar',
+  title: 'Navbar',
+  build: (c) => {
+    const linkCls = style({
+      fontSize: t.size.sm,
+      fontWeight: t.weight.medium,
+      color: t.content.secondary,
+      textDecoration: 'none',
+      borderRadius: t.radius.sm,
+      paddingTop: t.space['1'],
+      paddingBottom: t.space['1'],
+      paddingLeft: t.space['2'],
+      paddingRight: t.space['2'],
+      on: { hover: { color: t.accent.primary, background: t.surface.sunken } },
+    });
+    c.container('sc-nav', (n) => {
+      n.heading('Brand', { level: 2, id: 'sc-nav-brand', class: style({ fontSize: t.size.lg, fontWeight: t.weight.bold, color: t.content.primary }) });
+      n.container('sc-nav-links', (links) => {
+        for (const l of ['Home', 'Docs', 'API', 'Blog']) {
+          links.link(l, { href: `#${l.toLowerCase()}`, id: `sc-nav-${l.toLowerCase()}`, class: linkCls });
+        }
+      }, { id: 'sc-nav-links', class: layout.row({ gap: '3', align: 'center', wrap: true }) });
+    }, {
+      id: 'sc-nav',
+      class: cx(layout.row({ gap: '4', align: 'center', justify: 'between', wrap: true }), style({
+        background: t.surface.raised,
+        boxShadow: t.shadow.sm,
+        borderRadius: t.radius.md,
+        paddingTop: t.space['3'],
+        paddingBottom: t.space['3'],
+        paddingLeft: t.space['4'],
+        paddingRight: t.space['4'],
+      })),
+    });
+  },
+};
+
+// ── 11. Pricing cards (variant: featured vs standard) ───────────────────────
+
+const priceCard = styleVariants({
+  base: {
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderRadius: t.radius.lg,
+    padding: t.space['5'],
+    background: t.surface.raised,
+  },
+  variants: {
+    tier: {
+      standard: { borderColor: t.border.default },
+      featured: { borderColor: t.accent.primary, boxShadow: t.shadow.md },
+    },
+  },
+  defaultVariants: { tier: 'standard' },
+});
+
+const pricingCards: Showcase = {
+  id: 'pricing',
+  title: 'Pricing',
+  build: (c) => {
+    const plans: ReadonlyArray<{ name: string; price: string; tier: 'standard' | 'featured' }> = [
+      { name: 'Hobby', price: '$0', tier: 'standard' },
+      { name: 'Pro', price: '$12', tier: 'featured' },
+      { name: 'Team', price: '$29', tier: 'standard' },
+    ];
+    c.container('sc-pricing', (grid) => {
+      plans.forEach((p, i) => {
+        grid.container(`sc-plan-${i}`, (card) => {
+          card.heading(p.name, { level: 3, id: `sc-plan-${i}-name`, class: text.heading({ level: 3 }) });
+          card.text(p.price, { id: `sc-plan-${i}-price`, class: cx(text.heading({ level: 1 }), style({ color: t.accent.primary })) });
+          card.button('Choose', { id: `sc-plan-${i}-cta`, class: button({ intent: p.tier === 'featured' ? 'primary' : 'secondary' }) });
+        }, { id: `sc-plan-${i}`, class: priceCard({ tier: p.tier }) });
+      });
+    }, { id: 'sc-pricing', class: layout.grid({ columns: 'auto', min: 200, gap: '5' }) });
+  },
+};
+
+// ── 12. Tabs (reactive selection via signal + when) ─────────────────────────
+
+const tabs: Showcase = {
+  id: 'tabs',
+  title: 'Tabs',
+  build: (c) => {
+    const active = signal<'overview' | 'details'>('overview');
+    const tabCls = style({
+      fontFamily: t.font.sans,
+      fontSize: t.size.sm,
+      fontWeight: t.weight.medium,
+      cursor: 'pointer',
+      appearance: 'none',
+      background: 'transparent',
+      borderWidth: 0,
+      borderStyle: 'solid',
+      color: t.content.secondary,
+      paddingTop: t.space['2'],
+      paddingBottom: t.space['2'],
+      paddingLeft: t.space['3'],
+      paddingRight: t.space['3'],
+      borderRadius: t.radius.sm,
+      on: { hover: { background: t.surface.sunken, color: t.content.primary } },
+    });
+    c.container('sc-tabs', (box) => {
+      box.container('sc-tabs-strip', (strip) => {
+        strip.button('Overview', { id: 'sc-tab-overview', class: tabCls, onClick: () => active.set('overview') });
+        strip.button('Details', { id: 'sc-tab-details', class: tabCls, onClick: () => active.set('details') });
+      }, { id: 'sc-tabs-strip', class: layout.row({ gap: '2', align: 'center' }) });
+      box.when(derived(() => active.get() === 'overview'), (p) => {
+        p.text('Overview panel content.', { id: 'sc-tab-panel-overview', class: text.body() });
+      });
+      box.when(derived(() => active.get() === 'details'), (p) => {
+        p.text('Details panel content.', { id: 'sc-tab-panel-details', class: text.body() });
+      });
+    }, { id: 'sc-tabs', class: panel });
+  },
+};
+
+// ── 13. Search results popover ──────────────────────────────────────────────
+
+const searchResults: Showcase = {
+  id: 'search',
+  title: 'Search results',
+  build: (c) => {
+    c.container('sc-search', (box) => {
+      box.input({ id: 'sc-search-input', type: 'search', placeholder: 'Search…', class: form.input() });
+      box.container('sc-search-list', (list) => {
+        for (const r of ['Reactivity', 'Routing', 'Rendering']) {
+          list.link(r, { href: `#${r.toLowerCase()}`, id: `sc-search-${r.toLowerCase()}`, class: cx(text.link(), style({ textDecoration: 'none', padding: t.space['1'], borderRadius: t.radius.sm })) });
+        }
+      }, {
+        id: 'sc-search-list',
+        class: cx(layout.stack({ gap: '1' }), style({
+          background: t.surface.raised,
+          borderWidth: 1,
+          borderStyle: 'solid',
+          borderColor: t.border.default,
+          borderRadius: t.radius.md,
+          boxShadow: t.shadow.md,
+          padding: t.space['2'],
+        })),
+      });
+    }, { id: 'sc-search', class: cx(layout.stack({ gap: '2' }), style({ maxWidth: 320 })) });
+  },
+};
+
+// ── 14. Breadcrumb + a11y (skip link + focus ring) ──────────────────────────
+
+const breadcrumbA11y: Showcase = {
+  id: 'a11y',
+  title: 'Breadcrumb & a11y',
+  build: (c) => {
+    c.link('Skip to content', { href: '#sc-a11y-main', id: 'sc-a11y-skip', class: a11y.skipLink() });
+    c.container('sc-crumbs', (bc) => {
+      bc.link('Home', { href: '#', id: 'sc-crumb-home', class: cx(text.link(), style({ fontSize: t.size.xs, textDecoration: 'none' })) });
+      bc.link('Docs', { href: '#', id: 'sc-crumb-docs', class: cx(text.link(), style({ fontSize: t.size.xs, textDecoration: 'none' })) });
+      bc.text('Reactivity', { id: 'sc-crumb-current', class: cx(text.caption(), style({ color: t.content.secondary })) });
+    }, { id: 'sc-crumbs', class: cx(layout.row({ gap: '2', align: 'center', wrap: true }), text.caption()) });
+    c.container('sc-a11y-main', (m) => {
+      m.link('Focusable link with a strong focus ring', { href: '#', id: 'sc-a11y-link', class: cx(text.link(), a11y.focusRing({ width: 3, offset: 2 })) });
+    }, { id: 'sc-a11y-main', class: layout.stack({ gap: '2' }) });
+  },
+};
+
+// ── 15. Theme / token swatches ──────────────────────────────────────────────
+
+const themePanel: Showcase = {
+  id: 'tokens',
+  title: 'Token swatches',
+  build: (c) => {
+    const swatches: ReadonlyArray<{ id: string; bg: string }> = [
+      { id: 'accent', bg: t.accent.primary },
+      { id: 'surface', bg: t.surface.sunken },
+      { id: 'danger', bg: t.danger.solid },
+      { id: 'success', bg: t.success.solid },
+    ];
+    c.container('sc-swatches', (row) => {
+      swatches.forEach((s) => {
+        row.container(`sc-swatch-${s.id}`, (box) => {
+          box.container(`sc-swatch-${s.id}-chip`, () => { /* color block */ }, {
+            id: `sc-swatch-${s.id}-chip`,
+            class: style({ background: s.bg, borderRadius: t.radius.md, minHeight: 48, borderWidth: 1, borderStyle: 'solid', borderColor: t.border.subtle }),
+          });
+          box.text(s.id, { id: `sc-swatch-${s.id}-label`, class: text.caption() });
+        }, { id: `sc-swatch-${s.id}`, class: layout.stack({ gap: '1' }) });
+      });
+    }, { id: 'sc-swatches', class: layout.grid({ columns: 'auto', min: 120, gap: '4' }) });
+  },
+};
+
+// ── Registry ─────────────────────────────────────────────────────────────────
+
+/** All fifteen showcases, in display order. */
+export const SHOWCASES: readonly Showcase[] = [
+  buttonBar, cardGrid, formCard, responsiveSplit, typographyScale,
+  statTiles, badgesAndAlert, dataTable, hero, navbarDemo,
+  pricingCards, tabs, searchResults, breadcrumbA11y, themePanel,
+];
+
+/** Render every showcase into one container (each wrapped in a titled section). */
+export function buildShowcases(c: ContainerDSL): void {
+  for (const sc of SHOWCASES) {
+    c.container(`showcase-${sc.id}`, (section) => {
+      section.heading(sc.title, { level: 2, id: `showcase-${sc.id}-title`, class: text.heading({ level: 2 }) });
+      section.container(`showcase-${sc.id}-body`, (body) => sc.build(body), { id: `showcase-${sc.id}-body`, class: layout.stack({ gap: '4' }) });
+    }, { id: `showcase-${sc.id}`, class: layout.stack({ gap: '3' }) });
+  }
+}
+
