@@ -79,6 +79,34 @@ runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
 - Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
 - Registry-backed `npm install` / `npm publish`.
 
+## 2.7.0 — Unified Styling System (2026-10-01)
+
+**Minor release** — first-class styling system. All 18 packages **published to npm at
+`2.7.0`**. Full detail in [`V2.7.0-RELEASE-REPORT.md`](./V2.7.0-RELEASE-REPORT.md).
+
+### Added
+
+- **Unified styling system** in `packages/core/src/styling/` — `style()`, `cx()`,
+  `styleVariants()`, `styleWithVars()`, `tokens`, presets (`layout`, `text`, `form`,
+  `a11y`), deterministic dedup, SSR via `renderStyles()`, hydration via
+  `adoptServerStyles()`.
+- **`createTheme`** (renderer) — light/dark/system/persisted; single `data-theme` flip,
+  no re-render, CSS cascade updates token vars.
+- **`examples/streetui-website`** fully migrated to the styling system: 0 `.css` files,
+  0 external styling imports, 100% StreetUI-generated CSS.
+- **Contrast fix:** `content.muted` light-theme token `#8a8a95` → `#666672`
+  (3.18:1 → 5.29:1, WCAG AA PASS — found by axe-core during validation).
+
+### Verified
+
+- Build 30/30, typecheck 48/48, tests 913/913 (framework) + 71/71 (website).
+- Website Chrome 154: FCP median **56 ms** · CLS **0** all routes · TTI **11 ms** · 0 errors.
+- Website Firefox 155: FCP median **63 ms** · 0 errors.
+- axe-core: **0 violations** across 10 website routes (Chrome 154).
+- Framework: mount 229.5 ms · hydrate 152.1 ms · fine-grained toggle **0 mutations**.
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+- Bundle: incremental styling gzip **2,010 B**; tree-shake proven (0 styling bytes when no styling imported).
+
 ## 2.6.0 — Production Website Validation (2026-10-01)
 
 **Validation milestone** — website performance, accessibility, and SEO. All 18 packages
