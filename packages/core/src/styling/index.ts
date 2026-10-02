@@ -32,3 +32,7 @@ export {
   type VariantGroups, type VariantConfig, type VariantSelection, type VariantFn,
   style, cx, styleVariants,
 } from './style.js';
+
+export {
+  type ReactiveStyle, reactiveVarName, styleWithVars, reactiveVarValue,
+} from './reactive.js';

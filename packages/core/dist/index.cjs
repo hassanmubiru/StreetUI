@@ -52,6 +52,8 @@ __export(index_exports, {
   identityOf: () => identityOf,
   nextId: () => nextId,
   nodeIdPrefix: () => nodeIdPrefix,
+  reactiveVarName: () => reactiveVarName,
+  reactiveVarValue: () => reactiveVarValue,
   reportDiagnostic: () => reportDiagnostic,
   reportError: () => reportError,
   resetIdCounter: () => resetIdCounter,
@@ -59,6 +61,7 @@ __export(index_exports, {
   style: () => style,
   styleRegistry: () => styleRegistry,
   styleVariants: () => styleVariants,
+  styleWithVars: () => styleWithVars,
   toIdToken: () => toIdToken,
   tokens: () => tokens
 });
@@ -792,6 +795,27 @@ function styleVariants(cfg) {
     return cx(...parts);
   };
 }
+
+// src/styling/reactive.ts
+function reactiveVarName(prop) {
+  return `--s-${cssPropName(prop)}`;
+}
+function styleWithVars(staticDef, reactiveProps) {
+  const vars = {};
+  const bind = {};
+  const dynamic = {};
+  for (const prop of reactiveProps) {
+    const varName = reactiveVarName(prop);
+    vars[prop] = varName;
+    bind[prop] = `style.${varName}`;
+    dynamic[prop] = `var(${varName})`;
+  }
+  const merged = { ...staticDef, ...dynamic };
+  return { class: style(merged), vars, bind };
+}
+function reactiveVarValue(prop, value) {
+  return cssValue(prop, value);
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   Application,
@@ -826,6 +850,8 @@ function styleVariants(cfg) {
   identityOf,
   nextId,
   nodeIdPrefix,
+  reactiveVarName,
+  reactiveVarValue,
   reportDiagnostic,
   reportError,
   resetIdCounter,
@@ -833,6 +859,7 @@ function styleVariants(cfg) {
   style,
   styleRegistry,
   styleVariants,
+  styleWithVars,
   toIdToken,
   tokens
 });

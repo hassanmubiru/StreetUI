@@ -726,6 +726,27 @@ function styleVariants(cfg) {
     return cx(...parts);
   };
 }
+
+// src/styling/reactive.ts
+function reactiveVarName(prop) {
+  return `--s-${cssPropName(prop)}`;
+}
+function styleWithVars(staticDef, reactiveProps) {
+  const vars = {};
+  const bind = {};
+  const dynamic = {};
+  for (const prop of reactiveProps) {
+    const varName = reactiveVarName(prop);
+    vars[prop] = varName;
+    bind[prop] = `style.${varName}`;
+    dynamic[prop] = `var(${varName})`;
+  }
+  const merged = { ...staticDef, ...dynamic };
+  return { class: style(merged), vars, bind };
+}
+function reactiveVarValue(prop, value) {
+  return cssValue(prop, value);
+}
 export {
   Application,
   BREAKPOINTS,
@@ -759,6 +780,8 @@ export {
   identityOf,
   nextId,
   nodeIdPrefix,
+  reactiveVarName,
+  reactiveVarValue,
   reportDiagnostic,
   reportError,
   resetIdCounter,
@@ -766,6 +789,7 @@ export {
   style,
   styleRegistry,
   styleVariants,
+  styleWithVars,
   toIdToken,
   tokens
 };

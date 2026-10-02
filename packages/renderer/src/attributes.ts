@@ -61,6 +61,17 @@ export function applyProp(
     return;
   }
 
+  // Reactive scalar styling (§4): a `style.<prop>` binding updates exactly one
+  // CSS property/custom-property on this element — one signal → one setProperty,
+  // never a class change or node reconstruction.
+  if (name.startsWith('style.')) {
+    const el = element as HTMLElement;
+    const prop = name.slice('style.'.length);
+    if (value === null || value === undefined) el.style.removeProperty(prop);
+    else el.style.setProperty(prop, String(value));
+    return;
+  }
+
   if (value === null || value === undefined || value === false) {
     dom.removeAttribute(element, name);
     return;
