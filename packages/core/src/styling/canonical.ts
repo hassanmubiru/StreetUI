@@ -107,6 +107,17 @@ export interface StyleProperties {
   readonly cursor?: ResponsiveValue<CSSValue>;
   readonly transition?: ResponsiveValue<CSSValue>;
   readonly transform?: ResponsiveValue<CSSValue>;
+  readonly transformOrigin?: ResponsiveValue<CSSValue>;
+  readonly animation?: ResponsiveValue<CSSValue>;
+  readonly animationName?: ResponsiveValue<CSSValue>;
+  readonly animationDuration?: ResponsiveValue<CSSValue>;
+  readonly animationTimingFunction?: ResponsiveValue<CSSValue>;
+  readonly animationDelay?: ResponsiveValue<CSSValue>;
+  readonly animationIterationCount?: ResponsiveValue<CSSValue>;
+  readonly animationDirection?: ResponsiveValue<CSSValue>;
+  readonly animationFillMode?: ResponsiveValue<CSSValue>;
+  readonly animationPlayState?: ResponsiveValue<CSSValue>;
+  readonly willChange?: ResponsiveValue<CSSValue>;
   readonly appearance?: ResponsiveValue<CSSValue>;
   readonly userSelect?: ResponsiveValue<CSSValue>;
   readonly pointerEvents?: ResponsiveValue<CSSValue>;
