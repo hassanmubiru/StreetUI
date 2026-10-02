@@ -26,6 +26,7 @@ __export(index_exports, {
   StreetRenderHandle: () => StreetRenderHandle,
   StreetRendererImpl: () => StreetRendererImpl,
   TransitionController: () => TransitionController,
+  adoptServerStyles: () => adoptServerStyles,
   applyNodeProps: () => applyNodeProps,
   applyProp: () => applyProp,
   buttonUpdate: () => buttonUpdate,
@@ -33,6 +34,9 @@ __export(index_exports, {
   createHydrationDiagnosticCollector: () => createHydrationDiagnosticCollector,
   createRenderContext: () => createRenderContext,
   createRenderer: () => createRenderer,
+  createTheme: () => createTheme,
+  defaultThemeStorage: () => defaultThemeStorage,
+  fadeTransition: () => fadeTransition,
   formatHydrationDiagnostic: () => formatHydrationDiagnostic,
   getResolvedTransition: () => getResolvedTransition,
   headingUpdate: () => headingUpdate,
@@ -47,11 +51,15 @@ __export(index_exports, {
   reconcileChildren: () => reconcileChildren,
   reconcileChildrenByPlan: () => reconcileChildrenByPlan,
   renderHead: () => renderHead,
+  renderStyles: () => renderStyles,
   renderToString: () => renderToString,
   resolveTag: () => resolveTag,
   runElementTransition: () => runElementTransition,
+  scaleTransition: () => scaleTransition,
   serializeState: () => serializeState,
+  slideTransition: () => slideTransition,
   textUpdate: () => textUpdate,
+  transitions: () => transitions,
   wireComponentBehavior: () => wireComponentBehavior,
   wireEvents: () => wireEvents,
   wireHeadBehavior: () => wireHeadBehavior,
@@ -164,6 +172,13 @@ function applyProp(dom, element, name, value) {
     for (const [k, v] of Object.entries(styles)) {
       el.style.setProperty(k, v);
     }
+    return;
+  }
+  if (name.startsWith("style.")) {
+    const el = element;
+    const prop = name.slice("style.".length);
+    if (value === null || value === void 0) el.style.removeProperty(prop);
+    else el.style.setProperty(prop, String(value));
     return;
   }
   if (value === null || value === void 0 || value === false) {
@@ -1299,6 +1314,176 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
+// src/styling-transitions.ts
+var import_core2 = require("@streetui/core");
+var DURATION_MS = { fast: 120, base: 200, slow: 320 };
+function activeClass(props, duration, easing) {
+  return (0, import_core2.style)({ transition: (0, import_core2.transition)(props, { duration, easing }) });
+}
+function fadeTransition(opts = {}) {
+  const duration = opts.duration ?? "base";
+  const easing = opts.easing ?? "standard";
+  const active = activeClass(["opacity"], duration, easing);
+  const hidden = (0, import_core2.style)({ opacity: 0 });
+  const shown = (0, import_core2.style)({ opacity: 1 });
+  return {
+    enterActive: [active],
+    enterFrom: [hidden],
+    enterTo: [shown],
+    leaveActive: [active],
+    leaveFrom: [shown],
+    leaveTo: [hidden],
+    appear: opts.appear ?? false,
+    duration: DURATION_MS[duration]
+  };
+}
+function scaleTransition(opts = {}) {
+  const duration = opts.duration ?? "base";
+  const easing = opts.easing ?? "emphasized";
+  const active = activeClass(["opacity", "transform"], duration, easing);
+  const hidden = (0, import_core2.style)({ opacity: 0, transform: "scale(.96)" });
+  const shown = (0, import_core2.style)({ opacity: 1, transform: "scale(1)" });
+  return {
+    enterActive: [active],
+    enterFrom: [hidden],
+    enterTo: [shown],
+    leaveActive: [active],
+    leaveFrom: [shown],
+    leaveTo: [hidden],
+    appear: opts.appear ?? false,
+    duration: DURATION_MS[duration]
+  };
+}
+function slideTransition(opts = {}) {
+  const duration = opts.duration ?? "base";
+  const easing = opts.easing ?? "standard";
+  const active = activeClass(["opacity", "transform"], duration, easing);
+  const hidden = (0, import_core2.style)({ opacity: 0, transform: "translateY(8px)" });
+  const shown = (0, import_core2.style)({ opacity: 1, transform: "translateY(0)" });
+  return {
+    enterActive: [active],
+    enterFrom: [hidden],
+    enterTo: [shown],
+    leaveActive: [active],
+    leaveFrom: [shown],
+    leaveTo: [hidden],
+    appear: opts.appear ?? false,
+    duration: DURATION_MS[duration]
+  };
+}
+var transitions = { fadeTransition, scaleTransition, slideTransition };
+
+// src/styles.ts
+var import_core3 = require("@streetui/core");
+var CSS_MARKER = "data-streetui-css";
+var CSS_KEYS = "data-streetui-css-keys";
+function renderStyles(options = {}) {
+  const registry = options.registry ?? import_core3.styleRegistry;
+  const css = registry.serializeCSS();
+  if (css.length === 0) return "";
+  const keys = registry.identities().join(" ");
+  return `<style ${CSS_MARKER} ${CSS_KEYS}="${keys}">${css}</style>`;
+}
+function adoptServerStyles(dom, root, options = {}) {
+  const registry = options.registry ?? import_core3.styleRegistry;
+  const el = findStyleBlock(dom, root);
+  if (el === null) return 0;
+  const keysAttr = dom.getAttribute(el, CSS_KEYS);
+  if (keysAttr === null || keysAttr.length === 0) {
+    registry.adoptServerIdentities([]);
+    return 0;
+  }
+  const ids = keysAttr.split(" ").filter((s) => s.length > 0);
+  registry.adoptServerIdentities(ids);
+  return ids.length;
+}
+function findStyleBlock(dom, root) {
+  const head = dom.head();
+  const scope = root ?? head;
+  if (scope === null) return null;
+  return searchDescendants(dom, scope);
+}
+function searchDescendants(dom, el) {
+  if (dom.isElement(el) && dom.getAttribute(el, CSS_MARKER) !== null) return el;
+  for (const child of dom.childNodes(el)) {
+    if (!dom.isElement(child)) continue;
+    const found = searchDescendants(dom, child);
+    if (found !== null) return found;
+  }
+  return null;
+}
+
+// src/theme.ts
+var import_state = require("@streetui/state");
+var DEFAULT_STORAGE_KEY = "streetui-theme";
+var CHOICES = ["light", "dark", "system"];
+function defaultThemeStorage(key = DEFAULT_STORAGE_KEY) {
+  try {
+    if (typeof localStorage !== "undefined") {
+      return {
+        read() {
+          const v = localStorage.getItem(key);
+          return v === "light" || v === "dark" || v === "system" ? v : null;
+        },
+        write(choice) {
+          try {
+            localStorage.setItem(key, choice);
+          } catch {
+          }
+        }
+      };
+    }
+  } catch {
+  }
+  let mem = null;
+  return { read: () => mem, write: (c) => {
+    mem = c;
+  } };
+}
+function systemPrefersDark() {
+  try {
+    return typeof matchMedia !== "undefined" && matchMedia("(prefers-color-scheme: dark)").matches;
+  } catch {
+    return false;
+  }
+}
+function createTheme(options = {}) {
+  const storage = options.storage ?? defaultThemeStorage();
+  const choice = (0, import_state.signal)(storage.read() ?? options.initial ?? "system");
+  const resolved = (0, import_state.derived)(() => {
+    const c = choice.get();
+    if (c === "system") return systemPrefersDark() ? "dark" : "light";
+    return c;
+  });
+  const label = (0, import_state.derived)(() => {
+    const c = choice.get();
+    return c === "light" ? "Theme: Light" : c === "dark" ? "Theme: Dark" : "Theme: System";
+  });
+  const root = options.root ?? (typeof document !== "undefined" ? document.documentElement : null);
+  const stop = root !== null ? (0, import_state.effect)(() => {
+    root.setAttribute("data-theme", resolved.get());
+  }) : () => {
+  };
+  return {
+    choice,
+    resolved,
+    label,
+    set(next) {
+      choice.set(next);
+      storage.write(next);
+    },
+    cycle() {
+      const i = CHOICES.indexOf(choice.get());
+      const next = CHOICES[(i + 1) % CHOICES.length];
+      choice.set(next);
+      storage.write(next);
+    },
+    dispose() {
+      stop();
+    }
+  };
+}
+
 // src/renderer.ts
 var import_dom3 = require("@streetui/dom");
 
@@ -1744,6 +1929,7 @@ function renderToString(compiled, options = {}) {
   StreetRenderHandle,
   StreetRendererImpl,
   TransitionController,
+  adoptServerStyles,
   applyNodeProps,
   applyProp,
   buttonUpdate,
@@ -1751,6 +1937,9 @@ function renderToString(compiled, options = {}) {
   createHydrationDiagnosticCollector,
   createRenderContext,
   createRenderer,
+  createTheme,
+  defaultThemeStorage,
+  fadeTransition,
   formatHydrationDiagnostic,
   getResolvedTransition,
   headingUpdate,
@@ -1765,11 +1954,15 @@ function renderToString(compiled, options = {}) {
   reconcileChildren,
   reconcileChildrenByPlan,
   renderHead,
+  renderStyles,
   renderToString,
   resolveTag,
   runElementTransition,
+  scaleTransition,
   serializeState,
+  slideTransition,
   textUpdate,
+  transitions,
   wireComponentBehavior,
   wireEvents,
   wireHeadBehavior,

@@ -1,7 +1,7 @@
 import { DOMAdapter, ServerDOMAdapter } from '@streetui/dom';
 import { GraphNode, ApplicationGraph } from '@streetui/graph';
-import { CleanupRegistry, SemanticNodeType } from '@streetui/core';
-import { ReadonlySignal } from '@streetui/state';
+import { CleanupRegistry, DurationKey, EasingKey, StyleRegistry, SemanticNodeType } from '@streetui/core';
+import { ReadonlySignal, Signal } from '@streetui/state';
 import { CompiledApplication } from '@streetui/compiler';
 import { StreetRenderer, RenderHandle } from '@streetui/runtime';
 
@@ -492,6 +492,143 @@ declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldIn
 declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn, hooks?: TransitionHooks): ReconcileResult;
 
 /**
+ * StreetUI styling — transition engine interop presets (§18).
+ *
+ * These helpers return a {@link ResolvedTransitionLike} — the exact descriptor the
+ * existing transition engine consumes — assembled entirely from token-driven
+ * `style()` classes and the `--duration-*` / `--easing-*` tokens. Styling therefore
+ * *integrates with* the transition engine rather than competing with it: it only
+ * supplies the enter/leave appearance classes the engine toggles; the engine still
+ * owns all lifecycle timing, leave-deferral and keyed-identity reclaim (§18).
+ * StreetUI adds no new timer and no second animation system here — the browser
+ * performs the interpolation via CSS, and the engine's single timeout coordinates
+ * DOM removal.
+ */
+
+interface TransitionPresetOptions {
+    /** Duration token key driving both the CSS transition and the engine timeout. */
+    readonly duration?: DurationKey;
+    /** Easing token key for the CSS transition. */
+    readonly easing?: EasingKey;
+    /** Play the enter animation on first mount too (default `false`). */
+    readonly appear?: boolean;
+}
+/** A cross-fade enter/leave transition descriptor for the transition engine. */
+declare function fadeTransition(opts?: TransitionPresetOptions): ResolvedTransitionLike;
+/** A fade + scale "pop" transition descriptor (opacity and transform). */
+declare function scaleTransition(opts?: TransitionPresetOptions): ResolvedTransitionLike;
+/** A fade + vertical-slide transition descriptor (enters from below). */
+declare function slideTransition(opts?: TransitionPresetOptions): ResolvedTransitionLike;
+/** The token-driven transition presets (§18), for use with the transition engine. */
+declare const transitions: {
+    readonly fadeTransition: typeof fadeTransition;
+    readonly scaleTransition: typeof scaleTransition;
+    readonly slideTransition: typeof slideTransition;
+};
+
+/**
+ * StreetUI styling — SSR stylesheet emission + hydration adoption (§15–§17).
+ *
+ * This is the exact companion to `renderHead` (head.ts): where the head runtime
+ * serializes merged `head()` contributions into `<head>`, this serializes the
+ * process-wide deduplicated CSS rule registry into a single
+ * `<style data-streetui-css>` block for the caller to place in `<head>`.
+ *
+ *   • `renderStyles()` — SERVER. Serializes `styleRegistry` in deterministic band
+ *     order (tokens → base → responsive → state → variant) and stamps the block
+ *     with `data-streetui-css-keys="<id> <id> …"` so the browser can adopt the
+ *     identities on hydration instead of re-emitting duplicate rules (§17).
+ *     Returns `''` when the registry is empty — so an app that declares no styles
+ *     (and no token block) emits nothing extra and existing SSR output stays
+ *     byte-identical (§16, the empty-registry guarantee).
+ *
+ *   • `adoptServerStyles(dom, root)` — BROWSER. Finds the server-emitted style
+ *     block under `root` (or `document`), reads its identity keys, and seeds the
+ *     registry via `adoptServerIdentities` so client-side `style()`/token calls
+ *     for the same identities register no duplicate rule (§17).
+ *
+ * CSS is inherently global and cascading, so — unlike head — the stylesheet is
+ * the whole process registry (a deduped superset), not a per-graph walk. The
+ * registry is keyed by content identity and never by node, so it is bounded by
+ * source diversity and strands nothing when nodes unmount (§15, leak-free).
+ */
+
+interface RenderStylesOptions {
+    /** Registry to serialize (defaults to the shared process-wide instance). */
+    readonly registry?: StyleRegistry;
+}
+/**
+ * Serialize the deduplicated CSS registry to a `<style data-streetui-css>` block
+ * for placement inside `<head>`. Deterministic and byte-stable: an empty registry
+ * yields `''` (§16); otherwise the single block carries every registered rule in
+ * fixed band order plus the identity list for hydration adoption (§17).
+ */
+declare function renderStyles(options?: RenderStylesOptions): string;
+/**
+ * Adopt a server-emitted stylesheet's identities into the registry so the client
+ * does not re-emit duplicate rules for the same styles (§17). Safe to call when
+ * no server block exists (no-op) and idempotent. Returns the number of identities
+ * adopted (0 when there was nothing to adopt).
+ */
+declare function adoptServerStyles(dom: DOMAdapter, root: Element | null, options?: RenderStylesOptions): number;
+
+/**
+ * StreetUI styling — first-class, SSR/hydration-safe theme controller (§7).
+ *
+ * Theme is ordinary StreetUI state: a signal for the user's choice and a derived
+ * signal for the resolved concrete theme. The only browser-specific parts —
+ * reading a stored preference, matching the OS color scheme, and writing the
+ * `data-theme` attribute onto a root element — are isolated behind guards so the
+ * exact same module runs during SSR (no `document`, no `localStorage`) without
+ * throwing. The server renders with the default theme; the client applies the
+ * persisted/system choice on mount, which is a legitimate post-hydration update
+ * rather than a hydration mismatch: the attribute lives on the root element,
+ * outside the hydrated app container, and only re-points token variables (§16).
+ *
+ * This lives in the renderer layer because switching the theme writes to the DOM;
+ * it builds on the DOM-free token system in `@streetui/core` (`createThemeTokens`
+ * emits `:root` + `[data-theme="dark"]` variable blocks), so a theme flip is a
+ * single attribute change with no restyle work and no re-render.
+ */
+
+type ThemeChoice = 'light' | 'dark' | 'system';
+type ResolvedTheme = 'light' | 'dark';
+/** Minimal persistence seam so tests/SSR can run without a real localStorage. */
+interface ThemeStorage {
+    read(): ThemeChoice | null;
+    write(choice: ThemeChoice): void;
+}
+/** Browser localStorage adapter, guarded; falls back to in-memory elsewhere. */
+declare function defaultThemeStorage(key?: string): ThemeStorage;
+interface ThemeController {
+    /** The user's choice: light | dark | system. */
+    readonly choice: Signal<ThemeChoice>;
+    /** The resolved concrete theme after applying `system`. */
+    readonly resolved: ReadonlySignal<ResolvedTheme>;
+    /** Set an explicit choice (persisted). */
+    set(choice: ThemeChoice): void;
+    /** Advance light → dark → system → light (for a single toggle control). */
+    cycle(): void;
+    /** Human label for the current choice (bind to the toggle button). */
+    readonly label: ReadonlySignal<string>;
+    /** Stop applying the theme to the DOM (disposes the effect). */
+    dispose(): void;
+}
+interface ThemeOptions {
+    readonly storage?: ThemeStorage;
+    /** Element to receive `data-theme` (defaults to the document root). Omit for SSR. */
+    readonly root?: Element | null;
+    /** Initial choice when nothing is stored (default 'system'). */
+    readonly initial?: ThemeChoice;
+}
+/**
+ * Create the theme controller. During SSR pass no `root` (or it will be null);
+ * the signal still works so server markup can read `resolved`, but no DOM write
+ * is attempted. Reactive theme switching is a single `data-theme` flip (§7/§16).
+ */
+declare function createTheme(options?: ThemeOptions): ThemeController;
+
+/**
  * StreetUI Renderer — framework-owned DOM renderer.
  *
  * No React. No Vue. No virtual-dom. No external rendering library.
@@ -661,4 +798,4 @@ declare function renderToString(compiled: CompiledApplication, options?: RenderT
 
 declare function resolveTag(type: SemanticNodeType): string;
 
-export { HeadManager, type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderToStringOptions, type ResolvedTransitionLike, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, TransitionController, type TransitionHooks, type TransitionPhase, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, formatHydrationDiagnostic, getResolvedTransition, headingUpdate, hydrateGraph, inputUpdate, linkUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderHead, renderToString, resolveTag, runElementTransition, serializeState, textUpdate, wireComponentBehavior, wireEvents, wireHeadBehavior, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { HeadManager, type HydrationDiagnostic, type HydrationDiagnosticSink, type HydrationMismatchType, type MountFn, NodeInstance, type PlanEntry, type ReconcileResult, type RenderContext, type RenderStylesOptions, type RenderToStringOptions, type ResolvedTheme, type ResolvedTransitionLike, STATE_MARKER_ATTR, StreetRenderHandle, StreetRendererImpl, type StreetRendererOptions, type ThemeChoice, type ThemeController, type ThemeOptions, type ThemeStorage, TransitionController, type TransitionHooks, type TransitionPhase, type TransitionPresetOptions, adoptServerStyles, applyNodeProps, applyProp, buttonUpdate, consoleHydrationDiagnosticSink, createHydrationDiagnosticCollector, createRenderContext, createRenderer, createTheme, defaultThemeStorage, fadeTransition, formatHydrationDiagnostic, getResolvedTransition, headingUpdate, hydrateGraph, inputUpdate, linkUpdate, mountGraph, mountNode, patchNode, patchProp, readState, reconcileChildren, reconcileChildrenByPlan, renderHead, renderStyles, renderToString, resolveTag, runElementTransition, scaleTransition, serializeState, slideTransition, textUpdate, transitions, wireComponentBehavior, wireEvents, wireHeadBehavior, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
