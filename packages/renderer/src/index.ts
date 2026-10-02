@@ -6,6 +6,7 @@ export * from './mount.js';
 export * from './patch.js';
 export * from './reconciliation.js';
 export * from './transition.js';
+export * from './styling-transitions.js';
 export * from './head.js';
 export * from './styles.js';
 export * from './theme.js';
