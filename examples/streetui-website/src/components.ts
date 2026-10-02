@@ -47,12 +47,12 @@ export function pageLayout(
     );
   }
   page.section(opts.id, (s) => {
-    s.heading(opts.title, { level: 1, id: `${opts.id}-title` });
+    s.heading(opts.title, { level: 1, id: `${opts.id}-title`, class: ds.pageTitle });
     if (opts.lead !== undefined) {
-      s.text(opts.lead, { id: `${opts.id}-lead` });
+      s.text(opts.lead, { id: `${opts.id}-lead`, class: ds.pageLead });
     }
-    s.container(`${opts.id}-body`, (content) => body(content), { id: `${opts.id}-body` });
-  }, { id: `page-${opts.id}` });
+    s.container(`${opts.id}-body`, (content) => body(content), { id: `${opts.id}-body`, class: ds.pageBody });
+  }, { id: `page-${opts.id}`, class: ds.pageSection });
 }
 
 /**
