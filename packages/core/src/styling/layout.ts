@@ -53,8 +53,10 @@ export interface StackOptions {
   readonly justify?: 'start' | 'center' | 'end' | 'between' | 'around';
 }
 
-const ALIGN: Record<string, string> = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch' };
-const JUSTIFY: Record<string, string> = {
+const ALIGN: Record<NonNullable<StackOptions['align']>, string> = {
+  start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch',
+};
+const JUSTIFY: Record<NonNullable<StackOptions['justify']>, string> = {
   start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around',
 };
 

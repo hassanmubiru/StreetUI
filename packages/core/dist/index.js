@@ -174,14 +174,14 @@ var DiagnosticCollector = class {
   get hasWarnings() {
     return this._diagnostics.some((d) => d.severity === "warning");
   }
-  error(code, message, location, cause) {
-    this._diagnostics.push({ severity: "error", code, message, location: location ?? void 0, cause: cause ?? void 0 });
+  error(code2, message, location, cause) {
+    this._diagnostics.push({ severity: "error", code: code2, message, location: location ?? void 0, cause: cause ?? void 0 });
   }
-  warn(code, message, location) {
-    this._diagnostics.push({ severity: "warning", code, message, location: location ?? void 0, cause: void 0 });
+  warn(code2, message, location) {
+    this._diagnostics.push({ severity: "warning", code: code2, message, location: location ?? void 0, cause: void 0 });
   }
-  info(code, message, location) {
-    this._diagnostics.push({ severity: "info", code, message, location: location ?? void 0, cause: void 0 });
+  info(code2, message, location) {
+    this._diagnostics.push({ severity: "info", code: code2, message, location: location ?? void 0, cause: void 0 });
   }
   merge(other) {
     for (const d of other.diagnostics) {
@@ -322,11 +322,11 @@ function safeStringify(value) {
   if (typeof value === "string") return value;
   if (value === null) return "null";
   if (value === void 0) return "undefined";
-  const t = typeof value;
-  if (t === "number" || t === "boolean" || t === "bigint" || t === "symbol") {
+  const t6 = typeof value;
+  if (t6 === "number" || t6 === "boolean" || t6 === "bigint" || t6 === "symbol") {
     return String(value);
   }
-  const ctor = t === "object" && value !== null ? value.constructor?.name ?? "Object" : t;
+  const ctor = t6 === "object" && value !== null ? value.constructor?.name ?? "Object" : t6;
   return `[non-Error ${ctor}]`;
 }
 function describeError(error, context, options = {}) {
@@ -473,8 +473,8 @@ var StyleRegistry = class {
     }
     let out = "";
     for (const band of BAND_ORDER) {
-      const list = byBand[band].sort((a, b) => a.seq - b.seq);
-      for (const e of list) out += e.css;
+      const list2 = byBand[band].sort((a, b) => a.seq - b.seq);
+      for (const e of list2) out += e.css;
     }
     return out;
   }
@@ -580,16 +580,16 @@ function generateCSS(id, def) {
     for (const ps of Object.keys(def.on).sort()) {
       const block = def.on[ps];
       if (!block) continue;
-      const body = flatBody(block);
-      if (body.length > 0) stateCss += `${sel}${PSEUDO_SELECTOR[ps]}{${body}}`;
+      const body2 = flatBody(block);
+      if (body2.length > 0) stateCss += `${sel}${PSEUDO_SELECTOR[ps]}{${body2}}`;
     }
   }
   if (def.when) {
     for (const st of Object.keys(def.when).sort()) {
       const block = def.when[st];
       if (!block) continue;
-      const body = flatBody(block);
-      if (body.length > 0) stateCss += `${sel}[${stateAttr(st)}]{${body}}`;
+      const body2 = flatBody(block);
+      if (body2.length > 0) stateCss += `${sel}[${stateAttr(st)}]{${body2}}`;
     }
   }
   return { base: baseCss, state: stateCss, hasResponsive };
@@ -747,6 +747,474 @@ function styleWithVars(staticDef, reactiveProps) {
 function reactiveVarValue(prop, value) {
   return cssValue(prop, value);
 }
+
+// src/styling/layout.ts
+var space = (k) => tokens.ref.space[k];
+function container(opts = {}) {
+  const def = {
+    width: "100%",
+    maxWidth: opts.max ?? 1120,
+    paddingLeft: space(opts.padX ?? "4"),
+    paddingRight: space(opts.padX ?? "4"),
+    ...opts.center === false ? {} : { marginLeft: "auto", marginRight: "auto" }
+  };
+  return style(def);
+}
+var ALIGN = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  stretch: "stretch"
+};
+var JUSTIFY = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  between: "space-between",
+  around: "space-around"
+};
+function stack(opts = {}) {
+  return style({
+    display: "flex",
+    flexDirection: "column",
+    gap: space(opts.gap ?? "4"),
+    ...opts.align ? { alignItems: ALIGN[opts.align] } : {},
+    ...opts.justify ? { justifyContent: JUSTIFY[opts.justify] } : {}
+  });
+}
+function row(opts = {}) {
+  return style({
+    display: "flex",
+    flexDirection: "row",
+    gap: space(opts.gap ?? "4"),
+    alignItems: opts.align ? ALIGN[opts.align] : "center",
+    ...opts.justify ? { justifyContent: JUSTIFY[opts.justify] } : {},
+    ...opts.wrap ? { flexWrap: "wrap" } : {}
+  });
+}
+function grid(opts = {}) {
+  const columns = opts.columns ?? "auto";
+  const min = typeof opts.min === "number" ? `${opts.min}px` : opts.min ?? "220px";
+  const template = columns === "auto" ? `repeat(auto-fill, minmax(${min}, 1fr))` : `repeat(${columns}, minmax(0, 1fr))`;
+  return style({ display: "grid", gridTemplateColumns: template, gap: space(opts.gap ?? "4") });
+}
+function center(opts = {}) {
+  return style({
+    display: opts.inline ? "inline-flex" : "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    ...opts.minHeight !== void 0 ? { minHeight: opts.minHeight } : {}
+  });
+}
+function spacer(opts = {}) {
+  return opts.size !== void 0 ? style({ flex: "0 0 auto", width: opts.size, height: opts.size }) : style({ flex: "1 1 0%" });
+}
+var layout = { container, stack, row, grid, center, spacer };
+
+// src/styling/typography.ts
+var t = tokens.ref;
+var HEADING_SIZE = {
+  1: t.size["3xl"],
+  2: t.size["2xl"],
+  3: t.size.xl,
+  4: t.size.lg,
+  5: t.size.md,
+  6: t.size.sm
+};
+function heading(opts = {}) {
+  const level = opts.level ?? 2;
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: HEADING_SIZE[level],
+    fontWeight: level <= 2 ? t.weight.bold : t.weight.semibold,
+    lineHeight: t.leading.tight,
+    color: t.content.primary,
+    letterSpacing: level <= 2 ? "-0.02em" : "-0.01em"
+  });
+}
+function body(opts = {}) {
+  const def = {
+    fontFamily: t.font.sans,
+    fontSize: t.size.md,
+    fontWeight: t.weight.normal,
+    lineHeight: t.leading.normal,
+    color: opts.muted ? t.content.secondary : t.content.primary
+  };
+  return style(opts.measure !== void 0 ? { ...def, maxWidth: opts.measure } : def);
+}
+function label() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.sm,
+    fontWeight: t.weight.medium,
+    lineHeight: t.leading.normal,
+    color: t.content.primary
+  });
+}
+function caption() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.xs,
+    fontWeight: t.weight.normal,
+    lineHeight: t.leading.normal,
+    color: t.content.muted
+  });
+}
+function link() {
+  return style({
+    color: t.accent.primary,
+    textDecoration: "underline",
+    cursor: "pointer",
+    borderRadius: t.radius.sm,
+    on: {
+      hover: { color: t.accent.hover },
+      focusVisible: { outline: `2px solid ${t.focus.ring}` }
+    }
+  });
+}
+function code() {
+  return style({
+    fontFamily: t.font.mono,
+    fontSize: "0.9em",
+    background: t.surface.sunken,
+    color: t.content.primary,
+    borderRadius: t.radius.sm,
+    paddingLeft: t.space["1"],
+    paddingRight: t.space["1"],
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t.border.subtle
+  });
+}
+function pre() {
+  return style({
+    fontFamily: t.font.mono,
+    fontSize: t.size.sm,
+    lineHeight: t.leading.relaxed,
+    background: t.surface.sunken,
+    color: t.content.primary,
+    borderRadius: t.radius.md,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t.border.subtle,
+    padding: t.space["4"],
+    overflowX: "auto",
+    whiteSpace: "pre"
+  });
+}
+function blockquote() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.lg,
+    lineHeight: t.leading.relaxed,
+    color: t.content.secondary,
+    borderStyle: "solid",
+    borderColor: t.accent.primary,
+    paddingLeft: t.space["4"],
+    marginLeft: 0
+  });
+}
+function list() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.md,
+    lineHeight: t.leading.normal,
+    color: t.content.primary,
+    display: "flex",
+    flexDirection: "column",
+    gap: t.space["2"]
+  });
+}
+var text = { heading, body, label, caption, link, code, pre, blockquote, list };
+
+// src/styling/a11y.ts
+var t2 = tokens.ref;
+function focusRing(opts = {}) {
+  const color = opts.color ?? t2.focus.ring;
+  const width = opts.width ?? 2;
+  const offset = opts.offset ?? 2;
+  return style({
+    outline: "2px solid transparent",
+    // reserve space; real ring shown on focus
+    on: {
+      focusVisible: {
+        outline: `${width}px solid ${color}`,
+        outlineOffset: offset
+      }
+    }
+  });
+}
+function visuallyHidden() {
+  return style({
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    border: 0,
+    // clip to a zero-area rect so the node occupies no visual space
+    clipPath: "inset(50%)"
+  });
+}
+function skipLink() {
+  return style({
+    position: "absolute",
+    left: t2.space["2"],
+    top: -40,
+    background: t2.surface.raised,
+    color: t2.content.primary,
+    padding: t2.space["2"],
+    borderRadius: t2.radius.md,
+    boxShadow: t2.shadow.md,
+    transition: `top ${t2.duration.fast} ${t2.easing.standard}`,
+    on: {
+      focusVisible: { top: t2.space["2"], outline: `2px solid ${t2.focus.ring}`, outlineOffset: 2 }
+    }
+  });
+}
+var a11y = { focusRing, visuallyHidden, skipLink };
+
+// src/styling/forms.ts
+var t3 = tokens.ref;
+var CONTROL_BASE = {
+  fontFamily: t3.font.sans,
+  fontSize: t3.size.md,
+  lineHeight: t3.leading.normal,
+  color: t3.content.primary,
+  background: t3.surface.background,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t3.border.strong,
+  borderRadius: t3.radius.md,
+  paddingTop: t3.space["2"],
+  paddingBottom: t3.space["2"],
+  paddingLeft: t3.space["3"],
+  paddingRight: t3.space["3"],
+  width: "100%",
+  appearance: "none",
+  transition: `border-color ${t3.duration.fast} ${t3.easing.standard}, box-shadow ${t3.duration.fast} ${t3.easing.standard}`,
+  on: {
+    focusVisible: { outline: "none", borderColor: t3.accent.primary, boxShadow: `0 0 0 3px ${t3.focus.ring}` },
+    disabled: { opacity: 0.55, cursor: "not-allowed", background: t3.surface.sunken }
+  },
+  when: {
+    invalid: { borderColor: t3.danger.border, boxShadow: `0 0 0 3px ${t3.danger.surface}` }
+  }
+};
+function input() {
+  return style(CONTROL_BASE);
+}
+function field() {
+  return style({ display: "flex", flexDirection: "column", gap: t3.space["2"] });
+}
+function fieldLabel() {
+  return style({
+    fontFamily: t3.font.sans,
+    fontSize: t3.size.sm,
+    fontWeight: t3.weight.medium,
+    color: t3.content.primary
+  });
+}
+function fieldHelp() {
+  return style({ fontFamily: t3.font.sans, fontSize: t3.size.xs, color: t3.content.muted });
+}
+function fieldError() {
+  return style({
+    fontFamily: t3.font.sans,
+    fontSize: t3.size.xs,
+    fontWeight: t3.weight.medium,
+    color: t3.danger.content
+  });
+}
+function button() {
+  return style({
+    fontFamily: t3.font.sans,
+    fontSize: t3.size.md,
+    fontWeight: t3.weight.semibold,
+    lineHeight: t3.leading.normal,
+    color: t3.accent.contrast,
+    background: t3.accent.primary,
+    borderWidth: 0,
+    borderStyle: "solid",
+    borderRadius: t3.radius.md,
+    paddingTop: t3.space["2"],
+    paddingBottom: t3.space["2"],
+    paddingLeft: t3.space["4"],
+    paddingRight: t3.space["4"],
+    cursor: "pointer",
+    appearance: "none",
+    transition: `background ${t3.duration.fast} ${t3.easing.standard}`,
+    on: {
+      hover: { background: t3.accent.hover },
+      focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t3.focus.ring}` },
+      disabled: { opacity: 0.55, cursor: "not-allowed" }
+    }
+  });
+}
+var form = { field, input, label: fieldLabel, help: fieldHelp, error: fieldError, button };
+
+// src/styling/overlays.ts
+var t4 = tokens.ref;
+function backdrop() {
+  return style({
+    position: "fixed",
+    inset: 0,
+    background: t4.surface.overlay,
+    zIndex: t4.z.overlay
+  });
+}
+function dialog() {
+  return style({
+    position: "relative",
+    background: t4.surface.background,
+    color: t4.content.primary,
+    borderRadius: t4.radius.lg,
+    boxShadow: t4.shadow.lg,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t4.border.default,
+    padding: t4.space["5"],
+    maxWidth: "min(560px, calc(100vw - 32px))",
+    width: "100%",
+    zIndex: t4.z.overlay
+  });
+}
+function popover() {
+  return style({
+    position: "absolute",
+    background: t4.surface.raised,
+    color: t4.content.primary,
+    borderRadius: t4.radius.md,
+    boxShadow: t4.shadow.md,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t4.border.default,
+    padding: t4.space["3"],
+    zIndex: t4.z.dropdown
+  });
+}
+function tooltip() {
+  return style({
+    position: "absolute",
+    background: t4.content.primary,
+    color: t4.surface.background,
+    fontFamily: t4.font.sans,
+    fontSize: t4.size.xs,
+    lineHeight: t4.leading.tight,
+    borderRadius: t4.radius.sm,
+    paddingTop: t4.space["1"],
+    paddingBottom: t4.space["1"],
+    paddingLeft: t4.space["2"],
+    paddingRight: t4.space["2"],
+    maxWidth: 240,
+    zIndex: t4.z.overlay,
+    pointerEvents: "none"
+  });
+}
+var MENU_BASE = {
+  position: "absolute",
+  background: t4.surface.background,
+  color: t4.content.primary,
+  borderRadius: t4.radius.md,
+  boxShadow: t4.shadow.md,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t4.border.default,
+  paddingTop: t4.space["1"],
+  paddingBottom: t4.space["1"],
+  minWidth: 180,
+  zIndex: t4.z.dropdown
+};
+function dropdown() {
+  return style(MENU_BASE);
+}
+function dropdownItem() {
+  return style({
+    display: "flex",
+    alignItems: "center",
+    gap: t4.space["2"],
+    fontFamily: t4.font.sans,
+    fontSize: t4.size.sm,
+    color: t4.content.primary,
+    paddingTop: t4.space["2"],
+    paddingBottom: t4.space["2"],
+    paddingLeft: t4.space["3"],
+    paddingRight: t4.space["3"],
+    cursor: "pointer",
+    on: {
+      hover: { background: t4.surface.raised },
+      disabled: { opacity: 0.5, cursor: "not-allowed" }
+    },
+    when: { selected: { background: t4.surface.sunken, fontWeight: t4.weight.medium } }
+  });
+}
+function toast() {
+  return style({
+    background: t4.surface.raised,
+    color: t4.content.primary,
+    borderRadius: t4.radius.md,
+    boxShadow: t4.shadow.lg,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t4.border.default,
+    padding: t4.space["3"],
+    minWidth: 240,
+    maxWidth: 420,
+    zIndex: t4.z.toast
+  });
+}
+var overlay = {
+  backdrop,
+  dialog,
+  popover,
+  tooltip,
+  dropdown,
+  dropdownItem,
+  toast
+};
+
+// src/styling/animation.ts
+var t5 = tokens.ref;
+var KEYFRAMES = {
+  "streetui-fade-in": "from{opacity:0}to{opacity:1}",
+  "streetui-fade-out": "from{opacity:1}to{opacity:0}",
+  "streetui-scale-in": "from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}",
+  "streetui-scale-out": "from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}",
+  "streetui-slide-in-up": "from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}",
+  "streetui-slide-out-down": "from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}",
+  "streetui-spin": "to{transform:rotate(360deg)}"
+};
+function ensureKeyframes(name) {
+  const id = `kf-${name}`;
+  if (!styleRegistry.has(id)) {
+    styleRegistry.register(id, "base", `@keyframes ${name}{${KEYFRAMES[name]}}`);
+  }
+}
+function animate(name, opts = {}) {
+  ensureKeyframes(name);
+  const duration = t5.duration[opts.duration ?? "base"];
+  const easing = t5.easing[opts.easing ?? "standard"];
+  const iterations = opts.iterations ?? 1;
+  const fill = opts.fill ?? "both";
+  return style({
+    animationName: name,
+    animationDuration: duration,
+    animationTimingFunction: easing,
+    animationFillMode: fill,
+    animationIterationCount: String(iterations),
+    ...opts.delay !== void 0 ? { animationDelay: opts.delay } : {}
+  });
+}
+function transition(properties, opts = {}) {
+  const props = typeof properties === "string" ? [properties] : properties;
+  const duration = t5.duration[opts.duration ?? "base"];
+  const easing = t5.easing[opts.easing ?? "standard"];
+  const delay = opts.delay !== void 0 ? ` ${typeof opts.delay === "number" ? `${opts.delay}ms` : opts.delay}` : "";
+  return props.map((p) => `${p} ${duration} ${easing}${delay}`).join(", ");
+}
+var animation = { animate, transition, keyframes: KEYFRAMES };
 export {
   Application,
   BREAKPOINTS,
@@ -759,9 +1227,20 @@ export {
   Lifecycle,
   StreetFrameworkError,
   StyleRegistry,
+  a11y,
   a11yIds,
+  animate,
+  animation,
+  backdrop,
+  blockquote,
+  body,
+  button,
   canonicalize,
+  caption,
+  center,
+  code,
   consoleDiagnosticSink,
+  container,
   createApplication,
   createNodeId,
   createThemeTokens,
@@ -769,28 +1248,56 @@ export {
   cssValue,
   cx,
   describeError,
+  dialog,
+  dropdown,
+  dropdownItem,
   environment,
+  field,
+  fieldError,
+  fieldHelp,
+  fieldLabel,
+  focusRing,
+  form,
   formatDiagnostic,
   formatDiagnosticContext,
   frameworkError,
   generateApplicationId,
   generateCSS,
   generateNodeId,
+  grid,
   hashIdentity,
+  heading,
   identityOf,
+  input,
+  label,
+  layout,
+  link,
+  list,
   nextId,
   nodeIdPrefix,
+  overlay,
+  popover,
+  pre,
   reactiveVarName,
   reactiveVarValue,
   reportDiagnostic,
   reportError,
   resetIdCounter,
+  row,
+  skipLink,
+  spacer,
+  stack,
   stateAttr,
   style,
   styleRegistry,
   styleVariants,
   styleWithVars,
+  text,
   toIdToken,
-  tokens
+  toast,
+  tokens,
+  tooltip,
+  transition,
+  visuallyHidden
 };
 //# sourceMappingURL=index.js.map

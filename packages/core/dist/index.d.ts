@@ -448,6 +448,7 @@ interface StyleProperties {
     readonly borderRadius?: ResponsiveValue<CSSValue>;
     readonly boxShadow?: ResponsiveValue<CSSValue>;
     readonly outline?: ResponsiveValue<CSSValue>;
+    readonly outlineOffset?: ResponsiveValue<CSSValue>;
     readonly opacity?: ResponsiveValue<CSSValue>;
     readonly fontFamily?: ResponsiveValue<CSSValue>;
     readonly fontSize?: ResponsiveValue<CSSValue>;
@@ -461,9 +462,21 @@ interface StyleProperties {
     readonly overflow?: ResponsiveValue<CSSValue>;
     readonly overflowX?: ResponsiveValue<CSSValue>;
     readonly overflowY?: ResponsiveValue<CSSValue>;
+    readonly clipPath?: ResponsiveValue<CSSValue>;
     readonly cursor?: ResponsiveValue<CSSValue>;
     readonly transition?: ResponsiveValue<CSSValue>;
     readonly transform?: ResponsiveValue<CSSValue>;
+    readonly transformOrigin?: ResponsiveValue<CSSValue>;
+    readonly animation?: ResponsiveValue<CSSValue>;
+    readonly animationName?: ResponsiveValue<CSSValue>;
+    readonly animationDuration?: ResponsiveValue<CSSValue>;
+    readonly animationTimingFunction?: ResponsiveValue<CSSValue>;
+    readonly animationDelay?: ResponsiveValue<CSSValue>;
+    readonly animationIterationCount?: ResponsiveValue<CSSValue>;
+    readonly animationDirection?: ResponsiveValue<CSSValue>;
+    readonly animationFillMode?: ResponsiveValue<CSSValue>;
+    readonly animationPlayState?: ResponsiveValue<CSSValue>;
+    readonly willChange?: ResponsiveValue<CSSValue>;
     readonly appearance?: ResponsiveValue<CSSValue>;
     readonly userSelect?: ResponsiveValue<CSSValue>;
     readonly pointerEvents?: ResponsiveValue<CSSValue>;
@@ -934,4 +947,301 @@ declare function styleWithVars<K extends string>(staticDef: StyleDef, reactivePr
  */
 declare function reactiveVarValue(prop: string, value: CSSValue): string;
 
-export { type A11yIds, Application, type ApplicationId, type ApplicationOptions, BREAKPOINTS, BaseNode, type Breakpoint, type CSSValue, type CanonicalStyle, CleanupRegistry, type ComponentState, DEFAULT_TOKENS, type DeepPartial, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, type GeneratedCSS, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type PseudoState, type ReactiveStyle, type ResponsiveValue, type SemanticNodeType, StreetFrameworkError, type StyleBand, type StyleDef, type StyleProperties, StyleRegistry, type ThemeTokenDef, type ThemeTokens, type TokenLeaf, type TokenRefs, type TokenTree, type VariantConfig, type VariantFn, type VariantGroups, type VariantSelection, a11yIds, canonicalize, consoleDiagnosticSink, createApplication, createNodeId, createThemeTokens, cssPropName, cssValue, cx, describeError, environment, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateCSS, generateNodeId, hashIdentity, identityOf, nextId, nodeIdPrefix, reactiveVarName, reactiveVarValue, reportDiagnostic, reportError, resetIdCounter, stateAttr, style, styleRegistry, styleVariants, styleWithVars, toIdToken, tokens };
+/**
+ * StreetUI styling — layout primitives (§12).
+ *
+ * Thin, token-driven `style()` presets — **not** new graph nodes and **not** a
+ * utility-class framework. Each primitive is a function that takes a small, typed
+ * option bag and returns a single deduplicated class string, so composing a layout
+ * is `container()`, `stack({ gap: 4 })`, etc. Because they compile through the same
+ * `style()` registry, identical option bags share one CSS rule (§15/§18), and they
+ * carry no runtime dependency — the return value is a plain class token.
+ *
+ * Spacing/gap options are **space-scale keys** (`'0'`…`'10'`) resolved to the
+ * `--space-*` token variables, so layouts stay on the design system by default and
+ * remain theme-consistent. Raw CSS escape values are still accepted where a bare
+ * `CSSValue` is allowed.
+ */
+
+/** A spacing-scale key resolved against the `--space-*` tokens. */
+type SpaceKey = keyof typeof tokens.ref.space;
+interface ContainerOptions {
+    /** Max content width (default `1120px`). A number is treated as `px`. */
+    readonly max?: CSSValue;
+    /** Horizontal padding as a space-scale key (default `'4'`). */
+    readonly padX?: SpaceKey;
+    /** Center the container horizontally (default `true`). */
+    readonly center?: boolean;
+}
+/** A width-capped, centered content column with symmetric horizontal padding. */
+declare function container(opts?: ContainerOptions): string;
+interface StackOptions {
+    /** Gap between children as a space-scale key (default `'4'`). */
+    readonly gap?: SpaceKey;
+    /** Cross-axis alignment (`align-items`). */
+    readonly align?: 'start' | 'center' | 'end' | 'stretch';
+    /** Main-axis distribution (`justify-content`). */
+    readonly justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+}
+/** A vertical flex column with a token-scaled gap. */
+declare function stack(opts?: StackOptions): string;
+interface RowOptions extends StackOptions {
+    /** Allow children to wrap onto multiple lines (default `false`). */
+    readonly wrap?: boolean;
+}
+/** A horizontal flex row with a token-scaled gap. */
+declare function row(opts?: RowOptions): string;
+interface GridOptions {
+    /** Fixed column count, or `'auto'` for a responsive auto-fill track. */
+    readonly columns?: number | 'auto';
+    /** Minimum track width for the `'auto'` mode (default `220px`). */
+    readonly min?: CSSValue;
+    /** Gap between cells as a space-scale key (default `'4'`). */
+    readonly gap?: SpaceKey;
+}
+/** A CSS grid with either a fixed column count or an auto-fill responsive track. */
+declare function grid(opts?: GridOptions): string;
+interface CenterOptions {
+    /** Use inline-flex instead of block flex (default `false`). */
+    readonly inline?: boolean;
+    /** Minimum height of the centering box (e.g. `'100vh'`). */
+    readonly minHeight?: CSSValue;
+}
+/** Center a single child on both axes. */
+declare function center(opts?: CenterOptions): string;
+interface SpacerOptions {
+    /** Fixed size (both dimensions). When omitted the spacer flexes to fill. */
+    readonly size?: CSSValue;
+}
+/** A flexible gap: fills available space, or a fixed box when `size` is given. */
+declare function spacer(opts?: SpacerOptions): string;
+/** The layout primitive family (§12), exported as one namespace object. */
+declare const layout: {
+    readonly container: typeof container;
+    readonly stack: typeof stack;
+    readonly row: typeof row;
+    readonly grid: typeof grid;
+    readonly center: typeof center;
+    readonly spacer: typeof spacer;
+};
+
+/**
+ * StreetUI styling — semantic typography + code/pre primitives (§13/§14).
+ *
+ * Token-driven `style()` presets for text roles. Each returns a deduplicated class
+ * string and reads the `--font-*`, `--size-*`, `--weight-*`, `--leading-*` and
+ * `--content-*` tokens, so typography stays on the design system and re-themes with
+ * no duplicated definitions. `code` and `blockquote` cover the §14 code/pre case:
+ * monospace, token surface, and sensible wrapping without an external prose sheet.
+ */
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+interface HeadingOptions {
+    /** Semantic heading level 1–6 (drives size + weight). Default `2`. */
+    readonly level?: HeadingLevel;
+}
+/** A display heading sized from the type scale by level. */
+declare function heading(opts?: HeadingOptions): string;
+interface BodyOptions {
+    /** Secondary (muted) body colour instead of primary. Default `false`. */
+    readonly muted?: boolean;
+    /** Line length cap for comfortable reading (e.g. `'65ch'`). */
+    readonly measure?: string;
+}
+/** Default running-text body copy. */
+declare function body(opts?: BodyOptions): string;
+/** A small, medium-weight form/field label. */
+declare function label(): string;
+/** The smallest supporting text (captions, help, metadata). */
+declare function caption(): string;
+/** An inline text link with a token accent colour and accessible focus/hover. */
+declare function link(): string;
+/** Inline monospace code (§14). */
+declare function code(): string;
+/** A fenced code block / `<pre>` surface: monospace, scrollable, token surface (§14). */
+declare function pre(): string;
+/** A left-ruled quotation block. */
+declare function blockquote(): string;
+/** A vertically-spaced list body. */
+declare function list(): string;
+/** The semantic typography family (§13/§14), exported as one namespace object. */
+declare const text: {
+    readonly heading: typeof heading;
+    readonly body: typeof body;
+    readonly label: typeof label;
+    readonly caption: typeof caption;
+    readonly link: typeof link;
+    readonly code: typeof code;
+    readonly pre: typeof pre;
+    readonly blockquote: typeof blockquote;
+    readonly list: typeof list;
+};
+
+/**
+ * StreetUI styling — accessibility styling helpers (§19).
+ *
+ * These presets make the *default* accessible: a strong, token-driven focus ring
+ * that is visible against any surface, and a correct visually-hidden pattern that
+ * still exposes content to assistive technology. They introduce **no** parallel
+ * a11y-state system — focus styling rides the browser's native `:focus-visible`,
+ * and component a11y states remain the ARIA attributes the renderer already sets,
+ * read from CSS via the `when`/attribute selectors (§10/§15).
+ */
+interface FocusRingOptions {
+    /** Ring colour (default `--focus-ring` token). */
+    readonly color?: string;
+    /** Ring thickness in px (default `2`). */
+    readonly width?: number;
+    /** Gap between the element and the ring in px (default `2`). */
+    readonly offset?: number;
+}
+/**
+ * A strong keyboard focus indicator applied via native `:focus-visible` only, so
+ * pointer focus stays quiet while keyboard focus is always clearly visible (§19).
+ * Compose onto any interactive element's class list.
+ */
+declare function focusRing(opts?: FocusRingOptions): string;
+/**
+ * Visually-hidden content that remains available to screen readers (the correct
+ * `sr-only` pattern — not `display:none`, which also hides from AT).
+ */
+declare function visuallyHidden(): string;
+/**
+ * A skip-link style: visually hidden until focused, then revealed as a prominent
+ * on-surface control. Pairs with `visuallyHidden` semantics but becomes visible on
+ * keyboard focus so "skip to content" links work.
+ */
+declare function skipLink(): string;
+/** The accessibility styling family (§19). */
+declare const a11y: {
+    readonly focusRing: typeof focusRing;
+    readonly visuallyHidden: typeof visuallyHidden;
+    readonly skipLink: typeof skipLink;
+};
+
+/**
+ * StreetUI styling — form control styling (§20).
+ *
+ * Token-driven presets for the common form surfaces. Validation styling is read
+ * from the ARIA attribute the renderer already sets (`[aria-invalid="true"]`) via
+ * the `when: { invalid }` → `[data-invalid]` channel *and* a native attribute
+ * selector, so there is no parallel form-state system — the control's accessible
+ * state drives its appearance (§10/§15/§19). Focus uses native `:focus-visible`
+ * with the strong focus-ring token (§19).
+ */
+/** A single-line text input / select / textarea surface. */
+declare function input(): string;
+/** The vertical field wrapper: label, control and help/error stacked with gap. */
+declare function field(): string;
+/** A field label (medium weight, primary content colour). */
+declare function fieldLabel(): string;
+/** Supporting help text under a control. */
+declare function fieldHelp(): string;
+/** An inline validation error message, coloured with the danger token. */
+declare function fieldError(): string;
+/** A primary action button surface with hover/active/disabled and focus ring. */
+declare function button(): string;
+/** The form styling family (§20). */
+declare const form: {
+    readonly field: typeof field;
+    readonly input: typeof input;
+    readonly label: typeof fieldLabel;
+    readonly help: typeof fieldHelp;
+    readonly error: typeof fieldError;
+    readonly button: typeof button;
+};
+
+/**
+ * StreetUI styling — overlay surface styling (§21).
+ *
+ * Token-driven presets for the overlay surfaces produced by the overlay runtime
+ * (dialog, popover, tooltip, dropdown, toast + backdrop). Styling here is **only**
+ * appearance (surface colour, elevation, radius, z-index from the `--z-*` tokens);
+ * positioning, focus trapping and open/close lifecycle remain owned by the overlay
+ * runtime and the transition engine (§18/§21). Elevation and z-index come from
+ * tokens so overlays stack predictably and re-theme with the rest of the system.
+ */
+/** The dimmed, full-viewport backdrop behind a modal surface. */
+declare function backdrop(): string;
+/** A centered modal dialog surface (elevation + radius from tokens). */
+declare function dialog(): string;
+/** A small anchored popover panel. */
+declare function popover(): string;
+/** A compact, high-contrast tooltip bubble. */
+declare function tooltip(): string;
+/** A dropdown menu surface. */
+declare function dropdown(): string;
+/** A single dropdown menu item (hover/selected via tokens + attribute state). */
+declare function dropdownItem(): string;
+/** A toast notification surface, elevated above overlays on the toast z-band. */
+declare function toast(): string;
+/** The overlay styling family (§21). */
+declare const overlay: {
+    readonly backdrop: typeof backdrop;
+    readonly dialog: typeof dialog;
+    readonly popover: typeof popover;
+    readonly tooltip: typeof tooltip;
+    readonly dropdown: typeof dropdown;
+    readonly dropdownItem: typeof dropdownItem;
+    readonly toast: typeof toast;
+};
+
+/**
+ * StreetUI styling — animation tokens & declarative keyframes (§22).
+ *
+ * Animation is **pure CSS**: duration and easing come from the `--duration-*` /
+ * `--easing-*` design tokens, and named `@keyframes` are registered once in the
+ * shared registry (lazily, only when referenced, so unused animations add zero
+ * bytes and unstyled routes stay byte-identical). There is **no animation
+ * runtime** — StreetUI runs no timers, RAF loops, or JS tweening for these; the
+ * browser owns playback. Enter/leave *lifecycle* animation remains the transition
+ * engine's job (§18); these helpers supply the appearance it toggles.
+ */
+
+/** Duration token keys (`--duration-*`). */
+type DurationKey = keyof typeof tokens.ref.duration;
+/** Easing token keys (`--easing-*`). */
+type EasingKey = keyof typeof tokens.ref.easing;
+/** The built-in keyframe animations and their raw `@keyframes` bodies. */
+declare const KEYFRAMES: Readonly<Record<string, string>>;
+/** The animation names available to {@link animate}. */
+type AnimationName = keyof typeof KEYFRAMES;
+interface AnimateOptions {
+    /** Duration token key (default `'base'`). */
+    readonly duration?: DurationKey;
+    /** Easing token key (default `'standard'`). */
+    readonly easing?: EasingKey;
+    /** Delay before the animation starts (e.g. `'100ms'`). */
+    readonly delay?: CSSValue;
+    /** Iteration count — a number or `'infinite'` (default `1`). */
+    readonly iterations?: number | 'infinite';
+    /** Fill mode (default `'both'` so the end state persists). */
+    readonly fill?: 'none' | 'forwards' | 'backwards' | 'both';
+}
+/**
+ * A class that plays a named keyframe animation using token duration/easing. The
+ * keyframe rule is registered on first use. One class → one CSS `animation`; no JS
+ * drives the frames.
+ */
+declare function animate(name: AnimationName, opts?: AnimateOptions): string;
+interface TransitionOptions {
+    /** Duration token key (default `'base'`). */
+    readonly duration?: DurationKey;
+    /** Easing token key (default `'standard'`). */
+    readonly easing?: EasingKey;
+    /** Delay before the transition starts (e.g. `'50ms'`). */
+    readonly delay?: CSSValue;
+}
+/**
+ * Build a CSS `transition` value for one or more properties using token
+ * duration/easing — e.g. `transition(['opacity','transform'])`. Assign the result
+ * to a `transition` style property; the browser performs the interpolation.
+ */
+declare function transition(properties: string | readonly string[], opts?: TransitionOptions): string;
+/** The animation family (§22) — tokens + declarative keyframes, no runtime. */
+declare const animation: {
+    readonly animate: typeof animate;
+    readonly transition: typeof transition;
+    readonly keyframes: Readonly<Record<string, string>>;
+};
+
+export { type A11yIds, type AnimateOptions, type AnimationName, Application, type ApplicationId, type ApplicationOptions, BREAKPOINTS, BaseNode, type BodyOptions, type Breakpoint, type CSSValue, type CanonicalStyle, type CenterOptions, CleanupRegistry, type ComponentState, type ContainerOptions, DEFAULT_TOKENS, type DeepPartial, type Diagnostic, DiagnosticCollector, type DiagnosticContext, DiagnosticError, type DiagnosticLocation, type DiagnosticSeverity, type DiagnosticSink, type DurationKey, type EasingKey, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, type FocusRingOptions, type GeneratedCSS, type GridOptions, type HeadingLevel, type HeadingOptions, Lifecycle, type LifecycleHook, type LifecyclePhase, type NodeId, type NodeMetadata, type PseudoState, type ReactiveStyle, type ResponsiveValue, type RowOptions, type SemanticNodeType, type SpaceKey, type SpacerOptions, type StackOptions, StreetFrameworkError, type StyleBand, type StyleDef, type StyleProperties, StyleRegistry, type ThemeTokenDef, type ThemeTokens, type TokenLeaf, type TokenRefs, type TokenTree, type TransitionOptions, type VariantConfig, type VariantFn, type VariantGroups, type VariantSelection, a11y, a11yIds, animate, animation, backdrop, blockquote, body, button, canonicalize, caption, center, code, consoleDiagnosticSink, container, createApplication, createNodeId, createThemeTokens, cssPropName, cssValue, cx, describeError, dialog, dropdown, dropdownItem, environment, field, fieldError, fieldHelp, fieldLabel, focusRing, form, formatDiagnostic, formatDiagnosticContext, frameworkError, generateApplicationId, generateCSS, generateNodeId, grid, hashIdentity, heading, identityOf, input, label, layout, link, list, nextId, nodeIdPrefix, overlay, popover, pre, reactiveVarName, reactiveVarValue, reportDiagnostic, reportError, resetIdCounter, row, skipLink, spacer, stack, stateAttr, style, styleRegistry, styleVariants, styleWithVars, text, toIdToken, toast, tokens, tooltip, transition, visuallyHidden };
