@@ -39,6 +39,14 @@ export interface RenderResult {
   readonly head: string;
   /** A <script> island embedding serialized state for client resume. */
   readonly stateScript: string;
+  /**
+   * The deduplicated stylesheet for the whole design system, serialized as a
+   * single `<style data-streetui-css …>` element for the document `<head>`.
+   * Produced from the shared `styleRegistry` (populated at module load by
+   * importing the design system), so it is byte-identical for every route.
+   * Kept SEPARATE from `head` so document-metadata assertions are unaffected.
+   */
+  readonly styles: string;
 }
 
 /** Render the website at `path` (may include a query string) to HTML. */
