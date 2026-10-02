@@ -58,7 +58,7 @@ const JUSTIFY: Record<string, string> = {
   start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around',
 };
 
-/** A vertical fl<!---->ex column with a token-scaled gap. */
+/** A vertical flex column with a token-scaled gap. */
 export function stack(opts: StackOptions = {}): string {
   return style({
     display: 'flex',

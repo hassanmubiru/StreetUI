@@ -91,6 +91,7 @@ export interface StyleProperties {
   readonly borderRadius?: ResponsiveValue<CSSValue>;
   readonly boxShadow?: ResponsiveValue<CSSValue>;
   readonly outline?: ResponsiveValue<CSSValue>;
+  readonly outlineOffset?: ResponsiveValue<CSSValue>;
   readonly opacity?: ResponsiveValue<CSSValue>;
   readonly fontFamily?: ResponsiveValue<CSSValue>;
   readonly fontSize?: ResponsiveValue<CSSValue>;
@@ -104,6 +105,7 @@ export interface StyleProperties {
   readonly overflow?: ResponsiveValue<CSSValue>;
   readonly overflowX?: ResponsiveValue<CSSValue>;
   readonly overflowY?: ResponsiveValue<CSSValue>;
+  readonly clipPath?: ResponsiveValue<CSSValue>;
   readonly cursor?: ResponsiveValue<CSSValue>;
   readonly transition?: ResponsiveValue<CSSValue>;
   readonly transform?: ResponsiveValue<CSSValue>;
