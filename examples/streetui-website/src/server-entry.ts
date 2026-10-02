@@ -95,5 +95,11 @@ export function renderWebsite(path: string): RenderResult {
     [STATE_KEY]: { path, themeChoice },
   });
 
-  return { html, head, stateScript };
+  // The complete, deduplicated design-system stylesheet. renderStyles reads the
+  // shared registry (seeded at import) and returns a single <style> element, or
+  // '' when nothing is registered — so SSR byte-identity is preserved for apps
+  // that use no styling.
+  const styles = renderStyles({ registry: styleRegistry });
+
+  return { html, head, stateScript, styles };
 }
