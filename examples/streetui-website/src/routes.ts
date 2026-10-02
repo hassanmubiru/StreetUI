@@ -38,15 +38,21 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
         lead: 'A TypeScript-first UI framework with its own reactivity and a keyed real-DOM reconciler — no virtual DOM.',
         path: '/',
       }, (c) => {
-        c.link('Get started', { href: '/getting-started', id: 'home-start' });
-        c.link('Read the docs', { href: '/docs', id: 'home-docs' });
-        c.link('Try the playground', { href: '/playground', id: 'home-playground' });
+        c.container('home-cta', (cta) => {
+          cta.link('Get started', { href: '/getting-started', id: 'home-start', class: ds.buttonPrimary });
+          cta.link('Read the docs', { href: '/docs', id: 'home-docs', class: ds.buttonSecondary });
+          cta.link('Try the playground', { href: '/playground', id: 'home-playground', class: ds.buttonSecondary });
+        }, { id: 'home-cta', class: ds.ctaRow });
         c.container('home-pillars', (p) => {
-          p.heading('One package', { level: 2, id: 'home-pillar-pkg' });
-          p.text('Install streetui. Server helpers at streetui/server, tests at streetui/testing.', { id: 'home-pillar-pkg-text' });
-          p.heading('One pipeline', { level: 2, id: 'home-pillar-pipeline' });
-          p.text('DSL → compiler → semantic graph → runtime → real-DOM renderer.', { id: 'home-pillar-pipeline-text' });
-        }, { id: 'home-pillars' });
+          p.container('home-pillar-pkg-card', (card) => {
+            card.heading('One package', { level: 2, id: 'home-pillar-pkg', class: ds.sectionHeading });
+            card.text('Install streetui. Server helpers at streetui/server, tests at streetui/testing.', { id: 'home-pillar-pkg-text', class: ds.bodyText });
+          }, { id: 'home-pillar-pkg-card', class: ds.card });
+          p.container('home-pillar-pipeline-card', (card) => {
+            card.heading('One pipeline', { level: 2, id: 'home-pillar-pipeline', class: ds.sectionHeading });
+            card.text('DSL → compiler → semantic graph → runtime → real-DOM renderer.', { id: 'home-pillar-pipeline-text', class: ds.bodyText });
+          }, { id: 'home-pillar-pipeline-card', class: ds.card });
+        }, { id: 'home-pillars', class: ds.featureGrid });
       }),
   };
 
