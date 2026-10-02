@@ -804,7 +804,7 @@ declare const DEFAULT_TOKENS: {
     readonly content: {
         readonly primary: "#17171a";
         readonly secondary: "#55555f";
-        readonly muted: "#8a8a95";
+        readonly muted: "#666672";
         readonly inverse: "#ffffff";
     };
     readonly border: {
@@ -904,7 +904,7 @@ declare const tokens: ThemeTokens<{
     readonly content: {
         readonly primary: "#17171a";
         readonly secondary: "#55555f";
-        readonly muted: "#8a8a95";
+        readonly muted: "#666672";
         readonly inverse: "#ffffff";
     };
     readonly border: {
