@@ -1,0 +1,17 @@
+// vitest.config.ts
+import { defineConfig } from "file:///sessions/sweet-gallant-mendel/mnt/StreetUI/node_modules/.pnpm/vitest@2.1.4_@types+node@26.6.2_happy-dom@20.14.5/node_modules/vitest/dist/config.js";
+var vitest_config_default = defineConfig({
+  test: {
+    // The CLI is a Node program: it spawns builds, watches files and starts
+    // HTTP servers. Tests exercise real process behaviour, so a Node env.
+    environment: "node",
+    include: ["src/**/*.test.ts"],
+    // Real builds + server round-trips need headroom beyond the default 5s.
+    testTimeout: 6e4,
+    hookTimeout: 6e4
+  }
+});
+export {
+  vitest_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZXN0LmNvbmZpZy50cyJdLAogICJzb3VyY2VzQ29udGVudCI6IFsiY29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2Rpcm5hbWUgPSBcIi9zZXNzaW9ucy9zd2VldC1nYWxsYW50LW1lbmRlbC9tbnQvU3RyZWV0VUkvcGFja2FnZXMvY2xpXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ZpbGVuYW1lID0gXCIvc2Vzc2lvbnMvc3dlZXQtZ2FsbGFudC1tZW5kZWwvbW50L1N0cmVldFVJL3BhY2thZ2VzL2NsaS92aXRlc3QuY29uZmlnLnRzXCI7Y29uc3QgX192aXRlX2luamVjdGVkX29yaWdpbmFsX2ltcG9ydF9tZXRhX3VybCA9IFwiZmlsZTovLy9zZXNzaW9ucy9zd2VldC1nYWxsYW50LW1lbmRlbC9tbnQvU3RyZWV0VUkvcGFja2FnZXMvY2xpL3ZpdGVzdC5jb25maWcudHNcIjtpbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlc3QvY29uZmlnJztcblxuZXhwb3J0IGRlZmF1bHQgZGVmaW5lQ29uZmlnKHtcbiAgdGVzdDoge1xuICAgIC8vIFRoZSBDTEkgaXMgYSBOb2RlIHByb2dyYW06IGl0IHNwYXducyBidWlsZHMsIHdhdGNoZXMgZmlsZXMgYW5kIHN0YXJ0c1xuICAgIC8vIEhUVFAgc2VydmVycy4gVGVzdHMgZXhlcmNpc2UgcmVhbCBwcm9jZXNzIGJlaGF2aW91ciwgc28gYSBOb2RlIGVudi5cbiAgICBlbnZpcm9ubWVudDogJ25vZGUnLFxuICAgIGluY2x1ZGU6IFsnc3JjLyoqLyoudGVzdC50cyddLFxuICAgIC8vIFJlYWwgYnVpbGRzICsgc2VydmVyIHJvdW5kLXRyaXBzIG5lZWQgaGVhZHJvb20gYmV5b25kIHRoZSBkZWZhdWx0IDVzLlxuICAgIHRlc3RUaW1lb3V0OiA2MDAwMCxcbiAgICBob29rVGltZW91dDogNjAwMDAsXG4gIH0sXG59KTtcbiJdLAogICJtYXBwaW5ncyI6ICI7QUFBOFYsU0FBUyxvQkFBb0I7QUFFM1gsSUFBTyx3QkFBUSxhQUFhO0FBQUEsRUFDMUIsTUFBTTtBQUFBO0FBQUE7QUFBQSxJQUdKLGFBQWE7QUFBQSxJQUNiLFNBQVMsQ0FBQyxrQkFBa0I7QUFBQTtBQUFBLElBRTVCLGFBQWE7QUFBQSxJQUNiLGFBQWE7QUFBQSxFQUNmO0FBQ0YsQ0FBQzsiLAogICJuYW1lcyI6IFtdCn0K
