@@ -82,7 +82,7 @@ export function styleVariants<V extends VariantGroups>(cfg: VariantConfig<V>): V
     groupClasses[group] = map;
   }
 
-  const defaults = cfg.defaultVariants ?? {};
+  const defaults: { readonly [K in keyof V]?: keyof V[K] } = cfg.defaultVariants ?? {};
 
   return (selection?: VariantSelection<V>) => {
     const parts: string[] = [];

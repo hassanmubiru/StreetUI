@@ -6,3 +6,4 @@ export * from './identity.js';
 export * from './lifecycle.js';
 export * from './node.js';
 export * from './observability.js';
+export * from './styling/index.js';

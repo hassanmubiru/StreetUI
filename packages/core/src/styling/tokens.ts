@@ -36,7 +36,7 @@ export interface ThemeTokenDef<L extends TokenTree> {
 }
 
 export type DeepPartial<T> = {
-  [K in keyof T]?: T[K] extends TokenLeaf ? T[K] : T[K] extends TokenTree ? DeepPartial<T[K]> : never;
+  [K in keyof T]?: T[K] extends TokenLeaf ? TokenLeaf : T[K] extends TokenTree ? DeepPartial<T[K]> : never;
 };
 
 export interface ThemeTokens<L extends TokenTree> {
