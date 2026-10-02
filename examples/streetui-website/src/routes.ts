@@ -15,6 +15,7 @@ import { derived, type Signal } from 'streetui';
 import type { RouteContext, RouteDefinition } from 'streetui';
 import { pageLayout, codeExample, breadcrumb } from './components.js';
 import { buildPlayground, type PlaygroundState } from './playground.js';
+import { ds } from './design-system.js';
 import {
   DOC_GROUPS, docsInGroup, findDoc, PRIMARY_NAV, EXAMPLES, API_GROUPS,
   CHANGELOG, BLOG_POSTS, findPost, type ExampleEntry,
