@@ -19,9 +19,9 @@
  *
  * Incremental styling cost = withStyling − baseline (what a real app adds by
  * adopting styling). Tree-shake proof: the baseline bundle must NOT contain the
- * styling string literals ('data-streetui-css', '--space-') that survive
- * minification, while stylingOnly must. If esbuild cannot load, a BLOCKED result
- * is recorded with the reason and NO sizes are fabricated.
+ * styling string literals ('data-streetui-css', 'focus-visible', 'inset(50%)')
+ * that survive minification, while stylingOnly must. If esbuild cannot load, a
+ * BLOCKED result is recorded with the reason and NO sizes are fabricated.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -122,7 +122,7 @@ async function bundle(contents) {
   return r.outputFiles[0].text;
 }
 
-const MARKERS = ['data-streetui-css', '--space-'];
+const MARKERS = ['data-streetui-css', 'focus-visible', 'inset(50%)'];
 const buf = (txt) => Buffer.from(txt, 'utf8');
 
 async function main() {
