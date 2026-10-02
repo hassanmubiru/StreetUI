@@ -757,7 +757,7 @@ function createThemeTokens(def) {
 }
 var DEFAULT_TOKENS = {
   surface: { background: "#ffffff", raised: "#f7f7f8", sunken: "#eeeef1", overlay: "rgba(17,17,20,0.55)" },
-  content: { primary: "#17171a", secondary: "#55555f", muted: "#8a8a95", inverse: "#ffffff" },
+  content: { primary: "#17171a", secondary: "#55555f", muted: "#666672", inverse: "#ffffff" },
   border: { default: "#e3e3e8", strong: "#c9c9d1", subtle: "#f0f0f3" },
   accent: { primary: "#4f46e5", hover: "#4338ca", contrast: "#ffffff" },
   focus: { ring: "#6366f1" },
