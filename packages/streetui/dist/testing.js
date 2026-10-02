@@ -1,4 +1,4 @@
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/identity.ts
+// ../core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -13,7 +13,7 @@ function generateNodeId(prefix = "node") {
   return createNodeId(`${prefix}:${nextId()}`);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/lifecycle.ts
+// ../core/src/lifecycle.ts
 var CleanupRegistry = class {
   _fns = [];
   add(fn) {
@@ -30,7 +30,7 @@ var CleanupRegistry = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/diagnostics.ts
+// ../core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -76,7 +76,7 @@ var DiagnosticCollector = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/validation/validator.ts
+// ../compiler/src/validation/validator.ts
 function validateGraph(graph) {
   const dc = new DiagnosticCollector();
   dc.merge(graph.validate());
@@ -132,7 +132,7 @@ function validateNode(node, dc) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/transform/transform.ts
+// ../compiler/src/transform/transform.ts
 function transformGraph(graph) {
   graph.walk((node, depth) => {
     applyDefaults(node);
@@ -170,7 +170,7 @@ function ensureRenderKey(node, depth) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/compile.ts
+// ../compiler/src/compile.ts
 function compile(app, options = {}) {
   const strict = options.strict ?? true;
   const strictWarnings = options.strictWarnings ?? false;
@@ -197,7 +197,7 @@ function compile(app, options = {}) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/browser-adapter.ts
+// ../dom/src/browser-adapter.ts
 var BrowserDOMAdapter = class {
   createElement(tag, ns) {
     if (ns !== void 0) {
@@ -300,7 +300,7 @@ var BrowserDOMAdapter = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-node.ts
+// ../dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -513,7 +513,7 @@ function serializeChildren(node) {
   return out;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-adapter.ts
+// ../dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -708,7 +708,7 @@ var ServerDOMAdapter = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/focus.ts
+// ../dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -817,7 +817,7 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-context.ts
+// ../renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -829,7 +829,7 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/node-instance.ts
+// ../renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -860,7 +860,7 @@ var NodeInstance = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/attributes.ts
+// ../renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -939,7 +939,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/events.ts
+// ../renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -963,7 +963,7 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/tag-map.ts
+// ../renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -1003,7 +1003,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/patch.ts
+// ../renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -1044,7 +1044,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/reconciliation.ts
+// ../renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -1272,7 +1272,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/transition.ts
+// ../renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -1442,7 +1442,7 @@ var TransitionController = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/head.ts
+// ../renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -1594,7 +1594,7 @@ function wireHeadBehavior(ctx, graphNode, instance) {
   instance.trackCleanup(() => manager.unregister(nodeId));
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/mount.ts
+// ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -2020,7 +2020,7 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/signal.ts
+// ../state/src/signal.ts
 var _activeConsumer = null;
 function withConsumer(consumer, fn) {
   const prev = _activeConsumer;
@@ -2202,7 +2202,7 @@ function effect(fn) {
   return () => e.dispose();
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydration-diagnostics.ts
+// ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -2226,7 +2226,7 @@ function createHydrationDiagnosticCollector() {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydrate.ts
+// ../renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -2462,7 +2462,7 @@ function expectedTag(ctx, graphNode) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-handle.ts
+// ../renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -2487,7 +2487,7 @@ var StreetRenderHandle = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/renderer.ts
+// ../renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -2528,7 +2528,7 @@ function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/dist/diagnostics.js
+// ../compiler/dist/diagnostics.js
 var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
 function analyzeGraph(graph) {
   const nodes = /* @__PURE__ */ new Map();
@@ -2637,7 +2637,7 @@ function formatInspection(inspection) {
   return lines.join("\n");
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/static-ssr-plan.ts
+// ../renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -2684,7 +2684,7 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/ssr.ts
+// ../renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -2698,7 +2698,7 @@ function renderToString(compiled, options = {}) {
   return html;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/testing/src/test-renderer.ts
+// ../testing/src/test-renderer.ts
 function render(app) {
   const compiled = compile(app);
   const container = document.createElement("div");
@@ -2765,7 +2765,7 @@ function renderOnce(app, testFn) {
   });
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/scheduler/src/scheduler.ts
+// ../scheduler/src/scheduler.ts
 var PRIORITY_ORDER = {
   immediate: 0,
   normal: 1,
@@ -2865,7 +2865,7 @@ function flushSync() {
   scheduler.flush();
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/testing/src/helpers.ts
+// ../testing/src/helpers.ts
 async function flushUpdates() {
   flushSync();
   await Promise.resolve();
@@ -3016,7 +3016,7 @@ function renderServerThenHydrate(build, options = {}) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/transition.ts
+// ../dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -3052,7 +3052,7 @@ function resolveTransition(config) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/head.ts
+// ../dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -3164,7 +3164,7 @@ function resolveHead(config) {
   return { entries };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/builders.ts
+// ../dsl/src/builders.ts
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -3787,7 +3787,7 @@ var AppBuilder = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph-node.ts
+// ../graph/src/graph-node.ts
 var GraphNode = class _GraphNode {
   id;
   type;
@@ -3891,7 +3891,7 @@ var GraphNode = class _GraphNode {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph.ts
+// ../graph/src/graph.ts
 var ApplicationGraph = class {
   root;
   name;
@@ -4045,7 +4045,7 @@ var ApplicationGraph = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/dsl.ts
+// ../dsl/src/dsl.ts
 var StreetApp = class {
   _graph;
   _builder;
@@ -4076,7 +4076,7 @@ var streetui = {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/testing/src/component.ts
+// ../testing/src/component.ts
 var COMPONENT_ATTR = "data-streetui-component";
 function renderComponent(def, props, children) {
   const app = streetui.app({ name: `test:${def.name}` });

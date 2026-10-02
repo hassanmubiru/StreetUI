@@ -1,7 +1,7 @@
 // src/version.ts
 var VERSION = "2.7.0";
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/signal.ts
+// ../state/src/signal.ts
 var _activeConsumer = null;
 function withConsumer(consumer, fn) {
   const prev = _activeConsumer;
@@ -211,7 +211,7 @@ function observerCount(source) {
   return typeof maybe._observerCount === "function" ? maybe._observerCount() : void 0;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/store.ts
+// ../state/src/store.ts
 var Store = class {
   _signals;
   constructor(initial) {
@@ -261,7 +261,7 @@ function createStore(initial) {
   return new Store(initial);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/resource.ts
+// ../state/src/resource.ts
 function isAbortError(err) {
   return err instanceof Error && err.name === "AbortError" || typeof DOMException !== "undefined" && err instanceof DOMException && err.name === "AbortError";
 }
@@ -339,7 +339,7 @@ function resource(loader, options = {}) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/mutation.ts
+// ../state/src/mutation.ts
 function mutation(mutator, options = {}) {
   const status = signal("idle");
   const data = signal(void 0);
@@ -396,7 +396,7 @@ function mutation(mutator, options = {}) {
   return { status, data, error, pending, mutate, reset, dispose };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/client.ts
+// ../state/src/client.ts
 var HttpError = class extends Error {
   status;
   statusText;
@@ -479,7 +479,7 @@ async function parseBody(response) {
   return text2;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/auth.ts
+// ../state/src/auth.ts
 function createAuthSession(config) {
   const session = resource(
     (ctx) => config.loadUser(ctx),
@@ -531,7 +531,7 @@ function createAuthSession(config) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/a11y-ids.ts
+// ../core/src/a11y-ids.ts
 var UNSAFE = /[^A-Za-z0-9_-]+/g;
 function toIdToken(base) {
   const token = base.trim().replace(UNSAFE, "-").replace(/^-+|-+$/g, "");
@@ -553,7 +553,7 @@ function a11yIds(base) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/identity.ts
+// ../core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -575,7 +575,7 @@ function generateApplicationId(name) {
   return `app:${name}:${nextId()}`;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/lifecycle.ts
+// ../core/src/lifecycle.ts
 var Lifecycle = class {
   _phase = "created";
   _hooks = /* @__PURE__ */ new Map();
@@ -633,7 +633,7 @@ var CleanupRegistry = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/environment.ts
+// ../core/src/environment.ts
 function detectEnvironment() {
   try {
     if (typeof process !== "undefined" && process !== null && typeof process === "object" && (process.env?.["NODE_ENV"] === "test" || process.env?.["VITEST"] === "true")) {
@@ -685,7 +685,7 @@ var Environment = class {
 };
 var environment = new Environment();
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/diagnostics.ts
+// ../core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -735,7 +735,7 @@ function formatDiagnostic(d) {
   return `[${d.severity.toUpperCase()}] ${d.code}: ${d.message}${loc}`;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/application.ts
+// ../core/src/application.ts
 var Application = class {
   id;
   name;
@@ -779,7 +779,7 @@ function createApplication(options) {
   return new Application(options);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/node.ts
+// ../core/src/node.ts
 var BaseNode = class {
   id;
   type;
@@ -791,7 +791,7 @@ var BaseNode = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/observability.ts
+// ../core/src/observability.ts
 function formatDiagnosticContext(context) {
   if (context === void 0) return "";
   const parts = [];
@@ -871,7 +871,7 @@ function reportError(sink, error, context, options = {}) {
   return report;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/canonical.ts
+// ../core/src/styling/canonical.ts
 var LENGTH_PROPS = /* @__PURE__ */ new Set([
   "inset",
   "top",
@@ -948,7 +948,7 @@ function identityOf(def) {
   return { canonical, id: hashIdentity(canonical) };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/registry.ts
+// ../core/src/styling/registry.ts
 var BAND_ORDER = ["tokens", "base", "responsive", "state", "variant"];
 var StyleRegistry = class {
   _entries = /* @__PURE__ */ new Map();
@@ -1024,7 +1024,7 @@ var StyleRegistry = class {
 };
 var styleRegistry = new StyleRegistry();
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/css.ts
+// ../core/src/styling/css.ts
 var BREAKPOINTS = {
   sm: 480,
   md: 768,
@@ -1128,7 +1128,7 @@ function generateCSS(id, def) {
   return { base: baseCss, state: stateCss, hasResponsive };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/tokens.ts
+// ../core/src/styling/tokens.ts
 function kebab(seg) {
   return seg.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
 }
@@ -1217,7 +1217,7 @@ var DARK_OVERRIDES = {
 };
 var tokens = createThemeTokens({ light: DEFAULT_TOKENS, dark: DARK_OVERRIDES });
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/style.ts
+// ../core/src/styling/style.ts
 function style(def) {
   const { id } = identityOf(def);
   if (!styleRegistry.has(id)) {
@@ -1260,7 +1260,7 @@ function styleVariants(cfg) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/reactive.ts
+// ../core/src/styling/reactive.ts
 function reactiveVarName(prop) {
   return `--s-${cssPropName(prop)}`;
 }
@@ -1281,7 +1281,7 @@ function reactiveVarValue(prop, value) {
   return cssValue(prop, value);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/layout.ts
+// ../core/src/styling/layout.ts
 var space = (k) => tokens.ref.space[k];
 function container(opts = {}) {
   const def = {
@@ -1344,7 +1344,7 @@ function spacer(opts = {}) {
 }
 var layout = { container, stack, row, grid, center, spacer };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/typography.ts
+// ../core/src/styling/typography.ts
 var t = tokens.ref;
 var HEADING_SIZE = {
   1: t.size["3xl"],
@@ -1460,7 +1460,7 @@ function list() {
 }
 var text = { heading, body, label, caption, link, code, pre, blockquote, list };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/a11y.ts
+// ../core/src/styling/a11y.ts
 var t2 = tokens.ref;
 function focusRing(opts = {}) {
   const color = opts.color ?? t2.focus.ring;
@@ -1509,7 +1509,7 @@ function skipLink() {
 }
 var a11y = { focusRing, visuallyHidden, skipLink };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/forms.ts
+// ../core/src/styling/forms.ts
 var t3 = tokens.ref;
 var CONTROL_BASE = {
   fontFamily: t3.font.sans,
@@ -1588,7 +1588,7 @@ function button() {
 }
 var form = { field, input, label: fieldLabel, help: fieldHelp, error: fieldError, button };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/overlays.ts
+// ../core/src/styling/overlays.ts
 var t4 = tokens.ref;
 function backdrop() {
   return style({
@@ -1708,7 +1708,7 @@ var overlay = {
   toast
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/animation.ts
+// ../core/src/styling/animation.ts
 var t5 = tokens.ref;
 var KEYFRAMES = {
   "streetui-fade-in": "from{opacity:0}to{opacity:1}",
@@ -1749,7 +1749,7 @@ function transition(properties, opts = {}) {
 }
 var animation = { animate, transition, keyframes: KEYFRAMES };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph-node.ts
+// ../graph/src/graph-node.ts
 var GraphNode = class _GraphNode {
   id;
   type;
@@ -1853,7 +1853,7 @@ var GraphNode = class _GraphNode {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph.ts
+// ../graph/src/graph.ts
 var ApplicationGraph = class {
   root;
   name;
@@ -2007,7 +2007,7 @@ var ApplicationGraph = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/transition.ts
+// ../dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -2048,7 +2048,7 @@ function isTransitionConfig(value) {
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/head.ts
+// ../dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -2163,7 +2163,7 @@ function isHeadContribution(value) {
   return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/builders.ts
+// ../dsl/src/builders.ts
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -2786,7 +2786,7 @@ var AppBuilder = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/component.ts
+// ../dsl/src/component.ts
 function component(setup, options = {}) {
   return {
     __streetui_component: true,
@@ -2798,7 +2798,7 @@ function isComponentDefinition(value) {
   return value !== null && typeof value === "object" && value.__streetui_component === true;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/dsl.ts
+// ../dsl/src/dsl.ts
 var StreetApp = class {
   _graph;
   _builder;
@@ -2829,7 +2829,7 @@ var streetui = {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/validation/validator.ts
+// ../compiler/src/validation/validator.ts
 function validateGraph(graph) {
   const dc = new DiagnosticCollector();
   dc.merge(graph.validate());
@@ -2885,7 +2885,7 @@ function validateNode(node, dc) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/transform/transform.ts
+// ../compiler/src/transform/transform.ts
 function transformGraph(graph) {
   graph.walk((node, depth) => {
     applyDefaults(node);
@@ -2923,7 +2923,7 @@ function ensureRenderKey(node, depth) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/compile.ts
+// ../compiler/src/compile.ts
 function compile(app, options = {}) {
   const strict = options.strict ?? true;
   const strictWarnings = options.strictWarnings ?? false;
@@ -2967,7 +2967,7 @@ function compileGraph(graph, options = {}) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/runtime/src/node-instance.ts
+// ../runtime/src/node-instance.ts
 var RuntimeNodeInstance = class {
   graphNode;
   domNode;
@@ -3006,7 +3006,7 @@ var RuntimeNodeInstance = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/scheduler/src/scheduler.ts
+// ../scheduler/src/scheduler.ts
 var PRIORITY_ORDER = {
   immediate: 0,
   normal: 1,
@@ -3112,7 +3112,7 @@ function flushSync() {
   scheduler.flush();
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/runtime/src/runtime.ts
+// ../runtime/src/runtime.ts
 var Runtime = class {
   _renderer;
   _scheduler;
@@ -3209,7 +3209,7 @@ function createRuntime(options) {
   return new Runtime(options);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/events/src/event-types.ts
+// ../events/src/event-types.ts
 function createStreetEvent(type, target, data, originalEvent) {
   let _stopped = false;
   const ev = {
@@ -3229,7 +3229,7 @@ function createStreetEvent(type, target, data, originalEvent) {
   return ev;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/events/src/event-bus.ts
+// ../events/src/event-bus.ts
 var EventBus = class {
   _handlers = /* @__PURE__ */ new Map();
   on(type, handler) {
@@ -3271,7 +3271,7 @@ var EventBus = class {
 };
 var globalEventBus = new EventBus();
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/events/src/dom-bridge.ts
+// ../events/src/dom-bridge.ts
 function bindDomEvent(element, domEventType, handler, options) {
   const listener = (e) => {
     const streetEvent = createStreetEvent(domEventType, element, void 0, e);
@@ -3300,7 +3300,7 @@ var DomEventRegistry = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/browser-adapter.ts
+// ../dom/src/browser-adapter.ts
 var BrowserDOMAdapter = class {
   createElement(tag, ns) {
     if (ns !== void 0) {
@@ -3404,7 +3404,7 @@ var BrowserDOMAdapter = class {
 };
 var browserDOMAdapter = /* @__PURE__ */ new BrowserDOMAdapter();
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-node.ts
+// ../dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -3617,7 +3617,7 @@ function serializeChildren(node) {
   return out;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-adapter.ts
+// ../dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -3813,7 +3813,7 @@ var ServerDOMAdapter = class {
 };
 var serverDOMAdapter = /* @__PURE__ */ new ServerDOMAdapter();
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/focus.ts
+// ../dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -3922,7 +3922,7 @@ function rovingMenu(dom, container2, selector = FOCUSABLE_SELECTOR) {
   return () => dom.removeEventListener(container2, "keydown", onKeydown);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/live-region.ts
+// ../dom/src/live-region.ts
 var VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;";
 function makeRegion(dom, politeness) {
   const el = dom.createElement("div");
@@ -3973,7 +3973,7 @@ function createAnnouncer(dom) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-context.ts
+// ../renderer/src/render-context.ts
 function createRenderContext(dom, graph, container2, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -3985,7 +3985,7 @@ function createRenderContext(dom, graph, container2, hydrationDiagnostics, stati
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/node-instance.ts
+// ../renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -4016,7 +4016,7 @@ var NodeInstance = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/attributes.ts
+// ../renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -4095,7 +4095,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/events.ts
+// ../renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -4119,7 +4119,7 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/tag-map.ts
+// ../renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -4159,7 +4159,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/patch.ts
+// ../renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -4200,7 +4200,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/reconciliation.ts
+// ../renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -4428,7 +4428,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/transition.ts
+// ../renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -4609,7 +4609,7 @@ var TransitionController = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/head.ts
+// ../renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -4787,7 +4787,7 @@ function renderHead(compiled) {
   return out;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/mount.ts
+// ../renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -5213,7 +5213,7 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/styling-transitions.ts
+// ../renderer/src/styling-transitions.ts
 var DURATION_MS = { fast: 120, base: 200, slow: 320 };
 function activeClass(props, duration, easing) {
   return style({ transition: transition(props, { duration, easing }) });
@@ -5271,7 +5271,7 @@ function slideTransition(opts = {}) {
 }
 var transitions = { fadeTransition, scaleTransition, slideTransition };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/styles.ts
+// ../renderer/src/styles.ts
 var CSS_MARKER = "data-streetui-css";
 var CSS_KEYS = "data-streetui-css-keys";
 function renderStyles(options = {}) {
@@ -5310,7 +5310,7 @@ function searchDescendants(dom, el) {
   return null;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/theme.ts
+// ../renderer/src/theme.ts
 var DEFAULT_STORAGE_KEY = "streetui-theme";
 var CHOICES = ["light", "dark", "system"];
 function defaultThemeStorage(key = DEFAULT_STORAGE_KEY) {
@@ -5380,7 +5380,7 @@ function createTheme(options = {}) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydration-diagnostics.ts
+// ../renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -5411,7 +5411,7 @@ function consoleHydrationDiagnosticSink(logger = console) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydrate.ts
+// ../renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -5647,7 +5647,7 @@ function expectedTag(ctx, graphNode) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-handle.ts
+// ../renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -5672,7 +5672,7 @@ var StreetRenderHandle = class {
   }
 };
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/renderer.ts
+// ../renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -5713,7 +5713,7 @@ function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/dehydrate.ts
+// ../renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
@@ -5749,7 +5749,7 @@ function readState(dom, root) {
   }
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/dist/diagnostics.js
+// ../compiler/dist/diagnostics.js
 var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
 function analyzeGraph(graph) {
   const nodes = /* @__PURE__ */ new Map();
@@ -5806,7 +5806,7 @@ function analyzeGraph(graph) {
   return { nodes, summary };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/static-ssr-plan.ts
+// ../renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -5853,7 +5853,7 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/ssr.ts
+// ../renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -5867,7 +5867,7 @@ function renderToString(compiled, options = {}) {
   return html;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/matching.ts
+// ../router/src/matching.ts
 function segments(path) {
   return path.split("/").filter((s) => s.length > 0);
 }
@@ -5922,7 +5922,7 @@ function splitTarget(to) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/history.ts
+// ../router/src/history.ts
 function buildLocation(pathname, search) {
   return { pathname, search };
 }
@@ -6014,7 +6014,7 @@ function createMemoryHistory(initial = "/") {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/router.ts
+// ../router/src/router.ts
 var DEFAULT_NOT_FOUND = {
   path: "*",
   builder: (page) => {
@@ -6087,7 +6087,7 @@ function createRouter(options) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/mount-router.ts
+// ../router/src/mount-router.ts
 var ROUTER_OUTLET_ID = "streetui-router-outlet";
 var ROUTER_OUTLET_KEY = "router-outlet";
 function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
@@ -6258,7 +6258,7 @@ function mountRouter(router, options) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/forms/src/validators.ts
+// ../forms/src/validators.ts
 function required(message = "This field is required") {
   return (value) => value.trim().length === 0 ? message : void 0;
 }
@@ -6285,7 +6285,7 @@ function runValidators(value, validators) {
   return void 0;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/forms/src/form.ts
+// ../forms/src/form.ts
 function createForm(config) {
   const names = Object.keys(config.initialValues);
   const validators = config.validators ?? {};
@@ -6438,7 +6438,7 @@ function createForm(config) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/context/src/context.ts
+// ../context/src/context.ts
 function createContext(defaultValue, description) {
   const id = Symbol(description ?? "streetui.context");
   const stack2 = [];
@@ -6462,7 +6462,7 @@ function createContext(defaultValue, description) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/i18n/src/i18n.ts
+// ../i18n/src/i18n.ts
 var INTERPOLATION = /\{(\w+)\}/g;
 function interpolate(template, params) {
   if (params === void 0) return template;
@@ -6520,7 +6520,7 @@ function createI18n(config) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspector.ts
+// ../devtools/src/inspector.ts
 function inspectGraph(graph) {
   return inspectNode(graph.root, 0);
 }
@@ -6610,7 +6610,7 @@ function inspectInteractions(graph) {
   return { overlays, transitions: transitions2 };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/application.ts
+// ../devtools/src/application.ts
 function collectPerf(node, distinctSignals, acc) {
   acc.totalNodes += 1;
   if (node.depth > acc.maxDepth) acc.maxDepth = node.depth;
@@ -6667,7 +6667,7 @@ function inspectApplication(compiled) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/diagnostics.ts
+// ../devtools/src/diagnostics.ts
 var DEFAULT_PERF_THRESHOLDS = {
   maxNodes: 5e3,
   maxDepth: 32,
@@ -6713,7 +6713,7 @@ function diagnosePerformance(compiled, thresholds = {}) {
   return out;
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspect-reactive.ts
+// ../devtools/src/inspect-reactive.ts
 function inspectSignal(source, options = {}) {
   const raw = source.peek();
   let value = raw;
@@ -6815,7 +6815,7 @@ function inspectI18n(i18n, options = {}) {
   return { ...base, missingKeys };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspect-detail.ts
+// ../devtools/src/inspect-detail.ts
 function inspectEvents(graph) {
   const nodes = [];
   const byType = {};
@@ -6877,7 +6877,7 @@ function inspectSignalGraph(compiled, options = {}) {
   return { signals, edges };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspect-ssr.ts
+// ../devtools/src/inspect-ssr.ts
 function countType(graph, type) {
   let n = 0;
   graph.walk((node) => {
@@ -6906,7 +6906,7 @@ function inspectHydration(compiled) {
   };
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/panels.ts
+// ../devtools/src/panels.ts
 function createDevTools(compiled, sources = {}, options = {}) {
   let current = capture(compiled, sources, options);
   return {
@@ -7108,7 +7108,7 @@ function format(value) {
   return String(value);
 }
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/view.ts
+// ../devtools/src/view.ts
 function escapeHtml(value) {
   const s = typeof value === "string" ? value : stringifyValue(value);
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -7278,7 +7278,7 @@ var DEVTOOLS_CSS = [
   "code{color:#d7d7e0}"
 ].join("");
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/interactive.ts
+// ../devtools/src/interactive.ts
 var DEVTOOLS_TABS = [
   { id: "components", label: "Component Tree" },
   { id: "inspector", label: "Component Inspector" },
@@ -7479,7 +7479,7 @@ var INTERACTIVE_CSS = [
   "code{color:#d7d7e0}"
 ].join("");
 
-// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/devtools-report.ts
+// ../devtools/src/devtools-report.ts
 function renderDevToolsReport(compiled, sources = {}, options = {}) {
   const session = createDevTools(compiled, sources, options);
   return renderDevToolsHTML(session.snapshot);
