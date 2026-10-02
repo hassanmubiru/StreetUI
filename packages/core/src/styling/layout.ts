@@ -33,7 +33,7 @@ export interface ContainerStyleOptions {
 }
 
 /** A width-capped, centered content column with symmetric horizontal padding. */
-export function container(opts: ContainerOptions = {}): string {
+export function container(opts: ContainerStyleOptions = {}): string {
   const def: StyleDef = {
     width: '100%',
     maxWidth: opts.max ?? 1120,

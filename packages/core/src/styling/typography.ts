@@ -21,7 +21,7 @@ const HEADING_SIZE: Record<HeadingLevel, string> = {
   4: t.size.lg, 5: t.size.md, 6: t.size.sm,
 };
 
-export interface HeadingOptions {
+export interface HeadingStyleOptions {
   /** Semantic heading level 1–6 (drives size + weight). Default `2`. */
   readonly level?: HeadingLevel;
 }
