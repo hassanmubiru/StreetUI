@@ -17,6 +17,7 @@ import { routerOutlet, ROUTER_OUTLET_KEY } from 'streetui';
 import { navLink } from './components.js';
 import { PRIMARY_NAV, searchContent, type SearchDoc } from './content.js';
 import type { ThemeController } from './theme.js';
+import { ds } from './design-system.js';
 
 export interface ShellContext {
   readonly router: Router;
@@ -56,45 +57,51 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   // charge of the whole document.head. See V2.6.0-FRAMEWORK-FINDINGS.md.
 
   shell.section('skip', (s) => {
-    s.link('Skip to content', { href: '#page-outlet', id: 'skip-link' });
+    s.link('Skip to content', { href: '#page-outlet', id: 'skip-link', class: ds.skipLink });
   }, { id: 'site-skip' });
 
   // Primary navigation landmark.
   shell.section('nav', (n) => {
-    n.heading('StreetUI', { level: 1, id: 'brand' });
+    n.container('nav-inner', (inner) => {
+      inner.heading('StreetUI', { level: 1, id: 'brand', class: ds.brand });
 
-    n.container('nav-links', (links) => {
-      for (const item of PRIMARY_NAV) {
-        navLink(links, router, item);
-      }
-      links.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'nav-github' });
-    }, { id: 'nav-links' });
+      inner.container('nav-right', (right) => {
+        right.container('nav-links', (links) => {
+          for (const item of PRIMARY_NAV) {
+            navLink(links, router, item);
+          }
+          links.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'nav-github', class: ds.navLinkItem });
+        }, { id: 'nav-links', class: ds.navLinks });
 
-    // Theme toggle — a real button bound to a reactive label.
-    n.container('theme', (t) => {
-      t.button(theme.label, { id: 'theme-toggle', onClick: () => theme.cycle() });
-    }, { id: 'theme-region' });
+        // Theme toggle — a real button bound to a reactive label.
+        right.container('theme', (t) => {
+          t.button(theme.label, { id: 'theme-toggle', onClick: () => theme.cycle(), class: ds.themeToggle });
+        }, { id: 'theme-region' });
 
-    // Docs search — bound input + live results list + empty state.
-    n.container('search', (sc) => {
-      sc.input({
-        id: 'search-input',
-        type: 'search',
-        placeholder: 'Search docs…',
-        bind: search.query,
-      });
-      sc.listOf('search-results', search.results, (item, _i, content) => {
-        content.link(`${item.title} — ${item.kind}`, {
-          href: item.href,
-          id: `search-result-${slugifyId(item.title)}-${item.kind}`,
-        });
-      }, { id: 'search-results' });
-      sc.when(
-        derived(() => search.query.get().trim() !== '' && search.results.get().length === 0),
-        (empty) => { empty.text('No matches.', { id: 'search-empty' }); },
-      );
-    }, { id: 'search-region' });
-  }, { id: 'site-nav' });
+        // Docs search — bound input + live results list + empty state.
+        right.container('search', (sc) => {
+          sc.input({
+            id: 'search-input',
+            type: 'search',
+            placeholder: 'Search docs…',
+            bind: search.query,
+            class: ds.searchInput,
+          });
+          sc.listOf('search-results', search.results, (item, _i, content) => {
+            content.link(`${item.title} — ${item.kind}`, {
+              href: item.href,
+              id: `search-result-${slugifyId(item.title)}-${item.kind}`,
+              class: ds.searchResultItem,
+            });
+          }, { id: 'search-results', class: ds.searchResults });
+          sc.when(
+            derived(() => search.query.get().trim() !== '' && search.results.get().length === 0),
+            (empty) => { empty.text('No matches.', { id: 'search-empty', class: ds.searchEmpty }); },
+          );
+        }, { id: 'search-region', class: ds.searchRegion });
+      }, { id: 'nav-right', class: ds.navControls });
+    }, { id: 'nav-inner', class: ds.navInner });
+  }, { id: 'site-nav', class: ds.navBar });
 
   // The active route renders here; the shell above/below persists. The outlet
   // id matches the skip-link target (#page-outlet). On the server we fill it
@@ -109,9 +116,11 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   }
 
   shell.section('footer', (f) => {
-    f.text('Built with StreetUI — this site is a StreetUI application.', { id: 'footer-text' });
-    f.link('MIT License', { href: '/about', id: 'footer-license' });
-  }, { id: 'site-footer' });
+    f.container('footer-inner', (fi) => {
+      fi.text('Built with StreetUI — this site is a StreetUI application.', { id: 'footer-text', class: ds.footerText });
+      fi.link('MIT License', { href: '/about', id: 'footer-license', class: ds.inlineLink });
+    }, { id: 'footer-inner', class: ds.footerInner });
+  }, { id: 'site-footer', class: ds.footer });
 }
 
 /** Stable id fragment from an arbitrary title (search result ids). */

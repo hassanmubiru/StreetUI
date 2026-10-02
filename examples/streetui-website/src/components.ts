@@ -65,9 +65,9 @@ export function navLink(
   router: Router,
   item: { label: string; href: string; id: string; exact?: boolean },
 ): void {
-  scope.link(item.label, { href: item.href, id: item.id });
+  scope.link(item.label, { href: item.href, id: item.id, class: ds.navLinkItem });
   scope.when(router.isActive(item.href, { exact: item.exact ?? false }), (c) => {
-    c.text(' (active)', { id: `${item.id}-active` });
+    c.text(' (active)', { id: `${item.id}-active`, class: ds.navActiveMark });
   });
 }
 
@@ -80,11 +80,11 @@ export function navLink(
  */
 export function codeExample(scope: ContainerDSL, sample: CodeSample, idBase: string): void {
   scope.container(idBase, (c) => {
-    c.text(sample.label, { id: `${idBase}-label` });
-    const codeOpts: { id: string; language?: string } = { id: `${idBase}-src` };
+    c.text(sample.label, { id: `${idBase}-label`, class: ds.codeLabel });
+    const codeOpts: { id: string; language?: string; class: string } = { id: `${idBase}-src`, class: ds.codeSurface };
     if (sample.language !== undefined) codeOpts.language = sample.language;
     c.code(sample.code, codeOpts);
-  }, { id: `${idBase}` });
+  }, { id: `${idBase}`, class: ds.codeBlock });
 }
 
 /**
@@ -99,12 +99,12 @@ export function breadcrumb(
   scope.container(idBase, (c) => {
     trail.forEach((crumb, i) => {
       if (crumb.href !== undefined) {
-        c.link(crumb.label, { href: crumb.href, id: `${idBase}-${i}` });
+        c.link(crumb.label, { href: crumb.href, id: `${idBase}-${i}`, class: ds.breadcrumbLink });
       } else {
-        c.text(crumb.label, { id: `${idBase}-${i}` });
+        c.text(crumb.label, { id: `${idBase}-${i}`, class: ds.breadcrumbCurrent });
       }
     });
-  }, { id: idBase });
+  }, { id: idBase, class: ds.breadcrumbTrail });
 }
 
 /** Render a value or signal of text, choosing a stable id. */
