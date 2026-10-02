@@ -11,6 +11,7 @@ import { derived, type Signal, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import type { CodeSample } from './content.js';
 import { pageHead } from './metadata.js';
+import { ds } from './design-system.js';
 
 /**
  * A consistent page shell: a titled landmark `<section>` wrapping a content
