@@ -27,7 +27,7 @@ export interface HeadingStyleOptions {
 }
 
 /** A display heading sized from the type scale by level. */
-export function heading(opts: HeadingOptions = {}): string {
+export function heading(opts: HeadingStyleOptions = {}): string {
   const level = opts.level ?? 2;
   return style({
     fontFamily: t.font.sans,

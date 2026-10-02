@@ -30,7 +30,7 @@ __export(server_exports, {
 });
 module.exports = __toCommonJS(server_exports);
 
-// ../renderer/src/render-context.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -42,7 +42,7 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
   };
 }
 
-// ../core/src/lifecycle.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/lifecycle.ts
 var CleanupRegistry = class {
   _fns = [];
   add(fn) {
@@ -59,7 +59,7 @@ var CleanupRegistry = class {
   }
 };
 
-// ../renderer/src/node-instance.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -90,7 +90,7 @@ var NodeInstance = class {
   }
 };
 
-// ../renderer/src/attributes.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -151,6 +151,13 @@ function applyProp(dom, element, name, value) {
     }
     return;
   }
+  if (name.startsWith("style.")) {
+    const el = element;
+    const prop = name.slice("style.".length);
+    if (value === null || value === void 0) el.style.removeProperty(prop);
+    else el.style.setProperty(prop, String(value));
+    return;
+  }
   if (value === null || value === void 0 || value === false) {
     dom.removeAttribute(element, name);
     return;
@@ -162,7 +169,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// ../renderer/src/events.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -186,7 +193,7 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// ../dom/src/server-node.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -399,7 +406,7 @@ function serializeChildren(node) {
   return out;
 }
 
-// ../dom/src/server-adapter.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -594,7 +601,7 @@ var ServerDOMAdapter = class {
   }
 };
 
-// ../dom/src/focus.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -703,7 +710,7 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
 
-// ../renderer/src/tag-map.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -743,7 +750,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// ../renderer/src/patch.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -784,7 +791,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// ../renderer/src/reconciliation.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -1012,7 +1019,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// ../renderer/src/transition.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -1182,7 +1189,7 @@ var TransitionController = class {
   }
 };
 
-// ../renderer/src/head.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -1360,7 +1367,7 @@ function renderHead(compiled) {
   return out;
 }
 
-// ../renderer/src/mount.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -1786,7 +1793,7 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// ../renderer/src/dehydrate.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
@@ -1822,7 +1829,7 @@ function readState(dom, root) {
   }
 }
 
-// ../compiler/dist/diagnostics.js
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/dist/diagnostics.js
 var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
 function analyzeGraph(graph) {
   const nodes = /* @__PURE__ */ new Map();
@@ -1879,7 +1886,7 @@ function analyzeGraph(graph) {
   return { nodes, summary };
 }
 
-// ../renderer/src/static-ssr-plan.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -1926,7 +1933,7 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// ../renderer/src/ssr.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);

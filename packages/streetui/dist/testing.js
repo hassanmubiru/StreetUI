@@ -1,4 +1,4 @@
-// ../core/src/identity.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -13,7 +13,7 @@ function generateNodeId(prefix = "node") {
   return createNodeId(`${prefix}:${nextId()}`);
 }
 
-// ../core/src/lifecycle.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/lifecycle.ts
 var CleanupRegistry = class {
   _fns = [];
   add(fn) {
@@ -30,7 +30,7 @@ var CleanupRegistry = class {
   }
 };
 
-// ../core/src/diagnostics.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -76,7 +76,7 @@ var DiagnosticCollector = class {
   }
 };
 
-// ../compiler/src/validation/validator.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/validation/validator.ts
 function validateGraph(graph) {
   const dc = new DiagnosticCollector();
   dc.merge(graph.validate());
@@ -132,7 +132,7 @@ function validateNode(node, dc) {
   }
 }
 
-// ../compiler/src/transform/transform.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/transform/transform.ts
 function transformGraph(graph) {
   graph.walk((node, depth) => {
     applyDefaults(node);
@@ -170,7 +170,7 @@ function ensureRenderKey(node, depth) {
   }
 }
 
-// ../compiler/src/compile.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/compile.ts
 function compile(app, options = {}) {
   const strict = options.strict ?? true;
   const strictWarnings = options.strictWarnings ?? false;
@@ -197,7 +197,7 @@ function compile(app, options = {}) {
   };
 }
 
-// ../dom/src/browser-adapter.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/browser-adapter.ts
 var BrowserDOMAdapter = class {
   createElement(tag, ns) {
     if (ns !== void 0) {
@@ -300,7 +300,7 @@ var BrowserDOMAdapter = class {
   }
 };
 
-// ../dom/src/server-node.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -513,7 +513,7 @@ function serializeChildren(node) {
   return out;
 }
 
-// ../dom/src/server-adapter.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -708,7 +708,7 @@ var ServerDOMAdapter = class {
   }
 };
 
-// ../dom/src/focus.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -817,7 +817,7 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
   return () => dom.removeEventListener(container, "keydown", onKeydown);
 }
 
-// ../renderer/src/render-context.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-context.ts
 function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
   return {
     dom,
@@ -829,7 +829,7 @@ function createRenderContext(dom, graph, container, hydrationDiagnostics, static
   };
 }
 
-// ../renderer/src/node-instance.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -860,7 +860,7 @@ var NodeInstance = class {
   }
 };
 
-// ../renderer/src/attributes.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -921,6 +921,13 @@ function applyProp(dom, element, name, value) {
     }
     return;
   }
+  if (name.startsWith("style.")) {
+    const el = element;
+    const prop = name.slice("style.".length);
+    if (value === null || value === void 0) el.style.removeProperty(prop);
+    else el.style.setProperty(prop, String(value));
+    return;
+  }
   if (value === null || value === void 0 || value === false) {
     dom.removeAttribute(element, name);
     return;
@@ -932,7 +939,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// ../renderer/src/events.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -956,7 +963,7 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// ../renderer/src/tag-map.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -996,7 +1003,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// ../renderer/src/patch.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -1037,7 +1044,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// ../renderer/src/reconciliation.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -1265,7 +1272,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// ../renderer/src/transition.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -1435,7 +1442,7 @@ var TransitionController = class {
   }
 };
 
-// ../renderer/src/head.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -1587,7 +1594,7 @@ function wireHeadBehavior(ctx, graphNode, instance) {
   instance.trackCleanup(() => manager.unregister(nodeId));
 }
 
-// ../renderer/src/mount.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -2013,7 +2020,189 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// ../renderer/src/hydration-diagnostics.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/signal.ts
+var _activeConsumer = null;
+function withConsumer(consumer, fn) {
+  const prev = _activeConsumer;
+  _activeConsumer = consumer;
+  try {
+    return fn();
+  } finally {
+    _activeConsumer = prev;
+  }
+}
+var _batchDepth = 0;
+var _pendingFlushes = /* @__PURE__ */ new Map();
+function _enqueueBatchFlush(sig, value) {
+  _pendingFlushes.set(sig, { signal: sig, value });
+}
+var Signal = class {
+  _value;
+  _subscribers = /* @__PURE__ */ new Set();
+  _consumers = /* @__PURE__ */ new Set();
+  constructor(initial) {
+    this._value = initial;
+  }
+  get() {
+    if (_activeConsumer !== null) {
+      this._consumers.add(_activeConsumer);
+      _activeConsumer._addSource(this);
+    }
+    return this._value;
+  }
+  peek() {
+    return this._value;
+  }
+  set(value) {
+    if (Object.is(this._value, value)) return;
+    this._value = value;
+    if (_batchDepth > 0) {
+      _enqueueBatchFlush(this, value);
+    } else {
+      this._flush(value);
+    }
+  }
+  update(fn) {
+    this.set(fn(this._value));
+  }
+  subscribe(fn) {
+    this._subscribers.add(fn);
+    return () => {
+      this._subscribers.delete(fn);
+    };
+  }
+  _removeConsumer(consumer) {
+    this._consumers.delete(consumer);
+  }
+  /**
+   * Called by the batch machinery after the batch has completed.
+   * Notifies subscribers with the final coalesced value.
+   */
+  _flushBatch(value) {
+    this._flush(value);
+  }
+  _flush(value) {
+    for (const sub of [...this._subscribers]) sub(value);
+    for (const consumer of [...this._consumers]) consumer._invalidate();
+  }
+  /**
+   * @internal DevTools inspection only. The number of live observers
+   * (direct subscribers plus derived/effect consumers). Read-only; never
+   * mutates reactive state.
+   */
+  _observerCount() {
+    return this._subscribers.size + this._consumers.size;
+  }
+};
+var DerivedSignal = class {
+  _value = void 0;
+  _dirty = true;
+  _disposed = false;
+  _fn;
+  _subscribers = /* @__PURE__ */ new Set();
+  /** All upstream sources this derived currently reads from. */
+  _sources = /* @__PURE__ */ new Set();
+  /** Downstream consumers that depend on this derived. */
+  _consumers = /* @__PURE__ */ new Set();
+  constructor(fn) {
+    this._fn = fn;
+  }
+  get() {
+    if (_activeConsumer !== null) {
+      this._consumers.add(_activeConsumer);
+      _activeConsumer._addSource(this);
+    }
+    if (this._dirty) this._recompute();
+    return this._value;
+  }
+  peek() {
+    if (this._dirty) this._recompute();
+    return this._value;
+  }
+  subscribe(fn) {
+    if (this._dirty) this._recompute();
+    this._subscribers.add(fn);
+    return () => {
+      this._subscribers.delete(fn);
+    };
+  }
+  _addSource(src) {
+    this._sources.add(src);
+  }
+  _removeConsumer(consumer) {
+    this._consumers.delete(consumer);
+  }
+  _invalidate() {
+    if (this._disposed) return;
+    this._dirty = true;
+    const newVal = this.peek();
+    for (const sub of [...this._subscribers]) sub(newVal);
+    for (const consumer of [...this._consumers]) consumer._invalidate();
+  }
+  _recompute() {
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    this._value = withConsumer(this, this._fn);
+    this._dirty = false;
+  }
+  dispose() {
+    this._disposed = true;
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    this._subscribers.clear();
+    this._consumers.clear();
+  }
+  /**
+   * @internal DevTools inspection only. Live observers (subscribers plus
+   * downstream consumers). Read-only.
+   */
+  _observerCount() {
+    return this._subscribers.size + this._consumers.size;
+  }
+};
+var Effect = class {
+  _fn;
+  _cleanup = void 0;
+  _disposed = false;
+  _sources = /* @__PURE__ */ new Set();
+  constructor(fn) {
+    this._fn = fn;
+    this._run();
+  }
+  _addSource(src) {
+    this._sources.add(src);
+  }
+  _invalidate() {
+    if (this._disposed) return;
+    this._run();
+  }
+  _run() {
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    if (typeof this._cleanup === "function") this._cleanup();
+    const result = withConsumer(this, this._fn);
+    this._cleanup = typeof result === "function" ? result : void 0;
+  }
+  dispose() {
+    this._disposed = true;
+    for (const src of this._sources) src._removeConsumer(this);
+    this._sources.clear();
+    if (typeof this._cleanup === "function") this._cleanup();
+    this._cleanup = void 0;
+  }
+};
+function signal(initial) {
+  return new Signal(initial);
+}
+function derived(fn) {
+  return new DerivedSignal(fn);
+}
+function effect(fn) {
+  const e = new Effect(fn);
+  return () => e.dispose();
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -2037,7 +2226,7 @@ function createHydrationDiagnosticCollector() {
   };
 }
 
-// ../renderer/src/hydrate.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -2273,7 +2462,7 @@ function expectedTag(ctx, graphNode) {
   }
 }
 
-// ../renderer/src/render-handle.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -2298,7 +2487,7 @@ var StreetRenderHandle = class {
   }
 };
 
-// ../renderer/src/renderer.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -2339,7 +2528,7 @@ function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
 
-// ../compiler/dist/diagnostics.js
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/dist/diagnostics.js
 var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
 function analyzeGraph(graph) {
   const nodes = /* @__PURE__ */ new Map();
@@ -2448,7 +2637,7 @@ function formatInspection(inspection) {
   return lines.join("\n");
 }
 
-// ../renderer/src/static-ssr-plan.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -2495,7 +2684,7 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// ../renderer/src/ssr.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
@@ -2509,7 +2698,7 @@ function renderToString(compiled, options = {}) {
   return html;
 }
 
-// ../testing/src/test-renderer.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/testing/src/test-renderer.ts
 function render(app) {
   const compiled = compile(app);
   const container = document.createElement("div");
@@ -2576,7 +2765,7 @@ function renderOnce(app, testFn) {
   });
 }
 
-// ../scheduler/src/scheduler.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/scheduler/src/scheduler.ts
 var PRIORITY_ORDER = {
   immediate: 0,
   normal: 1,
@@ -2676,7 +2865,7 @@ function flushSync() {
   scheduler.flush();
 }
 
-// ../testing/src/helpers.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/testing/src/helpers.ts
 async function flushUpdates() {
   flushSync();
   await Promise.resolve();
@@ -2827,7 +3016,7 @@ function renderServerThenHydrate(build, options = {}) {
   };
 }
 
-// ../dsl/src/transition.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -2863,7 +3052,7 @@ function resolveTransition(config) {
   };
 }
 
-// ../dsl/src/head.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -2975,189 +3164,7 @@ function resolveHead(config) {
   return { entries };
 }
 
-// ../state/src/signal.ts
-var _activeConsumer = null;
-function withConsumer(consumer, fn) {
-  const prev = _activeConsumer;
-  _activeConsumer = consumer;
-  try {
-    return fn();
-  } finally {
-    _activeConsumer = prev;
-  }
-}
-var _batchDepth = 0;
-var _pendingFlushes = /* @__PURE__ */ new Map();
-function _enqueueBatchFlush(sig, value) {
-  _pendingFlushes.set(sig, { signal: sig, value });
-}
-var Signal = class {
-  _value;
-  _subscribers = /* @__PURE__ */ new Set();
-  _consumers = /* @__PURE__ */ new Set();
-  constructor(initial) {
-    this._value = initial;
-  }
-  get() {
-    if (_activeConsumer !== null) {
-      this._consumers.add(_activeConsumer);
-      _activeConsumer._addSource(this);
-    }
-    return this._value;
-  }
-  peek() {
-    return this._value;
-  }
-  set(value) {
-    if (Object.is(this._value, value)) return;
-    this._value = value;
-    if (_batchDepth > 0) {
-      _enqueueBatchFlush(this, value);
-    } else {
-      this._flush(value);
-    }
-  }
-  update(fn) {
-    this.set(fn(this._value));
-  }
-  subscribe(fn) {
-    this._subscribers.add(fn);
-    return () => {
-      this._subscribers.delete(fn);
-    };
-  }
-  _removeConsumer(consumer) {
-    this._consumers.delete(consumer);
-  }
-  /**
-   * Called by the batch machinery after the batch has completed.
-   * Notifies subscribers with the final coalesced value.
-   */
-  _flushBatch(value) {
-    this._flush(value);
-  }
-  _flush(value) {
-    for (const sub of [...this._subscribers]) sub(value);
-    for (const consumer of [...this._consumers]) consumer._invalidate();
-  }
-  /**
-   * @internal DevTools inspection only. The number of live observers
-   * (direct subscribers plus derived/effect consumers). Read-only; never
-   * mutates reactive state.
-   */
-  _observerCount() {
-    return this._subscribers.size + this._consumers.size;
-  }
-};
-var DerivedSignal = class {
-  _value = void 0;
-  _dirty = true;
-  _disposed = false;
-  _fn;
-  _subscribers = /* @__PURE__ */ new Set();
-  /** All upstream sources this derived currently reads from. */
-  _sources = /* @__PURE__ */ new Set();
-  /** Downstream consumers that depend on this derived. */
-  _consumers = /* @__PURE__ */ new Set();
-  constructor(fn) {
-    this._fn = fn;
-  }
-  get() {
-    if (_activeConsumer !== null) {
-      this._consumers.add(_activeConsumer);
-      _activeConsumer._addSource(this);
-    }
-    if (this._dirty) this._recompute();
-    return this._value;
-  }
-  peek() {
-    if (this._dirty) this._recompute();
-    return this._value;
-  }
-  subscribe(fn) {
-    if (this._dirty) this._recompute();
-    this._subscribers.add(fn);
-    return () => {
-      this._subscribers.delete(fn);
-    };
-  }
-  _addSource(src) {
-    this._sources.add(src);
-  }
-  _removeConsumer(consumer) {
-    this._consumers.delete(consumer);
-  }
-  _invalidate() {
-    if (this._disposed) return;
-    this._dirty = true;
-    const newVal = this.peek();
-    for (const sub of [...this._subscribers]) sub(newVal);
-    for (const consumer of [...this._consumers]) consumer._invalidate();
-  }
-  _recompute() {
-    for (const src of this._sources) src._removeConsumer(this);
-    this._sources.clear();
-    this._value = withConsumer(this, this._fn);
-    this._dirty = false;
-  }
-  dispose() {
-    this._disposed = true;
-    for (const src of this._sources) src._removeConsumer(this);
-    this._sources.clear();
-    this._subscribers.clear();
-    this._consumers.clear();
-  }
-  /**
-   * @internal DevTools inspection only. Live observers (subscribers plus
-   * downstream consumers). Read-only.
-   */
-  _observerCount() {
-    return this._subscribers.size + this._consumers.size;
-  }
-};
-var Effect = class {
-  _fn;
-  _cleanup = void 0;
-  _disposed = false;
-  _sources = /* @__PURE__ */ new Set();
-  constructor(fn) {
-    this._fn = fn;
-    this._run();
-  }
-  _addSource(src) {
-    this._sources.add(src);
-  }
-  _invalidate() {
-    if (this._disposed) return;
-    this._run();
-  }
-  _run() {
-    for (const src of this._sources) src._removeConsumer(this);
-    this._sources.clear();
-    if (typeof this._cleanup === "function") this._cleanup();
-    const result = withConsumer(this, this._fn);
-    this._cleanup = typeof result === "function" ? result : void 0;
-  }
-  dispose() {
-    this._disposed = true;
-    for (const src of this._sources) src._removeConsumer(this);
-    this._sources.clear();
-    if (typeof this._cleanup === "function") this._cleanup();
-    this._cleanup = void 0;
-  }
-};
-function signal(initial) {
-  return new Signal(initial);
-}
-function derived(fn) {
-  return new DerivedSignal(fn);
-}
-function effect(fn) {
-  const e = new Effect(fn);
-  return () => e.dispose();
-}
-
-// ../dsl/src/builders.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/builders.ts
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -3780,7 +3787,7 @@ var AppBuilder = class {
   }
 };
 
-// ../graph/src/graph-node.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph-node.ts
 var GraphNode = class _GraphNode {
   id;
   type;
@@ -3884,7 +3891,7 @@ var GraphNode = class _GraphNode {
   }
 };
 
-// ../graph/src/graph.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph.ts
 var ApplicationGraph = class {
   root;
   name;
@@ -4038,7 +4045,7 @@ var ApplicationGraph = class {
   }
 };
 
-// ../dsl/src/dsl.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/dsl.ts
 var StreetApp = class {
   _graph;
   _builder;
@@ -4069,7 +4076,7 @@ var streetui = {
   }
 };
 
-// ../testing/src/component.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/testing/src/component.ts
 var COMPONENT_ATTR = "data-streetui-component";
 function renderComponent(def, props, children) {
   const app = streetui.app({ name: `test:${def.name}` });

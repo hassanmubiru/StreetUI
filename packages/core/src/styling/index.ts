@@ -38,13 +38,13 @@ export {
 } from './reactive.js';
 
 export {
-  type SpaceKey, type ContainerOptions, type StackOptions, type RowOptions,
+  type SpaceKey, type ContainerStyleOptions, type StackOptions, type RowOptions,
   type GridOptions, type CenterOptions, type SpacerOptions,
   container, stack, row, grid, center, spacer, layout,
 } from './layout.js';
 
 export {
-  type HeadingLevel, type HeadingOptions, type BodyOptions,
+  type HeadingLevel, type HeadingStyleOptions, type BodyOptions,
   heading, body, label, caption, link, code, pre, blockquote, list, text,
 } from './typography.js';
 

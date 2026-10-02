@@ -507,6 +507,885 @@ declare function describeError(error: unknown, context?: DiagnosticContext, opti
 declare function reportError(sink: DiagnosticSink | undefined, error: unknown, context?: DiagnosticContext, options?: ErrorReportOptions): ErrorReport;
 
 /**
+ * StreetUI styling — canonical style model + stable identity.
+ *
+ * A *style* is pure, serializable data describing appearance (§1 Q1). This module
+ * defines the authoring type model and the compile-time canonicalization that
+ * turns any `StyleDef` into (a) a deterministic, order-independent canonical form
+ * and (b) a stable class identity `s-<hash>`. Identical styles → identical
+ * canonical form → identical identity → one shared CSS rule (§18 dedup).
+ *
+ * This file is pure and DOM-free: it never touches the graph, a signal, or the
+ * renderer. It is the foundation the registry (`registry.ts`), CSS generator
+ * (`css.ts`) and authoring API (`style.ts`) build on.
+ */
+/** A raw CSS value: a string (`'1px solid'`) or a number (lengths → px). */
+type CSSValue = string | number;
+/** The responsive breakpoint keys, smallest → largest. `base` is unconditional. */
+type Breakpoint = 'base' | 'sm' | 'md' | 'lg' | 'xl';
+/** A value that may vary by breakpoint. A bare value means "all breakpoints". */
+type ResponsiveValue<T> = T | Partial<Record<Breakpoint, T>>;
+/** Native CSS pseudo-states the browser owns (styled via CSS, never JS). */
+type PseudoState = 'hover' | 'focus' | 'focusVisible' | 'focusWithin' | 'active' | 'disabled' | 'checked' | 'firstChild' | 'lastChild';
+/** Reactive component/application states (distinct from native pseudo states). */
+type ComponentState = 'open' | 'closed' | 'active' | 'selected' | 'expanded' | 'collapsed' | 'loading' | 'error' | 'disabled' | 'invalid' | 'busy' | 'current';
+/**
+ * A set of CSS declarations. Keys are camelCase CSS property names; values may be
+ * responsive. The curated property surface gives autocomplete and rejects unknown
+ * keys under strict object-literal checking (§23) without pulling an external
+ * `csstype` dependency. Unlisted-but-valid CSS can still be set via the inline
+ * `style` prop escape hatch on an element (precedence §5).
+ */
+interface StyleProperties {
+    readonly display?: ResponsiveValue<CSSValue>;
+    readonly position?: ResponsiveValue<CSSValue>;
+    readonly inset?: ResponsiveValue<CSSValue>;
+    readonly top?: ResponsiveValue<CSSValue>;
+    readonly right?: ResponsiveValue<CSSValue>;
+    readonly bottom?: ResponsiveValue<CSSValue>;
+    readonly left?: ResponsiveValue<CSSValue>;
+    readonly zIndex?: ResponsiveValue<CSSValue>;
+    readonly width?: ResponsiveValue<CSSValue>;
+    readonly minWidth?: ResponsiveValue<CSSValue>;
+    readonly maxWidth?: ResponsiveValue<CSSValue>;
+    readonly height?: ResponsiveValue<CSSValue>;
+    readonly minHeight?: ResponsiveValue<CSSValue>;
+    readonly maxHeight?: ResponsiveValue<CSSValue>;
+    readonly margin?: ResponsiveValue<CSSValue>;
+    readonly marginTop?: ResponsiveValue<CSSValue>;
+    readonly marginRight?: ResponsiveValue<CSSValue>;
+    readonly marginBottom?: ResponsiveValue<CSSValue>;
+    readonly marginLeft?: ResponsiveValue<CSSValue>;
+    readonly padding?: ResponsiveValue<CSSValue>;
+    readonly paddingTop?: ResponsiveValue<CSSValue>;
+    readonly paddingRight?: ResponsiveValue<CSSValue>;
+    readonly paddingBottom?: ResponsiveValue<CSSValue>;
+    readonly paddingLeft?: ResponsiveValue<CSSValue>;
+    readonly gap?: ResponsiveValue<CSSValue>;
+    readonly rowGap?: ResponsiveValue<CSSValue>;
+    readonly columnGap?: ResponsiveValue<CSSValue>;
+    readonly flex?: ResponsiveValue<CSSValue>;
+    readonly flexDirection?: ResponsiveValue<CSSValue>;
+    readonly flexWrap?: ResponsiveValue<CSSValue>;
+    readonly flexGrow?: ResponsiveValue<CSSValue>;
+    readonly flexShrink?: ResponsiveValue<CSSValue>;
+    readonly flexBasis?: ResponsiveValue<CSSValue>;
+    readonly alignItems?: ResponsiveValue<CSSValue>;
+    readonly alignSelf?: ResponsiveValue<CSSValue>;
+    readonly justifyContent?: ResponsiveValue<CSSValue>;
+    readonly justifySelf?: ResponsiveValue<CSSValue>;
+    readonly gridTemplateColumns?: ResponsiveValue<CSSValue>;
+    readonly gridTemplateRows?: ResponsiveValue<CSSValue>;
+    readonly gridColumn?: ResponsiveValue<CSSValue>;
+    readonly gridRow?: ResponsiveValue<CSSValue>;
+    readonly placeItems?: ResponsiveValue<CSSValue>;
+    readonly color?: ResponsiveValue<CSSValue>;
+    readonly background?: ResponsiveValue<CSSValue>;
+    readonly backgroundColor?: ResponsiveValue<CSSValue>;
+    readonly borderColor?: ResponsiveValue<CSSValue>;
+    readonly border?: ResponsiveValue<CSSValue>;
+    readonly borderWidth?: ResponsiveValue<CSSValue>;
+    readonly borderStyle?: ResponsiveValue<CSSValue>;
+    readonly borderRadius?: ResponsiveValue<CSSValue>;
+    readonly boxShadow?: ResponsiveValue<CSSValue>;
+    readonly outline?: ResponsiveValue<CSSValue>;
+    readonly outlineOffset?: ResponsiveValue<CSSValue>;
+    readonly opacity?: ResponsiveValue<CSSValue>;
+    readonly fontFamily?: ResponsiveValue<CSSValue>;
+    readonly fontSize?: ResponsiveValue<CSSValue>;
+    readonly fontWeight?: ResponsiveValue<CSSValue>;
+    readonly lineHeight?: ResponsiveValue<CSSValue>;
+    readonly letterSpacing?: ResponsiveValue<CSSValue>;
+    readonly textAlign?: ResponsiveValue<CSSValue>;
+    readonly textDecoration?: ResponsiveValue<CSSValue>;
+    readonly textTransform?: ResponsiveValue<CSSValue>;
+    readonly whiteSpace?: ResponsiveValue<CSSValue>;
+    readonly overflow?: ResponsiveValue<CSSValue>;
+    readonly overflowX?: ResponsiveValue<CSSValue>;
+    readonly overflowY?: ResponsiveValue<CSSValue>;
+    readonly clipPath?: ResponsiveValue<CSSValue>;
+    readonly cursor?: ResponsiveValue<CSSValue>;
+    readonly transition?: ResponsiveValue<CSSValue>;
+    readonly transform?: ResponsiveValue<CSSValue>;
+    readonly transformOrigin?: ResponsiveValue<CSSValue>;
+    readonly animation?: ResponsiveValue<CSSValue>;
+    readonly animationName?: ResponsiveValue<CSSValue>;
+    readonly animationDuration?: ResponsiveValue<CSSValue>;
+    readonly animationTimingFunction?: ResponsiveValue<CSSValue>;
+    readonly animationDelay?: ResponsiveValue<CSSValue>;
+    readonly animationIterationCount?: ResponsiveValue<CSSValue>;
+    readonly animationDirection?: ResponsiveValue<CSSValue>;
+    readonly animationFillMode?: ResponsiveValue<CSSValue>;
+    readonly animationPlayState?: ResponsiveValue<CSSValue>;
+    readonly willChange?: ResponsiveValue<CSSValue>;
+    readonly appearance?: ResponsiveValue<CSSValue>;
+    readonly userSelect?: ResponsiveValue<CSSValue>;
+    readonly pointerEvents?: ResponsiveValue<CSSValue>;
+    /** Reactive CSS custom properties (`--name`) — the signal-driven channel (§6). */
+    readonly vars?: Readonly<Record<`--${string}`, CSSValue>>;
+}
+/**
+ * A full style definition: base declarations plus optional pseudo-state,
+ * component-state and a11y-state overrides. Each override block is itself a set
+ * of (non-responsive) declarations.
+ */
+interface StyleDef extends StyleProperties {
+    /** Native pseudo-state overrides (`:hover`, `:focus-visible`, …) — §9. */
+    readonly on?: Partial<Record<PseudoState, StyleProperties>>;
+    /** Component-state overrides → `[data-<state>]` selectors — §10. */
+    readonly when?: Partial<Record<ComponentState, StyleProperties>>;
+}
+/** A canonical, order-independent, JSON-serializable form of a `StyleDef`. */
+type CanonicalStyle = string;
+/** camelCase → kebab-case CSS property name (`backgroundColor` → `background-color`). */
+declare function cssPropName(camel: string): string;
+/** Format a CSS value: unitless numbers on length props get `px`; others pass through. */
+declare function cssValue(prop: string, value: CSSValue): string;
+/** Produce the canonical form of a style definition (stable across key order). */
+declare function canonicalize(def: StyleDef): CanonicalStyle;
+/**
+ * FNV-1a (two seeds) → a stable, dependency-free class identity. Two 32-bit
+ * passes are concatenated in base36 to make collisions between distinct styles
+ * astronomically unlikely for realistic app style counts. Deterministic: the
+ * same canonical form always yields the same id on server and client (§11/§12).
+ */
+declare function hashIdentity(canonical: CanonicalStyle): string;
+/** Convenience: canonical form + identity in one call. */
+declare function identityOf(def: StyleDef): {
+    canonical: CanonicalStyle;
+    id: string;
+};
+
+/**
+ * StreetUI styling — the deduplicated CSS rule registry (§15/§18).
+ *
+ * A single module-level registry maps a *style identity* (`s-<hash>`) to the CSS
+ * rule text for that style. Registration is idempotent: registering the same
+ * identity twice with identical content is a no-op, so 10,000 elements that share
+ * a style produce exactly one rule (§18). The registry is keyed by identity —
+ * **never** by node or element — so it holds only bounded rule strings and
+ * unmounting nodes never strands state in it (§17 memory-leak avoidance).
+ *
+ * Ordering is deterministic (insertion order within fixed category bands), so
+ * serialization is byte-stable across runs (§11/§16). An empty registry
+ * serializes to the empty string, mirroring `renderHead` — so a route that
+ * declares no styles emits no `<style>` block and stays byte-identical.
+ */
+/** Category bands fix the serialization order regardless of registration order. */
+type StyleBand = 'tokens' | 'base' | 'responsive' | 'state' | 'variant';
+declare class StyleRegistry {
+    private readonly _entries;
+    private _seq;
+    /** True once the registry has adopted a server-emitted stylesheet (§12). */
+    private _adopted;
+    /**
+     * Register (idempotently) the CSS for a style identity. Returns the identity so
+     * callers can chain. Re-registering an existing id with the same css is a no-op;
+     * with different css it keeps the first registration (identity is content-derived,
+     * so this cannot happen for honest input and signals a hash collision if it does).
+     */
+    register(id: string, band: StyleBand, css: string): string;
+    /** Whether an identity is already present (server-adopted or locally registered). */
+    has(id: string): boolean;
+    /** Number of distinct rules held (bounded by source diversity, not instances). */
+    get size(): number;
+    /**
+     * Seed the registry from identities a server stylesheet already shipped (§12).
+     * We only need the *keys* to avoid re-emitting duplicates; the rule text is
+     * already in the adopted `<style>` element, so a placeholder css is stored.
+     */
+    adoptServerIdentities(ids: Iterable<string>): void;
+    get adopted(): boolean;
+    /** Serialize all rules to a single CSS string in deterministic band order. */
+    serializeCSS(): string;
+    /** The ordered list of identities present (for the `data-streetui-css-keys` attr). */
+    identities(): string[];
+    /** Clear everything — test isolation and per-process reset only. */
+    reset(): void;
+}
+/**
+ * The process-wide registry instance. Because consuming packages (`dsl` authoring
+ * and `renderer` SSR) both resolve `streetui` to the *same* module, they
+ * share this one instance — the authoring side registers rules and the SSR side
+ * serializes them, with no cross-package plumbing.
+ */
+declare const styleRegistry: StyleRegistry;
+
+/**
+ * StreetUI styling — compile-time CSS generation (§7-§10, §15).
+ *
+ * Turns a `StyleDef` + its stable identity into CSS rule text. All generation is
+ * pure and happens at author/compile time; nothing here runs per render. Output
+ * is deterministic (properties sorted, fixed media order) so identities and bytes
+ * are stable across server and client (§11/§16).
+ *
+ * Property values that are objects of the shape `{ base, sm, md, lg, xl }` expand
+ * to a base declaration plus `@media (min-width: …)` blocks (§7). Pseudo states
+ * (`on`) become `.id:hover` etc. (§9). Component states (`when`) become
+ * `.id[data-<state>]` selectors driven reactively by a data attribute (§10).
+ */
+
+/** Default breakpoint minimum widths (px). Mirrors the default token breakpoints. */
+declare const BREAKPOINTS: Readonly<Record<Exclude<Breakpoint, 'base'>, number>>;
+/** `data-<state>` attribute name a component state maps to (§10). */
+declare function stateAttr(state: ComponentState): string;
+interface GeneratedCSS {
+    /** Base rule + any responsive `@media` blocks. */
+    readonly base: string;
+    /** Pseudo-state and component-state rules (empty string when none). */
+    readonly state: string;
+    /** Whether the style declares any responsive values (for registry banding). */
+    readonly hasResponsive: boolean;
+}
+/**
+ * Generate the CSS for a style identity. The caller registers `base` under the
+ * `base`/`responsive` band and `state` under the `state` band.
+ */
+declare function generateCSS(id: string, def: StyleDef): GeneratedCSS;
+
+/**
+ * StreetUI styling — first-class design tokens + theming (§6/§7/§16).
+ *
+ * Tokens are declared as a nested tree of named values and compiled to CSS custom
+ * properties emitted once under `:root`, with dark-mode values emitted under
+ * `[data-theme="dark"]`. A token *reference* is the string `var(--name)`, usable
+ * anywhere a CSS value is expected inside a `StyleDef`. Dark mode therefore never
+ * duplicates a style definition — it only re-points the variables (§7/§16).
+ *
+ * SSR/hydration safety: the token CSS is registered in the shared style registry
+ * (tokens band) and serialized into the single `<style data-streetui-css>` block
+ * like any other rule, so the server ships the variables and the client adopts
+ * them. Switching theme is a single `data-theme` attribute flip on the root
+ * element — no restyle work, no re-render (§16).
+ */
+type TokenLeaf = string | number;
+interface TokenTree {
+    readonly [key: string]: TokenLeaf | TokenTree;
+}
+/** The ref tree mirrors the input shape; every leaf becomes a `var(--…)` string. */
+type TokenRefs<T> = {
+    readonly [K in keyof T]: T[K] extends TokenLeaf ? string : T[K] extends TokenTree ? TokenRefs<T[K]> : never;
+};
+interface ThemeTokenDef<L extends TokenTree> {
+    /** Base (light) token values — required; defines the full token surface. */
+    readonly light: L;
+    /** Dark overrides — a partial subset; unlisted tokens inherit the light value. */
+    readonly dark?: DeepPartial<L>;
+}
+type DeepPartial<T> = {
+    [K in keyof T]?: T[K] extends TokenLeaf ? TokenLeaf : T[K] extends TokenTree ? DeepPartial<T[K]> : never;
+};
+interface ThemeTokens<L extends TokenTree> {
+    /** Token references (`var(--…)`) mirroring the declared tree. */
+    readonly ref: TokenRefs<L>;
+    /** The generated CSS for `:root` and `[data-theme="dark"]`. */
+    readonly css: string;
+    /** The stable identity under which this token block is registered. */
+    readonly id: string;
+}
+/**
+ * Declare a set of design tokens. Returns typed references and registers the
+ * generated `:root` / `[data-theme="dark"]` CSS in the shared registry (idempotent).
+ */
+declare function createThemeTokens<L extends TokenTree>(def: ThemeTokenDef<L>): ThemeTokens<L>;
+/**
+ * The default StreetUI semantic token set (§6/§7). Covers color surfaces, content,
+ * borders, accent, focus and danger semantics, plus spacing, radii, typography,
+ * shadows, z-index, durations, easings and breakpoints. Dark mode re-points only
+ * the color semantics; structural tokens (spacing, radii, …) are theme-invariant.
+ */
+declare const DEFAULT_TOKENS: {
+    readonly surface: {
+        readonly background: "#ffffff";
+        readonly raised: "#f7f7f8";
+        readonly sunken: "#eeeef1";
+        readonly overlay: "rgba(17,17,20,0.55)";
+    };
+    readonly content: {
+        readonly primary: "#17171a";
+        readonly secondary: "#55555f";
+        readonly muted: "#8a8a95";
+        readonly inverse: "#ffffff";
+    };
+    readonly border: {
+        readonly default: "#e3e3e8";
+        readonly strong: "#c9c9d1";
+        readonly subtle: "#f0f0f3";
+    };
+    readonly accent: {
+        readonly primary: "#4f46e5";
+        readonly hover: "#4338ca";
+        readonly contrast: "#ffffff";
+    };
+    readonly focus: {
+        readonly ring: "#6366f1";
+    };
+    readonly danger: {
+        readonly surface: "#fef2f2";
+        readonly border: "#fecaca";
+        readonly content: "#b91c1c";
+        readonly solid: "#dc2626";
+    };
+    readonly success: {
+        readonly content: "#15803d";
+        readonly solid: "#16a34a";
+    };
+    readonly space: {
+        readonly '0': "0";
+        readonly '1': "4px";
+        readonly '2': "8px";
+        readonly '3': "12px";
+        readonly '4': "16px";
+        readonly '5': "24px";
+        readonly '6': "32px";
+        readonly '8': "48px";
+        readonly '10': "64px";
+    };
+    readonly radius: {
+        readonly sm: "4px";
+        readonly md: "8px";
+        readonly lg: "12px";
+        readonly xl: "16px";
+        readonly full: "9999px";
+    };
+    readonly font: {
+        readonly sans: "ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+        readonly mono: "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+    };
+    readonly size: {
+        readonly xs: "12px";
+        readonly sm: "14px";
+        readonly md: "16px";
+        readonly lg: "18px";
+        readonly xl: "24px";
+        readonly '2xl': "32px";
+        readonly '3xl': "44px";
+    };
+    readonly weight: {
+        readonly normal: "400";
+        readonly medium: "500";
+        readonly semibold: "600";
+        readonly bold: "700";
+    };
+    readonly leading: {
+        readonly tight: "1.2";
+        readonly normal: "1.5";
+        readonly relaxed: "1.7";
+    };
+    readonly shadow: {
+        readonly sm: "0 1px 2px rgba(17,17,20,0.08)";
+        readonly md: "0 4px 12px rgba(17,17,20,0.1)";
+        readonly lg: "0 12px 32px rgba(17,17,20,0.16)";
+    };
+    readonly z: {
+        readonly base: "0";
+        readonly dropdown: "1000";
+        readonly overlay: "1100";
+        readonly toast: "1200";
+    };
+    readonly duration: {
+        readonly fast: "120ms";
+        readonly base: "200ms";
+        readonly slow: "320ms";
+    };
+    readonly easing: {
+        readonly standard: "cubic-bezier(0.2,0,0,1)";
+        readonly emphasized: "cubic-bezier(0.3,0,0,1)";
+    };
+};
+/** The ready-to-use default theme tokens, registered on import. */
+declare const tokens: ThemeTokens<{
+    readonly surface: {
+        readonly background: "#ffffff";
+        readonly raised: "#f7f7f8";
+        readonly sunken: "#eeeef1";
+        readonly overlay: "rgba(17,17,20,0.55)";
+    };
+    readonly content: {
+        readonly primary: "#17171a";
+        readonly secondary: "#55555f";
+        readonly muted: "#8a8a95";
+        readonly inverse: "#ffffff";
+    };
+    readonly border: {
+        readonly default: "#e3e3e8";
+        readonly strong: "#c9c9d1";
+        readonly subtle: "#f0f0f3";
+    };
+    readonly accent: {
+        readonly primary: "#4f46e5";
+        readonly hover: "#4338ca";
+        readonly contrast: "#ffffff";
+    };
+    readonly focus: {
+        readonly ring: "#6366f1";
+    };
+    readonly danger: {
+        readonly surface: "#fef2f2";
+        readonly border: "#fecaca";
+        readonly content: "#b91c1c";
+        readonly solid: "#dc2626";
+    };
+    readonly success: {
+        readonly content: "#15803d";
+        readonly solid: "#16a34a";
+    };
+    readonly space: {
+        readonly '0': "0";
+        readonly '1': "4px";
+        readonly '2': "8px";
+        readonly '3': "12px";
+        readonly '4': "16px";
+        readonly '5': "24px";
+        readonly '6': "32px";
+        readonly '8': "48px";
+        readonly '10': "64px";
+    };
+    readonly radius: {
+        readonly sm: "4px";
+        readonly md: "8px";
+        readonly lg: "12px";
+        readonly xl: "16px";
+        readonly full: "9999px";
+    };
+    readonly font: {
+        readonly sans: "ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";
+        readonly mono: "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace";
+    };
+    readonly size: {
+        readonly xs: "12px";
+        readonly sm: "14px";
+        readonly md: "16px";
+        readonly lg: "18px";
+        readonly xl: "24px";
+        readonly '2xl': "32px";
+        readonly '3xl': "44px";
+    };
+    readonly weight: {
+        readonly normal: "400";
+        readonly medium: "500";
+        readonly semibold: "600";
+        readonly bold: "700";
+    };
+    readonly leading: {
+        readonly tight: "1.2";
+        readonly normal: "1.5";
+        readonly relaxed: "1.7";
+    };
+    readonly shadow: {
+        readonly sm: "0 1px 2px rgba(17,17,20,0.08)";
+        readonly md: "0 4px 12px rgba(17,17,20,0.1)";
+        readonly lg: "0 12px 32px rgba(17,17,20,0.16)";
+    };
+    readonly z: {
+        readonly base: "0";
+        readonly dropdown: "1000";
+        readonly overlay: "1100";
+        readonly toast: "1200";
+    };
+    readonly duration: {
+        readonly fast: "120ms";
+        readonly base: "200ms";
+        readonly slow: "320ms";
+    };
+    readonly easing: {
+        readonly standard: "cubic-bezier(0.2,0,0,1)";
+        readonly emphasized: "cubic-bezier(0.3,0,0,1)";
+    };
+}>;
+
+/**
+ * StreetUI styling — the public authoring API: `style()` and `styleVariants()`.
+ *
+ * `style(def)` canonicalizes a definition, registers its deduplicated CSS once,
+ * and returns the stable class token (a plain string) to spread onto an element's
+ * `class` (§2/§5/§18). Being a plain string makes it trivially composable and
+ * tree-shakeable with no runtime dependency. A *static* `style()` call opens no
+ * signal, no subscription and no effect (§3) — it is pure compile-time data.
+ *
+ * `styleVariants(cfg)` builds a type-safe family of styles. Variant group keys and
+ * values are mapped types, so selecting an unknown group or value is a TypeScript
+ * error (§11/§23) — no stringly-typed variant names. The returned function yields
+ * the merged, deduped class list for a selection.
+ */
+
+/**
+ * Register a style definition and return its class token. Idempotent: the same
+ * definition always maps to the same token and a single shared CSS rule.
+ */
+declare function style(def: StyleDef): string;
+/** Join class tokens/strings, dropping falsy entries. `cx('a', cond && 'b')`. */
+declare function cx(...parts: Array<string | false | null | undefined>): string;
+type VariantGroups = Record<string, Record<string, StyleDef>>;
+interface VariantConfig<V extends VariantGroups> {
+    /** Shared declarations applied to every variant combination. */
+    readonly base?: StyleDef;
+    /** Named variant groups; each maps a value name to its own `StyleDef`. */
+    readonly variants: V;
+    /** Default selection used when a group is omitted at call time. */
+    readonly defaultVariants?: {
+        readonly [K in keyof V]?: keyof V[K];
+    };
+}
+/** A selection object: for each group, an optional value from that group. */
+type VariantSelection<V extends VariantGroups> = {
+    readonly [K in keyof V]?: keyof V[K];
+};
+/** The callable produced by `styleVariants` — `button({ intent:'danger' })`. */
+type VariantFn<V extends VariantGroups> = (selection?: VariantSelection<V>) => string;
+/**
+ * Build a type-safe variant family. All base and variant-value styles are
+ * registered up front (each as its own deduped identity), so calling the returned
+ * function only *selects* among precompiled classes — no runtime style work (§11).
+ */
+declare function styleVariants<V extends VariantGroups>(cfg: VariantConfig<V>): VariantFn<V>;
+
+/**
+ * StreetUI styling — reactive scalar styles (§4).
+ *
+ * A reactive scalar style value (a signal) must update **one** property on **one**
+ * element with no class churn and no DOM reconstruction. The mechanism rides the
+ * existing reactive seam exactly: the appearance is a *static*, deduped rule that
+ * reads a **CSS custom property**, and the signal drives only that custom
+ * property via the renderer's existing `style.<prop>` binding path
+ * (`applyProp` → `el.style.setProperty`). One signal → one `setProperty`.
+ *
+ * `styleWithVars(staticDef, reactiveProps)` returns:
+ *   • `class` — the static class token for a `StyleDef` whose reactive properties
+ *     are rewritten to `var(--s-<prop>)` (so the rule itself never changes), and
+ *   • `vars`  — the custom-property name per reactive prop (`width` → `--s-width`),
+ *     and the `style.<custom-prop>` binding key to attach the signal to.
+ *
+ * This introduces no second reactive system and no runtime style framework: the
+ * returned `class` is a plain string (deduped like any other `style()`), and the
+ * reactive binding is a single `StateRef { propKey: 'style.--s-<prop>' }` wired by
+ * the existing `wireSignalBindings`/`applyProp` pipeline. Core stays free of any
+ * `streetui` dependency — the caller supplies the signal at the DSL layer.
+ */
+
+/** The reactive binding surface for one `styleWithVars` call. */
+interface ReactiveStyle<K extends string> {
+    /** Static, deduped class token; reactive props read `var(--s-<prop>)`. */
+    readonly class: string;
+    /** Per reactive prop: its CSS custom-property name, e.g. `width` → `--s-width`. */
+    readonly vars: Readonly<Record<K, string>>;
+    /** Per reactive prop: the renderer binding key, e.g. `width` → `style.--s-width`. */
+    readonly bind: Readonly<Record<K, string>>;
+}
+/** The CSS custom-property name a reactive prop compiles to (`width` → `--s-width`). */
+declare function reactiveVarName(prop: string): string;
+/**
+ * Compile a style whose listed properties are driven by signals at runtime. The
+ * rule is static and deduped (reads `var(--s-<prop>)`); the caller binds each
+ * `bind[prop]` key to a signal so one change is one `setProperty` (§4).
+ */
+declare function styleWithVars<K extends string>(staticDef: StyleDef, reactiveProps: readonly K[]): ReactiveStyle<K>;
+/**
+ * Format a reactive scalar for assignment to its custom property, applying the
+ * same unit rule as static values (unitless numbers on length props get `px`).
+ * Use this in the signal/derived that feeds a `styleWithVars` binding so that
+ * `widthSignal.set(240)` yields `--s-width: 240px`.
+ */
+declare function reactiveVarValue(prop: string, value: CSSValue): string;
+
+/**
+ * StreetUI styling — layout primitives (§12).
+ *
+ * Thin, token-driven `style()` presets — **not** new graph nodes and **not** a
+ * utility-class framework. Each primitive is a function that takes a small, typed
+ * option bag and returns a single deduplicated class string, so composing a layout
+ * is `container()`, `stack({ gap: 4 })`, etc. Because they compile through the same
+ * `style()` registry, identical option bags share one CSS rule (§15/§18), and they
+ * carry no runtime dependency — the return value is a plain class token.
+ *
+ * Spacing/gap options are **space-scale keys** (`'0'`…`'10'`) resolved to the
+ * `--space-*` token variables, so layouts stay on the design system by default and
+ * remain theme-consistent. Raw CSS escape values are still accepted where a bare
+ * `CSSValue` is allowed.
+ */
+
+/** A spacing-scale key resolved against the `--space-*` tokens. */
+type SpaceKey = keyof typeof tokens.ref.space;
+interface ContainerStyleOptions {
+    /** Max content width (default `1120px`). A number is treated as `px`. */
+    readonly max?: CSSValue;
+    /** Horizontal padding as a space-scale key (default `'4'`). */
+    readonly padX?: SpaceKey;
+    /** Center the container horizontally (default `true`). */
+    readonly center?: boolean;
+}
+/** A width-capped, centered content column with symmetric horizontal padding. */
+declare function container(opts?: ContainerStyleOptions): string;
+interface StackOptions {
+    /** Gap between children as a space-scale key (default `'4'`). */
+    readonly gap?: SpaceKey;
+    /** Cross-axis alignment (`align-items`). */
+    readonly align?: 'start' | 'center' | 'end' | 'stretch';
+    /** Main-axis distribution (`justify-content`). */
+    readonly justify?: 'start' | 'center' | 'end' | 'between' | 'around';
+}
+/** A vertical flex column with a token-scaled gap. */
+declare function stack(opts?: StackOptions): string;
+interface RowOptions extends StackOptions {
+    /** Allow children to wrap onto multiple lines (default `false`). */
+    readonly wrap?: boolean;
+}
+/** A horizontal flex row with a token-scaled gap. */
+declare function row(opts?: RowOptions): string;
+interface GridOptions {
+    /** Fixed column count, or `'auto'` for a responsive auto-fill track. */
+    readonly columns?: number | 'auto';
+    /** Minimum track width for the `'auto'` mode (default `220px`). */
+    readonly min?: CSSValue;
+    /** Gap between cells as a space-scale key (default `'4'`). */
+    readonly gap?: SpaceKey;
+}
+/** A CSS grid with either a fixed column count or an auto-fill responsive track. */
+declare function grid(opts?: GridOptions): string;
+interface CenterOptions {
+    /** Use inline-flex instead of block flex (default `false`). */
+    readonly inline?: boolean;
+    /** Minimum height of the centering box (e.g. `'100vh'`). */
+    readonly minHeight?: CSSValue;
+}
+/** Center a single child on both axes. */
+declare function center(opts?: CenterOptions): string;
+interface SpacerOptions {
+    /** Fixed size (both dimensions). When omitted the spacer flexes to fill. */
+    readonly size?: CSSValue;
+}
+/** A flexible gap: fills available space, or a fixed box when `size` is given. */
+declare function spacer(opts?: SpacerOptions): string;
+/** The layout primitive family (§12), exported as one namespace object. */
+declare const layout: {
+    readonly container: typeof container;
+    readonly stack: typeof stack;
+    readonly row: typeof row;
+    readonly grid: typeof grid;
+    readonly center: typeof center;
+    readonly spacer: typeof spacer;
+};
+
+/**
+ * StreetUI styling — semantic typography + code/pre primitives (§13/§14).
+ *
+ * Token-driven `style()` presets for text roles. Each returns a deduplicated class
+ * string and reads the `--font-*`, `--size-*`, `--weight-*`, `--leading-*` and
+ * `--content-*` tokens, so typography stays on the design system and re-themes with
+ * no duplicated definitions. `code` and `blockquote` cover the §14 code/pre case:
+ * monospace, token surface, and sensible wrapping without an external prose sheet.
+ */
+type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+interface HeadingStyleOptions {
+    /** Semantic heading level 1–6 (drives size + weight). Default `2`. */
+    readonly level?: HeadingLevel;
+}
+/** A display heading sized from the type scale by level. */
+declare function heading(opts?: HeadingStyleOptions): string;
+interface BodyOptions {
+    /** Secondary (muted) body colour instead of primary. Default `false`. */
+    readonly muted?: boolean;
+    /** Line length cap for comfortable reading (e.g. `'65ch'`). */
+    readonly measure?: string;
+}
+/** Default running-text body copy. */
+declare function body(opts?: BodyOptions): string;
+/** A small, medium-weight form/field label. */
+declare function label(): string;
+/** The smallest supporting text (captions, help, metadata). */
+declare function caption(): string;
+/** An inline text link with a token accent colour and accessible focus/hover. */
+declare function link(): string;
+/** Inline monospace code (§14). */
+declare function code(): string;
+/** A fenced code block / `<pre>` surface: monospace, scrollable, token surface (§14). */
+declare function pre(): string;
+/** A left-ruled quotation block. */
+declare function blockquote(): string;
+/** A vertically-spaced list body. */
+declare function list(): string;
+/** The semantic typography family (§13/§14), exported as one namespace object. */
+declare const text: {
+    readonly heading: typeof heading;
+    readonly body: typeof body;
+    readonly label: typeof label;
+    readonly caption: typeof caption;
+    readonly link: typeof link;
+    readonly code: typeof code;
+    readonly pre: typeof pre;
+    readonly blockquote: typeof blockquote;
+    readonly list: typeof list;
+};
+
+/**
+ * StreetUI styling — accessibility styling helpers (§19).
+ *
+ * These presets make the *default* accessible: a strong, token-driven focus ring
+ * that is visible against any surface, and a correct visually-hidden pattern that
+ * still exposes content to assistive technology. They introduce **no** parallel
+ * a11y-state system — focus styling rides the browser's native `:focus-visible`,
+ * and component a11y states remain the ARIA attributes the renderer already sets,
+ * read from CSS via the `when`/attribute selectors (§10/§15).
+ */
+interface FocusRingOptions {
+    /** Ring colour (default `--focus-ring` token). */
+    readonly color?: string;
+    /** Ring thickness in px (default `2`). */
+    readonly width?: number;
+    /** Gap between the element and the ring in px (default `2`). */
+    readonly offset?: number;
+}
+/**
+ * A strong keyboard focus indicator applied via native `:focus-visible` only, so
+ * pointer focus stays quiet while keyboard focus is always clearly visible (§19).
+ * Compose onto any interactive element's class list.
+ */
+declare function focusRing(opts?: FocusRingOptions): string;
+/**
+ * Visually-hidden content that remains available to screen readers (the correct
+ * `sr-only` pattern — not `display:none`, which also hides from AT).
+ */
+declare function visuallyHidden(): string;
+/**
+ * A skip-link style: visually hidden until focused, then revealed as a prominent
+ * on-surface control. Pairs with `visuallyHidden` semantics but becomes visible on
+ * keyboard focus so "skip to content" links work.
+ */
+declare function skipLink(): string;
+/** The accessibility styling family (§19). */
+declare const a11y: {
+    readonly focusRing: typeof focusRing;
+    readonly visuallyHidden: typeof visuallyHidden;
+    readonly skipLink: typeof skipLink;
+};
+
+/**
+ * StreetUI styling — form control styling (§20).
+ *
+ * Token-driven presets for the common form surfaces. Validation styling is read
+ * from the ARIA attribute the renderer already sets (`[aria-invalid="true"]`) via
+ * the `when: { invalid }` → `[data-invalid]` channel *and* a native attribute
+ * selector, so there is no parallel form-state system — the control's accessible
+ * state drives its appearance (§10/§15/§19). Focus uses native `:focus-visible`
+ * with the strong focus-ring token (§19).
+ */
+/** A single-line text input / select / textarea surface. */
+declare function input(): string;
+/** The vertical field wrapper: label, control and help/error stacked with gap. */
+declare function field(): string;
+/** A field label (medium weight, primary content colour). */
+declare function fieldLabel(): string;
+/** Supporting help text under a control. */
+declare function fieldHelp(): string;
+/** An inline validation error message, coloured with the danger token. */
+declare function fieldError(): string;
+/** A primary action button surface with hover/active/disabled and focus ring. */
+declare function button(): string;
+/** The form styling family (§20). */
+declare const form: {
+    readonly field: typeof field;
+    readonly input: typeof input;
+    readonly label: typeof fieldLabel;
+    readonly help: typeof fieldHelp;
+    readonly error: typeof fieldError;
+    readonly button: typeof button;
+};
+
+/**
+ * StreetUI styling — overlay surface styling (§21).
+ *
+ * Token-driven presets for the overlay surfaces produced by the overlay runtime
+ * (dialog, popover, tooltip, dropdown, toast + backdrop). Styling here is **only**
+ * appearance (surface colour, elevation, radius, z-index from the `--z-*` tokens);
+ * positioning, focus trapping and open/close lifecycle remain owned by the overlay
+ * runtime and the transition engine (§18/§21). Elevation and z-index come from
+ * tokens so overlays stack predictably and re-theme with the rest of the system.
+ */
+/** The dimmed, full-viewport backdrop behind a modal surface. */
+declare function backdrop(): string;
+/** A centered modal dialog surface (elevation + radius from tokens). */
+declare function dialog(): string;
+/** A small anchored popover panel. */
+declare function popover(): string;
+/** A compact, high-contrast tooltip bubble. */
+declare function tooltip(): string;
+/** A dropdown menu surface. */
+declare function dropdown(): string;
+/** A single dropdown menu item (hover/selected via tokens + attribute state). */
+declare function dropdownItem(): string;
+/** A toast notification surface, elevated above overlays on the toast z-band. */
+declare function toast(): string;
+/** The overlay styling family (§21). */
+declare const overlay: {
+    readonly backdrop: typeof backdrop;
+    readonly dialog: typeof dialog;
+    readonly popover: typeof popover;
+    readonly tooltip: typeof tooltip;
+    readonly dropdown: typeof dropdown;
+    readonly dropdownItem: typeof dropdownItem;
+    readonly toast: typeof toast;
+};
+
+/**
+ * StreetUI styling — animation tokens & declarative keyframes (§22).
+ *
+ * Animation is **pure CSS**: duration and easing come from the `--duration-*` /
+ * `--easing-*` design tokens, and named `@keyframes` are registered once in the
+ * shared registry (lazily, only when referenced, so unused animations add zero
+ * bytes and unstyled routes stay byte-identical). There is **no animation
+ * runtime** — StreetUI runs no timers, RAF loops, or JS tweening for these; the
+ * browser owns playback. Enter/leave *lifecycle* animation remains the transition
+ * engine's job (§18); these helpers supply the appearance it toggles.
+ */
+
+/** Duration token keys (`--duration-*`). */
+type DurationKey = keyof typeof tokens.ref.duration;
+/** Easing token keys (`--easing-*`). */
+type EasingKey = keyof typeof tokens.ref.easing;
+/** The built-in keyframe animations and their raw `@keyframes` bodies. */
+declare const KEYFRAMES: Readonly<Record<string, string>>;
+/** The animation names available to {@link animate}. */
+type AnimationName = keyof typeof KEYFRAMES;
+interface AnimateOptions {
+    /** Duration token key (default `'base'`). */
+    readonly duration?: DurationKey;
+    /** Easing token key (default `'standard'`). */
+    readonly easing?: EasingKey;
+    /** Delay before the animation starts (e.g. `'100ms'`). */
+    readonly delay?: CSSValue;
+    /** Iteration count — a number or `'infinite'` (default `1`). */
+    readonly iterations?: number | 'infinite';
+    /** Fill mode (default `'both'` so the end state persists). */
+    readonly fill?: 'none' | 'forwards' | 'backwards' | 'both';
+}
+/**
+ * A class that plays a named keyframe animation using token duration/easing. The
+ * keyframe rule is registered on first use. One class → one CSS `animation`; no JS
+ * drives the frames.
+ */
+declare function animate(name: AnimationName, opts?: AnimateOptions): string;
+interface TransitionOptions {
+    /** Duration token key (default `'base'`). */
+    readonly duration?: DurationKey;
+    /** Easing token key (default `'standard'`). */
+    readonly easing?: EasingKey;
+    /** Delay before the transition starts (e.g. `'50ms'`). */
+    readonly delay?: CSSValue;
+}
+/**
+ * Build a CSS `transition` value for one or more properties using token
+ * duration/easing — e.g. `transition(['opacity','transform'])`. Assign the result
+ * to a `transition` style property; the browser performs the interpolation.
+ */
+declare function transition(properties: string | readonly string[], opts?: TransitionOptions): string;
+/** The animation family (§22) — tokens + declarative keyframes, no runtime. */
+declare const animation: {
+    readonly animate: typeof animate;
+    readonly transition: typeof transition;
+    readonly keyframes: Readonly<Record<string, string>>;
+};
+
+/**
  * Compiler-phase validation of the ApplicationGraph.
  *
  * This runs after the DSL has built the graph but before the runtime
@@ -1258,6 +2137,143 @@ declare function reconcileChildren(ctx: RenderContext, parentDom: Element, oldIn
  * moves is minimal (e.g. a prepend into a 10k list moves 1 node, not 10k).
  */
 declare function reconcileChildrenByPlan(ctx: RenderContext, parentDom: Element, oldInstances: NodeInstance[], plan: readonly PlanEntry[], mountFn: MountFn, hooks?: TransitionHooks): ReconcileResult;
+
+/**
+ * StreetUI styling — transition engine interop presets (§18).
+ *
+ * These helpers return a {@link ResolvedTransitionLike} — the exact descriptor the
+ * existing transition engine consumes — assembled entirely from token-driven
+ * `style()` classes and the `--duration-*` / `--easing-*` tokens. Styling therefore
+ * *integrates with* the transition engine rather than competing with it: it only
+ * supplies the enter/leave appearance classes the engine toggles; the engine still
+ * owns all lifecycle timing, leave-deferral and keyed-identity reclaim (§18).
+ * StreetUI adds no new timer and no second animation system here — the browser
+ * performs the interpolation via CSS, and the engine's single timeout coordinates
+ * DOM removal.
+ */
+
+interface TransitionPresetOptions {
+    /** Duration token key driving both the CSS transition and the engine timeout. */
+    readonly duration?: DurationKey;
+    /** Easing token key for the CSS transition. */
+    readonly easing?: EasingKey;
+    /** Play the enter animation on first mount too (default `false`). */
+    readonly appear?: boolean;
+}
+/** A cross-fade enter/leave transition descriptor for the transition engine. */
+declare function fadeTransition(opts?: TransitionPresetOptions): ResolvedTransitionLike;
+/** A fade + scale "pop" transition descriptor (opacity and transform). */
+declare function scaleTransition(opts?: TransitionPresetOptions): ResolvedTransitionLike;
+/** A fade + vertical-slide transition descriptor (enters from below). */
+declare function slideTransition(opts?: TransitionPresetOptions): ResolvedTransitionLike;
+/** The token-driven transition presets (§18), for use with the transition engine. */
+declare const transitions: {
+    readonly fadeTransition: typeof fadeTransition;
+    readonly scaleTransition: typeof scaleTransition;
+    readonly slideTransition: typeof slideTransition;
+};
+
+/**
+ * StreetUI styling — SSR stylesheet emission + hydration adoption (§15–§17).
+ *
+ * This is the exact companion to `renderHead` (head.ts): where the head runtime
+ * serializes merged `head()` contributions into `<head>`, this serializes the
+ * process-wide deduplicated CSS rule registry into a single
+ * `<style data-streetui-css>` block for the caller to place in `<head>`.
+ *
+ *   • `renderStyles()` — SERVER. Serializes `styleRegistry` in deterministic band
+ *     order (tokens → base → responsive → state → variant) and stamps the block
+ *     with `data-streetui-css-keys="<id> <id> …"` so the browser can adopt the
+ *     identities on hydration instead of re-emitting duplicate rules (§17).
+ *     Returns `''` when the registry is empty — so an app that declares no styles
+ *     (and no token block) emits nothing extra and existing SSR output stays
+ *     byte-identical (§16, the empty-registry guarantee).
+ *
+ *   • `adoptServerStyles(dom, root)` — BROWSER. Finds the server-emitted style
+ *     block under `root` (or `document`), reads its identity keys, and seeds the
+ *     registry via `adoptServerIdentities` so client-side `style()`/token calls
+ *     for the same identities register no duplicate rule (§17).
+ *
+ * CSS is inherently global and cascading, so — unlike head — the stylesheet is
+ * the whole process registry (a deduped superset), not a per-graph walk. The
+ * registry is keyed by content identity and never by node, so it is bounded by
+ * source diversity and strands nothing when nodes unmount (§15, leak-free).
+ */
+
+interface RenderStylesOptions {
+    /** Registry to serialize (defaults to the shared process-wide instance). */
+    readonly registry?: StyleRegistry;
+}
+/**
+ * Serialize the deduplicated CSS registry to a `<style data-streetui-css>` block
+ * for placement inside `<head>`. Deterministic and byte-stable: an empty registry
+ * yields `''` (§16); otherwise the single block carries every registered rule in
+ * fixed band order plus the identity list for hydration adoption (§17).
+ */
+declare function renderStyles(options?: RenderStylesOptions): string;
+/**
+ * Adopt a server-emitted stylesheet's identities into the registry so the client
+ * does not re-emit duplicate rules for the same styles (§17). Safe to call when
+ * no server block exists (no-op) and idempotent. Returns the number of identities
+ * adopted (0 when there was nothing to adopt).
+ */
+declare function adoptServerStyles(dom: DOMAdapter, root: Element | null, options?: RenderStylesOptions): number;
+
+/**
+ * StreetUI styling — first-class, SSR/hydration-safe theme controller (§7).
+ *
+ * Theme is ordinary StreetUI state: a signal for the user's choice and a derived
+ * signal for the resolved concrete theme. The only browser-specific parts —
+ * reading a stored preference, matching the OS color scheme, and writing the
+ * `data-theme` attribute onto a root element — are isolated behind guards so the
+ * exact same module runs during SSR (no `document`, no `localStorage`) without
+ * throwing. The server renders with the default theme; the client applies the
+ * persisted/system choice on mount, which is a legitimate post-hydration update
+ * rather than a hydration mismatch: the attribute lives on the root element,
+ * outside the hydrated app container, and only re-points token variables (§16).
+ *
+ * This lives in the renderer layer because switching the theme writes to the DOM;
+ * it builds on the DOM-free token system in `streetui` (`createThemeTokens`
+ * emits `:root` + `[data-theme="dark"]` variable blocks), so a theme flip is a
+ * single attribute change with no restyle work and no re-render.
+ */
+
+type ThemeChoice = 'light' | 'dark' | 'system';
+type ResolvedTheme = 'light' | 'dark';
+/** Minimal persistence seam so tests/SSR can run without a real localStorage. */
+interface ThemeStorage {
+    read(): ThemeChoice | null;
+    write(choice: ThemeChoice): void;
+}
+/** Browser localStorage adapter, guarded; falls back to in-memory elsewhere. */
+declare function defaultThemeStorage(key?: string): ThemeStorage;
+interface ThemeController {
+    /** The user's choice: light | dark | system. */
+    readonly choice: Signal<ThemeChoice>;
+    /** The resolved concrete theme after applying `system`. */
+    readonly resolved: ReadonlySignal<ResolvedTheme>;
+    /** Set an explicit choice (persisted). */
+    set(choice: ThemeChoice): void;
+    /** Advance light → dark → system → light (for a single toggle control). */
+    cycle(): void;
+    /** Human label for the current choice (bind to the toggle button). */
+    readonly label: ReadonlySignal<string>;
+    /** Stop applying the theme to the DOM (disposes the effect). */
+    dispose(): void;
+}
+interface ThemeOptions {
+    readonly storage?: ThemeStorage;
+    /** Element to receive `data-theme` (defaults to the document root). Omit for SSR. */
+    readonly root?: Element | null;
+    /** Initial choice when nothing is stored (default 'system'). */
+    readonly initial?: ThemeChoice;
+}
+/**
+ * Create the theme controller. During SSR pass no `root` (or it will be null);
+ * the signal still works so server markup can read `resolved`, but no DOM write
+ * is attempted. Reactive theme switching is a single `data-theme` flip (§7/§16).
+ */
+declare function createTheme(options?: ThemeOptions): ThemeController;
 
 /**
  * StreetUI Renderer — framework-owned DOM renderer.
@@ -2665,4 +3681,4 @@ interface ResolvedConfig {
 /** Identity helper that gives `streetui.config.ts` full type-checking + inference. */
 declare function defineConfig(config: StreetUIConfig): StreetUIConfig;
 
-export { type A11yIds, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, type AuthSession, type AuthSessionConfig, type AuthStatus, BrowserDOMAdapter, CleanupRegistry, type Client, type ClientConfig, CompiledApplication, ContainerDSL, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DEVTOOLS_TABS, DOMAdapter, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsPanel, type DiagnosticsSummary, type DomBinding, DomEventRegistry, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, EventBus, type EventHandler, type EventInspection, FOCUSABLE_SELECTOR, type FetchLike, type Field, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, GraphNode, HttpError, type HttpMethod, HydrationDiagnosticSink, type HydrationInspection, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalGraphOptions, type InspectSignalOptions, type InspectedComponent, type InspectedEventNode, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InteractiveDevToolsOptions, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LoadUser, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type Mutation, type MutationInspection, type MutationLike, type MutationOptions, type MutationStatus, type Mutator, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, ROUTER_OUTLET_ID, ROUTER_OUTLET_KEY, ReadonlySignal, type ReconcileResult, RenderContext, RenderHandle, type RequestConfig, type ResolvedConfig, type ResolvedTransitionLike, Resource, type ResourceInspection, type ResourceLike, ResourceLoaderContext, ResourceOptions, ResourceStatus, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalGraph, type SignalGraphEdge, type SignalGraphNode, type SignalInspection, SignalKind, type SignalsPanel, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type SubmitStatus, Subscriber, TransitionConfig, TransitionController, type TransitionHooks, type TransitionPhase, Unsubscribe, type Validator, a11yIds, applyNodeProps, applyProp, bindDomEvent, browserDOMAdapter, buttonUpdate, consoleDiagnosticSink, containFocus, createAnnouncer, createApplication, createAuthSession, createBrowserHistory, createClient, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, defineConfig, describeError, diagnosePerformance, email, environment, escapeHtml, escapeHtmlAttr, escapeHtmlText, flushSync, focusById, focusFirst, focusInitial, formatDiagnosticContext, frameworkError, getFocusable, getResolvedTransition, globalEventBus, headingUpdate, hydrateGraph, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectEvents, inspectForm, inspectGraph, inspectHydration, inspectI18n, inspectInteractions, inspectMutation, inspectResource, inspectRouter, inspectSignal, inspectSignalGraph, interpolate, linkUpdate, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, mutation, nodeTypeStats, normalizePath, onEscape, patchNode, patchProp, pattern, printDiagnostics, printGraph, reconcileChildren, reconcileChildrenByPlan, renderDevToolsHTML, renderDevToolsReport, renderInteractiveDevTools, reportDiagnostic, reportError, required, resolveTag, restoreFocus, routerOutlet, rovingMenu, runElementTransition, runValidators, saveFocus, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, splitTarget, textUpdate, toIdToken, transformGraph, trapFocus, validateGraph, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };
+export { type A11yIds, type AnimateOptions, type AnimationName, type Announcer, Application, ApplicationGraph, ApplicationId, type ApplicationIdentity, type ApplicationInspection, type ApplicationOptions, type ApplicationPanel, type AuthSession, type AuthSessionConfig, type AuthStatus, BREAKPOINTS, type BodyOptions, type Breakpoint, BrowserDOMAdapter, type CSSValue, type CanonicalStyle, type CenterOptions, CleanupRegistry, type Client, type ClientConfig, CompiledApplication, type ComponentState, ContainerDSL, type ContainerStyleOptions, type Context, type ContextInspection, type ContextLike, DEFAULT_PERF_THRESHOLDS, DEFAULT_TOKENS, DEVTOOLS_TABS, DOMAdapter, type DeepPartial, type DevToolsOptions, type DevToolsSession, type DevToolsSnapshot, type DevToolsSources, DiagnosticCollector, type DiagnosticContext, type DiagnosticSink, type DiagnosticsPanel, type DiagnosticsSummary, type DomBinding, DomEventRegistry, type DurationKey, type EasingKey, Environment, type EnvironmentCapabilities, type EnvironmentKind, type ErrorReport, type ErrorReportOptions, EventBus, type EventHandler, type EventInspection, FOCUSABLE_SELECTOR, type FetchLike, type Field, type FocusRingOptions, type Form, type FormConfig, type FormInspection, type FormLike, type FormValidators, type FormValues, type GeneratedCSS, GraphNode, type GridOptions, type HeadingLevel, type HeadingStyleOptions, HttpError, type HttpMethod, HydrationDiagnosticSink, type HydrationInspection, type I18n, type I18nConfig, type I18nInspection, type I18nLike, type InspectFormOptions, type InspectI18nOptions, type InspectResourceOptions, type InspectSignalGraphOptions, type InspectSignalOptions, type InspectedComponent, type InspectedEventNode, type InspectedInteractions, type InspectedNode, type InspectedOverlay, type InspectedPage, type InspectedTransition, type InteractiveDevToolsOptions, type InterpolationParams, type IsActiveOptions, type Job, Lifecycle, type LoadUser, type MatchResult, type MessageMap, type MountFn, type MountRouterOptions, type MountedApplication, type MountedRouter, type Mutation, type MutationInspection, type MutationLike, type MutationOptions, type MutationStatus, type Mutator, type NavigateOptions, NodeInstance, type NodeInstanceOptions, PageDSL, type PerfDiagnostic, type PerfDiagnosticCode, type PerfSnapshot, type PerfThresholds, type PerformancePanel, type PlanEntry, type Priority, type PseudoState, ROUTER_OUTLET_ID, ROUTER_OUTLET_KEY, type ReactiveStyle, ReadonlySignal, type ReconcileResult, RenderContext, RenderHandle, type RenderStylesOptions, type RequestConfig, type ResolvedConfig, type ResolvedTheme, type ResolvedTransitionLike, Resource, type ResourceInspection, type ResourceLike, ResourceLoaderContext, ResourceOptions, ResourceStatus, type ResponsiveValue, type RouteBuilder, type RouteContext, type RouteDefinition, type RouteMatch, type RouteMatchLike, type Router, type RouterHistory, type RouterInspection, type RouterLike, type RouterLocation, type RouterOptions, type RowOptions, Runtime, RuntimeNodeInstance, type RuntimeOptions, Scheduler, type SchedulerDiagnostics, SemanticNodeType, ServerComment, ServerElement, ServerFragment, type ServerNode, type ServerNodeKind, type ServerParent, ServerRawHTML, ServerStyle, ServerText, type ShellBuilder, Signal, type SignalGraph, type SignalGraphEdge, type SignalGraphNode, type SignalInspection, SignalKind, type SignalsPanel, type SpaceKey, type SpacerOptions, type StackOptions, Store, type StoreState, type StreetEvent, type StreetEventType, StreetFrameworkError, StreetRenderHandle, StreetRenderer, StreetRendererImpl, type StreetRendererOptions, type StreetUIConfig, type StyleBand, type StyleDef, type StyleProperties, StyleRegistry, type SubmitStatus, Subscriber, type ThemeChoice, type ThemeController, type ThemeOptions, type ThemeStorage, type ThemeTokenDef, type ThemeTokens, type TokenLeaf, type TokenRefs, type TokenTree, TransitionConfig, TransitionController, type TransitionHooks, type TransitionOptions, type TransitionPhase, type TransitionPresetOptions, Unsubscribe, type Validator, type VariantConfig, type VariantFn, type VariantGroups, type VariantSelection, a11y, a11yIds, adoptServerStyles, animate, animation, applyNodeProps, applyProp, backdrop, bindDomEvent, blockquote, body, browserDOMAdapter, button, buttonUpdate, canonicalize, caption, center, code, consoleDiagnosticSink, containFocus, container, createAnnouncer, createApplication, createAuthSession, createBrowserHistory, createClient, createContext, createDevTools, createForm, createI18n, createMemoryHistory, createRenderer, createRouter, createRuntime, createStore, createStreetEvent, createTheme, createThemeTokens, cssPropName, cssValue, cx, defaultThemeStorage, defineConfig, describeError, diagnosePerformance, dialog, dropdown, dropdownItem, email, environment, escapeHtml, escapeHtmlAttr, escapeHtmlText, fadeTransition, field, fieldError, fieldHelp, fieldLabel, flushSync, focusById, focusFirst, focusInitial, focusRing, form, formatDiagnosticContext, frameworkError, generateCSS, getFocusable, getResolvedTransition, globalEventBus, grid, hashIdentity, heading, headingUpdate, hydrateGraph, identityOf, input, inputUpdate, inspectApplication, inspectComponents, inspectContext, inspectEvents, inspectForm, inspectGraph, inspectHydration, inspectI18n, inspectInteractions, inspectMutation, inspectResource, inspectRouter, inspectSignal, inspectSignalGraph, interpolate, label, layout, link, linkUpdate, list, matchPattern, matchRoutes, maxLength, minLength, mountGraph, mountNode, mountRouter, mutation, nodeTypeStats, normalizePath, onEscape, overlay, patchNode, patchProp, pattern, popover, pre, printDiagnostics, printGraph, reactiveVarName, reactiveVarValue, reconcileChildren, reconcileChildrenByPlan, renderDevToolsHTML, renderDevToolsReport, renderInteractiveDevTools, renderStyles, reportDiagnostic, reportError, required, resolveTag, restoreFocus, routerOutlet, rovingMenu, row, runElementTransition, runValidators, saveFocus, scaleTransition, scheduleImmediate, scheduleUpdate, scheduler, serializeChildren, serializeServerNode, skipLink, slideTransition, spacer, splitTarget, stack, stateAttr, style, styleRegistry, styleVariants, styleWithVars, text, textUpdate, toIdToken, toast, tokens, tooltip, transformGraph, transition, transitions, trapFocus, validateGraph, visuallyHidden, wireComponentBehavior, wireEvents, wireOverlayBehavior, wireReactiveList, wireSignalBindings };

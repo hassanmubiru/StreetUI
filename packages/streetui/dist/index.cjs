@@ -23,11 +23,13 @@ __export(src_exports, {
   AppBuilder: () => AppBuilder,
   Application: () => Application,
   ApplicationGraph: () => ApplicationGraph,
+  BREAKPOINTS: () => BREAKPOINTS,
   BaseNode: () => BaseNode,
   BrowserDOMAdapter: () => BrowserDOMAdapter,
   CleanupRegistry: () => CleanupRegistry,
   ContainerBuilderImpl: () => ContainerBuilderImpl,
   DEFAULT_PERF_THRESHOLDS: () => DEFAULT_PERF_THRESHOLDS,
+  DEFAULT_TOKENS: () => DEFAULT_TOKENS,
   DEVTOOLS_TABS: () => DEVTOOLS_TABS,
   DerivedSignal: () => DerivedSignal,
   DiagnosticCollector: () => DiagnosticCollector,
@@ -64,21 +66,35 @@ __export(src_exports, {
   StreetFrameworkError: () => StreetFrameworkError,
   StreetRenderHandle: () => StreetRenderHandle,
   StreetRendererImpl: () => StreetRendererImpl,
+  StyleRegistry: () => StyleRegistry,
   TransitionController: () => TransitionController,
   VERSION: () => VERSION,
+  a11y: () => a11y,
   a11yIds: () => a11yIds,
+  adoptServerStyles: () => adoptServerStyles,
+  animate: () => animate,
+  animation: () => animation,
   applyNodeProps: () => applyNodeProps,
   applyProp: () => applyProp,
+  backdrop: () => backdrop,
   batch: () => batch,
   bindDomEvent: () => bindDomEvent,
+  blockquote: () => blockquote,
+  body: () => body,
   browserDOMAdapter: () => browserDOMAdapter,
+  button: () => button,
   buttonUpdate: () => buttonUpdate,
+  canonicalize: () => canonicalize,
+  caption: () => caption,
+  center: () => center,
+  code: () => code,
   compile: () => compile,
   compileGraph: () => compileGraph,
   component: () => component,
   consoleDiagnosticSink: () => consoleDiagnosticSink,
   consoleHydrationDiagnosticSink: () => consoleHydrationDiagnosticSink,
   containFocus: () => containFocus,
+  container: () => container,
   createAnnouncer: () => createAnnouncer,
   createApplication: () => createApplication,
   createAuthSession: () => createAuthSession,
@@ -97,31 +113,53 @@ __export(src_exports, {
   createRuntime: () => createRuntime,
   createStore: () => createStore,
   createStreetEvent: () => createStreetEvent,
+  createTheme: () => createTheme,
+  createThemeTokens: () => createThemeTokens,
+  cssPropName: () => cssPropName,
+  cssValue: () => cssValue,
+  cx: () => cx,
+  defaultThemeStorage: () => defaultThemeStorage,
   defineConfig: () => defineConfig,
   derived: () => derived,
   describeError: () => describeError,
   diagnosePerformance: () => diagnosePerformance,
+  dialog: () => dialog,
+  dropdown: () => dropdown,
+  dropdownItem: () => dropdownItem,
   effect: () => effect,
   email: () => email,
   environment: () => environment,
   escapeHtml: () => escapeHtml,
   escapeHtmlAttr: () => escapeHtmlAttr,
   escapeHtmlText: () => escapeHtmlText,
+  fadeTransition: () => fadeTransition,
+  field: () => field,
+  fieldError: () => fieldError,
+  fieldHelp: () => fieldHelp,
+  fieldLabel: () => fieldLabel,
   flushSync: () => flushSync,
   focusById: () => focusById,
   focusFirst: () => focusFirst,
   focusInitial: () => focusInitial,
+  focusRing: () => focusRing,
+  form: () => form,
   formatDiagnostic: () => formatDiagnostic,
   formatDiagnosticContext: () => formatDiagnosticContext,
   formatHydrationDiagnostic: () => formatHydrationDiagnostic,
   frameworkError: () => frameworkError,
   generateApplicationId: () => generateApplicationId,
+  generateCSS: () => generateCSS,
   generateNodeId: () => generateNodeId,
   getFocusable: () => getFocusable,
   getResolvedTransition: () => getResolvedTransition,
   globalEventBus: () => globalEventBus,
+  grid: () => grid,
+  hashIdentity: () => hashIdentity,
+  heading: () => heading,
   headingUpdate: () => headingUpdate,
   hydrateGraph: () => hydrateGraph,
+  identityOf: () => identityOf,
+  input: () => input,
   inputUpdate: () => inputUpdate,
   inspectApplication: () => inspectApplication,
   inspectComponents: () => inspectComponents,
@@ -142,7 +180,11 @@ __export(src_exports, {
   isComponentDefinition: () => isComponentDefinition,
   isHeadContribution: () => isHeadContribution,
   isTransitionConfig: () => isTransitionConfig,
+  label: () => label,
+  layout: () => layout,
+  link: () => link,
   linkUpdate: () => linkUpdate,
+  list: () => list,
   matchPattern: () => matchPattern,
   matchRoutes: () => matchRoutes,
   maxLength: () => maxLength,
@@ -157,13 +199,18 @@ __export(src_exports, {
   normalizePath: () => normalizePath,
   observerCount: () => observerCount,
   onEscape: () => onEscape,
+  overlay: () => overlay,
   patchNode: () => patchNode,
   patchProp: () => patchProp,
   pattern: () => pattern,
+  popover: () => popover,
+  pre: () => pre,
   printDiagnostics: () => printDiagnostics,
   printGraph: () => printGraph,
   reactiveListItemKey: () => reactiveListItemKey,
   reactiveListItemSignature: () => reactiveListItemSignature,
+  reactiveVarName: () => reactiveVarName,
+  reactiveVarValue: () => reactiveVarValue,
   readState: () => readState,
   reconcileChildren: () => reconcileChildren,
   reconcileChildrenByPlan: () => reconcileChildrenByPlan,
@@ -171,6 +218,7 @@ __export(src_exports, {
   renderDevToolsReport: () => renderDevToolsReport,
   renderHead: () => renderHead,
   renderInteractiveDevTools: () => renderInteractiveDevTools,
+  renderStyles: () => renderStyles,
   renderToString: () => renderToString,
   reportDiagnostic: () => reportDiagnostic,
   reportError: () => reportError,
@@ -183,9 +231,11 @@ __export(src_exports, {
   restoreFocus: () => restoreFocus,
   routerOutlet: () => routerOutlet,
   rovingMenu: () => rovingMenu,
+  row: () => row,
   runElementTransition: () => runElementTransition,
   runValidators: () => runValidators,
   saveFocus: () => saveFocus,
+  scaleTransition: () => scaleTransition,
   scheduleImmediate: () => scheduleImmediate,
   scheduleUpdate: () => scheduleUpdate,
   scheduler: () => scheduler,
@@ -195,13 +245,29 @@ __export(src_exports, {
   serverDOMAdapter: () => serverDOMAdapter,
   signal: () => signal,
   signalKind: () => signalKind,
+  skipLink: () => skipLink,
+  slideTransition: () => slideTransition,
+  spacer: () => spacer,
   splitTarget: () => splitTarget,
+  stack: () => stack,
+  stateAttr: () => stateAttr,
   streetui: () => streetui,
+  style: () => style,
+  styleRegistry: () => styleRegistry,
+  styleVariants: () => styleVariants,
+  styleWithVars: () => styleWithVars,
+  text: () => text,
   textUpdate: () => textUpdate,
   toIdToken: () => toIdToken,
+  toast: () => toast,
+  tokens: () => tokens,
+  tooltip: () => tooltip,
   transformGraph: () => transformGraph,
+  transition: () => transition,
+  transitions: () => transitions,
   trapFocus: () => trapFocus,
   validateGraph: () => validateGraph,
+  visuallyHidden: () => visuallyHidden,
   wireComponentBehavior: () => wireComponentBehavior,
   wireEvents: () => wireEvents,
   wireHeadBehavior: () => wireHeadBehavior,
@@ -214,7 +280,7 @@ module.exports = __toCommonJS(src_exports);
 // src/version.ts
 var VERSION = "2.6.0";
 
-// ../state/src/signal.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/signal.ts
 var _activeConsumer = null;
 function withConsumer(consumer, fn) {
   const prev = _activeConsumer;
@@ -424,7 +490,7 @@ function observerCount(source) {
   return typeof maybe._observerCount === "function" ? maybe._observerCount() : void 0;
 }
 
-// ../state/src/store.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/store.ts
 var Store = class {
   _signals;
   constructor(initial) {
@@ -474,7 +540,7 @@ function createStore(initial) {
   return new Store(initial);
 }
 
-// ../state/src/resource.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/resource.ts
 function isAbortError(err) {
   return err instanceof Error && err.name === "AbortError" || typeof DOMException !== "undefined" && err instanceof DOMException && err.name === "AbortError";
 }
@@ -552,7 +618,7 @@ function resource(loader, options = {}) {
   };
 }
 
-// ../state/src/mutation.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/mutation.ts
 function mutation(mutator, options = {}) {
   const status = signal("idle");
   const data = signal(void 0);
@@ -609,19 +675,19 @@ function mutation(mutator, options = {}) {
   return { status, data, error, pending, mutate, reset, dispose };
 }
 
-// ../state/src/client.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/client.ts
 var HttpError = class extends Error {
   status;
   statusText;
   url;
   body;
-  constructor(status, statusText, url, body) {
+  constructor(status, statusText, url, body2) {
     super(`HTTP ${status} ${statusText} for ${url}`);
     this.name = "HttpError";
     this.status = status;
     this.statusText = statusText;
     this.url = url;
-    this.body = body;
+    this.body = body2;
   }
 };
 function joinUrl(baseUrl, path) {
@@ -639,20 +705,20 @@ function withQuery(url, query) {
   return url.includes("?") ? `${url}&${qs}` : `${url}?${qs}`;
 }
 function createClient(config = {}) {
-  const doFetch = config.fetch ?? ((input, init) => {
+  const doFetch = config.fetch ?? ((input2, init) => {
     if (typeof fetch === "undefined") {
       throw new Error("createClient: no global fetch; pass { fetch } explicitly");
     }
-    return fetch(input, init);
+    return fetch(input2, init);
   });
-  async function request(method, path, body, reqConfig = {}) {
+  async function request(method, path, body2, reqConfig = {}) {
     const url = withQuery(joinUrl(config.baseUrl, path), reqConfig.query);
     const headers = { ...config.headers, ...reqConfig.headers };
     const init = { method, headers };
     if (reqConfig.signal !== void 0) init.signal = reqConfig.signal;
-    if (body !== void 0) {
+    if (body2 !== void 0) {
       if (headers["Content-Type"] === void 0) headers["Content-Type"] = "application/json";
-      init.body = JSON.stringify(body);
+      init.body = JSON.stringify(body2);
     }
     const response = await doFetch(url, init);
     const parsed = await parseBody(response);
@@ -679,20 +745,20 @@ function createClient(config = {}) {
   };
 }
 async function parseBody(response) {
-  const text = await response.text();
-  if (text === "") return void 0;
+  const text2 = await response.text();
+  if (text2 === "") return void 0;
   const type = response.headers.get("content-type") ?? "";
   if (type.includes("application/json")) {
     try {
-      return JSON.parse(text);
+      return JSON.parse(text2);
     } catch {
-      return text;
+      return text2;
     }
   }
-  return text;
+  return text2;
 }
 
-// ../state/src/auth.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/state/src/auth.ts
 function createAuthSession(config) {
   const session = resource(
     (ctx) => config.loadUser(ctx),
@@ -744,7 +810,7 @@ function createAuthSession(config) {
   };
 }
 
-// ../core/src/a11y-ids.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/a11y-ids.ts
 var UNSAFE = /[^A-Za-z0-9_-]+/g;
 function toIdToken(base) {
   const token = base.trim().replace(UNSAFE, "-").replace(/^-+|-+$/g, "");
@@ -766,7 +832,7 @@ function a11yIds(base) {
   };
 }
 
-// ../core/src/identity.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/identity.ts
 var _counter = 0;
 function nextId() {
   return ++_counter;
@@ -788,7 +854,7 @@ function generateApplicationId(name) {
   return `app:${name}:${nextId()}`;
 }
 
-// ../core/src/lifecycle.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/lifecycle.ts
 var Lifecycle = class {
   _phase = "created";
   _hooks = /* @__PURE__ */ new Map();
@@ -846,7 +912,7 @@ var CleanupRegistry = class {
   }
 };
 
-// ../core/src/environment.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/environment.ts
 function detectEnvironment() {
   try {
     if (typeof process !== "undefined" && process !== null && typeof process === "object" && (process.env?.["NODE_ENV"] === "test" || process.env?.["VITEST"] === "true")) {
@@ -898,7 +964,7 @@ var Environment = class {
 };
 var environment = new Environment();
 
-// ../core/src/diagnostics.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/diagnostics.ts
 var DiagnosticError = class extends Error {
   diagnostics;
   constructor(diagnostics) {
@@ -920,14 +986,14 @@ var DiagnosticCollector = class {
   get hasWarnings() {
     return this._diagnostics.some((d) => d.severity === "warning");
   }
-  error(code, message, location, cause) {
-    this._diagnostics.push({ severity: "error", code, message, location: location ?? void 0, cause: cause ?? void 0 });
+  error(code2, message, location, cause) {
+    this._diagnostics.push({ severity: "error", code: code2, message, location: location ?? void 0, cause: cause ?? void 0 });
   }
-  warn(code, message, location) {
-    this._diagnostics.push({ severity: "warning", code, message, location: location ?? void 0, cause: void 0 });
+  warn(code2, message, location) {
+    this._diagnostics.push({ severity: "warning", code: code2, message, location: location ?? void 0, cause: void 0 });
   }
-  info(code, message, location) {
-    this._diagnostics.push({ severity: "info", code, message, location: location ?? void 0, cause: void 0 });
+  info(code2, message, location) {
+    this._diagnostics.push({ severity: "info", code: code2, message, location: location ?? void 0, cause: void 0 });
   }
   merge(other) {
     for (const d of other.diagnostics) {
@@ -948,7 +1014,7 @@ function formatDiagnostic(d) {
   return `[${d.severity.toUpperCase()}] ${d.code}: ${d.message}${loc}`;
 }
 
-// ../core/src/application.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/application.ts
 var Application = class {
   id;
   name;
@@ -992,7 +1058,7 @@ function createApplication(options) {
   return new Application(options);
 }
 
-// ../core/src/node.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/node.ts
 var BaseNode = class {
   id;
   type;
@@ -1004,7 +1070,7 @@ var BaseNode = class {
   }
 };
 
-// ../core/src/observability.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/observability.ts
 function formatDiagnosticContext(context) {
   if (context === void 0) return "";
   const parts = [];
@@ -1068,11 +1134,11 @@ function safeStringify(value) {
   if (typeof value === "string") return value;
   if (value === null) return "null";
   if (value === void 0) return "undefined";
-  const t = typeof value;
-  if (t === "number" || t === "boolean" || t === "bigint" || t === "symbol") {
+  const t6 = typeof value;
+  if (t6 === "number" || t6 === "boolean" || t6 === "bigint" || t6 === "symbol") {
     return String(value);
   }
-  const ctor = t === "object" && value !== null ? value.constructor?.name ?? "Object" : t;
+  const ctor = t6 === "object" && value !== null ? value.constructor?.name ?? "Object" : t6;
   return `[non-Error ${ctor}]`;
 }
 function describeError(error, context, options = {}) {
@@ -1084,7 +1150,885 @@ function reportError(sink, error, context, options = {}) {
   return report;
 }
 
-// ../graph/src/graph-node.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/canonical.ts
+var LENGTH_PROPS = /* @__PURE__ */ new Set([
+  "inset",
+  "top",
+  "right",
+  "bottom",
+  "left",
+  "width",
+  "minWidth",
+  "maxWidth",
+  "height",
+  "minHeight",
+  "maxHeight",
+  "margin",
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+  "padding",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "gap",
+  "rowGap",
+  "columnGap",
+  "flexBasis",
+  "borderWidth",
+  "borderRadius",
+  "fontSize",
+  "letterSpacing"
+]);
+function cssPropName(camel) {
+  if (camel.startsWith("--")) return camel;
+  return camel.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+}
+function cssValue(prop, value) {
+  if (typeof value === "number") {
+    if (value === 0) return "0";
+    return LENGTH_PROPS.has(prop) ? `${value}px` : String(value);
+  }
+  return value;
+}
+function sortDeep(value) {
+  if (Array.isArray(value)) return value.map(sortDeep);
+  if (value !== null && typeof value === "object") {
+    const out = {};
+    for (const key of Object.keys(value).sort()) {
+      const v = value[key];
+      if (v === void 0) continue;
+      out[key] = sortDeep(v);
+    }
+    return out;
+  }
+  return value;
+}
+function canonicalize(def) {
+  return JSON.stringify(sortDeep(def));
+}
+function hashIdentity(canonical) {
+  let h1 = 2166136261;
+  let h2 = 16777619 ^ canonical.length;
+  for (let i = 0; i < canonical.length; i++) {
+    const c = canonical.charCodeAt(i);
+    h1 ^= c;
+    h1 = Math.imul(h1, 16777619);
+    h2 = Math.imul(h2 ^ c, 2246822507);
+  }
+  const a = (h1 >>> 0).toString(36);
+  const b = (h2 >>> 0).toString(36);
+  return `s-${a}${b}`;
+}
+function identityOf(def) {
+  const canonical = canonicalize(def);
+  return { canonical, id: hashIdentity(canonical) };
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/registry.ts
+var BAND_ORDER = ["tokens", "base", "responsive", "state", "variant"];
+var StyleRegistry = class {
+  _entries = /* @__PURE__ */ new Map();
+  _seq = 0;
+  /** True once the registry has adopted a server-emitted stylesheet (§12). */
+  _adopted = false;
+  /**
+   * Register (idempotently) the CSS for a style identity. Returns the identity so
+   * callers can chain. Re-registering an existing id with the same css is a no-op;
+   * with different css it keeps the first registration (identity is content-derived,
+   * so this cannot happen for honest input and signals a hash collision if it does).
+   */
+  register(id, band, css) {
+    const existing = this._entries.get(id);
+    if (existing !== void 0) return id;
+    this._entries.set(id, { id, band, css, seq: this._seq++ });
+    return id;
+  }
+  /** Whether an identity is already present (server-adopted or locally registered). */
+  has(id) {
+    return this._entries.has(id);
+  }
+  /** Number of distinct rules held (bounded by source diversity, not instances). */
+  get size() {
+    return this._entries.size;
+  }
+  /**
+   * Seed the registry from identities a server stylesheet already shipped (§12).
+   * We only need the *keys* to avoid re-emitting duplicates; the rule text is
+   * already in the adopted `<style>` element, so a placeholder css is stored.
+   */
+  adoptServerIdentities(ids) {
+    for (const id of ids) {
+      if (!this._entries.has(id)) {
+        this._entries.set(id, { id, band: "base", css: "", seq: this._seq++ });
+      }
+    }
+    this._adopted = true;
+  }
+  get adopted() {
+    return this._adopted;
+  }
+  /** Serialize all rules to a single CSS string in deterministic band order. */
+  serializeCSS() {
+    if (this._entries.size === 0) return "";
+    const byBand = {
+      tokens: [],
+      base: [],
+      responsive: [],
+      state: [],
+      variant: []
+    };
+    for (const e of this._entries.values()) {
+      if (e.css.length > 0) byBand[e.band].push(e);
+    }
+    let out = "";
+    for (const band of BAND_ORDER) {
+      const list2 = byBand[band].sort((a, b) => a.seq - b.seq);
+      for (const e of list2) out += e.css;
+    }
+    return out;
+  }
+  /** The ordered list of identities present (for the `data-streetui-css-keys` attr). */
+  identities() {
+    return [...this._entries.values()].sort((a, b) => a.seq - b.seq).map((e) => e.id);
+  }
+  /** Clear everything — test isolation and per-process reset only. */
+  reset() {
+    this._entries.clear();
+    this._seq = 0;
+    this._adopted = false;
+  }
+};
+var styleRegistry = new StyleRegistry();
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/css.ts
+var BREAKPOINTS = {
+  sm: 480,
+  md: 768,
+  lg: 1024,
+  xl: 1280
+};
+var PSEUDO_SELECTOR = {
+  hover: ":hover",
+  focus: ":focus",
+  focusVisible: ":focus-visible",
+  focusWithin: ":focus-within",
+  active: ":active",
+  disabled: ":disabled",
+  checked: ":checked",
+  firstChild: ":first-child",
+  lastChild: ":last-child"
+};
+function stateAttr(state) {
+  return `data-${state}`;
+}
+function isResponsiveObject(v) {
+  return v !== null && typeof v === "object";
+}
+function splitResponsive(props) {
+  const base = [];
+  const media = { sm: [], md: [], lg: [], xl: [] };
+  for (const key of Object.keys(props).sort()) {
+    if (key === "vars") {
+      const vars = props.vars;
+      if (vars) for (const vk of Object.keys(vars).sort()) base.push([vk, vars[vk]]);
+      continue;
+    }
+    const raw = props[key];
+    if (raw === void 0) continue;
+    if (isResponsiveObject(raw)) {
+      const r = raw;
+      if (r.base !== void 0) base.push([key, r.base]);
+      for (const bp of ["sm", "md", "lg", "xl"]) {
+        if (r[bp] !== void 0) media[bp].push([key, r[bp]]);
+      }
+    } else {
+      base.push([key, raw]);
+    }
+  }
+  return { base, media };
+}
+function declBody(pairs) {
+  let out = "";
+  for (const [prop, val] of pairs) out += `${cssPropName(prop)}:${cssValue(prop, val)};`;
+  return out;
+}
+function flatBody(props) {
+  const pairs = [];
+  for (const key of Object.keys(props).sort()) {
+    if (key === "vars") {
+      const vars = props.vars;
+      if (vars) for (const vk of Object.keys(vars).sort()) pairs.push([vk, vars[vk]]);
+      continue;
+    }
+    const raw = props[key];
+    if (raw === void 0) continue;
+    if (isResponsiveObject(raw)) {
+      const b = raw.base;
+      if (b !== void 0) pairs.push([key, b]);
+    } else {
+      pairs.push([key, raw]);
+    }
+  }
+  return declBody(pairs);
+}
+function generateCSS(id, def) {
+  const sel = `.${id}`;
+  const { base, media } = splitResponsive(def);
+  let baseCss = "";
+  const baseBody = declBody(base);
+  if (baseBody.length > 0) baseCss += `${sel}{${baseBody}}`;
+  let hasResponsive = false;
+  for (const bp of ["sm", "md", "lg", "xl"]) {
+    if (media[bp].length > 0) {
+      hasResponsive = true;
+      baseCss += `@media (min-width:${BREAKPOINTS[bp]}px){${sel}{${declBody(media[bp])}}}`;
+    }
+  }
+  let stateCss = "";
+  if (def.on) {
+    for (const ps of Object.keys(def.on).sort()) {
+      const block = def.on[ps];
+      if (!block) continue;
+      const body2 = flatBody(block);
+      if (body2.length > 0) stateCss += `${sel}${PSEUDO_SELECTOR[ps]}{${body2}}`;
+    }
+  }
+  if (def.when) {
+    for (const st of Object.keys(def.when).sort()) {
+      const block = def.when[st];
+      if (!block) continue;
+      const body2 = flatBody(block);
+      if (body2.length > 0) stateCss += `${sel}[${stateAttr(st)}]{${body2}}`;
+    }
+  }
+  return { base: baseCss, state: stateCss, hasResponsive };
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/tokens.ts
+function kebab(seg) {
+  return seg.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`);
+}
+function isLeaf(v) {
+  return typeof v === "string" || typeof v === "number";
+}
+function walkTokens(tree, path, visit) {
+  for (const key of Object.keys(tree).sort()) {
+    const v = tree[key];
+    const next = [...path, kebab(key)];
+    if (isLeaf(v)) visit(`--${next.join("-")}`, v);
+    else walkTokens(v, next, visit);
+  }
+}
+function buildRefs(tree, path) {
+  const out = {};
+  for (const key of Object.keys(tree)) {
+    const v = tree[key];
+    const next = [...path, kebab(key)];
+    out[key] = isLeaf(v) ? `var(--${next.join("-")})` : buildRefs(v, next);
+  }
+  return out;
+}
+function tokenIdentity(def) {
+  const json = JSON.stringify({ light: def.light, dark: def.dark ?? null });
+  let h = 2166136261;
+  for (let i = 0; i < json.length; i++) {
+    h ^= json.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return `t-${(h >>> 0).toString(36)}`;
+}
+function createThemeTokens(def) {
+  const id = tokenIdentity(def);
+  let root = "";
+  walkTokens(def.light, [], (name, value) => {
+    root += `${name}:${value};`;
+  });
+  let dark = "";
+  if (def.dark) walkTokens(def.dark, [], (name, value) => {
+    dark += `${name}:${value};`;
+  });
+  let css = root.length > 0 ? `:root{${root}}` : "";
+  if (dark.length > 0) css += `[data-theme="dark"]{${dark}}`;
+  styleRegistry.register(id, "tokens", css);
+  return {
+    ref: buildRefs(def.light, []),
+    css,
+    id
+  };
+}
+var DEFAULT_TOKENS = {
+  surface: { background: "#ffffff", raised: "#f7f7f8", sunken: "#eeeef1", overlay: "rgba(17,17,20,0.55)" },
+  content: { primary: "#17171a", secondary: "#55555f", muted: "#8a8a95", inverse: "#ffffff" },
+  border: { default: "#e3e3e8", strong: "#c9c9d1", subtle: "#f0f0f3" },
+  accent: { primary: "#4f46e5", hover: "#4338ca", contrast: "#ffffff" },
+  focus: { ring: "#6366f1" },
+  danger: { surface: "#fef2f2", border: "#fecaca", content: "#b91c1c", solid: "#dc2626" },
+  success: { content: "#15803d", solid: "#16a34a" },
+  space: { "0": "0", "1": "4px", "2": "8px", "3": "12px", "4": "16px", "5": "24px", "6": "32px", "8": "48px", "10": "64px" },
+  radius: { sm: "4px", md: "8px", lg: "12px", xl: "16px", full: "9999px" },
+  font: {
+    sans: "ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif",
+    mono: "ui-monospace,SFMono-Regular,Menlo,Consolas,monospace"
+  },
+  size: { xs: "12px", sm: "14px", md: "16px", lg: "18px", xl: "24px", "2xl": "32px", "3xl": "44px" },
+  weight: { normal: "400", medium: "500", semibold: "600", bold: "700" },
+  leading: { tight: "1.2", normal: "1.5", relaxed: "1.7" },
+  shadow: {
+    sm: "0 1px 2px rgba(17,17,20,0.08)",
+    md: "0 4px 12px rgba(17,17,20,0.1)",
+    lg: "0 12px 32px rgba(17,17,20,0.16)"
+  },
+  z: { base: "0", dropdown: "1000", overlay: "1100", toast: "1200" },
+  duration: { fast: "120ms", base: "200ms", slow: "320ms" },
+  easing: { standard: "cubic-bezier(0.2,0,0,1)", emphasized: "cubic-bezier(0.3,0,0,1)" }
+};
+var DARK_OVERRIDES = {
+  surface: { background: "#0f0f12", raised: "#17171c", sunken: "#0a0a0d", overlay: "rgba(0,0,0,0.6)" },
+  content: { primary: "#f4f4f6", secondary: "#b4b4bf", muted: "#7c7c88", inverse: "#17171a" },
+  border: { default: "#2a2a31", strong: "#3a3a44", subtle: "#1e1e24" },
+  accent: { primary: "#818cf8", hover: "#a5b4fc", contrast: "#0f0f12" },
+  focus: { ring: "#a5b4fc" },
+  danger: { surface: "#2a1416", border: "#5b1d1d", content: "#fca5a5", solid: "#ef4444" },
+  success: { content: "#4ade80", solid: "#22c55e" }
+};
+var tokens = createThemeTokens({ light: DEFAULT_TOKENS, dark: DARK_OVERRIDES });
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/style.ts
+function style(def) {
+  const { id } = identityOf(def);
+  if (!styleRegistry.has(id)) {
+    const gen = generateCSS(id, def);
+    styleRegistry.register(id, gen.hasResponsive ? "responsive" : "base", gen.base);
+    if (gen.state.length > 0) {
+      styleRegistry.register(`${id}~state`, "state", gen.state);
+    }
+  }
+  return id;
+}
+function cx(...parts) {
+  let out = "";
+  for (const p of parts) {
+    if (!p) continue;
+    out = out.length === 0 ? p : `${out} ${p}`;
+  }
+  return out;
+}
+function styleVariants(cfg) {
+  const baseClass = cfg.base ? style(cfg.base) : "";
+  const groupClasses = {};
+  for (const group of Object.keys(cfg.variants)) {
+    const values = cfg.variants[group];
+    const map = {};
+    for (const value of Object.keys(values)) map[value] = style(values[value]);
+    groupClasses[group] = map;
+  }
+  const defaults = cfg.defaultVariants ?? {};
+  return (selection) => {
+    const parts = [];
+    if (baseClass) parts.push(baseClass);
+    for (const group of Object.keys(groupClasses)) {
+      const chosen = selection?.[group] ?? defaults[group];
+      if (chosen === void 0) continue;
+      const cls = groupClasses[group][chosen];
+      if (cls) parts.push(cls);
+    }
+    return cx(...parts);
+  };
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/reactive.ts
+function reactiveVarName(prop) {
+  return `--s-${cssPropName(prop)}`;
+}
+function styleWithVars(staticDef, reactiveProps) {
+  const vars = {};
+  const bind = {};
+  const dynamic = {};
+  for (const prop of reactiveProps) {
+    const varName = reactiveVarName(prop);
+    vars[prop] = varName;
+    bind[prop] = `style.${varName}`;
+    dynamic[prop] = `var(${varName})`;
+  }
+  const merged = { ...staticDef, ...dynamic };
+  return { class: style(merged), vars, bind };
+}
+function reactiveVarValue(prop, value) {
+  return cssValue(prop, value);
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/layout.ts
+var space = (k) => tokens.ref.space[k];
+function container(opts = {}) {
+  const def = {
+    width: "100%",
+    maxWidth: opts.max ?? 1120,
+    paddingLeft: space(opts.padX ?? "4"),
+    paddingRight: space(opts.padX ?? "4"),
+    ...opts.center === false ? {} : { marginLeft: "auto", marginRight: "auto" }
+  };
+  return style(def);
+}
+var ALIGN = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  stretch: "stretch"
+};
+var JUSTIFY = {
+  start: "flex-start",
+  center: "center",
+  end: "flex-end",
+  between: "space-between",
+  around: "space-around"
+};
+function stack(opts = {}) {
+  return style({
+    display: "flex",
+    flexDirection: "column",
+    gap: space(opts.gap ?? "4"),
+    ...opts.align ? { alignItems: ALIGN[opts.align] } : {},
+    ...opts.justify ? { justifyContent: JUSTIFY[opts.justify] } : {}
+  });
+}
+function row(opts = {}) {
+  return style({
+    display: "flex",
+    flexDirection: "row",
+    gap: space(opts.gap ?? "4"),
+    alignItems: opts.align ? ALIGN[opts.align] : "center",
+    ...opts.justify ? { justifyContent: JUSTIFY[opts.justify] } : {},
+    ...opts.wrap ? { flexWrap: "wrap" } : {}
+  });
+}
+function grid(opts = {}) {
+  const columns = opts.columns ?? "auto";
+  const min = typeof opts.min === "number" ? `${opts.min}px` : opts.min ?? "220px";
+  const template = columns === "auto" ? `repeat(auto-fill, minmax(${min}, 1fr))` : `repeat(${columns}, minmax(0, 1fr))`;
+  return style({ display: "grid", gridTemplateColumns: template, gap: space(opts.gap ?? "4") });
+}
+function center(opts = {}) {
+  return style({
+    display: opts.inline ? "inline-flex" : "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    ...opts.minHeight !== void 0 ? { minHeight: opts.minHeight } : {}
+  });
+}
+function spacer(opts = {}) {
+  return opts.size !== void 0 ? style({ flex: "0 0 auto", width: opts.size, height: opts.size }) : style({ flex: "1 1 0%" });
+}
+var layout = { container, stack, row, grid, center, spacer };
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/typography.ts
+var t = tokens.ref;
+var HEADING_SIZE = {
+  1: t.size["3xl"],
+  2: t.size["2xl"],
+  3: t.size.xl,
+  4: t.size.lg,
+  5: t.size.md,
+  6: t.size.sm
+};
+function heading(opts = {}) {
+  const level = opts.level ?? 2;
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: HEADING_SIZE[level],
+    fontWeight: level <= 2 ? t.weight.bold : t.weight.semibold,
+    lineHeight: t.leading.tight,
+    color: t.content.primary,
+    letterSpacing: level <= 2 ? "-0.02em" : "-0.01em"
+  });
+}
+function body(opts = {}) {
+  const def = {
+    fontFamily: t.font.sans,
+    fontSize: t.size.md,
+    fontWeight: t.weight.normal,
+    lineHeight: t.leading.normal,
+    color: opts.muted ? t.content.secondary : t.content.primary
+  };
+  return style(opts.measure !== void 0 ? { ...def, maxWidth: opts.measure } : def);
+}
+function label() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.sm,
+    fontWeight: t.weight.medium,
+    lineHeight: t.leading.normal,
+    color: t.content.primary
+  });
+}
+function caption() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.xs,
+    fontWeight: t.weight.normal,
+    lineHeight: t.leading.normal,
+    color: t.content.muted
+  });
+}
+function link() {
+  return style({
+    color: t.accent.primary,
+    textDecoration: "underline",
+    cursor: "pointer",
+    borderRadius: t.radius.sm,
+    on: {
+      hover: { color: t.accent.hover },
+      focusVisible: { outline: `2px solid ${t.focus.ring}` }
+    }
+  });
+}
+function code() {
+  return style({
+    fontFamily: t.font.mono,
+    fontSize: "0.9em",
+    background: t.surface.sunken,
+    color: t.content.primary,
+    borderRadius: t.radius.sm,
+    paddingLeft: t.space["1"],
+    paddingRight: t.space["1"],
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t.border.subtle
+  });
+}
+function pre() {
+  return style({
+    fontFamily: t.font.mono,
+    fontSize: t.size.sm,
+    lineHeight: t.leading.relaxed,
+    background: t.surface.sunken,
+    color: t.content.primary,
+    borderRadius: t.radius.md,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t.border.subtle,
+    padding: t.space["4"],
+    overflowX: "auto",
+    whiteSpace: "pre"
+  });
+}
+function blockquote() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.lg,
+    lineHeight: t.leading.relaxed,
+    color: t.content.secondary,
+    borderStyle: "solid",
+    borderColor: t.accent.primary,
+    paddingLeft: t.space["4"],
+    marginLeft: 0
+  });
+}
+function list() {
+  return style({
+    fontFamily: t.font.sans,
+    fontSize: t.size.md,
+    lineHeight: t.leading.normal,
+    color: t.content.primary,
+    display: "flex",
+    flexDirection: "column",
+    gap: t.space["2"]
+  });
+}
+var text = { heading, body, label, caption, link, code, pre, blockquote, list };
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/a11y.ts
+var t2 = tokens.ref;
+function focusRing(opts = {}) {
+  const color = opts.color ?? t2.focus.ring;
+  const width = opts.width ?? 2;
+  const offset = opts.offset ?? 2;
+  return style({
+    outline: "2px solid transparent",
+    // reserve space; real ring shown on focus
+    on: {
+      focusVisible: {
+        outline: `${width}px solid ${color}`,
+        outlineOffset: offset
+      }
+    }
+  });
+}
+function visuallyHidden() {
+  return style({
+    position: "absolute",
+    width: 1,
+    height: 1,
+    padding: 0,
+    margin: -1,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    border: 0,
+    // clip to a zero-area rect so the node occupies no visual space
+    clipPath: "inset(50%)"
+  });
+}
+function skipLink() {
+  return style({
+    position: "absolute",
+    left: t2.space["2"],
+    top: -40,
+    background: t2.surface.raised,
+    color: t2.content.primary,
+    padding: t2.space["2"],
+    borderRadius: t2.radius.md,
+    boxShadow: t2.shadow.md,
+    transition: `top ${t2.duration.fast} ${t2.easing.standard}`,
+    on: {
+      focusVisible: { top: t2.space["2"], outline: `2px solid ${t2.focus.ring}`, outlineOffset: 2 }
+    }
+  });
+}
+var a11y = { focusRing, visuallyHidden, skipLink };
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/forms.ts
+var t3 = tokens.ref;
+var CONTROL_BASE = {
+  fontFamily: t3.font.sans,
+  fontSize: t3.size.md,
+  lineHeight: t3.leading.normal,
+  color: t3.content.primary,
+  background: t3.surface.background,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t3.border.strong,
+  borderRadius: t3.radius.md,
+  paddingTop: t3.space["2"],
+  paddingBottom: t3.space["2"],
+  paddingLeft: t3.space["3"],
+  paddingRight: t3.space["3"],
+  width: "100%",
+  appearance: "none",
+  transition: `border-color ${t3.duration.fast} ${t3.easing.standard}, box-shadow ${t3.duration.fast} ${t3.easing.standard}`,
+  on: {
+    focusVisible: { outline: "none", borderColor: t3.accent.primary, boxShadow: `0 0 0 3px ${t3.focus.ring}` },
+    disabled: { opacity: 0.55, cursor: "not-allowed", background: t3.surface.sunken }
+  },
+  when: {
+    invalid: { borderColor: t3.danger.border, boxShadow: `0 0 0 3px ${t3.danger.surface}` }
+  }
+};
+function input() {
+  return style(CONTROL_BASE);
+}
+function field() {
+  return style({ display: "flex", flexDirection: "column", gap: t3.space["2"] });
+}
+function fieldLabel() {
+  return style({
+    fontFamily: t3.font.sans,
+    fontSize: t3.size.sm,
+    fontWeight: t3.weight.medium,
+    color: t3.content.primary
+  });
+}
+function fieldHelp() {
+  return style({ fontFamily: t3.font.sans, fontSize: t3.size.xs, color: t3.content.muted });
+}
+function fieldError() {
+  return style({
+    fontFamily: t3.font.sans,
+    fontSize: t3.size.xs,
+    fontWeight: t3.weight.medium,
+    color: t3.danger.content
+  });
+}
+function button() {
+  return style({
+    fontFamily: t3.font.sans,
+    fontSize: t3.size.md,
+    fontWeight: t3.weight.semibold,
+    lineHeight: t3.leading.normal,
+    color: t3.accent.contrast,
+    background: t3.accent.primary,
+    borderWidth: 0,
+    borderStyle: "solid",
+    borderRadius: t3.radius.md,
+    paddingTop: t3.space["2"],
+    paddingBottom: t3.space["2"],
+    paddingLeft: t3.space["4"],
+    paddingRight: t3.space["4"],
+    cursor: "pointer",
+    appearance: "none",
+    transition: `background ${t3.duration.fast} ${t3.easing.standard}`,
+    on: {
+      hover: { background: t3.accent.hover },
+      focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t3.focus.ring}` },
+      disabled: { opacity: 0.55, cursor: "not-allowed" }
+    }
+  });
+}
+var form = { field, input, label: fieldLabel, help: fieldHelp, error: fieldError, button };
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/overlays.ts
+var t4 = tokens.ref;
+function backdrop() {
+  return style({
+    position: "fixed",
+    inset: 0,
+    background: t4.surface.overlay,
+    zIndex: t4.z.overlay
+  });
+}
+function dialog() {
+  return style({
+    position: "relative",
+    background: t4.surface.background,
+    color: t4.content.primary,
+    borderRadius: t4.radius.lg,
+    boxShadow: t4.shadow.lg,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t4.border.default,
+    padding: t4.space["5"],
+    maxWidth: "min(560px, calc(100vw - 32px))",
+    width: "100%",
+    zIndex: t4.z.overlay
+  });
+}
+function popover() {
+  return style({
+    position: "absolute",
+    background: t4.surface.raised,
+    color: t4.content.primary,
+    borderRadius: t4.radius.md,
+    boxShadow: t4.shadow.md,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t4.border.default,
+    padding: t4.space["3"],
+    zIndex: t4.z.dropdown
+  });
+}
+function tooltip() {
+  return style({
+    position: "absolute",
+    background: t4.content.primary,
+    color: t4.surface.background,
+    fontFamily: t4.font.sans,
+    fontSize: t4.size.xs,
+    lineHeight: t4.leading.tight,
+    borderRadius: t4.radius.sm,
+    paddingTop: t4.space["1"],
+    paddingBottom: t4.space["1"],
+    paddingLeft: t4.space["2"],
+    paddingRight: t4.space["2"],
+    maxWidth: 240,
+    zIndex: t4.z.overlay,
+    pointerEvents: "none"
+  });
+}
+var MENU_BASE = {
+  position: "absolute",
+  background: t4.surface.background,
+  color: t4.content.primary,
+  borderRadius: t4.radius.md,
+  boxShadow: t4.shadow.md,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t4.border.default,
+  paddingTop: t4.space["1"],
+  paddingBottom: t4.space["1"],
+  minWidth: 180,
+  zIndex: t4.z.dropdown
+};
+function dropdown() {
+  return style(MENU_BASE);
+}
+function dropdownItem() {
+  return style({
+    display: "flex",
+    alignItems: "center",
+    gap: t4.space["2"],
+    fontFamily: t4.font.sans,
+    fontSize: t4.size.sm,
+    color: t4.content.primary,
+    paddingTop: t4.space["2"],
+    paddingBottom: t4.space["2"],
+    paddingLeft: t4.space["3"],
+    paddingRight: t4.space["3"],
+    cursor: "pointer",
+    on: {
+      hover: { background: t4.surface.raised },
+      disabled: { opacity: 0.5, cursor: "not-allowed" }
+    },
+    when: { selected: { background: t4.surface.sunken, fontWeight: t4.weight.medium } }
+  });
+}
+function toast() {
+  return style({
+    background: t4.surface.raised,
+    color: t4.content.primary,
+    borderRadius: t4.radius.md,
+    boxShadow: t4.shadow.lg,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t4.border.default,
+    padding: t4.space["3"],
+    minWidth: 240,
+    maxWidth: 420,
+    zIndex: t4.z.toast
+  });
+}
+var overlay = {
+  backdrop,
+  dialog,
+  popover,
+  tooltip,
+  dropdown,
+  dropdownItem,
+  toast
+};
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/core/src/styling/animation.ts
+var t5 = tokens.ref;
+var KEYFRAMES = {
+  "streetui-fade-in": "from{opacity:0}to{opacity:1}",
+  "streetui-fade-out": "from{opacity:1}to{opacity:0}",
+  "streetui-scale-in": "from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}",
+  "streetui-scale-out": "from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}",
+  "streetui-slide-in-up": "from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}",
+  "streetui-slide-out-down": "from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}",
+  "streetui-spin": "to{transform:rotate(360deg)}"
+};
+function ensureKeyframes(name) {
+  const id = `kf-${name}`;
+  if (!styleRegistry.has(id)) {
+    styleRegistry.register(id, "base", `@keyframes ${name}{${KEYFRAMES[name]}}`);
+  }
+}
+function animate(name, opts = {}) {
+  ensureKeyframes(name);
+  const duration = t5.duration[opts.duration ?? "base"];
+  const easing = t5.easing[opts.easing ?? "standard"];
+  const iterations = opts.iterations ?? 1;
+  const fill = opts.fill ?? "both";
+  return style({
+    animationName: name,
+    animationDuration: duration,
+    animationTimingFunction: easing,
+    animationFillMode: fill,
+    animationIterationCount: String(iterations),
+    ...opts.delay !== void 0 ? { animationDelay: opts.delay } : {}
+  });
+}
+function transition(properties, opts = {}) {
+  const props = typeof properties === "string" ? [properties] : properties;
+  const duration = t5.duration[opts.duration ?? "base"];
+  const easing = t5.easing[opts.easing ?? "standard"];
+  const delay = opts.delay !== void 0 ? ` ${typeof opts.delay === "number" ? `${opts.delay}ms` : opts.delay}` : "";
+  return props.map((p) => `${p} ${duration} ${easing}${delay}`).join(", ");
+}
+var animation = { animate, transition, keyframes: KEYFRAMES };
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph-node.ts
 var GraphNode = class _GraphNode {
   id;
   type;
@@ -1188,7 +2132,7 @@ var GraphNode = class _GraphNode {
   }
 };
 
-// ../graph/src/graph.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/graph/src/graph.ts
 var ApplicationGraph = class {
   root;
   name;
@@ -1342,7 +2286,7 @@ var ApplicationGraph = class {
   }
 };
 
-// ../dsl/src/transition.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/transition.ts
 function classes(value) {
   if (value === void 0) return [];
   const out = [];
@@ -1383,7 +2327,7 @@ function isTransitionConfig(value) {
   return typeof o["name"] === "string" || typeof o["enter"] === "string" || typeof o["enterActive"] === "string" || typeof o["enterFrom"] === "string" || typeof o["leave"] === "string" || typeof o["leaveActive"] === "string" || typeof o["leaveFrom"] === "string";
 }
 
-// ../dsl/src/head.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/head.ts
 function metaDedupKey(m) {
   if (m.charset !== void 0) return "meta:charset";
   if (m.name !== void 0) return `meta:name=${m.name}`;
@@ -1498,7 +2442,7 @@ function isHeadContribution(value) {
   return value !== null && typeof value === "object" && Array.isArray(value["entries"]);
 }
 
-// ../dsl/src/builders.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/builders.ts
 function isSignal(v) {
   return v !== null && typeof v === "object" && typeof v["get"] === "function" && typeof v["subscribe"] === "function";
 }
@@ -1617,13 +2561,13 @@ var ContentBuilderBase = class {
     this._node = _node;
     this._graph = _graph;
   }
-  heading(text, options = {}) {
+  heading(text2, options = {}) {
     const props = { level: options.level ?? 1 };
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
     applyA11yProps(props, options);
     const node = this._graph.createNode("heading", { parent: this._node, props });
-    const resolved = bindValue(this._graph, node, "text", text);
+    const resolved = bindValue(this._graph, node, "text", text2);
     node.setProp("text", resolved);
   }
   text(content, options = {}) {
@@ -1635,13 +2579,13 @@ var ContentBuilderBase = class {
     const resolved = bindValue(this._graph, node, "text", content);
     node.setProp("text", resolved);
   }
-  button(label, options = {}) {
+  button(label2, options = {}) {
     const props = {};
     if (options.class !== void 0) props["class"] = options.class;
     if (options.id !== void 0) props["id"] = options.id;
     applyA11yProps(props, options);
     const node = this._graph.createNode("button", { parent: this._node, props });
-    const resolved = bindValue(this._graph, node, "label", label);
+    const resolved = bindValue(this._graph, node, "label", label2);
     node.setProp("label", resolved);
     if (options.disabled !== void 0) {
       const resolvedDisabled = bindValue(this._graph, node, "disabled", options.disabled);
@@ -1705,7 +2649,7 @@ var ContentBuilderBase = class {
     if (options.id !== void 0) nodeOpts.key = options.id;
     this._graph.createNode("image", nodeOpts);
   }
-  link(label, options) {
+  link(label2, options) {
     const props = {
       href: options.href,
       external: options.external ?? false
@@ -1714,7 +2658,7 @@ var ContentBuilderBase = class {
     if (options.id !== void 0) props["id"] = options.id;
     applyA11yProps(props, options);
     const node = this._graph.createNode("link", { parent: this._node, props });
-    const resolved = bindValue(this._graph, node, "label", label);
+    const resolved = bindValue(this._graph, node, "label", label2);
     node.setProp("label", resolved);
     if (options.onClick !== void 0) {
       const handlerKey = `click:${node.id}`;
@@ -1898,9 +2842,9 @@ var ContainerBuilderBase = class extends ContentBuilderBase {
           options.fallback(fb, currentError, retry);
         },
         // Healthy state → body, guarded against synchronous build throws.
-        (body) => {
+        (body2) => {
           try {
-            builder(body);
+            builder(body2);
           } catch (err) {
             queueMicrotask(() => localError.set(err));
           }
@@ -2121,7 +3065,7 @@ var AppBuilder = class {
   }
 };
 
-// ../dsl/src/component.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/component.ts
 function component(setup, options = {}) {
   return {
     __streetui_component: true,
@@ -2133,7 +3077,7 @@ function isComponentDefinition(value) {
   return value !== null && typeof value === "object" && value.__streetui_component === true;
 }
 
-// ../dsl/src/dsl.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dsl/src/dsl.ts
 var StreetApp = class {
   _graph;
   _builder;
@@ -2164,7 +3108,7 @@ var streetui = {
   }
 };
 
-// ../compiler/src/validation/validator.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/validation/validator.ts
 function validateGraph(graph) {
   const dc = new DiagnosticCollector();
   dc.merge(graph.validate());
@@ -2183,8 +3127,8 @@ function validateGraph(graph) {
 function validateNode(node, dc) {
   switch (node.type) {
     case "heading": {
-      const text = node.getProp("text");
-      if (text === void 0 || text === "") {
+      const text2 = node.getProp("text");
+      if (text2 === void 0 || text2 === "") {
         dc.warn("COMPILER_EMPTY_HEADING", `Heading node "${node.id}" has no text content`, {
           nodeId: node.id
         });
@@ -2220,7 +3164,7 @@ function validateNode(node, dc) {
   }
 }
 
-// ../compiler/src/transform/transform.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/transform/transform.ts
 function transformGraph(graph) {
   graph.walk((node, depth) => {
     applyDefaults(node);
@@ -2258,7 +3202,7 @@ function ensureRenderKey(node, depth) {
   }
 }
 
-// ../compiler/src/compile.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/src/compile.ts
 function compile(app, options = {}) {
   const strict = options.strict ?? true;
   const strictWarnings = options.strictWarnings ?? false;
@@ -2302,7 +3246,7 @@ function compileGraph(graph, options = {}) {
   };
 }
 
-// ../runtime/src/node-instance.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/runtime/src/node-instance.ts
 var RuntimeNodeInstance = class {
   graphNode;
   domNode;
@@ -2341,7 +3285,7 @@ var RuntimeNodeInstance = class {
   }
 };
 
-// ../scheduler/src/scheduler.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/scheduler/src/scheduler.ts
 var PRIORITY_ORDER = {
   immediate: 0,
   normal: 1,
@@ -2447,7 +3391,7 @@ function flushSync() {
   scheduler.flush();
 }
 
-// ../runtime/src/runtime.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/runtime/src/runtime.ts
 var Runtime = class {
   _renderer;
   _scheduler;
@@ -2464,11 +3408,11 @@ var Runtime = class {
   /**
    * Mount the compiled application into the given DOM container.
    */
-  mount(compiled, container) {
+  mount(compiled, container2) {
     if (this._mounted) {
       throw new Error("[Runtime] Already mounted. Call unmount() first.");
     }
-    this._renderHandle = this._renderer.mount(compiled, container);
+    this._renderHandle = this._renderer.mount(compiled, container2);
     this._mounted = true;
     this._bindSignals(compiled.graph);
     const self2 = this;
@@ -2497,11 +3441,11 @@ var Runtime = class {
    * cannot hydrate. Signal binding is identical to `mount`, so the live client
    * lifecycle is established the same way.
    */
-  hydrate(compiled, container) {
+  hydrate(compiled, container2) {
     if (this._mounted) {
       throw new Error("[Runtime] Already mounted. Call unmount() first.");
     }
-    this._renderHandle = this._renderer.hydrate !== void 0 ? this._renderer.hydrate(compiled, container) : this._renderer.mount(compiled, container);
+    this._renderHandle = this._renderer.hydrate !== void 0 ? this._renderer.hydrate(compiled, container2) : this._renderer.mount(compiled, container2);
     this._mounted = true;
     this._bindSignals(compiled.graph);
     const self2 = this;
@@ -2544,7 +3488,7 @@ function createRuntime(options) {
   return new Runtime(options);
 }
 
-// ../events/src/event-types.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/events/src/event-types.ts
 function createStreetEvent(type, target, data, originalEvent) {
   let _stopped = false;
   const ev = {
@@ -2564,7 +3508,7 @@ function createStreetEvent(type, target, data, originalEvent) {
   return ev;
 }
 
-// ../events/src/event-bus.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/events/src/event-bus.ts
 var EventBus = class {
   _handlers = /* @__PURE__ */ new Map();
   on(type, handler) {
@@ -2606,7 +3550,7 @@ var EventBus = class {
 };
 var globalEventBus = new EventBus();
 
-// ../events/src/dom-bridge.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/events/src/dom-bridge.ts
 function bindDomEvent(element, domEventType, handler, options) {
   const listener = (e) => {
     const streetEvent = createStreetEvent(domEventType, element, void 0, e);
@@ -2635,7 +3579,7 @@ var DomEventRegistry = class {
   }
 };
 
-// ../dom/src/browser-adapter.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/browser-adapter.ts
 var BrowserDOMAdapter = class {
   createElement(tag, ns) {
     if (ns !== void 0) {
@@ -2676,8 +3620,8 @@ var BrowserDOMAdapter = class {
   setProperty(element, name, value) {
     element[name] = value;
   }
-  setTextContent(node, text) {
-    node.textContent = text;
+  setTextContent(node, text2) {
+    node.textContent = text2;
   }
   getTextContent(node) {
     return node.textContent;
@@ -2739,7 +3683,7 @@ var BrowserDOMAdapter = class {
 };
 var browserDOMAdapter = /* @__PURE__ */ new BrowserDOMAdapter();
 
-// ../dom/src/server-node.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-node.ts
 var ServerStyle = class {
   declarations = /* @__PURE__ */ new Map();
   setProperty(name, value) {
@@ -2917,9 +3861,9 @@ function serializeAttributes(el) {
       }
     }
   }
-  const style = el._style;
-  if (style !== null && !style.isEmpty && !el.attributes.has("style")) {
-    parts.push(` style="${escapeHtmlAttr(style.toCss())}"`);
+  const style2 = el._style;
+  if (style2 !== null && !style2.isEmpty && !el.attributes.has("style")) {
+    parts.push(` style="${escapeHtmlAttr(style2.toCss())}"`);
   }
   return parts.join("");
 }
@@ -2952,7 +3896,7 @@ function serializeChildren(node) {
   return out;
 }
 
-// ../dom/src/server-adapter.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/server-adapter.ts
 function asServer(node) {
   return node;
 }
@@ -3042,16 +3986,16 @@ var ServerDOMAdapter = class {
   setProperty(element, name, value) {
     element.properties.set(name, value);
   }
-  setTextContent(node, text) {
+  setTextContent(node, text2) {
     const n = asServer(node);
     if (n.kind === "element" || n.kind === "fragment") {
       const el = n;
       el.children.length = 0;
-      const t = new ServerText(text);
-      t.parent = el;
-      el.children.push(t);
+      const t6 = new ServerText(text2);
+      t6.parent = el;
+      el.children.push(t6);
     } else if (n.kind === "text") {
-      n.data = text;
+      n.data = text2;
     }
   }
   getTextContent(node) {
@@ -3148,7 +4092,7 @@ var ServerDOMAdapter = class {
 };
 var serverDOMAdapter = /* @__PURE__ */ new ServerDOMAdapter();
 
-// ../dom/src/focus.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/focus.ts
 var FOCUSABLE_SELECTOR = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function focusById(dom, root, id) {
   const el = dom.querySelector(root, `[id="${id}"]`);
@@ -3156,14 +4100,14 @@ function focusById(dom, root, id) {
   dom.focus(el);
   return true;
 }
-function focusFirst(dom, container, selector = FOCUSABLE_SELECTOR) {
-  const el = dom.querySelector(container, selector);
+function focusFirst(dom, container2, selector = FOCUSABLE_SELECTOR) {
+  const el = dom.querySelector(container2, selector);
   if (el === null) return false;
   dom.focus(el);
   return true;
 }
-function getFocusable(dom, container, selector = FOCUSABLE_SELECTOR) {
-  return Array.from(dom.querySelectorAll(container, selector)).filter(
+function getFocusable(dom, container2, selector = FOCUSABLE_SELECTOR) {
+  return Array.from(dom.querySelectorAll(container2, selector)).filter(
     (el) => dom.matches(el, selector)
   );
 }
@@ -3173,14 +4117,14 @@ function saveFocus(dom) {
 function restoreFocus(dom, saved) {
   if (saved !== null) dom.focus(saved);
 }
-function focusInitial(dom, container, initialFocusId) {
-  if (initialFocusId !== void 0 && focusById(dom, container, initialFocusId)) return;
-  focusFirst(dom, container);
+function focusInitial(dom, container2, initialFocusId) {
+  if (initialFocusId !== void 0 && focusById(dom, container2, initialFocusId)) return;
+  focusFirst(dom, container2);
 }
-function trapFocus(dom, container) {
+function trapFocus(dom, container2) {
   const onKeydown = (event) => {
     if (event.key !== "Tab") return;
-    const items = getFocusable(dom, container);
+    const items = getFocusable(dom, container2);
     if (items.length === 0) {
       event.preventDefault();
       return;
@@ -3188,7 +4132,7 @@ function trapFocus(dom, container) {
     const first = items[0];
     const last = items[items.length - 1];
     const active = dom.activeElement();
-    if (active === null || !dom.contains(container, active)) {
+    if (active === null || !dom.contains(container2, active)) {
       event.preventDefault();
       dom.focus(first);
     } else if (event.shiftKey && active === first) {
@@ -3199,26 +4143,26 @@ function trapFocus(dom, container) {
       dom.focus(first);
     }
   };
-  dom.addEventListener(container, "keydown", onKeydown);
-  return () => dom.removeEventListener(container, "keydown", onKeydown);
+  dom.addEventListener(container2, "keydown", onKeydown);
+  return () => dom.removeEventListener(container2, "keydown", onKeydown);
 }
 var containmentStack = [];
-function containFocus(dom, container) {
-  const body = dom.body();
-  if (body === null) return () => {
+function containFocus(dom, container2) {
+  const body2 = dom.body();
+  if (body2 === null) return () => {
   };
-  containmentStack.push(container);
+  containmentStack.push(container2);
   const onFocusIn = (event) => {
-    if (containmentStack[containmentStack.length - 1] !== container) return;
+    if (containmentStack[containmentStack.length - 1] !== container2) return;
     const target = event.target;
-    if (target !== null && !dom.contains(container, target)) {
-      focusFirst(dom, container);
+    if (target !== null && !dom.contains(container2, target)) {
+      focusFirst(dom, container2);
     }
   };
-  dom.addEventListener(body, "focusin", onFocusIn);
+  dom.addEventListener(body2, "focusin", onFocusIn);
   return () => {
-    dom.removeEventListener(body, "focusin", onFocusIn);
-    const index = containmentStack.lastIndexOf(container);
+    dom.removeEventListener(body2, "focusin", onFocusIn);
+    const index = containmentStack.lastIndexOf(container2);
     if (index !== -1) containmentStack.splice(index, 1);
   };
 }
@@ -3229,13 +4173,13 @@ function onEscape(dom, target, handler) {
   dom.addEventListener(target, "keydown", onKeydown);
   return () => dom.removeEventListener(target, "keydown", onKeydown);
 }
-function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
+function rovingMenu(dom, container2, selector = FOCUSABLE_SELECTOR) {
   const onKeydown = (event) => {
     const key = event.key;
     const isActivate = key === "Enter" || key === " " || key === "Spacebar";
     const isMove = key === "ArrowDown" || key === "ArrowUp" || key === "Home" || key === "End";
     if (!isActivate && !isMove) return;
-    const items = getFocusable(dom, container, selector);
+    const items = getFocusable(dom, container2, selector);
     if (items.length === 0) return;
     const active = dom.activeElement();
     const index = active === null ? -1 : items.indexOf(active);
@@ -3253,11 +4197,11 @@ function rovingMenu(dom, container, selector = FOCUSABLE_SELECTOR) {
     else next = index <= 0 ? items.length - 1 : index - 1;
     dom.focus(items[next]);
   };
-  dom.addEventListener(container, "keydown", onKeydown);
-  return () => dom.removeEventListener(container, "keydown", onKeydown);
+  dom.addEventListener(container2, "keydown", onKeydown);
+  return () => dom.removeEventListener(container2, "keydown", onKeydown);
 }
 
-// ../dom/src/live-region.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/dom/src/live-region.ts
 var VISUALLY_HIDDEN = "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;";
 function makeRegion(dom, politeness) {
   const el = dom.createElement("div");
@@ -3269,8 +4213,8 @@ function makeRegion(dom, politeness) {
   return el;
 }
 function createAnnouncer(dom) {
-  const body = dom.body();
-  if (body === null) {
+  const body2 = dom.body();
+  if (body2 === null) {
     return { announce() {
     }, clear() {
     }, destroy() {
@@ -3278,8 +4222,8 @@ function createAnnouncer(dom) {
   }
   const polite = makeRegion(dom, "polite");
   const assertive = makeRegion(dom, "assertive");
-  dom.appendChild(body, polite);
-  dom.appendChild(body, assertive);
+  dom.appendChild(body2, polite);
+  dom.appendChild(body2, assertive);
   let destroyed = false;
   const write = (region, message) => {
     dom.setTextContent(region, "");
@@ -3308,19 +4252,19 @@ function createAnnouncer(dom) {
   };
 }
 
-// ../renderer/src/render-context.ts
-function createRenderContext(dom, graph, container, hydrationDiagnostics, staticHTML) {
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-context.ts
+function createRenderContext(dom, graph, container2, hydrationDiagnostics, staticHTML) {
   return {
     dom,
     graph,
     instances: /* @__PURE__ */ new Map(),
-    container,
+    container: container2,
     ...hydrationDiagnostics !== void 0 ? { hydrationDiagnostics } : {},
     ...staticHTML !== void 0 ? { staticHTML } : {}
   };
 }
 
-// ../renderer/src/node-instance.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/node-instance.ts
 var NodeInstance = class {
   graphNode;
   /** The primary DOM node for this instance (element or text node). */
@@ -3351,7 +4295,7 @@ var NodeInstance = class {
   }
 };
 
-// ../renderer/src/attributes.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/attributes.ts
 var DOM_PROPERTIES = /* @__PURE__ */ new Set([
   "value",
   "checked",
@@ -3412,6 +4356,13 @@ function applyProp(dom, element, name, value) {
     }
     return;
   }
+  if (name.startsWith("style.")) {
+    const el = element;
+    const prop = name.slice("style.".length);
+    if (value === null || value === void 0) el.style.removeProperty(prop);
+    else el.style.setProperty(prop, String(value));
+    return;
+  }
   if (value === null || value === void 0 || value === false) {
     dom.removeAttribute(element, name);
     return;
@@ -3423,7 +4374,7 @@ function patchProp(dom, element, name, oldValue, newValue) {
   applyProp(dom, element, name, newValue);
 }
 
-// ../renderer/src/events.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/events.ts
 function wireEvents(dom, graph, node, element, instance) {
   if (node.events.length === 0) return;
   for (const eventDesc of node.events) {
@@ -3431,8 +4382,8 @@ function wireEvents(dom, graph, node, element, instance) {
     if (handler === void 0) continue;
     const domListener = (domEvent) => {
       if (eventDesc.type === "input" || eventDesc.type === "change") {
-        const input = domEvent.target;
-        handler(input.value);
+        const input2 = domEvent.target;
+        handler(input2.value);
       } else if (eventDesc.type === "submit") {
         domEvent.preventDefault();
         handler(domEvent);
@@ -3447,7 +4398,7 @@ function wireEvents(dom, graph, node, element, instance) {
   }
 }
 
-// ../renderer/src/tag-map.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/tag-map.ts
 var TAG_MAP = {
   application: "div",
   page: "div",
@@ -3487,7 +4438,7 @@ function resolveTag(type) {
   return TAG_MAP[type] ?? "div";
 }
 
-// ../renderer/src/patch.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/patch.ts
 function patchNode(ctx, graphNode, propKey, newValue) {
   const instance = ctx.instances.get(graphNode.id);
   if (instance === void 0) return;
@@ -3528,7 +4479,7 @@ function patchNode(ctx, graphNode, propKey, newValue) {
   }
 }
 
-// ../renderer/src/reconciliation.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/reconciliation.ts
 function reconcileChildren(ctx, parentDom, oldInstances, newNodes, mountFn, hooks) {
   const oldByKey = /* @__PURE__ */ new Map();
   for (const inst of oldInstances) {
@@ -3756,7 +4707,7 @@ function patchExistingInstance(ctx, instance, newNode) {
   }
 }
 
-// ../renderer/src/transition.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/transition.ts
 function getResolvedTransition(graph, nodeId) {
   const fn = graph.getHandler(`__transition__${nodeId}`);
   return fn === void 0 ? void 0 : fn();
@@ -3776,7 +4727,7 @@ function nextFrame(cb) {
 function splitClass(value) {
   if (value === null) return [];
   const out = [];
-  for (const t of value.split(/\s+/)) if (t.length > 0) out.push(t);
+  for (const t6 of value.split(/\s+/)) if (t6.length > 0) out.push(t6);
   return out;
 }
 function addClasses(dom, el, classes2) {
@@ -3937,7 +4888,7 @@ var TransitionController = class {
   }
 };
 
-// ../renderer/src/head.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/head.ts
 var HEAD_MARKER = "data-streetui-head";
 var HEAD_KEY = "data-streetui-head-key";
 function isSignalLike(v) {
@@ -4115,7 +5066,7 @@ function renderHead(compiled) {
   return out;
 }
 
-// ../renderer/src/mount.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/mount.ts
 var SKIP_PROP_KEYS = /* @__PURE__ */ new Set([
   "text",
   "label",
@@ -4158,9 +5109,9 @@ function mountNode(ctx, graphNode, parentDom) {
     return instance2;
   }
   if (graphNode.type === "text") {
-    const text = String(graphNode.getProp("text") ?? "");
+    const text2 = String(graphNode.getProp("text") ?? "");
     const el2 = dom.createElement("span");
-    const textNode = dom.createTextNode(text);
+    const textNode = dom.createTextNode(text2);
     dom.appendChild(el2, textNode);
     applyNodeProps(ctx, graphNode, el2);
     const instance2 = new NodeInstance(graphNode, el2);
@@ -4176,8 +5127,8 @@ function mountNode(ctx, graphNode, parentDom) {
     const level = graphNode.getProp("level") ?? 1;
     const tag2 = `h${level}`;
     const el2 = dom.createElement(tag2);
-    const text = String(graphNode.getProp("text") ?? "");
-    dom.setTextContent(el2, text);
+    const text2 = String(graphNode.getProp("text") ?? "");
+    dom.setTextContent(el2, text2);
     applyNodeProps(ctx, graphNode, el2);
     const instance2 = new NodeInstance(graphNode, el2);
     ctx.instances.set(graphNode.id, instance2);
@@ -4224,28 +5175,28 @@ function mountNode(ctx, graphNode, parentDom) {
   }
   if (graphNode.type === "code") {
     const source = String(graphNode.getProp("text") ?? "");
-    const pre = dom.createElement("pre");
+    const pre2 = dom.createElement("pre");
     const codeEl = dom.createElement("code");
     const textNode = dom.createTextNode(source);
     dom.appendChild(codeEl, textNode);
-    dom.appendChild(pre, codeEl);
-    applyNodeProps(ctx, graphNode, pre);
-    const instance2 = new NodeInstance(graphNode, pre);
+    dom.appendChild(pre2, codeEl);
+    applyNodeProps(ctx, graphNode, pre2);
+    const instance2 = new NodeInstance(graphNode, pre2);
     ctx.instances.set(graphNode.id, instance2);
-    wireEvents(dom, graph, graphNode, pre, instance2);
+    wireEvents(dom, graph, graphNode, pre2, instance2);
     if (graphNode.stateRefs.length !== 0) {
-      wireSignalBindings(ctx, graphNode, instance2, textUpdate(dom, pre, textNode));
+      wireSignalBindings(ctx, graphNode, instance2, textUpdate(dom, pre2, textNode));
     }
-    dom.appendChild(parentDom, pre);
+    dom.appendChild(parentDom, pre2);
     return instance2;
   }
   if (graphNode.type === "link") {
     const el2 = dom.createElement("a");
     const href = graphNode.getProp("href");
-    const label = graphNode.getProp("label");
+    const label2 = graphNode.getProp("label");
     const external = graphNode.getProp("external");
     if (href !== void 0) dom.setAttribute(el2, "href", String(href));
-    if (label !== void 0) dom.setTextContent(el2, String(label));
+    if (label2 !== void 0) dom.setTextContent(el2, String(label2));
     if (external === true) {
       dom.setAttribute(el2, "target", "_blank");
       dom.setAttribute(el2, "rel", "noopener noreferrer");
@@ -4262,8 +5213,8 @@ function mountNode(ctx, graphNode, parentDom) {
   }
   if (graphNode.type === "button") {
     const el2 = dom.createElement("button");
-    const label = graphNode.getProp("label");
-    if (label !== void 0) dom.setTextContent(el2, String(label));
+    const label2 = graphNode.getProp("label");
+    if (label2 !== void 0) dom.setTextContent(el2, String(label2));
     const disabled = graphNode.getProp("disabled");
     if (disabled === true) dom.setAttribute(el2, "disabled", "");
     applyNodeProps(ctx, graphNode, el2);
@@ -4296,13 +5247,13 @@ function mountNode(ctx, graphNode, parentDom) {
     applyNodeProps(ctx, graphNode, anchor);
     const instance2 = new NodeInstance(graphNode, anchor);
     ctx.instances.set(graphNode.id, instance2);
-    const body = dom.body();
+    const body2 = dom.body();
     let target = anchor;
-    if (body !== null) {
+    if (body2 !== null) {
       const portalContainer = dom.createElement("div");
       dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
-      dom.appendChild(body, portalContainer);
-      instance2.trackCleanup(() => dom.removeChild(body, portalContainer));
+      dom.appendChild(body2, portalContainer);
+      instance2.trackCleanup(() => dom.removeChild(body2, portalContainer));
       target = portalContainer;
     }
     for (const child of graphNode.children) {
@@ -4541,7 +5492,174 @@ function wireComponentBehavior(ctx, graphNode, instance) {
   for (const cleanup of fn()) instance.trackCleanup(cleanup);
 }
 
-// ../renderer/src/hydration-diagnostics.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/styling-transitions.ts
+var DURATION_MS = { fast: 120, base: 200, slow: 320 };
+function activeClass(props, duration, easing) {
+  return style({ transition: transition(props, { duration, easing }) });
+}
+function fadeTransition(opts = {}) {
+  const duration = opts.duration ?? "base";
+  const easing = opts.easing ?? "standard";
+  const active = activeClass(["opacity"], duration, easing);
+  const hidden = style({ opacity: 0 });
+  const shown = style({ opacity: 1 });
+  return {
+    enterActive: [active],
+    enterFrom: [hidden],
+    enterTo: [shown],
+    leaveActive: [active],
+    leaveFrom: [shown],
+    leaveTo: [hidden],
+    appear: opts.appear ?? false,
+    duration: DURATION_MS[duration]
+  };
+}
+function scaleTransition(opts = {}) {
+  const duration = opts.duration ?? "base";
+  const easing = opts.easing ?? "emphasized";
+  const active = activeClass(["opacity", "transform"], duration, easing);
+  const hidden = style({ opacity: 0, transform: "scale(.96)" });
+  const shown = style({ opacity: 1, transform: "scale(1)" });
+  return {
+    enterActive: [active],
+    enterFrom: [hidden],
+    enterTo: [shown],
+    leaveActive: [active],
+    leaveFrom: [shown],
+    leaveTo: [hidden],
+    appear: opts.appear ?? false,
+    duration: DURATION_MS[duration]
+  };
+}
+function slideTransition(opts = {}) {
+  const duration = opts.duration ?? "base";
+  const easing = opts.easing ?? "standard";
+  const active = activeClass(["opacity", "transform"], duration, easing);
+  const hidden = style({ opacity: 0, transform: "translateY(8px)" });
+  const shown = style({ opacity: 1, transform: "translateY(0)" });
+  return {
+    enterActive: [active],
+    enterFrom: [hidden],
+    enterTo: [shown],
+    leaveActive: [active],
+    leaveFrom: [shown],
+    leaveTo: [hidden],
+    appear: opts.appear ?? false,
+    duration: DURATION_MS[duration]
+  };
+}
+var transitions = { fadeTransition, scaleTransition, slideTransition };
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/styles.ts
+var CSS_MARKER = "data-streetui-css";
+var CSS_KEYS = "data-streetui-css-keys";
+function renderStyles(options = {}) {
+  const registry = options.registry ?? styleRegistry;
+  const css = registry.serializeCSS();
+  if (css.length === 0) return "";
+  const keys = registry.identities().join(" ");
+  return `<style ${CSS_MARKER} ${CSS_KEYS}="${keys}">${css}</style>`;
+}
+function adoptServerStyles(dom, root, options = {}) {
+  const registry = options.registry ?? styleRegistry;
+  const el = findStyleBlock(dom, root);
+  if (el === null) return 0;
+  const keysAttr = dom.getAttribute(el, CSS_KEYS);
+  if (keysAttr === null || keysAttr.length === 0) {
+    registry.adoptServerIdentities([]);
+    return 0;
+  }
+  const ids = keysAttr.split(" ").filter((s) => s.length > 0);
+  registry.adoptServerIdentities(ids);
+  return ids.length;
+}
+function findStyleBlock(dom, root) {
+  const head = dom.head();
+  const scope = root ?? head;
+  if (scope === null) return null;
+  return searchDescendants(dom, scope);
+}
+function searchDescendants(dom, el) {
+  if (dom.isElement(el) && dom.getAttribute(el, CSS_MARKER) !== null) return el;
+  for (const child of dom.childNodes(el)) {
+    if (!dom.isElement(child)) continue;
+    const found = searchDescendants(dom, child);
+    if (found !== null) return found;
+  }
+  return null;
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/theme.ts
+var DEFAULT_STORAGE_KEY = "streetui-theme";
+var CHOICES = ["light", "dark", "system"];
+function defaultThemeStorage(key = DEFAULT_STORAGE_KEY) {
+  try {
+    if (typeof localStorage !== "undefined") {
+      return {
+        read() {
+          const v = localStorage.getItem(key);
+          return v === "light" || v === "dark" || v === "system" ? v : null;
+        },
+        write(choice) {
+          try {
+            localStorage.setItem(key, choice);
+          } catch {
+          }
+        }
+      };
+    }
+  } catch {
+  }
+  let mem = null;
+  return { read: () => mem, write: (c) => {
+    mem = c;
+  } };
+}
+function systemPrefersDark() {
+  try {
+    return typeof matchMedia !== "undefined" && matchMedia("(prefers-color-scheme: dark)").matches;
+  } catch {
+    return false;
+  }
+}
+function createTheme(options = {}) {
+  const storage = options.storage ?? defaultThemeStorage();
+  const choice = signal(storage.read() ?? options.initial ?? "system");
+  const resolved = derived(() => {
+    const c = choice.get();
+    if (c === "system") return systemPrefersDark() ? "dark" : "light";
+    return c;
+  });
+  const label2 = derived(() => {
+    const c = choice.get();
+    return c === "light" ? "Theme: Light" : c === "dark" ? "Theme: Dark" : "Theme: System";
+  });
+  const root = options.root ?? (typeof document !== "undefined" ? document.documentElement : null);
+  const stop = root !== null ? effect(() => {
+    root.setAttribute("data-theme", resolved.get());
+  }) : () => {
+  };
+  return {
+    choice,
+    resolved,
+    label: label2,
+    set(next) {
+      choice.set(next);
+      storage.write(next);
+    },
+    cycle() {
+      const i = CHOICES.indexOf(choice.get());
+      const next = CHOICES[(i + 1) % CHOICES.length];
+      choice.set(next);
+      storage.write(next);
+    },
+    dispose() {
+      stop();
+    }
+  };
+}
+
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydration-diagnostics.ts
 function formatHydrationDiagnostic(d) {
   const at = ` at ${d.path}`;
   switch (d.type) {
@@ -4572,7 +5690,7 @@ function consoleHydrationDiagnosticSink(logger = console) {
   };
 }
 
-// ../renderer/src/hydrate.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/hydrate.ts
 function hydrateGraph(ctx) {
   const root = ctx.graph.root;
   const instance = new NodeInstance(root, ctx.container);
@@ -4671,16 +5789,16 @@ function hydrateNode(ctx, graphNode, domNode, path) {
     case "portal": {
       const instance = new NodeInstance(graphNode, domNode);
       ctx.instances.set(graphNode.id, instance);
-      const body = dom.body();
+      const body2 = dom.body();
       let target = domNode;
-      if (body !== null) {
+      if (body2 !== null) {
         const portalContainer = dom.createElement("div");
         dom.setAttribute(portalContainer, "data-streetui-portal-container", "");
         for (const child of dom.childNodes(domNode)) {
           dom.appendChild(portalContainer, child);
         }
-        dom.appendChild(body, portalContainer);
-        instance.trackCleanup(() => dom.removeChild(body, portalContainer));
+        dom.appendChild(body2, portalContainer);
+        instance.trackCleanup(() => dom.removeChild(body2, portalContainer));
         target = portalContainer;
       }
       hydrateChildren(ctx, graphNode, instance, target, path);
@@ -4808,7 +5926,7 @@ function expectedTag(ctx, graphNode) {
   }
 }
 
-// ../renderer/src/render-handle.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/render-handle.ts
 var StreetRenderHandle = class {
   _disposed = false;
   _ctx;
@@ -4825,15 +5943,15 @@ var StreetRenderHandle = class {
     this._disposed = true;
     this._rootInstance.dispose();
     const dom = this._ctx.dom;
-    const container = this._ctx.container;
-    for (const child of dom.childNodes(container)) {
-      dom.removeChild(container, child);
+    const container2 = this._ctx.container;
+    for (const child of dom.childNodes(container2)) {
+      dom.removeChild(container2, child);
     }
     this._ctx.instances.clear();
   }
 };
 
-// ../renderer/src/renderer.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/renderer.ts
 var StreetRendererImpl = class {
   _dom;
   _hydrationDiagnostics;
@@ -4843,8 +5961,8 @@ var StreetRendererImpl = class {
       this._hydrationDiagnostics = options.hydrationDiagnostics;
     }
   }
-  mount(compiled, container) {
-    const ctx = createRenderContext(this._dom, compiled.graph, container);
+  mount(compiled, container2) {
+    const ctx = createRenderContext(this._dom, compiled.graph, container2);
     const rootInstance = mountGraph(ctx);
     this._wireSignals(ctx, rootInstance);
     return new StreetRenderHandle(ctx, rootInstance);
@@ -4856,11 +5974,11 @@ var StreetRendererImpl = class {
    * behavior (events + signal subscriptions). Mismatched subtrees are locally
    * replaced. Returns the same handle type as `mount`.
    */
-  hydrate(compiled, container) {
+  hydrate(compiled, container2) {
     const ctx = createRenderContext(
       this._dom,
       compiled.graph,
-      container,
+      container2,
       this._hydrationDiagnostics
     );
     const rootInstance = hydrateGraph(ctx);
@@ -4874,17 +5992,17 @@ function createRenderer(options) {
   return new StreetRendererImpl(options);
 }
 
-// ../renderer/src/dehydrate.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/dehydrate.ts
 var STATE_MARKER_ATTR = "data-streetui-state";
 function escapeForScript(json) {
   let out = "";
   for (const ch of json) {
-    const code = ch.charCodeAt(0);
+    const code2 = ch.charCodeAt(0);
     if (ch === "<") out += "\\u003c";
     else if (ch === ">") out += "\\u003e";
     else if (ch === "&") out += "\\u0026";
-    else if (code === 8232) out += "\\u2028";
-    else if (code === 8233) out += "\\u2029";
+    else if (code2 === 8232) out += "\\u2028";
+    else if (code2 === 8233) out += "\\u2029";
     else out += ch;
   }
   return out;
@@ -4897,10 +6015,10 @@ function serializeState(state) {
 function readState(dom, root) {
   const el = dom.querySelector(root, `script[${STATE_MARKER_ATTR}]`);
   if (el === null) return {};
-  const text = dom.getTextContent(el);
-  if (text === null || text.length === 0) return {};
+  const text2 = dom.getTextContent(el);
+  if (text2 === null || text2.length === 0) return {};
   try {
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(text2);
     if (parsed !== null && typeof parsed === "object") {
       return parsed;
     }
@@ -4910,7 +6028,7 @@ function readState(dom, root) {
   }
 }
 
-// ../compiler/dist/diagnostics.js
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/compiler/dist/diagnostics.js
 var TEXT_PROP_KEYS = /* @__PURE__ */ new Set(["text", "label", "value"]);
 function analyzeGraph(graph) {
   const nodes = /* @__PURE__ */ new Map();
@@ -4967,7 +6085,7 @@ function analyzeGraph(graph) {
   return { nodes, summary };
 }
 
-// ../renderer/src/static-ssr-plan.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/static-ssr-plan.ts
 function collectMaximalStaticRoots(graph) {
   const analysis = analyzeGraph(graph);
   const roots = [];
@@ -4985,10 +6103,10 @@ function collectMaximalStaticRoots(graph) {
   return roots;
 }
 function serializeStaticSubtree(dom, graph, root) {
-  const container = dom.createElement("div");
-  const ctx = createRenderContext(dom, graph, container);
-  const instance = mountNode(ctx, root, container);
-  const html = dom.serializeInner(container);
+  const container2 = dom.createElement("div");
+  const ctx = createRenderContext(dom, graph, container2);
+  const instance = mountNode(ctx, root, container2);
+  const html = dom.serializeInner(container2);
   instance.dispose();
   ctx.instances.clear();
   return html;
@@ -5014,21 +6132,21 @@ function getStaticSSRPlan(compiled) {
   return plan;
 }
 
-// ../renderer/src/ssr.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/renderer/src/ssr.ts
 function renderToString(compiled, options = {}) {
   const dom = options.domAdapter ?? new ServerDOMAdapter();
   const plan = options.staticPlan === null ? void 0 : options.staticPlan ?? getStaticSSRPlan(compiled);
   const staticHTML = plan !== void 0 && plan.size > 0 ? plan : void 0;
-  const container = dom.createElement("div");
-  const ctx = createRenderContext(dom, compiled.graph, container, void 0, staticHTML);
+  const container2 = dom.createElement("div");
+  const ctx = createRenderContext(dom, compiled.graph, container2, void 0, staticHTML);
   const rootInstance = mountGraph(ctx);
-  const html = dom.serializeInner(container);
+  const html = dom.serializeInner(container2);
   rootInstance.dispose();
   ctx.instances.clear();
   return html;
 }
 
-// ../router/src/matching.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/matching.ts
 function segments(path) {
   return path.split("/").filter((s) => s.length > 0);
 }
@@ -5083,7 +6201,7 @@ function splitTarget(to) {
   };
 }
 
-// ../router/src/history.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/history.ts
 function buildLocation(pathname, search) {
   return { pathname, search };
 }
@@ -5137,20 +6255,20 @@ function createMemoryHistory(initial = "/") {
     if (qIndex < 0) return buildLocation(entry, "");
     return buildLocation(entry.slice(0, qIndex), entry.slice(qIndex + 1));
   };
-  const stack = [initial];
+  const stack2 = [initial];
   let index = 0;
   return {
     location() {
-      return parse(stack[index]);
+      return parse(stack2[index]);
     },
     push(pathname, search) {
-      stack.splice(index + 1);
-      stack.push(toUrl(pathname, search));
-      index = stack.length - 1;
+      stack2.splice(index + 1);
+      stack2.push(toUrl(pathname, search));
+      index = stack2.length - 1;
       notify();
     },
     replace(pathname, search) {
-      stack[index] = toUrl(pathname, search);
+      stack2[index] = toUrl(pathname, search);
       notify();
     },
     back() {
@@ -5160,7 +6278,7 @@ function createMemoryHistory(initial = "/") {
       }
     },
     forward() {
-      if (index < stack.length - 1) {
+      if (index < stack2.length - 1) {
         index++;
         notify();
       }
@@ -5175,7 +6293,7 @@ function createMemoryHistory(initial = "/") {
   };
 }
 
-// ../router/src/router.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/router.ts
 var DEFAULT_NOT_FOUND = {
   path: "*",
   builder: (page) => {
@@ -5248,7 +6366,7 @@ function createRouter(options) {
   };
 }
 
-// ../router/src/mount-router.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/router/src/mount-router.ts
 var ROUTER_OUTLET_ID = "streetui-router-outlet";
 var ROUTER_OUTLET_KEY = "router-outlet";
 function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
@@ -5260,7 +6378,7 @@ function isExternalHref(href) {
   href.startsWith("//");
 }
 function mountRouter(router, options) {
-  const { container } = options;
+  const { container: container2 } = options;
   const renderer = options.renderer ?? createRenderer();
   const outletId = options.outletId ?? ROUTER_OUTLET_ID;
   const interceptLinks = options.interceptLinks ?? true;
@@ -5278,8 +6396,8 @@ function mountRouter(router, options) {
         node.setProp("_hydrationBoundary", true);
       }
     }
-    shellMounted = hydrateMode ? shellRuntime.hydrate(shellCompiled, container) : shellRuntime.mount(shellCompiled, container);
-    const found = container.querySelector(`[id="${outletId}"]`);
+    shellMounted = hydrateMode ? shellRuntime.hydrate(shellCompiled, container2) : shellRuntime.mount(shellCompiled, container2);
+    const found = container2.querySelector(`[id="${outletId}"]`);
     if (found === null) {
       throw new Error(
         `[Router] The shell must contain a route outlet. Call routerOutlet(scope) (or add a container with id="${outletId}") inside your shell builder.`
@@ -5287,7 +6405,7 @@ function mountRouter(router, options) {
     }
     outlet = found;
   } else {
-    outlet = container;
+    outlet = container2;
   }
   const routeTransition = options.transition !== void 0 ? resolveTransition(options.transition) : void 0;
   const txDom = routeTransition !== void 0 ? new BrowserDOMAdapter() : void 0;
@@ -5400,12 +6518,12 @@ function mountRouter(router, options) {
     router.navigate(href);
   };
   if (interceptLinks) {
-    container.addEventListener("click", onClick);
+    container2.addEventListener("click", onClick);
   }
   return {
     outlet,
     unmount() {
-      if (interceptLinks) container.removeEventListener("click", onClick);
+      if (interceptLinks) container2.removeEventListener("click", onClick);
       stopRouteSub();
       for (const [route, run] of pendingLeaves) {
         run.cancel();
@@ -5419,7 +6537,7 @@ function mountRouter(router, options) {
   };
 }
 
-// ../forms/src/validators.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/forms/src/validators.ts
 function required(message = "This field is required") {
   return (value) => value.trim().length === 0 ? message : void 0;
 }
@@ -5438,15 +6556,15 @@ function pattern(regex, message = "Invalid format") {
 }
 function runValidators(value, validators) {
   if (validators === void 0) return void 0;
-  const list = Array.isArray(validators) ? validators : [validators];
-  for (const validate of list) {
+  const list2 = Array.isArray(validators) ? validators : [validators];
+  for (const validate of list2) {
     const error = validate(value);
     if (error !== void 0) return error;
   }
   return void 0;
 }
 
-// ../forms/src/form.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/forms/src/form.ts
 function createForm(config) {
   const names = Object.keys(config.initialValues);
   const validators = config.validators ?? {};
@@ -5491,31 +6609,31 @@ function createForm(config) {
     };
     fields.set(name, { api, value, touched, error, valid: valid2, dirty: dirty2, initial, unsub });
   }
-  const field = (name) => {
+  const field2 = (name) => {
     const f = fields.get(name);
     if (f === void 0) throw new Error(`Unknown form field: ${name}`);
     return f;
   };
   const values = derived(() => {
     const out = {};
-    for (const name of names) out[name] = field(name).value.get();
+    for (const name of names) out[name] = field2(name).value.get();
     return out;
   });
   const errors = derived(() => {
     const out = {};
     for (const name of names) {
-      const e = field(name).error.get();
+      const e = field2(name).error.get();
       if (e !== void 0) out[name] = e;
     }
     return out;
   });
   const touchedMap = derived(() => {
     const out = {};
-    for (const name of names) out[name] = field(name).touched.get();
+    for (const name of names) out[name] = field2(name).touched.get();
     return out;
   });
-  const dirty = derived(() => names.some((n) => field(n).dirty.get()));
-  const valid = derived(() => names.every((n) => field(n).valid.get()));
+  const dirty = derived(() => names.some((n) => field2(n).dirty.get()));
+  const valid = derived(() => names.every((n) => field2(n).valid.get()));
   const status = signal("idle");
   const submitting = derived(() => status.get() === "submitting");
   const submitted = derived(() => status.get() === "success");
@@ -5526,7 +6644,7 @@ function createForm(config) {
       batch(() => {
         for (const name of names) {
           const next = partial[name];
-          if (next !== void 0) field(name).value.set(next);
+          if (next !== void 0) field2(name).value.set(next);
         }
       });
     } finally {
@@ -5538,7 +6656,7 @@ function createForm(config) {
     try {
       batch(() => {
         for (const name of names) {
-          const f = field(name);
+          const f = field2(name);
           f.value.set(f.initial);
           f.touched.set(false);
         }
@@ -5551,7 +6669,7 @@ function createForm(config) {
   }
   async function submit() {
     batch(() => {
-      for (const name of names) field(name).touched.set(true);
+      for (const name of names) field2(name).touched.set(true);
     });
     if (!valid.peek()) {
       return;
@@ -5591,7 +6709,7 @@ function createForm(config) {
     submitted,
     status,
     submitError,
-    field: (name) => field(name).api,
+    field: (name) => field2(name).api,
     setValues,
     submit,
     reset,
@@ -5599,31 +6717,31 @@ function createForm(config) {
   };
 }
 
-// ../context/src/context.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/context/src/context.ts
 function createContext(defaultValue, description) {
   const id = Symbol(description ?? "streetui.context");
-  const stack = [];
+  const stack2 = [];
   return {
     id,
     defaultValue,
     provide(value, run) {
-      stack.push(value);
+      stack2.push(value);
       try {
         return run();
       } finally {
-        stack.pop();
+        stack2.pop();
       }
     },
     consume() {
-      return stack.length > 0 ? stack[stack.length - 1] : defaultValue;
+      return stack2.length > 0 ? stack2[stack2.length - 1] : defaultValue;
     },
     hasProvider() {
-      return stack.length > 0;
+      return stack2.length > 0;
     }
   };
 }
 
-// ../i18n/src/i18n.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/i18n/src/i18n.ts
 var INTERPOLATION = /\{(\w+)\}/g;
 function interpolate(template, params) {
   if (params === void 0) return template;
@@ -5681,7 +6799,7 @@ function createI18n(config) {
   };
 }
 
-// ../devtools/src/inspector.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspector.ts
 function inspectGraph(graph) {
   return inspectNode(graph.root, 0);
 }
@@ -5738,7 +6856,7 @@ function inspectComponents(graph) {
 }
 function inspectInteractions(graph) {
   const overlays = [];
-  const transitions = [];
+  const transitions2 = [];
   graph.walk((node, depth) => {
     const overlayFn = graph.getHandler(`__overlay__${node.id}`);
     if (overlayFn !== void 0) {
@@ -5757,21 +6875,21 @@ function inspectInteractions(graph) {
     }
     const transitionFn = graph.getHandler(`__transition__${node.id}`);
     if (transitionFn !== void 0) {
-      const t = transitionFn();
-      transitions.push({
+      const t6 = transitionFn();
+      transitions2.push({
         id: node.id,
         key: node.key,
         nodeType: node.type,
-        duration: t.duration,
-        appear: t.appear,
+        duration: t6.duration,
+        appear: t6.appear,
         depth
       });
     }
   });
-  return { overlays, transitions };
+  return { overlays, transitions: transitions2 };
 }
 
-// ../devtools/src/application.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/application.ts
 function collectPerf(node, distinctSignals, acc) {
   acc.totalNodes += 1;
   if (node.depth > acc.maxDepth) acc.maxDepth = node.depth;
@@ -5828,7 +6946,7 @@ function inspectApplication(compiled) {
   };
 }
 
-// ../devtools/src/diagnostics.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/diagnostics.ts
 var DEFAULT_PERF_THRESHOLDS = {
   maxNodes: 5e3,
   maxDepth: 32,
@@ -5836,45 +6954,45 @@ var DEFAULT_PERF_THRESHOLDS = {
   maxSignals: 1e3
 };
 function diagnosePerformance(compiled, thresholds = {}) {
-  const t = { ...DEFAULT_PERF_THRESHOLDS, ...thresholds };
+  const t6 = { ...DEFAULT_PERF_THRESHOLDS, ...thresholds };
   const { perf } = inspectApplication(compiled);
   const out = [];
-  if (perf.totalNodes > t.maxNodes) {
+  if (perf.totalNodes > t6.maxNodes) {
     out.push({
       code: "large-graph",
-      message: `Graph has ${perf.totalNodes} nodes (> ${t.maxNodes}); consider splitting the view or paginating.`,
+      message: `Graph has ${perf.totalNodes} nodes (> ${t6.maxNodes}); consider splitting the view or paginating.`,
       observed: perf.totalNodes,
-      threshold: t.maxNodes
+      threshold: t6.maxNodes
     });
   }
-  if (perf.maxDepth > t.maxDepth) {
+  if (perf.maxDepth > t6.maxDepth) {
     out.push({
       code: "deep-tree",
-      message: `Graph nests ${perf.maxDepth} levels deep (> ${t.maxDepth}); deep trees slow mount and reconciliation.`,
+      message: `Graph nests ${perf.maxDepth} levels deep (> ${t6.maxDepth}); deep trees slow mount and reconciliation.`,
       observed: perf.maxDepth,
-      threshold: t.maxDepth
+      threshold: t6.maxDepth
     });
   }
-  if (perf.largestChildCount > t.maxChildCount) {
+  if (perf.largestChildCount > t6.maxChildCount) {
     out.push({
       code: "large-list",
-      message: `A single node has ${perf.largestChildCount} children (> ${t.maxChildCount}); large un-windowed lists dominate DOM cost.`,
+      message: `A single node has ${perf.largestChildCount} children (> ${t6.maxChildCount}); large un-windowed lists dominate DOM cost.`,
       observed: perf.largestChildCount,
-      threshold: t.maxChildCount
+      threshold: t6.maxChildCount
     });
   }
-  if (perf.distinctSignals > t.maxSignals) {
+  if (perf.distinctSignals > t6.maxSignals) {
     out.push({
       code: "high-signal-fanout",
-      message: `${perf.distinctSignals} distinct signals are bound (> ${t.maxSignals}); heavy reactive fan-out increases update overhead.`,
+      message: `${perf.distinctSignals} distinct signals are bound (> ${t6.maxSignals}); heavy reactive fan-out increases update overhead.`,
       observed: perf.distinctSignals,
-      threshold: t.maxSignals
+      threshold: t6.maxSignals
     });
   }
   return out;
 }
 
-// ../devtools/src/inspect-reactive.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspect-reactive.ts
 function inspectSignal(source, options = {}) {
   const raw = source.peek();
   let value = raw;
@@ -5941,10 +7059,10 @@ function inspectRouter(router) {
     isFallback: match.isFallback === true
   };
 }
-function inspectForm(form, options = {}) {
-  const values = form.values.peek();
-  const errorsRaw = form.errors.peek();
-  const touchedRaw = form.touched.peek();
+function inspectForm(form2, options = {}) {
+  const values = form2.values.peek();
+  const errorsRaw = form2.errors.peek();
+  const touchedRaw = form2.touched.peek();
   const errors = {};
   for (const [k, v] of Object.entries(errorsRaw)) if (v !== void 0) errors[k] = v;
   const touched = {};
@@ -5953,9 +7071,9 @@ function inspectForm(form, options = {}) {
     fields: Object.keys(values),
     errors,
     touched,
-    dirty: form.dirty.peek(),
-    valid: form.valid.peek(),
-    status: form.status.peek()
+    dirty: form2.dirty.peek(),
+    valid: form2.valid.peek(),
+    status: form2.status.peek()
   };
   if (options.includeValues !== true) return base;
   return { ...base, values: { ...values } };
@@ -5976,7 +7094,7 @@ function inspectI18n(i18n, options = {}) {
   return { ...base, missingKeys };
 }
 
-// ../devtools/src/inspect-detail.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspect-detail.ts
 function inspectEvents(graph) {
   const nodes = [];
   const byType = {};
@@ -5984,8 +7102,8 @@ function inspectEvents(graph) {
   graph.walk((node, depth) => {
     if (node.events.length === 0) return;
     const types = node.events.map((e) => e.type);
-    for (const t of types) {
-      byType[t] = (byType[t] ?? 0) + 1;
+    for (const t6 of types) {
+      byType[t6] = (byType[t6] ?? 0) + 1;
       totalHandlers += 1;
     }
     nodes.push({
@@ -6038,7 +7156,7 @@ function inspectSignalGraph(compiled, options = {}) {
   return { signals, edges };
 }
 
-// ../devtools/src/inspect-ssr.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/inspect-ssr.ts
 function countType(graph, type) {
   let n = 0;
   graph.walk((node) => {
@@ -6067,7 +7185,7 @@ function inspectHydration(compiled) {
   };
 }
 
-// ../devtools/src/panels.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/panels.ts
 function createDevTools(compiled, sources = {}, options = {}) {
   let current = capture(compiled, sources, options);
   return {
@@ -6101,8 +7219,8 @@ function capture(compiled, sources, options) {
   };
   const live = {};
   if (sources.signals !== void 0) {
-    for (const [label, sig] of Object.entries(sources.signals)) {
-      live[label] = inspectSignal(
+    for (const [label2, sig] of Object.entries(sources.signals)) {
+      live[label2] = inspectSignal(
         sig,
         options.redactSignals !== void 0 ? { redact: options.redactSignals } : {}
       );
@@ -6154,7 +7272,7 @@ function capture(compiled, sources, options) {
 }
 function mapInspect(source, inspect) {
   const out = {};
-  for (const [label, value] of Object.entries(source)) out[label] = inspect(value);
+  for (const [label2, value] of Object.entries(source)) out[label2] = inspect(value);
   return out;
 }
 function findNode(node, id) {
@@ -6176,8 +7294,8 @@ function formatSnapshot(s) {
     `  signals ${app.signalCount} \xB7 handlers ${app.eventHandlers} \xB7 bindings ${app.stateBindings} \xB7 errors ${app.errors} \xB7 warnings ${app.warnings}`
   );
   lines.push(`Signals: ${s.signals.boundSignalIds.length} bound in graph`);
-  for (const [label, sig] of Object.entries(s.signals.live)) {
-    lines.push(`  ${label} [${sig.kind}] = ${format(sig.value)} \xB7 observers ${sig.observerCount ?? "?"}`);
+  for (const [label2, sig] of Object.entries(s.signals.live)) {
+    lines.push(`  ${label2} [${sig.kind}] = ${format(sig.value)} \xB7 observers ${sig.observerCount ?? "?"}`);
   }
   if (s.components.length > 0) {
     lines.push(`Components: ${s.components.length}`);
@@ -6194,8 +7312,8 @@ function formatSnapshot(s) {
   }
   if (s.transitions.length > 0) {
     lines.push(`Transitions: ${s.transitions.length}`);
-    for (const t of s.transitions) {
-      lines.push(`  ${t.key ?? t.id} on <${t.nodeType}> \xB7 ${t.duration}ms${t.appear ? " \xB7 appear" : ""}`);
+    for (const t6 of s.transitions) {
+      lines.push(`  ${t6.key ?? t6.id} on <${t6.nodeType}> \xB7 ${t6.duration}ms${t6.appear ? " \xB7 appear" : ""}`);
     }
   }
   if (s.router !== void 0) {
@@ -6203,26 +7321,26 @@ function formatSnapshot(s) {
   }
   if (s.resources !== void 0) {
     lines.push("Resources:");
-    for (const [label, r] of Object.entries(s.resources)) {
-      lines.push(`  ${label}: ${r.status}${r.loading ? " (loading)" : ""}${r.hasError ? ` !${r.errorName}` : ""}`);
+    for (const [label2, r] of Object.entries(s.resources)) {
+      lines.push(`  ${label2}: ${r.status}${r.loading ? " (loading)" : ""}${r.hasError ? ` !${r.errorName}` : ""}`);
     }
   }
   if (s.mutations !== void 0) {
     lines.push("Mutations:");
-    for (const [label, m] of Object.entries(s.mutations)) {
-      lines.push(`  ${label}: ${m.status}${m.pending ? " (pending)" : ""}${m.hasError ? ` !${m.errorName}` : ""}`);
+    for (const [label2, m] of Object.entries(s.mutations)) {
+      lines.push(`  ${label2}: ${m.status}${m.pending ? " (pending)" : ""}${m.hasError ? ` !${m.errorName}` : ""}`);
     }
   }
   if (s.forms !== void 0) {
     lines.push("Forms:");
-    for (const [label, f] of Object.entries(s.forms)) {
-      lines.push(`  ${label}: ${f.valid ? "valid" : "invalid"} \xB7 ${f.status} \xB7 fields ${f.fields.length}`);
+    for (const [label2, f] of Object.entries(s.forms)) {
+      lines.push(`  ${label2}: ${f.valid ? "valid" : "invalid"} \xB7 ${f.status} \xB7 fields ${f.fields.length}`);
     }
   }
   if (s.contexts !== void 0) {
     lines.push("Contexts:");
-    for (const [label, c] of Object.entries(s.contexts)) {
-      lines.push(`  ${label} (${c.description}): ${c.hasProvider ? "provided" : "no provider"}`);
+    for (const [label2, c] of Object.entries(s.contexts)) {
+      lines.push(`  ${label2} (${c.description}): ${c.hasProvider ? "provided" : "no provider"}`);
     }
   }
   if (s.i18n !== void 0) {
@@ -6244,7 +7362,7 @@ function formatSnapshot(s) {
     lines.push(`  ${m}`);
   }
   lines.push(
-    `Events: ${s.events.nodes.length} node(s), ${s.events.totalHandlers} handler(s)` + (Object.keys(s.events.byType).length > 0 ? ` \xB7 ${Object.entries(s.events.byType).map(([t, n]) => `${t}\xD7${n}`).join(", ")}` : "")
+    `Events: ${s.events.nodes.length} node(s), ${s.events.totalHandlers} handler(s)` + (Object.keys(s.events.byType).length > 0 ? ` \xB7 ${Object.entries(s.events.byType).map(([t6, n]) => `${t6}\xD7${n}`).join(", ")}` : "")
   );
   lines.push(
     `Signal graph: ${s.signalGraph.signals.length} signal(s), ${s.signalGraph.edges.length} binding edge(s)`
@@ -6269,7 +7387,7 @@ function format(value) {
   return String(value);
 }
 
-// ../devtools/src/view.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/view.ts
 function escapeHtml(value) {
   const s = typeof value === "string" ? value : stringifyValue(value);
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -6285,9 +7403,9 @@ function stringifyValue(value) {
   }
   return String(value);
 }
-function section(title, count, body) {
+function section(title, count, body2) {
   const badge = count === void 0 ? "" : ` <span class="st-count">${count}</span>`;
-  return `<section class="st-panel"><h2>${escapeHtml(title)}${badge}</h2>${body}</section>`;
+  return `<section class="st-panel"><h2>${escapeHtml(title)}${badge}</h2>${body2}</section>`;
 }
 function ul(items) {
   if (items.length === 0) return '<p class="st-empty">(none)</p>';
@@ -6321,7 +7439,7 @@ function renderDevToolsHTML(s) {
       s.signals.boundSignalIds.length,
       `<p class="st-dim">${s.signals.boundSignalIds.length} bound in graph \xB7 effects shown as observer counts (no global effect registry)</p>` + ul(
         Object.entries(s.signals.live).map(
-          ([label, sig]) => `<code>${escapeHtml(label)}</code> <span class="st-key">[${escapeHtml(sig.kind)}]</span> = <code>${escapeHtml(sig.value)}</code> <span class="st-dim">observers ${escapeHtml(sig.observerCount ?? "?")}</span>`
+          ([label2, sig]) => `<code>${escapeHtml(label2)}</code> <span class="st-key">[${escapeHtml(sig.kind)}]</span> = <code>${escapeHtml(sig.value)}</code> <span class="st-dim">observers ${escapeHtml(sig.observerCount ?? "?")}</span>`
         )
       )
     )
@@ -6342,7 +7460,7 @@ function renderDevToolsHTML(s) {
         Object.keys(s.resources).length,
         ul(
           Object.entries(s.resources).map(
-            ([label, r]) => `<code>${escapeHtml(label)}</code>: ${escapeHtml(r.status)}` + (r.loading ? ' <span class="st-dim">(loading)</span>' : "") + (r.hasError ? ` <span class="st-err">!${escapeHtml(r.errorName)}</span>` : "")
+            ([label2, r]) => `<code>${escapeHtml(label2)}</code>: ${escapeHtml(r.status)}` + (r.loading ? ' <span class="st-dim">(loading)</span>' : "") + (r.hasError ? ` <span class="st-err">!${escapeHtml(r.errorName)}</span>` : "")
           )
         )
       )
@@ -6366,7 +7484,7 @@ function renderDevToolsHTML(s) {
       s.transitions.length,
       ul(
         s.transitions.map(
-          (t) => `<code>${escapeHtml(t.key ?? t.id)}</code> on <code>&lt;${escapeHtml(t.nodeType)}&gt;</code> <span class="st-dim">${t.duration}ms${t.appear ? " \xB7 appear" : ""}</span>`
+          (t6) => `<code>${escapeHtml(t6.key ?? t6.id)}</code> on <code>&lt;${escapeHtml(t6.nodeType)}&gt;</code> <span class="st-dim">${t6.duration}ms${t6.appear ? " \xB7 appear" : ""}</span>`
         )
       )
     )
@@ -6378,7 +7496,7 @@ function renderDevToolsHTML(s) {
         Object.keys(s.forms).length,
         ul(
           Object.entries(s.forms).map(
-            ([label, f]) => `<code>${escapeHtml(label)}</code>: ${f.valid ? "valid" : "invalid"} \xB7 ${escapeHtml(f.status)} \xB7 ${f.fields.length} field(s)`
+            ([label2, f]) => `<code>${escapeHtml(label2)}</code>: ${f.valid ? "valid" : "invalid"} \xB7 ${escapeHtml(f.status)} \xB7 ${f.fields.length} field(s)`
           )
         )
       )
@@ -6439,7 +7557,7 @@ var DEVTOOLS_CSS = [
   "code{color:#d7d7e0}"
 ].join("");
 
-// ../devtools/src/interactive.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/interactive.ts
 var DEVTOOLS_TABS = [
   { id: "components", label: "Component Tree" },
   { id: "inspector", label: "Component Inspector" },
@@ -6457,8 +7575,8 @@ var DEVTOOLS_TABS = [
 var EMBED_ESCAPE = new RegExp("[<\\u2028\\u2029]", "g");
 function embedJson(snapshot) {
   return JSON.stringify(snapshot).replace(EMBED_ESCAPE, (ch) => {
-    const code = ch.charCodeAt(0).toString(16).padStart(4, "0");
-    return `\\u${code}`;
+    const code2 = ch.charCodeAt(0).toString(16).padStart(4, "0");
+    return `\\u${code2}`;
   });
 }
 function renderInteractiveDevTools(snapshot, options = {}) {
@@ -6466,7 +7584,7 @@ function renderInteractiveDevTools(snapshot, options = {}) {
   const title = options.title ?? `StreetUI DevTools \u2014 ${app.identity.name}`;
   const initialTab = options.initialTab ?? DEVTOOLS_TABS[0].id;
   const tabButtons = DEVTOOLS_TABS.map(
-    (t) => `<button type="button" role="tab" class="st-tab" data-tab="${escapeHtml(t.id)}"${t.id === initialTab ? ' aria-selected="true"' : ' aria-selected="false"'}>${escapeHtml(t.label)}</button>`
+    (t6) => `<button type="button" role="tab" class="st-tab" data-tab="${escapeHtml(t6.id)}"${t6.id === initialTab ? ' aria-selected="true"' : ' aria-selected="false"'}>${escapeHtml(t6.label)}</button>`
   ).join("");
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>${INTERACTIVE_CSS}</style></head><body class="st-dt"><header class="st-top"><h1>${escapeHtml(title)} <span class="st-dim">v${escapeHtml(app.identity.version)}</span></h1><button type="button" id="st-refresh" class="st-refresh">&#8635; Refresh</button></header><nav class="st-tabs" role="tablist" aria-label="DevTools panels">${tabButtons}</nav><main id="st-panel" class="st-body" role="tabpanel" aria-live="polite"></main><footer class="st-foot"><span class="st-dim">Structural inspection over one compiled graph. Not a production profiler; browser/AT conformance not claimed (gates BLOCKED).</span></footer><script type="application/json" id="st-data">${embedJson(snapshot)}</script><script>${CONTROLLER_JS.replace("__INITIAL_TAB__", JSON.stringify(initialTab))}</script></body></html>`;
 }
@@ -6640,7 +7758,7 @@ var INTERACTIVE_CSS = [
   "code{color:#d7d7e0}"
 ].join("");
 
-// ../devtools/src/devtools-report.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/devtools/src/devtools-report.ts
 function renderDevToolsReport(compiled, sources = {}, options = {}) {
   const session = createDevTools(compiled, sources, options);
   return renderDevToolsHTML(session.snapshot);
@@ -6655,11 +7773,13 @@ function defineConfig(config) {
   AppBuilder,
   Application,
   ApplicationGraph,
+  BREAKPOINTS,
   BaseNode,
   BrowserDOMAdapter,
   CleanupRegistry,
   ContainerBuilderImpl,
   DEFAULT_PERF_THRESHOLDS,
+  DEFAULT_TOKENS,
   DEVTOOLS_TABS,
   DerivedSignal,
   DiagnosticCollector,
@@ -6696,21 +7816,35 @@ function defineConfig(config) {
   StreetFrameworkError,
   StreetRenderHandle,
   StreetRendererImpl,
+  StyleRegistry,
   TransitionController,
   VERSION,
+  a11y,
   a11yIds,
+  adoptServerStyles,
+  animate,
+  animation,
   applyNodeProps,
   applyProp,
+  backdrop,
   batch,
   bindDomEvent,
+  blockquote,
+  body,
   browserDOMAdapter,
+  button,
   buttonUpdate,
+  canonicalize,
+  caption,
+  center,
+  code,
   compile,
   compileGraph,
   component,
   consoleDiagnosticSink,
   consoleHydrationDiagnosticSink,
   containFocus,
+  container,
   createAnnouncer,
   createApplication,
   createAuthSession,
@@ -6729,31 +7863,53 @@ function defineConfig(config) {
   createRuntime,
   createStore,
   createStreetEvent,
+  createTheme,
+  createThemeTokens,
+  cssPropName,
+  cssValue,
+  cx,
+  defaultThemeStorage,
   defineConfig,
   derived,
   describeError,
   diagnosePerformance,
+  dialog,
+  dropdown,
+  dropdownItem,
   effect,
   email,
   environment,
   escapeHtml,
   escapeHtmlAttr,
   escapeHtmlText,
+  fadeTransition,
+  field,
+  fieldError,
+  fieldHelp,
+  fieldLabel,
   flushSync,
   focusById,
   focusFirst,
   focusInitial,
+  focusRing,
+  form,
   formatDiagnostic,
   formatDiagnosticContext,
   formatHydrationDiagnostic,
   frameworkError,
   generateApplicationId,
+  generateCSS,
   generateNodeId,
   getFocusable,
   getResolvedTransition,
   globalEventBus,
+  grid,
+  hashIdentity,
+  heading,
   headingUpdate,
   hydrateGraph,
+  identityOf,
+  input,
   inputUpdate,
   inspectApplication,
   inspectComponents,
@@ -6774,7 +7930,11 @@ function defineConfig(config) {
   isComponentDefinition,
   isHeadContribution,
   isTransitionConfig,
+  label,
+  layout,
+  link,
   linkUpdate,
+  list,
   matchPattern,
   matchRoutes,
   maxLength,
@@ -6789,13 +7949,18 @@ function defineConfig(config) {
   normalizePath,
   observerCount,
   onEscape,
+  overlay,
   patchNode,
   patchProp,
   pattern,
+  popover,
+  pre,
   printDiagnostics,
   printGraph,
   reactiveListItemKey,
   reactiveListItemSignature,
+  reactiveVarName,
+  reactiveVarValue,
   readState,
   reconcileChildren,
   reconcileChildrenByPlan,
@@ -6803,6 +7968,7 @@ function defineConfig(config) {
   renderDevToolsReport,
   renderHead,
   renderInteractiveDevTools,
+  renderStyles,
   renderToString,
   reportDiagnostic,
   reportError,
@@ -6815,9 +7981,11 @@ function defineConfig(config) {
   restoreFocus,
   routerOutlet,
   rovingMenu,
+  row,
   runElementTransition,
   runValidators,
   saveFocus,
+  scaleTransition,
   scheduleImmediate,
   scheduleUpdate,
   scheduler,
@@ -6827,13 +7995,29 @@ function defineConfig(config) {
   serverDOMAdapter,
   signal,
   signalKind,
+  skipLink,
+  slideTransition,
+  spacer,
   splitTarget,
+  stack,
+  stateAttr,
   streetui,
+  style,
+  styleRegistry,
+  styleVariants,
+  styleWithVars,
+  text,
   textUpdate,
   toIdToken,
+  toast,
+  tokens,
+  tooltip,
   transformGraph,
+  transition,
+  transitions,
   trapFocus,
   validateGraph,
+  visuallyHidden,
   wireComponentBehavior,
   wireEvents,
   wireHeadBehavior,

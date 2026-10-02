@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 "use strict";
 
-// ../cli/src/args.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/args.ts
 var VALUE_FLAGS = /* @__PURE__ */ new Set(["port", "host", "template", "dir"]);
 var BOOLEAN_FLAGS = /* @__PURE__ */ new Set(["help", "version"]);
 var SHORT = { h: "help", v: "version", p: "port" };
@@ -55,7 +55,7 @@ function parseArgs(argv) {
   return { command, positionals, help, version, port, host, template, dir, unknown };
 }
 
-// ../cli/src/logger.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/logger.ts
 var useColor = process.env["NO_COLOR"] === void 0 && process.env["FORCE_COLOR"] !== "0" && (process.stdout.isTTY === true || process.env["FORCE_COLOR"] !== void 0);
 function paint(code, text) {
   return useColor ? `\x1B[${code}m${text}\x1B[0m` : text;
@@ -80,7 +80,7 @@ function createLogger(prefix = BRAND) {
   };
 }
 
-// ../cli/src/diagnostics.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/diagnostics.ts
 var CliError = class extends Error {
   suggestion;
   /** Process exit code to use when this error reaches the top level. */
@@ -168,11 +168,11 @@ function formatBuildFailure(problems) {
 ${blocks}`;
 }
 
-// ../cli/src/project.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/project.ts
 var import_node_fs2 = require("fs");
 var import_node_path2 = require("path");
 
-// ../cli/src/config.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/config.ts
 var import_esbuild = require("esbuild");
 var import_promises = require("fs/promises");
 var import_node_fs = require("fs");
@@ -237,7 +237,7 @@ async function loadConfig(root) {
   };
 }
 
-// ../cli/src/project.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/project.ts
 function readPackageJson(root) {
   const pkgPath = (0, import_node_path2.join)(root, "package.json");
   if (!(0, import_node_fs2.existsSync)(pkgPath)) {
@@ -288,13 +288,13 @@ async function resolveProject(cwd, options) {
   return { root, packageJson, config };
 }
 
-// ../cli/src/build.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/build.ts
 var import_esbuild2 = require("esbuild");
 var import_promises2 = require("fs/promises");
 var import_node_fs3 = require("fs");
 var import_node_path3 = require("path");
 
-// ../cli/src/env.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/env.ts
 var PUBLIC_ENV_PREFIX = "STREETUI_PUBLIC_";
 function clientEnvDefine(mode, env = process.env) {
   const define = {
@@ -308,7 +308,7 @@ function clientEnvDefine(mode, env = process.env) {
   return define;
 }
 
-// ../cli/src/build.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/build.ts
 function toProblems(messages) {
   return messages.map((m) => fromEsbuildMessage({ text: m.text, location: m.location }));
 }
@@ -373,13 +373,13 @@ async function buildProject(project, mode = "production") {
   };
 }
 
-// ../cli/src/dev.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/dev.ts
 var import_esbuild3 = require("esbuild");
 var import_promises4 = require("fs/promises");
 var import_node_fs4 = require("fs");
 var import_node_path5 = require("path");
 
-// ../cli/src/serve.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/serve.ts
 var import_node_http = require("http");
 var import_promises3 = require("fs/promises");
 var import_node_path4 = require("path");
@@ -533,7 +533,7 @@ ${message}`);
   }
 }
 
-// ../cli/src/dev.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/dev.ts
 function reportResult(label, errors, logger, reload) {
   if (errors.length > 0) {
     const problems = errors.map((m) => fromEsbuildMessage({ text: m.text, location: m.location }));
@@ -627,7 +627,7 @@ async function runDev(options) {
   };
 }
 
-// ../cli/src/start.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/start.ts
 var import_node_fs5 = require("fs");
 var import_node_path6 = require("path");
 async function runStart(options) {
@@ -651,12 +651,12 @@ async function runStart(options) {
   return running;
 }
 
-// ../cli/src/create.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/create.ts
 var import_promises5 = require("fs/promises");
 var import_node_fs7 = require("fs");
 var import_node_path8 = require("path");
 
-// ../cli/src/templates.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/templates.ts
 var import_node_fs6 = require("fs");
 var import_node_path7 = require("path");
 var import_node_url3 = require("url");
@@ -710,7 +710,7 @@ function isTextFile(fileName) {
   return TEXT_EXTENSIONS.has(ext);
 }
 
-// ../cli/src/create.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/create.ts
 async function isEmptyDir(dir) {
   if (!(0, import_node_fs7.existsSync)(dir)) return true;
   const entries = await (0, import_promises5.readdir)(dir);
@@ -770,7 +770,7 @@ async function createProject(options) {
   return { root, template, files };
 }
 
-// ../cli/src/index.ts
+// ../../sessions/sweet-gallant-mendel/mnt/StreetUI/packages/cli/src/index.ts
 var CLI_VERSION = "2.6.0";
 var HELP = `streetui \u2014 the StreetUI application CLI
 
