@@ -5,6 +5,51 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 2.7.0 — Unified Styling System (2026-10-02)
+
+**Major capability — code complete, publish deferred to the authoritative environment.**
+StreetUI gains a first-class, unified styling system so developers can build polished,
+responsive, themeable production interfaces using StreetUI itself, with **no external
+styling framework and no additional required package** — `npm install streetui` is
+sufficient. Built on the existing pipeline with no vdom, no second reactive system, no
+second renderer, and no utility-class framework as the primary API. Full detail across the
+seven `V2.7.0-*.md` reports.
+
+### Added
+
+- One public styling model: `style` (deduped class tokens), `cx`, `styleVariants`
+  (type-safe, zero call-time registration), `styleWithVars` (reactive scalar styles via CSS
+  custom properties).
+- First-class design tokens (`tokens`, `createThemeTokens`) → CSS custom properties, and
+  `createTheme` (renderer) for light/dark/system/persisted theming via a single `data-theme`
+  flip (no re-render).
+- Responsive (`base/sm/md/lg/xl` → `@media`), pseudo & component states, and presets:
+  `layout.*`, `text.*` (incl. code/pre), `form.*`, `a11y.*` (strong focus ring,
+  visually-hidden, skip-link).
+- SSR/hydration styling: `renderStyles` (deterministic deduped `<style data-streetui-css>`)
+  and `adoptServerStyles` (seed identities, no duplicate injection). Transition integration
+  and animation tokens (no animation runtime).
+- Official website (`examples/streetui-website`) migrated to the styling system: **zero
+  `.css`, zero CSS imports, zero external stylesheet links** — 100% StreetUI-generated. New
+  `design-system.ts` (~47 tokens) and a 15-UI design showcase (§33).
+
+### Verified (sandbox, Node v22.23.2)
+
+- streetui 21/21, cli 53/53, core 81/81, renderer 252/252, devtools 85/85, testing 50/50,
+  website 71/71 (`tsc` exit 0).
+- SSR byte-identity PASS — all 5 perf-app routes exact and equal to the v1.6 SHA-256 golden.
+- Strict API (§23): no `any`/`@ts-ignore`; `strict` + `exactOptionalPropertyTypes` on.
+- Bundle (§24): incremental styling cost gzip ~2 010 B; tree-shaking proven; framework ships
+  zero `.css`. Perf (§29): 7/7 scenarios pass.
+- Version 2.7.0 coordinated across 17 packages (benchmarks held at 0.7.0); `src`, built
+  `dist`, package.json, and stability tests all consistent at 2.7.0.
+
+### BLOCKED (sandbox; owned by the authoritative environment, not faked)
+
+- Browser rendering / Core Web Vitals / cross-browser (Chrome 154 / FF 155).
+- Live assistive-technology accessibility (Orca + AT-SPI) and competitor benchmarks.
+- Registry-backed `npm publish` (sandbox returns E403).
+
 ## Unreleased — 2.6 Production Website Validation (2026-10-01)
 
 **Validation milestone — no framework code change.** The published `streetui` package's
