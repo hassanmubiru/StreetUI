@@ -23,7 +23,7 @@ export type SpaceKey = keyof typeof tokens.ref.space;
 
 const space = (k: SpaceKey): string => tokens.ref.space[k];
 
-export interface ContainerOptions {
+export interface ContainerStyleOptions {
   /** Max content width (default `1120px`). A number is treated as `px`. */
   readonly max?: CSSValue;
   /** Horizontal padding as a space-scale key (default `'4'`). */
