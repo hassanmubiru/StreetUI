@@ -91,10 +91,6 @@ function createState(): AppState {
   };
 }
 
-function statusIntent(s: Order['status']): 'success' | 'warning' | 'danger' {
-  return s === 'paid' ? 'success' : s === 'pending' ? 'warning' : 'danger';
-}
-
 // ── Shell ─────────────────────────────────────────────────────────────────────
 
 interface ShellDeps {
