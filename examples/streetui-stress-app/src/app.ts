@@ -269,7 +269,7 @@ export function renderApp(path = '/') {
   const routeBuilder = currentRoute.get().route.builder;
 
   app.page('main', (page) => shellBuilder(page, {
-    renderOutlet: () => routeBuilder(page),
+    renderOutlet: () => routeBuilder(page, currentRoute.get().ctx),
   }));
 
   const compiled = compile(app);
