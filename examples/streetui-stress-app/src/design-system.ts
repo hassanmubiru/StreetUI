@@ -250,8 +250,13 @@ export const railTagline = style({
 
 /** A group of nav links inside the rail. */
 export const railNav = cx(
-  layout.stack({ gap: '05' }),
-  style({ paddingLeft: L.space['2'], paddingRight: L.space['2'] }),
+  style({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: L.space['05'],
+    paddingLeft: L.space['2'],
+    paddingRight: L.space['2'],
+  }),
 );
 
 /** A single nav link in the rail. Active state rides `[data-current]`. */
@@ -307,7 +312,7 @@ export const topbar = cx(
     top: 0,
     zIndex: L.z.sticky,
     background: L.surface.app,
-    borderBottom: `1px solid ${L.surface.line}`,
+    boxShadow: `inset 0 -1px 0 ${L.surface.line}`,
     paddingLeft: { base: L.space['4'], lg: L.space['6'] },
     paddingRight: { base: L.space['4'], lg: L.space['6'] },
     paddingTop: L.space['3'],
@@ -650,7 +655,7 @@ export const tableHeadRow = style({
   paddingBottom: L.space['2'],
   paddingLeft: L.space['4'],
   paddingRight: L.space['4'],
-  borderBottom: `1px solid ${L.border.default}`,
+  boxShadow: `inset 0 -1px 0 ${L.border.default}`,
   background: L.surface.sunken,
 });
 
@@ -666,11 +671,10 @@ export const tableRow = style({
   paddingBottom: L.space['3'],
   paddingLeft: L.space['4'],
   paddingRight: L.space['4'],
-  borderBottom: `1px solid ${L.border.faint}`,
+  boxShadow: `inset 0 -1px 0 ${L.border.faint}`,
   transition: `background ${L.duration.fast} ${L.easing.standard}`,
   on: {
     hover: { background: L.surface.sunken },
-    lastChild: { borderBottom: 'none' },
   },
   when: {
     selected: { background: L.accent.soft, boxShadow: `inset 3px 0 0 ${L.accent.primary}` },
@@ -709,7 +713,7 @@ export const cellText = style({
 export const tabList = style({
   display: 'flex',
   gap: L.space['1'],
-  borderBottom: `1px solid ${L.border.default}`,
+  boxShadow: `inset 0 -1px 0 ${L.border.default}`,
   overflowX: 'auto',
 });
 
@@ -721,7 +725,7 @@ export const tab = style({
   color: L.content.secondary,
   background: 'transparent',
   border: 0,
-  borderBottom: `2px solid transparent`,
+  boxShadow: 'inset 0 -2px 0 transparent',
   paddingTop: L.space['2'],
   paddingBottom: L.space['2'],
   paddingLeft: L.space['3'],
@@ -735,8 +739,8 @@ export const tab = style({
     focusVisible: { outline: `2px solid ${L.focus.ring}`, outlineOffset: -2 },
   },
   when: {
-    current: { color: L.accent.primary, borderBottom: `2px solid ${L.accent.primary}`, fontWeight: L.weight.semibold },
-    active: { color: L.accent.primary, borderBottom: `2px solid ${L.accent.primary}`, fontWeight: L.weight.semibold },
+    current: { color: L.accent.primary, boxShadow: `inset 0 -2px 0 ${L.accent.primary}`, fontWeight: L.weight.semibold },
+    active: { color: L.accent.primary, boxShadow: `inset 0 -2px 0 ${L.accent.primary}`, fontWeight: L.weight.semibold },
   },
 });
 
