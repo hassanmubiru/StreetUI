@@ -242,8 +242,7 @@ export function createApp() {
 // ── Client mount ──────────────────────────────────────────────────────────────
 
 export function mountApp(container: Element) {
-  const { router, theme } = createApp();
-  theme.mount(container as HTMLElement);
+  const { router } = createApp();
   mountRouter(router, {
     container,
     shell: (page) => shellBuilder(page, {}),
@@ -267,7 +266,7 @@ export function renderApp(path = '/') {
   });
 
   const currentRoute = router.currentRoute;
-  const routeBuilder = currentRoute.get().builder;
+  const routeBuilder = currentRoute.get().route.builder;
 
   app.page('main', (page) => shellBuilder(page, {
     renderOutlet: () => routeBuilder(page),
