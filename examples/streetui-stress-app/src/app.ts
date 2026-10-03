@@ -40,15 +40,12 @@ import {
 
 import {
   appShell, rail, railBrand, railTagline, railNav, railLink, railDivider,
-  contentCol, topbar, topbarTitle, topbarActions, page as pageClass,
-  pageHeader, pageTitleBlock, pageTitle, pageSubtitle,
-  card, cardHeader, cardTitle,
-  metricGrid, metricTile, metricLabel, metricValue, metricDelta,
-  badge, button, iconButton,
-  tableWrap, tableHeadRow, tableRow, cellNum, cellMeta, cellText,
-  toolbar, toolbarGroup, segmentGroup, segment,
-  inputCompact, skipLink,
+  contentCol, topbar, topbarTitle, topbarActions, button, skipLink,
 } from './design-system.js';
+import {
+  overviewRoute, productsRoute, ordersRoute, customersRoute, analyticsRoute,
+  settingsRoute, notFoundRoute,
+} from './routes.js';
 // Importing the design system registers every Ledger token into the shared
 // styleRegistry at module load, so the serialized stylesheet is complete and
 // byte-identical for every route (SSR determinism §15/§16).
@@ -116,8 +113,10 @@ function shellBuilder(page: PageDSL, deps: ShellDeps) {
       r.text('Commerce ops', { id: 'tagline', class: railTagline });
       r.container('nav', (n) => {
         n.link('Overview', { href: '/', id: 'nav-overview', class: railLink });
+        n.link('Products', { href: '/products', id: 'nav-products', class: railLink });
         n.link('Orders', { href: '/orders', id: 'nav-orders', class: railLink });
         n.link('Customers', { href: '/customers', id: 'nav-customers', class: railLink });
+        n.link('Analytics', { href: '/analytics', id: 'nav-analytics', class: railLink });
         n.container('divider', () => {}, { id: 'rail-divider', class: railDivider });
         n.link('Settings', { href: '/settings', id: 'nav-settings', class: railLink });
       }, { id: 'rail-nav', class: railNav });
@@ -151,127 +150,18 @@ function shellBuilder(page: PageDSL, deps: ShellDeps) {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
-function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState) {
-  const { orders, filter, search } = state;
-  const visible = derived(() => {
-    const f = filter.get();
-    const q = search.get().toLowerCase();
-    return orders.get().filter(o =>
-      (f === 'all' || o.status === f) &&
-      (q === '' || o.customer.toLowerCase().includes(q) || o.id.includes(q)));
-  });
-  const revenue = derived(() => orders.get().reduce((s, o) => s + (o.status === 'paid' ? o.amount : 0), 0));
-  const pending = derived(() => orders.get().filter(o => o.status === 'pending').length);
-  const refunded = derived(() => orders.get().reduce((s, o) => s + (o.status === 'refunded' ? o.amount : 0), 0));
-
-  page.head({ title: 'Overview — Ledger', description: 'Commerce operations overview' });
-  page.container('overview', (p) => {
-    p.container('page-header', (h) => {
-      h.container('title-block', (tb) => {
-        tb.heading('Overview', { level: 2, id: 'page-title', class: pageTitle });
-        tb.text('Your commerce at a glance', { id: 'page-subtitle', class: pageSubtitle });
-      }, { id: 'title-block', class: pageTitleBlock });
-      h.button('Export', { id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }) });
-    }, { id: 'page-header', class: pageHeader });
-
-    p.container('metrics', (m) => {
-      const tile = (key: string, label: string, val: () => string, delta: string, trend: 'up' | 'down' | 'flat') => {
-        m.container(key, (t) => {
-          t.text(label, { id: `${key}-label`, class: metricLabel });
-          t.text(derived(val), { id: `${key}-value`, class: metricValue });
-          t.text(delta, { id: `${key}-delta`, class: metricDelta({ trend }) });
-        }, { id: key, class: metricTile });
-      };
-      tile('revenue-tile', 'Total revenue', () => `$${revenue.get().toFixed(2)}`, '↑ vs last month', 'up');
-      tile('orders-tile', 'Total orders', () => String(orders.get().length), 'Stable', 'flat');
-      tile('pending-tile', 'Pending', () => String(pending.get()), '↑ needs attention', 'down');
-      tile('refunded-tile', 'Refunded', () => `$${refunded.get().toFixed(2)}`, '↓ vs last month', 'up');
-    }, { id: 'metrics', class: metricGrid });
-
-    p.container('recent-card', (c) => {
-      c.container('card-header', (h) => {
-        h.heading('Recent orders', { level: 3, id: 'recent-title', class: cardTitle });
-        h.link('View all →', { href: '/orders', id: 'view-all', class: cellMeta });
-      }, { id: 'recent-header', class: cardHeader });
-      c.container('table-wrap', (tw) => {
-        tw.container('head-row', () => {}, { id: 'recent-head', class: tableHeadRow });
-        tw.listOf('recent-rows', derived(() => visible.get().slice(0, 10)), (order, _i, row) => {
-          row.text(order.id, { id: `r-id-${order.id}`, class: cellMeta });
-          row.text(order.customer, { id: `r-name-${order.id}`, class: cellText });
-          row.text(badge({ intent: statusIntent(order.status) }), { id: `r-st-${order.id}` });
-          row.text(`$${order.amount.toFixed(2)}`, { id: `r-amt-${order.id}`, class: cellNum });
-        }, { id: 'recent-rows', class: tableRow });
-      }, { id: 'recent-wrap', class: tableWrap });
-    }, { id: 'recent-card', class: card });
-  }, { id: 'overview', class: pageClass });
-}
-
-function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) {
-  const { orders, filter, search } = state;
-  const visible = derived(() => {
-    const f = filter.get();
-    const q = search.get().toLowerCase();
-    return orders.get().filter(o =>
-      (f === 'all' || o.status === f) &&
-      (q === '' || o.customer.toLowerCase().includes(q) || o.id.includes(q)));
-  });
-
-  page.head({ title: 'Orders — Ledger', description: 'All orders' });
-  page.container('orders-page', (p) => {
-    p.container('page-header', (h) => {
-      h.container('title-block', (tb) => {
-        tb.heading('Orders', { level: 2, id: 'orders-title', class: pageTitle });
-        tb.text(derived(() => `${visible.get().length} of ${orders.get().length}`), { id: 'orders-count', class: pageSubtitle });
-      }, { id: 'orders-title-block', class: pageTitleBlock });
-      h.button('New order', { id: 'new-order-btn', class: button({ intent: 'primary', size: 'sm' }) });
-    }, { id: 'orders-header', class: pageHeader });
-
-    p.container('toolbar', (tb) => {
-      tb.container('filters', (f) => {
-        f.input({ id: 'search', type: 'search', bind: search, class: inputCompact, placeholder: 'Search orders…' } as never);
-        f.container('segments', (sg) => {
-          (['all', 'paid', 'pending', 'refunded'] as const).forEach((s) => {
-            sg.button(s.charAt(0).toUpperCase() + s.slice(1), {
-              id: `seg-${s}`,
-              class: segment,
-              onClick: () => filter.set(s),
-            });
-          });
-        }, { id: 'seg-group', class: segmentGroup });
-      }, { id: 'toolbar-filters', class: toolbarGroup });
-    }, { id: 'orders-toolbar', class: toolbar });
-
-    p.container('orders-table-wrap', (tw) => {
-      tw.listOf('orders-rows', visible, (order, _i, row) => {
-        row.text(order.id, { id: `o-id-${order.id}`, class: cellMeta });
-        row.text(order.customer, { id: `o-name-${order.id}`, class: cellText });
-        row.text(badge({ intent: statusIntent(order.status) }), { id: `o-st-${order.id}` });
-        row.text(`$${order.amount.toFixed(2)}`, { id: `o-amt-${order.id}`, class: cellNum });
-        row.button('⋯', { id: `o-act-${order.id}`, class: iconButton });
-      }, { id: 'orders-list', class: tableRow });
-    }, { id: 'orders-table-wrap', class: tableWrap });
-  }, { id: 'orders-page', class: pageClass });
-}
-
-function placeholderRoute(name: string) {
-  return (page: PageDSL) => {
-    page.head({ title: `${name} — Ledger` });
-    page.container(name.toLowerCase(), (p) => {
-      p.heading(name, { level: 2, id: `${name.toLowerCase()}-title`, class: pageTitle });
-      p.text('Coming soon.', { id: `${name.toLowerCase()}-placeholder`, class: pageSubtitle });
-    }, { id: `${name.toLowerCase()}-page`, class: pageClass });
-  };
-}
-
 function buildRoutes(state: AppState) {
   return [
     { path: '/',          builder: (p: PageDSL, c: RouteContext) => overviewRoute(p, c, state) },
+    { path: '/products',  builder: (p: PageDSL, c: RouteContext) => productsRoute(p, c, state) },
     { path: '/orders',    builder: (p: PageDSL, c: RouteContext) => ordersRoute(p, c, state) },
-    { path: '/customers', builder: placeholderRoute('Customers') },
-    { path: '/settings',  builder: placeholderRoute('Settings') },
-    { path: '*',          builder: placeholderRoute('Not found') },
+    { path: '/customers', builder: (p: PageDSL, c: RouteContext) => customersRoute(p, c, state) },
+    { path: '/analytics', builder: (p: PageDSL, c: RouteContext) => analyticsRoute(p, c, state) },
+    { path: '/settings',  builder: (p: PageDSL, c: RouteContext) => settingsRoute(p, c, state) },
+    { path: '*',          builder: notFoundRoute },
   ];
 }
+
 
 // ── App object ────────────────────────────────────────────────────────────────
 
