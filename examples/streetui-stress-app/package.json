@@ -1,0 +1,24 @@
+{
+  "name": "@streetui/example-stress-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "StreetUI 2.8 stress-application dogfood: an independent dashboard/commerce app that proves the 2.7 styling model stays coherent outside the documentation website. Built entirely with streetui (no external styling).",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "streetui": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "*",
+    "typescript": "*",
+    "tsup": "*",
+    "vitest": "*",
+    "happy-dom": "*",
+    "esbuild": "*"
+  }
+}
