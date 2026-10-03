@@ -1,48 +1,72 @@
 /**
- * StreetUI Stress App — main application entry.
+ * StreetUI Stress App — application assembly.
  *
- * A dense ledger/commerce dashboard that exercises the full 2.7 styling system
- * with a materially different visual language from the documentation website.
+ * A dense ledger/commerce operations console that exercises the 2.7 styling
+ * system with a visual language materially different from the documentation
+ * website (deep-teal accent, slate surfaces, compact spacing, tabular figures).
+ *
+ * The shell/outlet contract matches the website's proven SSR↔hydration recipe:
+ * the server fills `#page-outlet` inline keyed on ROUTER_OUTLET_KEY; the client
+ * router mounts/hydrates the same element id. There is one source of truth for
+ * the outlet identity, so byte-identity is preserved and hydration adopts
+ * node-for-node instead of re-rendering.
  */
 import {
   signal,
   derived,
-  streetui,
-  compile,
-  createRuntime,
-  createRenderer,
-  BrowserDOMAdapter,
   createRouter,
   mountRouter,
   routerOutlet,
+  ROUTER_OUTLET_KEY,
   createMemoryHistory,
   renderToString,
   renderStyles,
   renderHead,
+  serializeState,
   styleRegistry,
+  adoptServerStyles,
+  BrowserDOMAdapter,
   createTheme,
+  streetui,
+  compile,
   type PageDSL,
+  type ContainerDSL,
+  type Router,
+  type RouterHistory,
+  type RouteContext,
+  type ThemeController,
+  type Signal,
 } from 'streetui';
 
 import {
-  ledger,
   appShell, rail, railBrand, railTagline, railNav, railLink, railDivider,
   contentCol, topbar, topbarTitle, topbarActions, page as pageClass,
   pageHeader, pageTitleBlock, pageTitle, pageSubtitle,
-  card, cardHeader, cardTitle, cardHint,
+  card, cardHeader, cardTitle,
   metricGrid, metricTile, metricLabel, metricValue, metricDelta,
   badge, button, iconButton,
   tableWrap, tableHeadRow, tableRow, cellNum, cellMeta, cellText,
-  tabList, tab,
   toolbar, toolbarGroup, segmentGroup, segment,
-  input, inputCompact,
-  splitGrid,
+  inputCompact, skipLink,
 } from './design-system.js';
+// Importing the design system registers every Ledger token into the shared
+// styleRegistry at module load, so the serialized stylesheet is complete and
+// byte-identical for every route (SSR determinism §15/§16).
 
-// ── Reactive data ─────────────────────────────────────────────────────────────
+export const STATE_KEY = 'streetui-stress-app';
 
-interface Order {
-  id: string; customer: string; amount: number; status: 'paid' | 'pending' | 'refunded';
+/** The single outlet element id — the SSR fill and client mount must agree. */
+export const OUTLET_ID = 'page-outlet';
+
+const CSS_MARKER = 'data-streetui-css';
+
+// ── Data model ────────────────────────────────────────────────────────────────
+
+export interface Order {
+  id: string;
+  customer: string;
+  amount: number;
+  status: 'paid' | 'pending' | 'refunded';
 }
 
 function makeOrders(n: number): Order[] {
@@ -55,35 +79,41 @@ function makeOrders(n: number): Order[] {
   }));
 }
 
-const allOrders = makeOrders(200);
-const orders = signal(allOrders);
-const filter = signal<'all' | 'paid' | 'pending' | 'refunded'>('all');
-const searchQ = signal('');
-const visibleOrders = derived(() => {
-  const f = filter.get();
-  const q = searchQ.get().toLowerCase();
-  return orders.get().filter(o =>
-    (f === 'all' || o.status === f) &&
-    (q === '' || o.customer.toLowerCase().includes(q) || o.id.includes(q))
-  );
-});
+/** Per-app reactive state. Created fresh in createApp so instances are isolated. */
+export interface AppState {
+  orders: Signal<Order[]>;
+  filter: Signal<'all' | 'paid' | 'pending' | 'refunded'>;
+  search: Signal<string>;
+}
 
-const revenue = derived(() => orders.get().reduce((s, o) => s + (o.status === 'paid' ? o.amount : 0), 0));
-const pending = derived(() => orders.get().filter(o => o.status === 'pending').length);
-const refunded = derived(() => orders.get().reduce((s, o) => s + (o.status === 'refunded' ? o.amount : 0), 0));
+function createState(): AppState {
+  return {
+    orders: signal(makeOrders(200)),
+    filter: signal<'all' | 'paid' | 'pending' | 'refunded'>('all'),
+    search: signal(''),
+  };
+}
 
-// ── Theme ─────────────────────────────────────────────────────────────────────
+function statusIntent(s: Order['status']): 'success' | 'warning' | 'danger' {
+  return s === 'paid' ? 'success' : s === 'pending' ? 'warning' : 'danger';
+}
 
-const theme = createTheme({ initial: 'system' });
+// ── Shell ─────────────────────────────────────────────────────────────────────
 
-// ── Shell builder ──────────────────────────────────────────────────────────────
+interface ShellDeps {
+  theme: ThemeController;
+  /** SSR only: fills the outlet container with the active route. */
+  renderOutlet?: (content: ContainerDSL) => void;
+}
 
-function shellBuilder(page: PageDSL, ctx: { renderOutlet?: () => void }) {
+function shellBuilder(page: PageDSL, deps: ShellDeps) {
   page.container('shell', (shell) => {
-    // Nav rail
+    shell.link('Skip to content', { href: `#${OUTLET_ID}`, id: 'skip-link', class: skipLink });
+
+    // Navigation rail
     shell.container('rail', (r) => {
       r.heading('Ledger', { level: 1, id: 'brand', class: railBrand });
-      r.text('Commerce dashboard', { id: 'tagline', class: railTagline });
+      r.text('Commerce ops', { id: 'tagline', class: railTagline });
       r.container('nav', (n) => {
         n.link('Overview', { href: '/', id: 'nav-overview', class: railLink });
         n.link('Orders', { href: '/orders', id: 'nav-orders', class: railLink });
@@ -95,23 +125,25 @@ function shellBuilder(page: PageDSL, ctx: { renderOutlet?: () => void }) {
 
     // Content column
     shell.container('content', (col) => {
-      // Top bar
       col.container('topbar', (tb) => {
         tb.text('Ledger', { id: 'topbar-title', class: topbarTitle });
         tb.container('actions', (a) => {
-          a.button(derived(() => theme.label.get()), {
+          a.button(derived(() => deps.theme.label.get()), {
             id: 'theme-toggle',
             class: button({ intent: 'quiet', size: 'sm' }),
-            onClick: () => theme.cycle(),
+            onClick: () => deps.theme.cycle(),
           });
         }, { id: 'topbar-actions', class: topbarActions });
       }, { id: 'topbar', class: topbar });
 
-      // Router outlet
-      if (ctx.renderOutlet) {
-        ctx.renderOutlet();
+      // Router outlet. On the server we fill it inline keyed on ROUTER_OUTLET_KEY
+      // and the shared OUTLET_ID; on the client the router populates it. One
+      // source of truth for both key and id → hydration adopts node-for-node.
+      if (deps.renderOutlet !== undefined) {
+        const fill = deps.renderOutlet;
+        col.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: OUTLET_ID });
       } else {
-        routerOutlet(col);
+        routerOutlet(col, OUTLET_ID);
       }
     }, { id: 'content', class: contentCol });
   }, { id: 'app-shell', class: appShell });
@@ -119,75 +151,84 @@ function shellBuilder(page: PageDSL, ctx: { renderOutlet?: () => void }) {
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 
-function overviewRoute(page: PageDSL) {
-  page.head({ title: 'Overview — Ledger', description: 'Dashboard overview' });
+function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState) {
+  const { orders, filter, search } = state;
+  const visible = derived(() => {
+    const f = filter.get();
+    const q = search.get().toLowerCase();
+    return orders.get().filter(o =>
+      (f === 'all' || o.status === f) &&
+      (q === '' || o.customer.toLowerCase().includes(q) || o.id.includes(q)));
+  });
+  const revenue = derived(() => orders.get().reduce((s, o) => s + (o.status === 'paid' ? o.amount : 0), 0));
+  const pending = derived(() => orders.get().filter(o => o.status === 'pending').length);
+  const refunded = derived(() => orders.get().reduce((s, o) => s + (o.status === 'refunded' ? o.amount : 0), 0));
+
+  page.head({ title: 'Overview — Ledger', description: 'Commerce operations overview' });
   page.container('overview', (p) => {
     p.container('page-header', (h) => {
       h.container('title-block', (tb) => {
         tb.heading('Overview', { level: 2, id: 'page-title', class: pageTitle });
         tb.text('Your commerce at a glance', { id: 'page-subtitle', class: pageSubtitle });
       }, { id: 'title-block', class: pageTitleBlock });
-      p.button('Export', { id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }) });
+      h.button('Export', { id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }) });
     }, { id: 'page-header', class: pageHeader });
 
-    // Metric tiles
     p.container('metrics', (m) => {
-      m.container('revenue-tile', (t) => {
-        t.text('Total revenue', { id: 'revenue-label', class: metricLabel });
-        t.text(derived(() => `$${revenue.get().toFixed(2)}`), { id: 'revenue-value', class: metricValue });
-        t.text('↑ vs last month', { id: 'revenue-delta', class: metricDelta({ trend: 'up' }) });
-      }, { id: 'revenue-tile', class: metricTile });
-      m.container('orders-tile', (t) => {
-        t.text('Total orders', { id: 'orders-label', class: metricLabel });
-        t.text(derived(() => String(orders.get().length)), { id: 'orders-value', class: metricValue });
-        t.text('Stable', { id: 'orders-delta', class: metricDelta({ trend: 'flat' }) });
-      }, { id: 'orders-tile', class: metricTile });
-      m.container('pending-tile', (t) => {
-        t.text('Pending', { id: 'pending-label', class: metricLabel });
-        t.text(derived(() => String(pending.get())), { id: 'pending-value', class: metricValue });
-        t.text('↑ needs attention', { id: 'pending-delta', class: metricDelta({ trend: 'down' }) });
-      }, { id: 'pending-tile', class: metricTile });
-      m.container('refunded-tile', (t) => {
-        t.text('Refunded', { id: 'refunded-label', class: metricLabel });
-        t.text(derived(() => `$${refunded.get().toFixed(2)}`), { id: 'refunded-value', class: metricValue });
-        t.text('↓ vs last month', { id: 'refunded-delta', class: metricDelta({ trend: 'up' }) });
-      }, { id: 'refunded-tile', class: metricTile });
+      const tile = (key: string, label: string, val: () => string, delta: string, trend: 'up' | 'down' | 'flat') => {
+        m.container(key, (t) => {
+          t.text(label, { id: `${key}-label`, class: metricLabel });
+          t.text(derived(val), { id: `${key}-value`, class: metricValue });
+          t.text(delta, { id: `${key}-delta`, class: metricDelta({ trend }) });
+        }, { id: key, class: metricTile });
+      };
+      tile('revenue-tile', 'Total revenue', () => `$${revenue.get().toFixed(2)}`, '↑ vs last month', 'up');
+      tile('orders-tile', 'Total orders', () => String(orders.get().length), 'Stable', 'flat');
+      tile('pending-tile', 'Pending', () => String(pending.get()), '↑ needs attention', 'down');
+      tile('refunded-tile', 'Refunded', () => `$${refunded.get().toFixed(2)}`, '↓ vs last month', 'up');
     }, { id: 'metrics', class: metricGrid });
 
-    // Recent orders preview (first 10)
     p.container('recent-card', (c) => {
       c.container('card-header', (h) => {
         h.heading('Recent orders', { level: 3, id: 'recent-title', class: cardTitle });
-        h.link('View all →', { href: '/orders', id: 'view-all', class: '' });
+        h.link('View all →', { href: '/orders', id: 'view-all', class: cellMeta });
       }, { id: 'recent-header', class: cardHeader });
       c.container('table-wrap', (tw) => {
-        tw.container('head-row', () => {}, { id: 'table-head', class: tableHeadRow });
-        c.listOf('recent-rows', derived(() => visibleOrders.get().slice(0, 10)), (order, _i, row) => {
-          row.text(order.id, { id: `row-id-${order.id}`, class: cellMeta });
-          row.text(order.customer, { id: `row-name-${order.id}`, class: cellText });
-          row.text(badge({ intent: order.status === 'paid' ? 'success' : order.status === 'pending' ? 'warning' : 'danger' }), { id: `row-status-${order.id}` });
-          row.text(`$${order.amount.toFixed(2)}`, { id: `row-amt-${order.id}`, class: cellNum });
+        tw.container('head-row', () => {}, { id: 'recent-head', class: tableHeadRow });
+        tw.listOf('recent-rows', derived(() => visible.get().slice(0, 10)), (order, _i, row) => {
+          row.text(order.id, { id: `r-id-${order.id}`, class: cellMeta });
+          row.text(order.customer, { id: `r-name-${order.id}`, class: cellText });
+          row.text(badge({ intent: statusIntent(order.status) }), { id: `r-st-${order.id}` });
+          row.text(`$${order.amount.toFixed(2)}`, { id: `r-amt-${order.id}`, class: cellNum });
         }, { id: 'recent-rows', class: tableRow });
-      }, { id: 'table-wrap', class: tableWrap });
+      }, { id: 'recent-wrap', class: tableWrap });
     }, { id: 'recent-card', class: card });
   }, { id: 'overview', class: pageClass });
 }
 
-function ordersRoute(page: PageDSL) {
+function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) {
+  const { orders, filter, search } = state;
+  const visible = derived(() => {
+    const f = filter.get();
+    const q = search.get().toLowerCase();
+    return orders.get().filter(o =>
+      (f === 'all' || o.status === f) &&
+      (q === '' || o.customer.toLowerCase().includes(q) || o.id.includes(q)));
+  });
+
   page.head({ title: 'Orders — Ledger', description: 'All orders' });
   page.container('orders-page', (p) => {
     p.container('page-header', (h) => {
       h.container('title-block', (tb) => {
         tb.heading('Orders', { level: 2, id: 'orders-title', class: pageTitle });
-        tb.text(derived(() => `${visibleOrders.get().length} of ${orders.get().length}`), { id: 'orders-count', class: pageSubtitle });
+        tb.text(derived(() => `${visible.get().length} of ${orders.get().length}`), { id: 'orders-count', class: pageSubtitle });
       }, { id: 'orders-title-block', class: pageTitleBlock });
       h.button('New order', { id: 'new-order-btn', class: button({ intent: 'primary', size: 'sm' }) });
     }, { id: 'orders-header', class: pageHeader });
 
-    // Toolbar
     p.container('toolbar', (tb) => {
       tb.container('filters', (f) => {
-        f.input({ id: 'search', type: 'search', bind: searchQ, class: inputCompact, placeholder: 'Search orders…' } as never);
+        f.input({ id: 'search', type: 'search', bind: search, class: inputCompact, placeholder: 'Search orders…' } as never);
         f.container('segments', (sg) => {
           (['all', 'paid', 'pending', 'refunded'] as const).forEach((s) => {
             sg.button(s.charAt(0).toUpperCase() + s.slice(1), {
@@ -200,14 +241,13 @@ function ordersRoute(page: PageDSL) {
       }, { id: 'toolbar-filters', class: toolbarGroup });
     }, { id: 'orders-toolbar', class: toolbar });
 
-    // Full table
     p.container('orders-table-wrap', (tw) => {
-      tw.listOf('orders-rows', visibleOrders, (order, _i, row) => {
-        row.text(order.id, { id: `ord-id-${order.id}`, class: cellMeta });
-        row.text(order.customer, { id: `ord-name-${order.id}`, class: cellText });
-        row.text(badge({ intent: order.status === 'paid' ? 'success' : order.status === 'pending' ? 'warning' : 'danger' }), { id: `ord-status-${order.id}` });
-        row.text(`$${order.amount.toFixed(2)}`, { id: `ord-amt-${order.id}`, class: cellNum });
-        row.button('⋯', { id: `ord-action-${order.id}`, class: iconButton });
+      tw.listOf('orders-rows', visible, (order, _i, row) => {
+        row.text(order.id, { id: `o-id-${order.id}`, class: cellMeta });
+        row.text(order.customer, { id: `o-name-${order.id}`, class: cellText });
+        row.text(badge({ intent: statusIntent(order.status) }), { id: `o-st-${order.id}` });
+        row.text(`$${order.amount.toFixed(2)}`, { id: `o-amt-${order.id}`, class: cellNum });
+        row.button('⋯', { id: `o-act-${order.id}`, class: iconButton });
       }, { id: 'orders-list', class: tableRow });
     }, { id: 'orders-table-wrap', class: tableWrap });
   }, { id: 'orders-page', class: pageClass });
@@ -223,59 +263,137 @@ function placeholderRoute(name: string) {
   };
 }
 
-// ── App ───────────────────────────────────────────────────────────────────────
-
-export function createApp() {
-  const router = createRouter({
-    routes: [
-      { path: '/',           builder: overviewRoute },
-      { path: '/orders',     builder: ordersRoute },
-      { path: '/customers',  builder: placeholderRoute('Customers') },
-      { path: '/settings',   builder: placeholderRoute('Settings') },
-      { path: '*',           builder: placeholderRoute('Not found') },
-    ],
-    history: createMemoryHistory('/'),
-  });
-  return { router, theme };
+function buildRoutes(state: AppState) {
+  return [
+    { path: '/',          builder: (p: PageDSL, c: RouteContext) => overviewRoute(p, c, state) },
+    { path: '/orders',    builder: (p: PageDSL, c: RouteContext) => ordersRoute(p, c, state) },
+    { path: '/customers', builder: placeholderRoute('Customers') },
+    { path: '/settings',  builder: placeholderRoute('Settings') },
+    { path: '*',          builder: placeholderRoute('Not found') },
+  ];
 }
 
-// ── Client mount ──────────────────────────────────────────────────────────────
+// ── App object ────────────────────────────────────────────────────────────────
 
-export function mountApp(container: Element) {
-  const { router } = createApp();
-  mountRouter(router, {
+export interface StressAppOptions {
+  /** Navigation source. Defaults to browser history; pass memory for SSR/tests. */
+  readonly history?: RouterHistory;
+  /** Adopt server-rendered markup instead of mounting fresh. */
+  readonly hydrate?: boolean;
+  /** Theme persistence seam (defaults to guarded localStorage). */
+  readonly themeStorage?: import('streetui').ThemeStorage;
+}
+
+export interface StressApp {
+  readonly router: Router;
+  readonly theme: ThemeController;
+  readonly state: AppState;
+}
+
+export interface MountedStressApp extends StressApp {
+  unmount(): void;
+}
+
+export function createApp(options: StressAppOptions = {}): StressApp {
+  const state = createState();
+  const theme = createTheme(
+    options.themeStorage !== undefined ? { storage: options.themeStorage } : {},
+  );
+  const router = createRouter(
+    options.history !== undefined
+      ? { routes: buildRoutes(state), history: options.history }
+      : { routes: buildRoutes(state) },
+  );
+  return { router, theme, state };
+}
+
+// ── Client stylesheet install (app responsibility, §1 boundary) ──────────────
+//
+// Hydration: the server already emitted the sheet; adopt its identities into
+// the registry. Fresh mount: serialize the registry once and inject a single
+// <style> block, guarded to run at most once per document (idempotent).
+function installClientStyles(container: Element, hydrate: boolean): void {
+  const doc = container.ownerDocument;
+  if (doc === null) return;
+  if (hydrate) {
+    adoptServerStyles(new BrowserDOMAdapter(), null, { registry: styleRegistry });
+    return;
+  }
+  const head = doc.head;
+  if (head === null || head === undefined) return;
+  if (head.querySelector(`[${CSS_MARKER}]`) !== null) return;
+  const sheet = renderStyles({ registry: styleRegistry });
+  if (sheet.length === 0) return;
+  head.insertAdjacentHTML('beforeend', sheet);
+}
+
+export function mountApp(container: Element, options: StressAppOptions = {}): MountedStressApp {
+  const app = createApp(options);
+  const hydrate = options.hydrate ?? false;
+  installClientStyles(container, hydrate);
+  const mounted = mountRouter(app.router, {
     container,
-    shell: (page) => shellBuilder(page, {}),
+    outletId: OUTLET_ID,
+    hydrate,
+    shell: (shell) => shellBuilder(shell, { theme: app.theme }),
   });
+  return {
+    ...app,
+    unmount: () => {
+      mounted.unmount();
+      app.theme.dispose();
+    },
+  };
 }
 
 // ── SSR ───────────────────────────────────────────────────────────────────────
 
-export function renderApp(path = '/') {
-  const app = streetui.app({ name: 'ledger' });
-  const hist = createMemoryHistory(path);
-  const router = createRouter({
-    routes: [
-      { path: '/',          builder: overviewRoute },
-      { path: '/orders',    builder: ordersRoute },
-      { path: '/customers', builder: placeholderRoute('Customers') },
-      { path: '/settings',  builder: placeholderRoute('Settings') },
-      { path: '*',          builder: placeholderRoute('Not found') },
-    ],
-    history: hist,
+export interface RenderResult {
+  readonly html: string;
+  readonly head: string;
+  readonly stateScript: string;
+  readonly styles: string;
+}
+
+/**
+ * Render the app at `path` to HTML. The persistent shell carries the active
+ * route already inside `#page-outlet`, exactly where the client hydrates it —
+ * composed as ONE compiled app through the normal renderToString pipeline.
+ */
+export function renderApp(path = '/'): RenderResult {
+  const state = createState();
+  // SSR: no DOM → theme attaches to nothing; data-theme lives on <html>,
+  // outside the hydrated container, so it is never a hydration mismatch.
+  const theme = createTheme({ storage: { read: () => null, write: () => {} } });
+
+  const router = createRouter({ routes: buildRoutes(state), history: createMemoryHistory(path) });
+  const match = router.currentRoute.get();
+  const ctx: RouteContext = {
+    path: match.path,
+    pattern: match.pattern,
+    params: match.params,
+    query: match.query,
+    onCleanup: () => { /* SSR: render lifecycle only */ },
+  };
+
+  const app = streetui.app({ name: 'ledger', version: '2.8.0' });
+  app.page('main', (page) => {
+    shellBuilder(page, {
+      theme,
+      renderOutlet: (content) => {
+        match.route.builder(content as unknown as PageDSL, ctx);
+      },
+    });
   });
-
-  const currentRoute = router.currentRoute;
-  const routeBuilder = currentRoute.get().route.builder;
-
-  app.page('main', (page) => shellBuilder(page, {
-    renderOutlet: () => routeBuilder(page, currentRoute.get().ctx),
-  }));
 
   const compiled = compile(app);
   const html = renderToString(compiled);
-  const styles = renderStyles({ registry: styleRegistry });
   const head = renderHead(compiled);
+  const themeChoice = theme.choice.get();
+  theme.dispose();
   router.destroy();
-  return { html, styles, head };
+
+  const stateScript = serializeState({ [STATE_KEY]: { path, themeChoice } });
+  const styles = renderStyles({ registry: styleRegistry });
+  return { html, head, stateScript, styles };
 }
