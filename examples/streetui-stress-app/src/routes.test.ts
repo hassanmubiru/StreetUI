@@ -150,8 +150,6 @@ describe('settings route — form', () => {
 
 describe('theme', () => {
   it('cycles data-theme without re-rendering the app', async () => {
-    mount('/');
-    await flushUpdates();
     const a = mount('/');
     await flushUpdates();
     const shell = container.querySelector('#app-shell');
