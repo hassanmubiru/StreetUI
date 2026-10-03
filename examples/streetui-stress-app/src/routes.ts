@@ -280,36 +280,32 @@ export function customersRoute(page: PageDSL, ctx: RouteContext, state: AppState
     headerBlock(p, 'customers', 'Customers', 'Directory and lifetime value');
 
     p.container('customers-body', (body) => {
-      body.when(derived(() => res.loading.get()), (ld) => {
-        ld.container('loading', (l) => {
+      body.asyncBoundary('cust-resource', res, {
+        loading: (l) => {
           l.container('spin', () => {}, { id: 'cust-spin', class: spinner });
           l.text('Loading customers…', { id: 'cust-loading', class: stateHint });
-        }, { id: 'cust-loading-region', class: stateRegion, role: 'status', ariaLive: 'polite' });
-      });
-
-      body.errorBoundary((fb, _err, retry) => {
-        fb.container('err', (e) => {
+        },
+        error: (e, _err, retry) => {
           e.heading('Could not load customers', { level: 3, id: 'cust-err-title', class: stateTitle });
           e.text('The directory request failed.', { id: 'cust-err-hint', class: stateHint });
           e.button('Retry', { id: 'cust-retry', class: button({ intent: 'primary', size: 'sm' }), onClick: () => { fail.set(false); retry(); } });
-        }, { id: 'cust-err', class: stateRegion });
-      }, { source: res.error, onRetry: () => { void res.refetch(); } });
-
-      body.when(derived(() => res.data.get() !== undefined && !res.loading.get()), (ok) => {
-        ok.container('table-wrap', (tw) => {
-          tw.container('head-row', (hr) => {
-            hr.text('ID', { id: 'ch-id', class: cellMeta });
-            hr.text('Name', { id: 'ch-name', class: cellText });
-            hr.text('Region', { id: 'ch-region', class: cellText });
-            hr.text('Lifetime', { id: 'ch-lt', class: cellNum });
-          }, { id: 'cust-head', class: tableHeadRow });
-          tw.listOf('cust-rows', derived(() => res.data.get() ?? []), (cust, _i, row) => {
-            row.text(cust.id, { id: `c-id-${cust.id}`, class: cellMeta });
-            row.text(cust.name, { id: `c-name-${cust.id}`, class: cellText });
-            row.text(cust.region, { id: `c-region-${cust.id}`, class: cellText });
-            row.text(`$${cust.lifetime.toFixed(2)}`, { id: `c-lt-${cust.id}`, class: cellNum });
-          }, { id: 'cust-rows', class: tableRow });
-        }, { id: 'cust-table', class: tableWrap });
+        },
+        success: (ok, data) => {
+          ok.container('table-wrap', (tw) => {
+            tw.container('head-row', (hr) => {
+              hr.text('ID', { id: 'ch-id', class: cellMeta });
+              hr.text('Name', { id: 'ch-name', class: cellText });
+              hr.text('Region', { id: 'ch-region', class: cellText });
+              hr.text('Lifetime', { id: 'ch-lt', class: cellNum });
+            }, { id: 'cust-head', class: tableHeadRow });
+            tw.listOf('cust-rows', derived(() => data.get() ?? []), (cust, _i, row) => {
+              row.text(cust.id, { id: `c-id-${cust.id}`, class: cellMeta });
+              row.text(cust.name, { id: `c-name-${cust.id}`, class: cellText });
+              row.text(cust.region, { id: `c-region-${cust.id}`, class: cellText });
+              row.text(`$${cust.lifetime.toFixed(2)}`, { id: `c-lt-${cust.id}`, class: cellNum });
+            }, { id: 'cust-rows', class: tableRow });
+          }, { id: 'cust-table', class: tableWrap });
+        },
       });
     }, { id: 'customers-body', class: card });
   }, { id: 'customers-page', class: pageClass });
