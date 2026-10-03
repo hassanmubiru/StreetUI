@@ -212,8 +212,7 @@ export const rail = cx(
   style({
     background: L.surface.rail,
     color: L.content.onRail,
-    borderRight: { base: 'none', md: `1px solid ${L.border.onRail}` },
-    borderBottom: { base: `1px solid ${L.border.onRail}`, md: 'none' },
+    boxShadow: { base: `inset 0 -1px 0 ${L.border.onRail}`, md: `inset -1px 0 0 ${L.border.onRail}` },
     paddingTop: L.space['4'],
     paddingBottom: L.space['4'],
     position: { base: 'relative', md: 'sticky' },
