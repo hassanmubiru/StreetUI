@@ -42,10 +42,8 @@ import {
   styleVariants,
   createThemeTokens,
   layout,
-  text,
   form,
   a11y,
-  overlay,
   animation,
 } from 'streetui';
 
