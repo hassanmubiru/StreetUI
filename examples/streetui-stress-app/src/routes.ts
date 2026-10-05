@@ -478,8 +478,15 @@ export function settingsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
     }
     emailError.set(null);
     saved.set(true);
+    settingsToast.set('Settings saved');
+    settingsToastOpen.set(true);
     return { ok: true };
   });
+
+  const settingsToast = signal('');
+  const settingsToastOpen = signal(false);
+
+  void save.onSuccess?.(() => {});
 
   pageHead(page, 'Settings', 'Store settings');
   page.container('settings-page', (p) => {
