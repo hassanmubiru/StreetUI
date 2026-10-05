@@ -18,9 +18,9 @@ import {
   type RouteContext,
 } from 'streetui';
 
+import { animation } from 'streetui';
 import {
   style,
-  animation,
   dialogPanel, backdrop, dropdownMenu, dropdownItem, tooltipBubble, toastSurface,
   countChip, fieldHelp, skeleton, visuallyHidden,
 } from './design-system.js';
@@ -89,6 +89,8 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
   const pending = derived(() => orders.get().filter(o => o.status === 'pending').length);
   const refunded = derived(() => orders.get().reduce((s, o) => s + (o.status === 'refunded' ? o.amount : 0), 0));
 
+  const exportTip = signal(false);
+
   pageHead(page, 'Overview', 'Commerce operations overview');
   page.container('overview', (p) => {
     p.container('page-header', (h) => {
@@ -96,7 +98,18 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
         tb.heading('Overview', { level: 2, id: 'page-title', class: pageTitle });
         tb.text('Your commerce at a glance', { id: 'page-subtitle', class: pageSubtitle });
       }, { id: 'title-block', class: pageTitleBlock });
-      h.button('Export', { id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }) });
+      h.container('export-wrap', () => {}, { id: 'export-wrap' });
+      h.button('Export', {
+        id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }),
+        ariaHasPopup: 'tooltip' as const,
+        onMouseEnter: () => exportTip.set(true),
+        onMouseLeave: () => exportTip.set(false),
+        onFocus: () => exportTip.set(true),
+        onBlur: () => exportTip.set(false),
+      });
+      h.tooltip('export-tip', { open: exportTip, onClose: () => exportTip.set(false) }, (t) => {
+        t.text('Export the current view as CSV', { id: 'export-tip-text', class: tooltipBubble });
+      });
     }, { id: 'page-header', class: pageHeader });
 
     p.container('metrics', (m) => {
@@ -107,15 +120,18 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
           t.text(delta, { id: `${key}-delta`, class: metricDelta({ trend }) });
         }, { id: key, class: metricTile });
       };
+      const count = orders.get().length;
+      const pendingCount = pending.get();
       tile('revenue-tile', 'Total revenue', () => `$${revenue.get().toFixed(2)}`, '↑ vs last month', 'up');
-      tile('orders-tile', 'Total orders', () => String(orders.get().length), 'Stable', 'flat');
-      tile('pending-tile', 'Pending', () => String(pending.get()), '↑ needs attention', 'down');
+      tile('orders-tile', 'Total orders', () => `${orders.get().length}`, 'Stable', 'flat');
+      tile('pending-tile', 'Pending', () => `${pendingCount}`, '↑ needs attention', 'down');
       tile('refunded-tile', 'Refunded', () => `$${refunded.get().toFixed(2)}`, '↓ vs last month', 'up');
     }, { id: 'metrics', class: metricGrid });
 
     p.container('recent-card', (c) => {
       c.container('card-header', (h) => {
         h.heading('Recent orders', { level: 3, id: 'recent-title', class: cardTitle });
+        h.container('recent-count', () => {}, { id: 'recent-count', class: countChip });
         h.link('View all →', { href: '/orders', id: 'view-all', class: inlineLink });
       }, { id: 'recent-header', class: cardHeader });
       c.container('table-wrap', (tw) => {
@@ -124,9 +140,12 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
           row.text(order.customer, { id: `r-name-${order.id}`, class: cellText });
           row.text(order.status, { id: `r-st-${order.id}`, class: badge({ intent: statusIntent(order.status) }) });
           row.text(`$${order.amount.toFixed(2)}`, { id: `r-amt-${order.id}`, class: cellNum });
-        }, { id: 'recent-rows', class: tableRow });
+        }, {
+          id: 'recent-rows', class: tableRow,
+          itemTransition: fade,
+        });
       }, { id: 'recent-wrap', class: tableWrap });
-    }, { id: 'recent-card', class: card });
+    }, { id: 'recent-card', class: card, transition: fade });
   }, { id: 'overview', class: pageClass });
 }
 
@@ -135,6 +154,11 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
 export function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) {
   const { orders, filter, search } = state;
   const pageNum = signal(1);
+  const newOrderOpen = signal(false);
+  const dropOpen = signal(false);
+  const dropOrder = signal<string | null>(null);
+  const toastOpen = signal(false);
+  const toastText = signal('');
   const visible = derived(() => {
     const f = filter.get();
     const q = search.get().toLowerCase();
@@ -155,8 +179,26 @@ export function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) 
         tb.heading('Orders', { level: 2, id: 'orders-title', class: pageTitle });
         tb.text(derived(() => `${visible.get().length} of ${orders.get().length}`), { id: 'orders-count', class: pageSubtitle });
       }, { id: 'orders-title-block', class: pageTitleBlock });
-      h.button('New order', { id: 'new-order-btn', class: button({ intent: 'primary', size: 'sm' }) });
+      h.button('New order', {
+        id: 'new-order-btn', class: button({ intent: 'primary', size: 'sm' }),
+        onClick: () => { newOrderOpen.set(true); },
+      });
     }, { id: 'orders-header', class: pageHeader });
+
+    // New-order modal dialog (focus-trapped, Escape-to-close).
+    page.dialog('new-order', {
+      open: newOrderOpen, onClose: () => { newOrderOpen.set(false); },
+      ariaLabel: 'Create order', initialFocusId: 'new-order-no',
+    }, (d) => {
+      d.container('dialog-panel', () => {}, { id: 'new-order-panel', class: dialogPanel });
+      d.container('dialog-backdrop', () => {}, { id: 'new-order-back', class: backdrop });
+      d.heading('New order', { level: 3, id: 'new-order-title', class: cardTitle });
+      d.text('This action is not yet wired — this dialog proves the overlay pipeline.', { id: 'new-order-hint', class: stateHint });
+      d.button('Dismiss', {
+        id: 'new-order-close', class: button({ intent: 'quiet', size: 'sm' }),
+        onClick: () => newOrderOpen.set(false),
+      });
+    });
 
     p.container('toolbar', (tb) => {
       tb.container('filters', (f) => {
@@ -186,8 +228,29 @@ export function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) 
           row.text(order.customer, { id: `o-name-${order.id}`, class: cellText });
           row.text(order.status, { id: `o-st-${order.id}`, class: badge({ intent: statusIntent(order.status) }) });
           row.text(`$${order.amount.toFixed(2)}`, { id: `o-amt-${order.id}`, class: cellNum });
-          row.button('⋯', { id: `o-act-${order.id}`, class: iconButton, ariaLabel: `Actions for ${order.id}` });
-        }, { id: 'orders-list', class: tableRow });
+          row.button('⋯', {
+            id: `o-act-${order.id}`, class: iconButton, ariaLabel: `Actions for ${order.id}`,
+            ariaHasPopup: 'menu' as const,
+            onClick: () => { dropOrder.set(order.id); dropOpen.set(true); },
+          });
+          // Per-row dropdown menu, revealed when an order's action is opened.
+          page.dropdown(`drop-${order.id}`, {
+            open: derived(() => dropOpen.get() && dropOrder.get() === order.id),
+            onClose: () => { dropOpen.set(false); dropOrder.set(null); },
+          }, (m) => {
+            m.button('Refund', {
+              id: `o-refund-${order.id}`, class: dropdownItem,
+              onClick: () => { toastText.set(`Refunded ${order.id}`); toastOpen.set(true); dropOpen.set(false); dropOrder.set(null); },
+            });
+            m.button('Copy ID', {
+              id: `o-copy-${order.id}`, class: dropdownItem,
+              onClick: () => { toastText.set(`Copied ${order.id}`); toastOpen.set(true); dropOpen.set(false); dropOrder.set(null); },
+            });
+          });
+        }, {
+          id: 'orders-list', class: tableRow,
+          itemTransition: fade,
+        });
       });
 
       tw.container('pager', (pg) => {
@@ -198,6 +261,11 @@ export function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) 
         }, { id: 'pager-buttons', class: pageButtons });
       }, { id: 'orders-pager', class: pagination });
     }, { id: 'orders-table-wrap', class: tableWrap });
+
+    // Global toast for row actions.
+    page.toast('orders-toast', { open: toastOpen, onClose: () => toastOpen.set(false) }, (t) => {
+      t.text(toastText, { id: 'orders-toast-text', class: toastSurface });
+    });
   }, { id: 'orders-page', class: pageClass });
 }
 
@@ -312,6 +380,7 @@ export function customersRoute(page: PageDSL, ctx: RouteContext, state: AppState
         loading: (l) => {
           l.container('spin', () => {}, { id: 'cust-spin', class: spinner });
           l.text('Loading customers…', { id: 'cust-loading', class: stateHint });
+          l.container('skeletons', () => {}, { id: 'cust-skel', class: skeleton });
         },
         error: (e, _err, retry) => {
           e.heading('Could not load customers', { level: 3, id: 'cust-err-title', class: stateTitle });
@@ -331,7 +400,7 @@ export function customersRoute(page: PageDSL, ctx: RouteContext, state: AppState
               row.text(cust.name, { id: `c-name-${cust.id}`, class: cellText });
               row.text(cust.region, { id: `c-region-${cust.id}`, class: cellText });
               row.text(`$${cust.lifetime.toFixed(2)}`, { id: `c-lt-${cust.id}`, class: cellNum });
-            }, { id: 'cust-rows', class: tableRow });
+            }, { id: 'cust-rows', class: tableRow, itemTransition: fade });
           }, { id: 'cust-table', class: tableWrap });
         },
       });
