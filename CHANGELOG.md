@@ -79,6 +79,33 @@ runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
 - Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
 - Registry-backed `npm install` / `npm publish`.
 
+## 2.8.0 — Styling Integration & Second-App Dogfooding (2026-10-01)
+
+**Minor release** — Ledger stress app + 3 a11y fixes. All 18 packages
+**published to npm at `2.8.0`**. Full detail in
+[`V2.8.0-RELEASE-REPORT.md`](./V2.8.0-RELEASE-REPORT.md).
+
+### Added
+
+- **`examples/streetui-stress-app/`** — "Ledger" commerce console: 6 routes,
+  independent teal-accent design system, full styling surface exercised with a
+  materially different visual language from the docs website.
+- **35 new tests** (lifecycle + route) covering SSR, hydration, dedup, filters,
+  overlays, async, forms, tabs, theme.
+
+### Fixed (found by axe-core during browser validation)
+
+- `content.muted` contrast in Ledger: `#6b7684` → `#5d6b7a` (3.97:1 → 4.69:1 WCAG AA PASS)
+- `ariaSelected`/`ariaInvalid` pattern: removed `Signal` passed via `as never`; use static value + `ariaLabelledBy`
+
+### Verified
+
+- Chrome 154: website FCP **64 ms** · stress app FCP **76 ms** · **CLS=0** all routes · 0 errors
+- Firefox 155: website FCP **74 ms** · 0 errors
+- axe-core: **0 violations** — website (10 routes) + stress app (6 routes)
+- Framework: mount **216 ms** · hydrate **158.7 ms** · fine-grained **0 mutations**
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests
+
 ## 2.7.0 — Unified Styling System (2026-10-01)
 
 **Minor release** — first-class styling system. All 18 packages **published to npm at
