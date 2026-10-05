@@ -19,6 +19,7 @@ import {
 } from 'streetui';
 
 import {
+  style,
   dialogPanel, backdrop, dropdownMenu, dropdownItem, tooltipBubble, toastSurface,
   countChip, fieldHelp, skeleton, visuallyHidden,
 } from './design-system.js';
@@ -41,6 +42,16 @@ import {
 
 /** Shared leave transition for overlay/content branch swaps. */
 const fade = { name: 'fade', duration: 15 } as const;
+
+/** CSS for the `.fade` enter/leave transition class names. */
+style({
+  '@keyframes _unused_fade_in': { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+  '@keyframes _unused_fade_out': { '0%': { opacity: 1 }, '100%': { opacity: 0 } },
+  '.fade-enter-from': { opacity: 0 },
+  '.fade-enter-active': { animation: '_unused_fade_in 15ms ease-out forwards' },
+  '.fade-leave-from': { opacity: 1 },
+  '.fade-leave-active': { animation: '_unused_fade_out 15ms ease-in forwards' },
+});
 
 const PAGE_SIZE = 20;
 
