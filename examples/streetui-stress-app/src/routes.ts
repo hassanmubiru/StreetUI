@@ -427,7 +427,8 @@ export function analyticsRoute(page: PageDSL, _ctx: RouteContext, state: AppStat
       (['volume', 'revenue', 'mix'] as const).forEach((tk) => {
         tl.button(tk.charAt(0).toUpperCase() + tk.slice(1), {
           id: `tab-${tk}`, class: tab,
-          ariaSelected: derived(() => activeTab.get() === tk) as never,
+          role: 'tab',
+          ariaSelected: false,
           onClick: () => activeTab.set(tk),
         });
       });
