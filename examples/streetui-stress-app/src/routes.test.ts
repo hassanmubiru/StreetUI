@@ -181,7 +181,7 @@ describe('overlays & transitions', () => {
     await flushUpdates();
     expect(document.querySelector('#new-order-panel')).not.toBeNull();
     expect(document.querySelector('#new-order-panel')?.getAttribute('class')).toContain('s-');
-    (container.querySelector('#new-order-close') as HTMLElement).click();
+    (document.querySelector('#new-order-close') as HTMLElement).click();
     await flushUpdates();
     expect(document.querySelector('#new-order-panel')).toBeNull();
   });
@@ -192,7 +192,7 @@ describe('overlays & transitions', () => {
     const firstAction = container.querySelector('#o-act-ORD-01000') as HTMLElement;
     expect(firstAction).not.toBeNull();
     firstAction.click();
-    await flushUpdates();
+    await settle();
     expect(document.querySelector('#drop-ORD-01000')).not.toBeNull();
     expect(document.querySelector('#o-refund-ORD-01000')).not.toBeNull();
     expect(document.querySelector('#o-copy-ORD-01000')).not.toBeNull();
@@ -202,9 +202,9 @@ describe('overlays & transitions', () => {
     mount('/orders');
     await flushUpdates();
     (container.querySelector('#o-act-ORD-01000') as HTMLElement).click();
-    await flushUpdates();
+    await settle();
     (document.querySelector('#o-refund-ORD-01000') as HTMLElement).click();
-    await flushUpdates();
+    await settle();
     const toast = document.querySelector('#orders-toast-text');
     expect(toast).not.toBeNull();
     expect(text(toast)).toContain('Refunded');
