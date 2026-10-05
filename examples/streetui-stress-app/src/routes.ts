@@ -120,11 +120,9 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
           t.text(delta, { id: `${key}-delta`, class: metricDelta({ trend }) });
         }, { id: key, class: metricTile });
       };
-      const count = orders.get().length;
-      const pendingCount = pending.get();
       tile('revenue-tile', 'Total revenue', () => `$${revenue.get().toFixed(2)}`, '↑ vs last month', 'up');
-      tile('orders-tile', 'Total orders', () => `${orders.get().length}`, 'Stable', 'flat');
-      tile('pending-tile', 'Pending', () => `${pendingCount}`, '↑ needs attention', 'down');
+      tile('orders-tile', 'Total orders', () => String(orders.get().length), 'Stable', 'flat');
+      tile('pending-tile', 'Pending', () => String(pending.get()), '↑ needs attention', 'down');
       tile('refunded-tile', 'Refunded', () => `$${refunded.get().toFixed(2)}`, '↓ vs last month', 'up');
     }, { id: 'metrics', class: metricGrid });
 
