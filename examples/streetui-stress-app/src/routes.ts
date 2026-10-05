@@ -20,7 +20,6 @@ import {
 
 import { animation } from 'streetui';
 import {
-  style,
   dialogPanel, backdrop, dropdownMenu, dropdownItem, tooltipBubble, toastSurface,
   countChip, fieldHelp, skeleton, visuallyHidden,
 } from './design-system.js';
