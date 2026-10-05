@@ -139,7 +139,7 @@ describe('analytics route — tabs', () => {
     await flushUpdates();
     expect(container.querySelector('#vol-panel')).not.toBeNull();
     (container.querySelector('#tab-revenue') as HTMLElement).click();
-    await flushUpdates();
+    await settle();
     expect(container.querySelector('#rev-panel')).not.toBeNull();
     expect(container.querySelector('#vol-panel')).toBeNull();
   });
