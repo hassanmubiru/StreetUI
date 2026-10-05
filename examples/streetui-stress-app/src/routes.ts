@@ -468,6 +468,8 @@ export function settingsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
   const email = signal('ops@example.com');
   const emailError = signal<string | null>(null);
   const saved = signal(false);
+  const settingsToast = signal('');
+  const settingsToastOpen = signal(false);
 
   const save = mutation<void, { ok: true }>(async () => {
     await new Promise(r => setTimeout(r, 15));
@@ -478,15 +480,11 @@ export function settingsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
     }
     emailError.set(null);
     saved.set(true);
-    settingsToast.set('Settings saved');
-    settingsToastOpen.set(true);
-    return { ok: true };
+    return { ok: true } as const;
+  }, {
+    onSuccess: () => { settingsToast.set('Settings saved'); settingsToastOpen.set(true); },
+    onError: () => { settingsToast.set('Could not save settings'); settingsToastOpen.set(true); },
   });
-
-  const settingsToast = signal('');
-  const settingsToastOpen = signal(false);
-
-  void save.onSuccess?.(() => {});
 
   pageHead(page, 'Settings', 'Store settings');
   page.container('settings-page', (p) => {
@@ -526,6 +524,10 @@ export function settingsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
 
     p.when(derived(() => save.error.get() !== undefined), (e) => {
       e.text('Could not save settings.', { id: 'save-error', class: alert({ intent: 'danger' }), role: 'alert' });
+    }, undefined, { transition: fade });
+
+    page.toast('settings-toast', { open: settingsToastOpen, onClose: () => settingsToastOpen.set(false) }, (t) => {
+      t.text(settingsToast, { id: 'settings-toast-text', class: toastSurface });
     });
   }, { id: 'settings-page', class: pageClass });
 }
