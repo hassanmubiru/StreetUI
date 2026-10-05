@@ -14,6 +14,13 @@ import { flushUpdates } from 'streetui/testing';
 
 const text = (el: Element | null | undefined) => el?.textContent ?? '';
 
+/** Flush microtasks plus a macrotask so deferred leave transitions can settle. */
+async function settle(ms = 40): Promise<void> {
+  await flushUpdates();
+  await new Promise<void>((r) => setTimeout(r, ms));
+  await flushUpdates();
+}
+
 let container: HTMLElement;
 let app: MountedStressApp | undefined;
 
