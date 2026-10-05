@@ -310,7 +310,8 @@ export function productsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
             row.text(String(prod.stock), { id: `p-stock-${prod.sku}`, class: cellNum });
             row.button('Select', {
               id: `p-sel-${prod.sku}`, class: button({ intent: 'quiet', size: 'sm' }),
-              ariaSelected: derived(() => selected.get() === prod.sku) as never,
+              role: 'option',
+              ariaLabel: `Select ${prod.name}`,
               onClick: () => selected.set(prod.sku),
             });
           }, { id: 'prod-rows', class: tableRow });
