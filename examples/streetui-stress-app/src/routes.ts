@@ -54,9 +54,10 @@ const fadeTo = style({ opacity: 1 });
 /** Shared leave transition for overlay/content branch swaps (explicit classes). */
 const fade = {
   enterFrom: fadeFrom,
+  enterActive: fadeIn,
   enterTo: fadeTo,
   leaveFrom: fadeTo,
-  leaveActive: fadeIn,
+  leaveActive: fadeOut,
   leaveTo: fadeFrom,
   duration: 15,
 } as const;
@@ -230,6 +231,7 @@ export function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) 
           page.dropdown(`drop-${order.id}`, {
             open: derived(() => dropOpen.get() && dropOrder.get() === order.id),
             onClose: () => { dropOpen.set(false); dropOrder.set(null); },
+            class: dropdownMenu,
           }, (m) => {
             m.button('Refund', {
               id: `o-refund-${order.id}`, class: dropdownItem,
