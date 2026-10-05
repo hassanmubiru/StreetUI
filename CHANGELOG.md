@@ -79,6 +79,24 @@ runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
 - Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
 - Registry-backed `npm install` / `npm publish`.
 
+## 3.0.0 — Final Production Readiness (2026-10-05)
+
+**Major version** — validation completion milestone. Zero framework source
+changes; version advanced to 3.0 to mark production readiness. All 18 packages
+**published to npm at `3.0.0`**. Full detail in
+[`V3.0.0-RELEASE-REPORT.md`](./V3.0.0-RELEASE-REPORT.md).
+
+### Verified
+
+- Website Chrome 154: FCP **68 ms** · LCP **68 ms** · **TBT 0 ms** · **CLS 0** · 0 errors
+- Website Firefox 155: FCP **60 ms** · 0 errors
+- Stress app Chrome 154: FCP **92 ms** · **CLS 0** · 0 errors
+- axe-core: **0 violations** — website + stress app, Chrome 154 + Firefox 155
+- Framework: mount 245.4 ms · hydrate 161.5 ms · fine-grained **0 mutations**
+- Competitors: React A=7.7 ms · Vue A=8.3 ms · Svelte A=11.7 ms · Solid SSR=1.99 ms
+- AT-SPI tree: 22 apps, Chrome visible. Literal Orca speech next.
+- SSR byte-identity PASS — all 5 routes match v1.6 SHA-256 digests.
+
 ## 2.9.0 — Final Hardening & Validation Completion (2026-10-01)
 
 **Validation milestone** — completion of three carried-over gaps. All 18 packages
