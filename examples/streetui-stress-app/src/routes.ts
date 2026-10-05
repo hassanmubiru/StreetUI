@@ -20,6 +20,7 @@ import {
 
 import {
   style,
+  animation,
   dialogPanel, backdrop, dropdownMenu, dropdownItem, tooltipBubble, toastSurface,
   countChip, fieldHelp, skeleton, visuallyHidden,
 } from './design-system.js';
@@ -40,18 +41,26 @@ import {
   metaText, dataText, inlineLink, sectionHeading,
 } from './design-system.js';
 
-/** Shared leave transition for overlay/content branch swaps. */
-const fade = { name: 'fade', duration: 15 } as const;
+/** Register fade keyframes (idempotent) and derive enter/leave class tokens.
 
-/** CSS for the `.fade` enter/leave transition class names. */
-style({
-  '@keyframes _unused_fade_in': { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
-  '@keyframes _unused_fade_out': { '0%': { opacity: 1 }, '100%': { opacity: 0 } },
-  '.fade-enter-from': { opacity: 0 },
-  '.fade-enter-active': { animation: '_unused_fade_in 15ms ease-out forwards' },
-  '.fade-leave-from': { opacity: 1 },
-  '.fade-leave-active': { animation: '_unused_fade_out 15ms ease-in forwards' },
-});
+ * The transition engine reads `enterFrom`/`enterActive`/`enterTo` (etc.) class
+ * names and toggles them on the host element; because these are `s-<hash>` strings
+ * produced by `style()`, they dedup into the single shared stylesheet and never
+ * collide with hand-written consumer CSS. */
+const fadeIn = animation.animate('streetui-fade-in', { duration: 'base' });
+const fadeOut = animation.animate('streetui-fade-out', { duration: 'base' });
+const fadeFrom = style({ opacity: 0 });
+const fadeTo = style({ opacity: 1 });
+
+/** Shared leave transition for overlay/content branch swaps (explicit classes). */
+const fade = {
+  enterFrom: fadeFrom,
+  enterTo: fadeTo,
+  leaveFrom: fadeTo,
+  leaveActive: fadeIn,
+  leaveTo: fadeFrom,
+  duration: 15,
+} as const;
 
 const PAGE_SIZE = 20;
 
