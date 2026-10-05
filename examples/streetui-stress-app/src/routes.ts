@@ -493,10 +493,11 @@ export function settingsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
         }, { id: 'name-field', class: field });
         grid.container('email-field', (fl) => {
           fl.text('Contact email', { id: 'email-label', class: fieldLabel });
+          fl.text('We will never share your email.', { id: 'email-help', class: fieldHelp });
           fl.input({
             id: 'email-input', type: 'email', bind: email, class: input, ariaRequired: true,
             ariaInvalid: derived(() => emailError.get() !== null) as never,
-            ariaDescribedBy: 'email-error',
+            ariaDescribedBy: 'email-error email-help',
           });
           fl.when(derived(() => emailError.get() !== null), (e) => {
             e.text(derived(() => emailError.get() ?? ''), { id: 'email-error', class: fieldError, role: 'alert' });
