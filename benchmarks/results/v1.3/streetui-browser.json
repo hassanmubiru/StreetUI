@@ -17,35 +17,35 @@
   },
   "scenarios": {
     "initialMountUsers10k": {
-      "ms": 216,
+      "ms": 240,
       "domNodeCount": 80031
     },
     "reactiveSearch": {
       "narrow": {
-        "ms": 227,
+        "ms": 205.59999999776483,
         "domMutations": 10004
       },
       "clear": {
-        "ms": 220.69999999925494,
+        "ms": 204.79999999701977,
         "domMutations": 10004
       }
     },
     "reverse": {
-      "ms": 71.70000000111759,
+      "ms": 59.600000001490116,
       "domMutations": 20002
     },
     "fineGrainedToggle1of1000": {
-      "ms": 0,
+      "ms": 0.10000000149011612,
       "domMutations": 0
     },
     "routerNavigationMs": [
-      33,
-      516.5,
-      67.2,
-      32.9
+      34.7,
+      447.2,
+      51.6,
+      33.9
     ],
     "hydrateUsers10k": {
-      "ms": 158.7,
+      "ms": 179.6,
       "nodesBefore": 80029,
       "nodesAfter": 80029,
       "addedDuringHydration": 0,
@@ -57,10 +57,10 @@
         "frame120Ms": 8.33
       },
       "bigListReorder": {
-        "frames": 3,
-        "maxFrameMs": 402,
+        "frames": 2,
+        "maxFrameMs": 489.4,
         "longFrames60": 2,
-        "longFrames120": 3
+        "longFrames120": 2
       }
     },
     "memory": {
@@ -78,9 +78,9 @@
       "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
     },
     "longTasks": {
-      "count": 16,
-      "totalMs": 4171
+      "count": 13,
+      "totalMs": 3579
     }
   },
-  "timestamp": "2026-10-05T07:52:33.642Z"
+  "timestamp": "2026-10-05T10:34:42.036Z"
 }
