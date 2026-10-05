@@ -71,7 +71,7 @@ export const ledger = createThemeTokens({
     content: {
       primary: '#1a2430',
       secondary: '#4a5563',
-      muted: '#6b7684',
+      muted: '#5d6b7a',
       faint: '#93a0ae',
       onRail: '#eef2f6',     // text on the dark rail
       onRailDim: '#8b98a8',  // secondary text on the dark rail
