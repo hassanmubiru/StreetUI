@@ -77,7 +77,7 @@ describe('orders route — filters + pagination', () => {
     await flushUpdates();
     const total = container.querySelectorAll('#orders-list > *').length;
     (container.querySelector('#seg-paid') as HTMLElement).click();
-    await flushUpdates();
+    await settle();
     const paid = container.querySelectorAll('#orders-list > *').length;
     expect(paid).toBeLessThanOrEqual(total);
     expect(text(container.querySelector('#orders-count'))).toContain('of 200');
