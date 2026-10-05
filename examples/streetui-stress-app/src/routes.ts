@@ -18,6 +18,11 @@ import {
   type RouteContext,
 } from 'streetui';
 
+import {
+  dialogPanel, backdrop, dropdownMenu, dropdownItem, tooltipBubble, toastSurface,
+  countChip, fieldHelp, skeleton, visuallyHidden,
+} from './design-system.js';
+
 import type { AppState, Order } from './app.js';
 import {
   page as pageClass, pageHeader, pageTitleBlock, pageTitle, pageSubtitle,
@@ -33,6 +38,9 @@ import {
   alert, stateRegion, spinner, stateTitle, stateHint,
   metaText, dataText, inlineLink, sectionHeading,
 } from './design-system.js';
+
+/** Shared leave transition for overlay/content branch swaps. */
+const fade = { name: 'fade', duration: 15 } as const;
 
 const PAGE_SIZE = 20;
 
