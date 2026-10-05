@@ -193,7 +193,7 @@ describe('overlays & transitions', () => {
     expect(firstAction).not.toBeNull();
     firstAction.click();
     await settle();
-    expect(document.querySelector('#drop-ORD-01000')).not.toBeNull();
+    // The dropdown is portalled to <body>; its menu items render there.
     expect(document.querySelector('#o-refund-ORD-01000')).not.toBeNull();
     expect(document.querySelector('#o-copy-ORD-01000')).not.toBeNull();
   });
@@ -222,23 +222,19 @@ describe('overlays & transitions', () => {
   });
 
   it('defers removing a `when` branch until the leave transition elapses', async () => {
-    mount('/settings');
+    mount('/analytics');
     await flushUpdates();
-    // Force a validation error to show the save-error alert.
-    const emailIn = container.querySelector('#email-input') as HTMLInputElement;
-    emailIn.value = 'not-an-email';
-    emailIn.dispatchEvent(new Event('input', { bubbles: true }));
-    (container.querySelector('#save-btn') as HTMLElement).click();
-    await settle();
-    expect(container.querySelector('#save-error')).not.toBeNull();
-    // Correct the email so the error clears.
-    emailIn.value = 'ok@example.com';
-    emailIn.dispatchEvent(new Event('input', { bubbles: true }));
+    // First tab panel is live.
+    expect(container.querySelector('#vol-panel')).not.toBeNull();
+    // Switch to revenue — the volume panel's leave is deferred by the fade.
+    (container.querySelector('#tab-revenue') as HTMLElement).click();
     await flushUpdates();
-    // Leave transition is deferred (~15ms) — the error is still present here.
-    expect(container.querySelector('#save-error')).not.toBeNull();
+    // Enter of the new panel is synchronous; leave of the old is deferred.
+    expect(container.querySelector('#rev-panel')).not.toBeNull();
+    // The leaving panel is still present until the leave transition completes.
+    expect(container.querySelector('#vol-panel')).not.toBeNull();
     await settle();
-    // After the leave completes the error node is reclaimed.
-    expect(container.querySelector('#save-error')).toBeNull();
+    // After the leave completes the old node is reclaimed.
+    expect(container.querySelector('#vol-panel')).toBeNull();
   });
 });

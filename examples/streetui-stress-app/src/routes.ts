@@ -504,8 +504,10 @@ export function settingsRoute(page: PageDSL, _ctx: RouteContext, state: AppState
       }, { id: 'settings-fields', class: formGrid });
 
       f.container('actions', (a) => {
+        a.text('Save the store profile form', { id: 'save-sr', class: visuallyHidden });
         a.button(derived(() => save.pending.get() ? 'Saving…' : 'Save changes'), {
           id: 'save-btn', class: button({ intent: 'primary', size: 'md' }),
+          ariaLabel: 'Save changes',
           disabled: save.pending,
           onClick: () => { void save.mutate(undefined).catch(() => {}); },
         });
