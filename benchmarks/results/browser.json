@@ -17,35 +17,35 @@
   },
   "scenarios": {
     "initialMountUsers10k": {
-      "ms": 240,
+      "ms": 245.4,
       "domNodeCount": 80031
     },
     "reactiveSearch": {
       "narrow": {
-        "ms": 205.59999999776483,
+        "ms": 211.39999999850988,
         "domMutations": 10004
       },
       "clear": {
-        "ms": 204.79999999701977,
+        "ms": 202.80000000074506,
         "domMutations": 10004
       }
     },
     "reverse": {
-      "ms": 59.600000001490116,
+      "ms": 59.100000001490116,
       "domMutations": 20002
     },
     "fineGrainedToggle1of1000": {
-      "ms": 0.10000000149011612,
+      "ms": 0,
       "domMutations": 0
     },
     "routerNavigationMs": [
-      34.7,
-      447.2,
-      51.6,
-      33.9
+      30.3,
+      433.1,
+      50.3,
+      33.2
     ],
     "hydrateUsers10k": {
-      "ms": 179.6,
+      "ms": 161.5,
       "nodesBefore": 80029,
       "nodesAfter": 80029,
       "addedDuringHydration": 0,
@@ -57,30 +57,30 @@
         "frame120Ms": 8.33
       },
       "bigListReorder": {
-        "frames": 2,
-        "maxFrameMs": 489.4,
-        "longFrames60": 2,
-        "longFrames120": 2
+        "frames": 3,
+        "maxFrameMs": 467.9,
+        "longFrames60": 3,
+        "longFrames120": 3
       }
     },
     "memory": {
       "available": true,
-      "usedJSHeapBefore": 239000000,
-      "usedJSHeapAfter": 239000000,
+      "usedJSHeapBefore": 225000000,
+      "usedJSHeapAfter": 225000000,
       "perCycle": [
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000,
-        239000000
+        225000000,
+        225000000,
+        225000000,
+        225000000,
+        225000000,
+        225000000
       ],
       "note": "Browsers expose no explicit GC; heap deltas are indicative, not authoritative."
     },
     "longTasks": {
-      "count": 13,
-      "totalMs": 3579
+      "count": 10,
+      "totalMs": 3356
     }
   },
-  "timestamp": "2026-10-05T10:34:42.036Z"
+  "timestamp": "2026-10-05T18:02:08.489Z"
 }
