@@ -18,7 +18,7 @@ import {
   type RouteContext,
 } from 'streetui';
 
-import { animation } from 'streetui';
+import { style, animation } from 'streetui';
 import {
   dialogPanel, backdrop, dropdownMenu, dropdownItem, tooltipBubble, toastSurface,
   countChip, fieldHelp, skeleton, visuallyHidden,
@@ -99,7 +99,7 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
       }, { id: 'title-block', class: pageTitleBlock });
       h.button('Export', {
         id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }),
-        ariaExpanded: exportTip,
+        ariaLabel: 'Export data',
         onMouseEnter: () => exportTip.set(true),
         onMouseLeave: () => exportTip.set(false),
         onFocus: () => exportTip.set(true),
