@@ -131,7 +131,7 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
     p.container('recent-card', (c) => {
       c.container('card-header', (h) => {
         h.heading('Recent orders', { level: 3, id: 'recent-title', class: cardTitle });
-        h.container('recent-count', () => {}, { id: 'recent-count', class: countChip });
+        h.text(derived(() => orders.get().slice(0, 8).length), { id: 'recent-count', class: countChip });
         h.link('View all →', { href: '/orders', id: 'view-all', class: inlineLink });
       }, { id: 'recent-header', class: cardHeader });
       c.container('table-wrap', (tw) => {
