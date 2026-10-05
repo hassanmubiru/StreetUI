@@ -224,7 +224,6 @@ export function ordersRoute(page: PageDSL, _ctx: RouteContext, state: AppState) 
           row.text(order.customer, { id: `o-name-${order.id}`, class: cellText });
           row.text(order.status, { id: `o-st-${order.id}`, class: badge({ intent: statusIntent(order.status) }) });
           row.text(`$${order.amount.toFixed(2)}`, { id: `o-amt-${order.id}`, class: cellNum });
-          row.container(`act-wrap-${order.id}`, () => {}, { id: `o-act-wrap-${order.id}` });
           row.button('⋯', {
             id: `o-act-${order.id}`, class: iconButton,
             ariaLabel: `Actions for ${order.id}`, ariaHasPopup: 'menu' as const,
