@@ -1,6 +1,6 @@
 {
   "name": "@streetui/testing",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "StreetUI testing utilities — test renderer, query helpers, assertions",
   "type": "module",
   "main": "./dist/index.cjs",
