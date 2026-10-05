@@ -225,14 +225,15 @@ describe('overlays & transitions', () => {
     mount('/settings');
     await flushUpdates();
     // Force a validation error to show the save-error alert.
-    (container.querySelector('#email-input') as HTMLInputElement).value = 'not-an-email';
-    (container.querySelector('#email-input') as HTMLInputElement).dispatchEvent(new Event('input', { bubbles: true }));
+    const emailIn = container.querySelector('#email-input') as HTMLInputElement;
+    emailIn.value = 'not-an-email';
+    emailIn.dispatchEvent(new Event('input', { bubbles: true }));
     (container.querySelector('#save-btn') as HTMLElement).click();
-    await flushUpdates();
+    await settle();
     expect(container.querySelector('#save-error')).not.toBeNull();
     // Correct the email so the error clears.
-    (container.querySelector('#email-input') as HTMLInputElement).value = 'ok@example.com';
-    (container.querySelector('#email-input') as HTMLInputElement).dispatchEvent(new Event('input', { bubbles: true }));
+    emailIn.value = 'ok@example.com';
+    emailIn.dispatchEvent(new Event('input', { bubbles: true }));
     await flushUpdates();
     // Leave transition is deferred (~15ms) — the error is still present here.
     expect(container.querySelector('#save-error')).not.toBeNull();
