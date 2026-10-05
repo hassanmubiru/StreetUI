@@ -3,14 +3,14 @@
   "version": "1.9.3",
   "nodeVersion": "v24.18.0",
   "browserVersion": null,
-  "timestamp": "2026-10-05T10:35:58.466Z",
+  "timestamp": "2026-10-05T18:03:42.282Z",
   "environment": {
     "domEnvironment": "chromium (Playwright)",
     "arch": "x64",
     "platform": "linux"
   },
   "notes": [
-    "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of undefined (reading 'done')\n    at Ze (http://localhost:43765/assets/index-DjaPfKPV.js:1:8127)\n    at ze (http://localhost:43765/assets/index-DjaPfKPV.js:1:10875)\n    at P.iterations (http://localhost:43765/assets/index-DjaPfKPV.js:1:19448)\n    at P (http://localhost:43765/assets/index-DjaPfKPV.js:1:14342)\n    at bt (http://localhost:43765/assets/index-DjaPfKPV.js:1:19414)\n    at async eval (eval at evaluate (:311:30), <anonymous>:1:13)\n    at async <anonymous>:337:30"
+    "browser scenarios failed: page.evaluate: TypeError: Cannot read properties of undefined (reading 'done')\n    at Ze (http://localhost:45777/assets/index-DjaPfKPV.js:1:8127)\n    at ze (http://localhost:45777/assets/index-DjaPfKPV.js:1:10875)\n    at P.iterations (http://localhost:45777/assets/index-DjaPfKPV.js:1:19448)\n    at P (http://localhost:45777/assets/index-DjaPfKPV.js:1:14342)\n    at bt (http://localhost:45777/assets/index-DjaPfKPV.js:1:19414)\n    at async eval (eval at evaluate (:311:30), <anonymous>:1:13)\n    at async <anonymous>:337:30"
   ],
   "benchmarks": {
     "A_initialRender": null,
@@ -20,10 +20,10 @@
     "E_deepState": null,
     "F_ssr": {
       "nodes": 10000,
-      "medianMs": 2.1449,
-      "p95Ms": 2.6417,
-      "minMs": 2.0145,
-      "maxMs": 9.3498,
+      "medianMs": 1.99,
+      "p95Ms": 2.2394,
+      "minMs": 1.8582,
+      "maxMs": 7.4629,
       "samples": 20,
       "outputBytes": 477813,
       "note": "renderToString of a 10k-node app; output size in bytes"
