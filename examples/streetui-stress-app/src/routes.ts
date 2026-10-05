@@ -443,20 +443,20 @@ export function analyticsRoute(page: PageDSL, _ctx: RouteContext, state: AppStat
           x.heading('Order volume', { level: 3, id: 'vol-title', class: sectionHeading });
           x.text(derived(() => `${orders.get().length} orders`), { id: 'vol-num', class: dataText });
         }, { id: 'vol-panel' });
-      });
+      }, undefined, { transition: fade });
       panel.when(derived(() => activeTab.get() === 'revenue'), (v) => {
         v.container('rev', (x) => {
           x.heading('Revenue', { level: 3, id: 'rev-title', class: sectionHeading });
           x.text(derived(() => `$${byStatus.get().paid.reduce((s, o) => s + o.amount, 0).toFixed(2)}`), { id: 'rev-num', class: dataText });
         }, { id: 'rev-panel' });
-      });
+      }, undefined, { transition: fade });
       panel.when(derived(() => activeTab.get() === 'mix'), (v) => {
         v.container('mix', (x) => {
           x.heading('Status mix', { level: 3, id: 'mix-title', class: sectionHeading });
           const b = byStatus.get();
           x.text(`Paid ${b.paid.length} · Pending ${b.pending.length} · Refunded ${b.refunded.length}`, { id: 'mix-num', class: dataText });
         }, { id: 'mix-panel' });
-      });
+      }, undefined, { transition: fade });
     }, { id: 'analytics-panel', class: card });
   }, { id: 'analytics-page', class: pageClass });
 }
