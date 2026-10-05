@@ -171,3 +171,73 @@ describe('theme', () => {
     expect(container.querySelector('#app-shell')).toBe(shell);
   });
 });
+
+describe('overlays & transitions', () => {
+  it('opens and closes the new-order dialog (modal overlay)', async () => {
+    mount('/orders');
+    await flushUpdates();
+    expect(document.querySelector('#new-order-panel')).toBeNull();
+    (container.querySelector('#new-order-btn') as HTMLElement).click();
+    await flushUpdates();
+    expect(document.querySelector('#new-order-panel')).not.toBeNull();
+    expect(document.querySelector('#new-order-panel')?.getAttribute('class')).toContain('s-');
+    (container.querySelector('#new-order-close') as HTMLElement).click();
+    await flushUpdates();
+    expect(document.querySelector('#new-order-panel')).toBeNull();
+  });
+
+  it('opens a per-row dropdown on the action button', async () => {
+    mount('/orders');
+    await flushUpdates();
+    const firstAction = container.querySelector('#o-act-ORD-01000') as HTMLElement;
+    expect(firstAction).not.toBeNull();
+    firstAction.click();
+    await flushUpdates();
+    expect(document.querySelector('#drop-ORD-01000')).not.toBeNull();
+    expect(document.querySelector('#o-refund-ORD-01000')).not.toBeNull();
+    expect(document.querySelector('#o-copy-ORD-01000')).not.toBeNull();
+  });
+
+  it('raises a toast when a dropdown action is invoked', async () => {
+    mount('/orders');
+    await flushUpdates();
+    (container.querySelector('#o-act-ORD-01000') as HTMLElement).click();
+    await flushUpdates();
+    (document.querySelector('#o-refund-ORD-01000') as HTMLElement).click();
+    await flushUpdates();
+    const toast = document.querySelector('#orders-toast-text');
+    expect(toast).not.toBeNull();
+    expect(text(toast)).toContain('Refunded');
+  });
+
+  it('toggles a tooltip on the export button', async () => {
+    mount('/');
+    await flushUpdates();
+    expect(document.querySelector('#export-tip-text')).toBeNull();
+    (container.querySelector('#export-btn') as HTMLElement).click();
+    await flushUpdates();
+    const tip = document.querySelector('#export-tip-text');
+    expect(tip).not.toBeNull();
+    expect(text(tip)).toContain('Export the current view as CSV');
+  });
+
+  it('defers removing a `when` branch until the leave transition elapses', async () => {
+    mount('/settings');
+    await flushUpdates();
+    // Force a validation error to show the save-error alert.
+    (container.querySelector('#email-input') as HTMLInputElement).value = 'not-an-email';
+    (container.querySelector('#email-input') as HTMLInputElement).dispatchEvent(new Event('input', { bubbles: true }));
+    (container.querySelector('#save-btn') as HTMLElement).click();
+    await flushUpdates();
+    expect(container.querySelector('#save-error')).not.toBeNull();
+    // Correct the email so the error clears.
+    (container.querySelector('#email-input') as HTMLInputElement).value = 'ok@example.com';
+    (container.querySelector('#email-input') as HTMLInputElement).dispatchEvent(new Event('input', { bubbles: true }));
+    await flushUpdates();
+    // Leave transition is deferred (~15ms) — the error is still present here.
+    expect(container.querySelector('#save-error')).not.toBeNull();
+    await settle();
+    // After the leave completes the error node is reclaimed.
+    expect(container.querySelector('#save-error')).toBeNull();
+  });
+});
