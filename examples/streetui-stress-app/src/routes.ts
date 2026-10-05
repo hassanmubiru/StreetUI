@@ -100,10 +100,7 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
       h.button('Export', {
         id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }),
         ariaLabel: 'Export data',
-        onMouseEnter: () => exportTip.set(true),
-        onMouseLeave: () => exportTip.set(false),
-        onFocus: () => exportTip.set(true),
-        onBlur: () => exportTip.set(false),
+        onClick: () => exportTip.update((v) => !v),
       });
       h.tooltip('export-tip', { open: exportTip, onClose: () => exportTip.set(false) }, (t) => {
         t.text('Export the current view as CSV', { id: 'export-tip-text', class: tooltipBubble });
