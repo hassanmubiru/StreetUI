@@ -4134,7 +4134,7 @@ function trigger(el, type, init = {}) {
 }
 
 // src/version.ts
-var VERSION = "2.7.0";
+var VERSION = "2.8.0";
 export {
   VERSION,
   analyzeGraph,
