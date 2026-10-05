@@ -1916,7 +1916,7 @@ function renderToString(compiled, options = {}) {
 }
 
 // src/version.ts
-var VERSION = "2.9.0";
+var VERSION = "3.0.0";
 export {
   STATE_MARKER_ATTR,
   ServerDOMAdapter,
