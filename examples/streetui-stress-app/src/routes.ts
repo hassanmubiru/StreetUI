@@ -99,7 +99,7 @@ export function overviewRoute(page: PageDSL, _ctx: RouteContext, state: AppState
       }, { id: 'title-block', class: pageTitleBlock });
       h.button('Export', {
         id: 'export-btn', class: button({ intent: 'quiet', size: 'sm' }),
-        ariaHasPopup: 'tooltip' as const,
+        ariaExpanded: exportTip,
         onMouseEnter: () => exportTip.set(true),
         onMouseLeave: () => exportTip.set(false),
         onFocus: () => exportTip.set(true),
