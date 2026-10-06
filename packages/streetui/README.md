@@ -8,7 +8,7 @@ transitions, accessibility platform, forms, context, i18n, SSR with static-plan
 acceleration, hydration, testing utilities, DevTools, and a CLI —
 as **one package, one import**.
 
-Current version: **2.1.0** · [Changelog](https://github.com/streetui/streetui/blob/main/CHANGELOG.md)
+Current version: **2.1.0** · [Changelog](https://github.com/hassanmubiru/StreetUI/blob/main/CHANGELOG.md)
 
 You install one thing:
 

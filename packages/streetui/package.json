@@ -82,7 +82,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/streetui/streetui.git",
+    "url": "https://github.com/hassanmubiru/StreetUI.git",
     "directory": "packages/streetui"
   },
   "keywords": [

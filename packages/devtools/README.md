@@ -2,7 +2,7 @@
 
 StreetUI devtools — graph inspection, serialization, debug helpers
 
-Part of [StreetUI](https://github.com/streetui/streetui) — a semantic,
+Part of [StreetUI](https://github.com/hassanmubiru/StreetUI) — a semantic,
 signal-based UI framework with its own reactivity and keyed DOM reconciler
 (no virtual DOM).
 
