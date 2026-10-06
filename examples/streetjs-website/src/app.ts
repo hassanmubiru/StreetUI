@@ -1,6 +1,16 @@
 import { mount, router, route } from 'streetui';
 import { Shell } from './shell.js';
-import { HomePage, GettingStartedPage, DocsPage, NotFoundPage } from './routes.js';
+import {
+  HomePage,
+  GettingStartedPage,
+  DocsPage,
+  ExamplesPage,
+  ApiPage,
+  GuidesPage,
+  CommunityPage,
+  AboutPage,
+  NotFoundPage
+} from './routes.js';
 
 export function createApp() {
   return router(
@@ -8,14 +18,14 @@ export function createApp() {
     route('/getting-started', () => Shell(GettingStartedPage())),
     route('/docs', () => Shell(DocsPage())),
     route('/docs/:section', () => Shell(DocsPage())),
-    route('/examples', () => Shell(DocsPage())),  // Placeholder
-    route('/api', () => Shell(DocsPage())),       // Placeholder
-    route('/guides', () => Shell(DocsPage())),    // Placeholder
+    route('/examples', () => Shell(ExamplesPage())),
+    route('/api', () => Shell(ApiPage())),
+    route('/guides', () => Shell(GuidesPage())),
     route('/plugins', () => Shell(DocsPage())),   // Placeholder
     route('/changelog', () => Shell(DocsPage())), // Placeholder
     route('/blog', () => Shell(DocsPage())),      // Placeholder
-    route('/community', () => Shell(DocsPage())), // Placeholder
-    route('/about', () => Shell(DocsPage())),     // Placeholder
+    route('/community', () => Shell(CommunityPage())),
+    route('/about', () => Shell(AboutPage())),
     route('*', () => Shell(NotFoundPage()))
   );
 }
