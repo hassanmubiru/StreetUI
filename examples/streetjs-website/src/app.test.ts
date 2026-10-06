@@ -4,7 +4,7 @@ import { renderPage } from './server-entry.js';
 describe('streetjs-website SSR', () => {
   it('renders the home page', () => {
     const { html, styles } = renderPage('/');
-    expect(html).toContain('TypeScript-first UI Framework');
+    expect(html).toContain('TypeScript-first UI framework');
     expect(html).toContain('id="hero-title"');
     expect(styles).toContain('data-streetui-css');
   });
