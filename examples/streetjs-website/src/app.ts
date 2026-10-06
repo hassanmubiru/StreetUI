@@ -1,31 +1,45 @@
-import { mount, router, route } from 'streetui';
-import { Shell } from './shell.js';
+import { createRouter, createMemoryHistory, createBrowserHistory } from 'streetui';
 import {
-  HomePage,
-  GettingStartedPage,
-  DocsPage,
-  ExamplesPage,
-  ApiPage,
-  GuidesPage,
-  CommunityPage,
-  AboutPage,
-  NotFoundPage
+  homePage, gettingStartedPage, docsPage, apiPage,
+  examplesPage, notFoundPage, placeholderPage,
 } from './routes.js';
 
-export function createApp() {
-  return router(
-    route('/', () => Shell(HomePage())),
-    route('/getting-started', () => Shell(GettingStartedPage())),
-    route('/docs', () => Shell(DocsPage())),
-    route('/docs/:section', () => Shell(DocsPage())),
-    route('/examples', () => Shell(ExamplesPage())),
-    route('/api', () => Shell(ApiPage())),
-    route('/guides', () => Shell(GuidesPage())),
-    route('/plugins', () => Shell(DocsPage())),   // Placeholder
-    route('/changelog', () => Shell(DocsPage())), // Placeholder
-    route('/blog', () => Shell(DocsPage())),      // Placeholder
-    route('/community', () => Shell(CommunityPage())),
-    route('/about', () => Shell(AboutPage())),
-    route('*', () => Shell(NotFoundPage()))
-  );
+export function createApp(path = '/') {
+  const router = createRouter({
+    routes: [
+      { path: '/',                builder: homePage },
+      { path: '/getting-started', builder: gettingStartedPage },
+      { path: '/docs',            builder: docsPage },
+      { path: '/docs/:section',   builder: docsPage },
+      { path: '/api',             builder: apiPage },
+      { path: '/examples',        builder: examplesPage },
+      { path: '/guides',          builder: placeholderPage('Guides') },
+      { path: '/changelog',       builder: placeholderPage('Changelog') },
+      { path: '/blog',            builder: placeholderPage('Blog') },
+      { path: '/about',           builder: placeholderPage('About') },
+      { path: '*',                builder: notFoundPage },
+    ],
+    history: createMemoryHistory(path),
+  });
+  return router;
+}
+
+export function createClientApp() {
+  const router = createRouter({
+    routes: [
+      { path: '/',                builder: homePage },
+      { path: '/getting-started', builder: gettingStartedPage },
+      { path: '/docs',            builder: docsPage },
+      { path: '/docs/:section',   builder: docsPage },
+      { path: '/api',             builder: apiPage },
+      { path: '/examples',        builder: examplesPage },
+      { path: '/guides',          builder: placeholderPage('Guides') },
+      { path: '/changelog',       builder: placeholderPage('Changelog') },
+      { path: '/blog',            builder: placeholderPage('Blog') },
+      { path: '/about',           builder: placeholderPage('About') },
+      { path: '*',                builder: notFoundPage },
+    ],
+    history: createBrowserHistory(),
+  });
+  return router;
 }

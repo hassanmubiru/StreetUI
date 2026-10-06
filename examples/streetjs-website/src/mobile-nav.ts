@@ -1,12 +1,3 @@
-import { signal } from 'streetui';
-
-// Mobile menu state
-export const isMobileMenuOpen = signal(false);
-
-export function toggleMobileMenu() {
-  isMobileMenuOpen.set(!isMobileMenuOpen.get());
-}
-
-export function closeMobileMenu() {
-  isMobileMenuOpen.set(false);
-}
+// Mobile nav state — kept minimal; shell uses the theme toggle for now.
+// Full hamburger menu is a progressive enhancement for a future iteration.
+export {};

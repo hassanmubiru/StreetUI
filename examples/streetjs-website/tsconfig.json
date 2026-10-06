@@ -1,16 +1,14 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "module": "ESNext",
     "target": "ES2022",
-    "moduleResolution": "bundler",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
-    "esModuleInterop": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "types": ["node", "vitest/globals"]
+    "lib": ["ES2022", "DOM"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

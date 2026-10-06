@@ -1,13 +1,36 @@
-import { hydrate } from 'streetui';
-import { createApp } from './app.js';
-import { initializeTheme } from './theme.js';
+import { mountRouter, styleRegistry, adoptServerStyles, renderStyles } from 'streetui';
+import { BrowserDOMAdapter } from 'streetui';
+import { createClientApp } from './app.js';
+import { websiteShell } from './shell.js';
+import { theme } from './theme.js';
+import { brand } from './design-system.js';
 
-// Initialize theme before hydration
-initializeTheme();
+const container = document.getElementById('app')!;
+const hasSSR = !!container.querySelector('[data-streetui-css]');
 
-const app = createApp();
-const root = document.getElementById('app');
+// Apply theme
+theme.set(theme.choice.get());
 
-if (root) {
-  hydrate(app, root);
+// Install or adopt styles
+if (hasSSR) {
+  adoptServerStyles(new BrowserDOMAdapter(), null, { registry: styleRegistry });
+} else {
+  const sheet = renderStyles({ registry: styleRegistry });
+  if (sheet) {
+    const style = document.createElement('style');
+    style.setAttribute('data-streetui-css', '');
+    style.textContent = sheet;
+    document.head.appendChild(style);
+  }
 }
+
+const router = createClientApp();
+mountRouter(router, {
+  container,
+  outletId: 'main-content',
+  hydrate: hasSSR,
+  shell: (page) => {
+    const { default: websiteShellFn } = { default: websiteShell };
+    websiteShellFn(page);
+  },
+});
