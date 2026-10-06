@@ -1,0 +1,23 @@
+{
+  "name": "streetjs-docs",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Official StreetJS framework documentation website built with StreetUI",
+  "scripts": {
+    "dev": "node src/server-entry.ts",
+    "build": "tsup",
+    "start": "node dist/server-entry.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "streetui": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
