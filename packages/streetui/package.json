@@ -85,6 +85,7 @@
     "url": "https://github.com/hassanmubiru/StreetUI.git",
     "directory": "packages/streetui"
   },
+  "homepage": "https://github.com/hassanmubiru/StreetUI#readme",
   "keywords": [
     "streetui",
     "ui",
