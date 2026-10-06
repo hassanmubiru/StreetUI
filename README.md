@@ -11,7 +11,7 @@ No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
 
-Current version: **2.1.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui)
+Current version: **2.1.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
 
 ---
 
