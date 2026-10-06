@@ -1,5 +1,7 @@
 import { div, header, nav, a, button, footer, p, span } from 'streetui';
 import { ds, commonStyles } from './design-system.js';
+import { currentTheme, toggleTheme } from './theme.js';
+import { isMobileMenuOpen, toggleMobileMenu, closeMobileMenu } from './mobile-nav.js';
 
 export function Shell(content: any) {
   return div(
@@ -11,6 +13,7 @@ export function Shell(content: any) {
       },
     },
     Header(),
+    MobileNav(),
     div(
       {
         style: {
@@ -71,13 +74,16 @@ function Header() {
         'StreetJS'
       ),
       
-      // Navigation
+      // Desktop Navigation
       nav(
         {
           style: {
             display: 'flex',
             gap: ds.spacing[8],
             alignItems: 'center',
+            '@media (max-width: 768px)': {
+              display: 'none',
+            },
           },
         },
         NavLink('Getting Started', '/getting-started'),
@@ -85,6 +91,28 @@ function Header() {
         NavLink('Examples', '/examples'),
         NavLink('API', '/api'),
         
+        // Theme switcher
+        button(
+          {
+            onclick: toggleTheme,
+            style: {
+              background: 'none',
+              border: 'none',
+              fontSize: ds.fontSizes.xl,
+              cursor: 'pointer',
+              padding: ds.spacing[2],
+              color: ds.colors.text,
+              transition: ds.transitions.fast,
+              '&:hover': {
+                color: ds.colors.primary,
+              },
+            },
+            'aria-label': 'Toggle theme',
+            title: 'Toggle theme',
+          },
+          currentTheme.get() === 'dark' ? '☀️' : '🌙'
+        ),
+
         a(
           {
             href: 'https://github.com/hassanmubiru/StreetJS',
@@ -253,5 +281,120 @@ function FooterColumn(title: string, links: Array<{ text: string; href: string }
         )
       )
     )
+  );
+}
+
+// Mobile menu button
+function MobileMenuButton() {
+  return button(
+    {
+      onclick: toggleMobileMenu,
+      style: {
+        display: 'none',
+        '@media (max-width: 768px)': {
+          display: 'flex',
+        },
+        background: 'none',
+        border: 'none',
+        fontSize: ds.fontSizes['2xl'],
+        cursor: 'pointer',
+        padding: ds.spacing[2],
+        color: ds.colors.text,
+      },
+      'aria-label': 'Toggle menu',
+      'aria-expanded': isMobileMenuOpen.get(),
+    },
+    isMobileMenuOpen.get() ? '✕' : '☰'
+  );
+}
+
+// Mobile navigation drawer
+function MobileNav() {
+  const isOpen = isMobileMenuOpen.get();
+  
+  return div(
+    {
+      style: {
+        display: 'none',
+        '@media (max-width: 768px)': {
+          display: isOpen ? 'block' : 'none',
+        },
+        position: 'fixed',
+        top: '4rem',
+        left: '0',
+        right: '0',
+        bottom: '0',
+        backgroundColor: ds.colors.bg,
+        borderTop: `1px solid ${ds.colors.border}`,
+        zIndex: ds.zIndex.modal,
+        overflowY: 'auto',
+        padding: ds.spacing[6],
+      },
+    },
+    div(
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          gap: ds.spacing[4],
+        },
+      },
+      MobileNavLink('Getting Started', '/getting-started'),
+      MobileNavLink('Docs', '/docs'),
+      MobileNavLink('Examples', '/examples'),
+      MobileNavLink('API', '/api'),
+      MobileNavLink('Guides', '/guides'),
+      MobileNavLink('Community', '/community'),
+      div(
+        {
+          style: {
+            marginTop: ds.spacing[4],
+            paddingTop: ds.spacing[4],
+            borderTop: `1px solid ${ds.colors.border}`,
+          },
+        },
+        a(
+          {
+            href: 'https://github.com/hassanmubiru/StreetJS',
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            style: {
+              display: 'flex',
+              alignItems: 'center',
+              gap: ds.spacing[2],
+              color: ds.colors.text,
+              textDecoration: 'none',
+              padding: ds.spacing[3],
+              fontSize: ds.fontSizes.lg,
+            },
+          },
+          '⭐',
+          ' View on GitHub'
+        )
+      )
+    )
+  );
+}
+
+function MobileNavLink(text: string, href: string) {
+  return a(
+    {
+      href,
+      onclick: closeMobileMenu,
+      style: {
+        color: ds.colors.text,
+        textDecoration: 'none',
+        fontSize: ds.fontSizes.lg,
+        fontWeight: ds.fontWeights.medium,
+        padding: ds.spacing[3],
+        borderRadius: ds.radii.md,
+        transition: ds.transitions.fast,
+        '&:hover': {
+          backgroundColor: ds.colors.bgAlt,
+          color: ds.colors.primary,
+        },
+      },
+    },
+    text
   );
 }

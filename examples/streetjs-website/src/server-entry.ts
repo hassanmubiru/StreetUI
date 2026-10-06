@@ -1,5 +1,7 @@
 import { renderToString } from 'streetui/server';
 import { createApp } from './app.js';
+import { themeCSSVariables } from './theme.js';
+import { generateMetaTags } from './seo.js';
 import { createServer } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -42,10 +44,16 @@ const server = createServer(async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StreetJS - Production-Grade TypeScript Backend Framework</title>
+  ${generateMetaTags(url.pathname)}
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    ${themeCSSVariables}
   </style>
 </head>
 <body>
