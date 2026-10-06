@@ -266,7 +266,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
     builder: (page) =>
       pageLayout(page, { id: 'about', title: 'About', lead: 'StreetUI is MIT-licensed and open source.', path: '/about' }, (c) => {
         c.text('StreetUI is a TypeScript-first UI framework. This website is itself a StreetUI application, used to dogfood the framework end to end.', { id: 'about-text', class: ds.bodyText });
-        c.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'about-github', class: ds.inlineLink });
+        c.link('GitHub', { href: 'https://github.com/hassanmubiru/StreetUI', external: true, id: 'about-github', class: ds.inlineLink });
       }),
   };
 

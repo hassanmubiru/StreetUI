@@ -88,7 +88,7 @@ export function homePage(page: PageDSL) {
       h.text('Build production-ready Node.js applications with decorators, native PostgreSQL wire protocol, background jobs, and JWT authentication. No dependencies on heavy ORMs.', { id: 'hero-subtitle', class: heroSubtitle });
       h.container('hero-actions', (a) => {
         a.link('Get Started', { href: '/getting-started', id: 'cta-start', class: btnPrimary });
-        a.link('View on GitHub', { href: 'https://github.com/streetjs/streetjs', id: 'cta-github', class: btnSecondary });
+        a.link('View on GitHub', { href: 'https://github.com/hassanmubiru/StreetUI', id: 'cta-github', class: btnSecondary });
       }, { id: 'hero-actions', class: heroActions });
     }, { id: 'hero', class: heroSection });
 

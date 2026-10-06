@@ -114,7 +114,7 @@ export function websiteShell(page: PageDSL, ctx: { renderOutlet?: () => void } =
     site.container('footer', (f) => {
       f.container('footer-inner', (fi) => {
         fi.text('Built with StreetUI 3.0.0', { id: 'footer-text', class: footerText });
-        fi.link('GitHub', { href: 'https://github.com/streetjs/streetjs', id: 'footer-github', class: footerText });
+        fi.link('GitHub', { href: 'https://github.com/hassanmubiru/StreetUI', id: 'footer-github', class: footerText });
       }, { id: 'footer-inner', class: footerInner });
     }, { id: 'site-footer', class: siteFooter, role: 'contentinfo' });
   }, { id: 'site-layout', class: siteLayout });

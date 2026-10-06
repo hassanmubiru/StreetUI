@@ -70,7 +70,7 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
           for (const item of PRIMARY_NAV) {
             navLink(links, router, item);
           }
-          links.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'nav-github', class: ds.navLinkItem });
+          links.link('GitHub', { href: 'https://github.com/hassanmubiru/StreetUI', external: true, id: 'nav-github', class: ds.navLinkItem });
         }, { id: 'nav-links', class: ds.navLinks });
 
         // Theme toggle — a real button bound to a reactive label.

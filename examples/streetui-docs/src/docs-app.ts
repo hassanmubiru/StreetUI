@@ -120,7 +120,7 @@ export function docsShell(shell: PageDSL, router: Router): void {
     navLink(n, router, 'Examples', '/examples', 'nav-examples');
     navLink(n, router, 'About', '/about', 'nav-about');
     // An external link keeps normal browser behaviour (not intercepted).
-    n.link('GitHub', { href: 'https://example.com/streetui', external: true, id: 'nav-github' });
+    n.link('GitHub', { href: 'https://github.com/hassanmubiru/StreetUI', external: true, id: 'nav-github' });
   }, { id: 'site-nav' });
 
   // The router renders the active route into this outlet; the shell persists.
