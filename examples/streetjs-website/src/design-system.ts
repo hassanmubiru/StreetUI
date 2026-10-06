@@ -259,3 +259,97 @@ export const cardGrid = style({
   display: 'grid', gap: B.space['4'],
   gridTemplateColumns: { base: '1fr', md: 'repeat(2,1fr)', xl: 'repeat(3,1fr)' },
 });
+
+// Search styles
+export const searchOverlay = style({
+  position: 'fixed',
+  inset: '0',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  display: 'flex',
+  alignItems: 'flex-start',
+  justifyContent: 'center',
+  paddingTop: B.space['20'],
+  zIndex: '50',
+});
+
+export const searchModal = style({
+  backgroundColor: B.surface.page,
+  borderRadius: B.radius.lg,
+  border: `1px solid ${B.border.default}`,
+  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
+  width: '90%',
+  maxWidth: '600px',
+  maxHeight: '80vh',
+  overflow: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+export const searchInput = style({
+  width: '100%',
+  padding: `${B.space['4']} ${B.space['4']}`,
+  fontSize: B.size.lg,
+  border: 'none',
+  borderBottom: `1px solid ${B.border.default}`,
+  backgroundColor: 'transparent',
+  color: B.content.primary,
+  outline: 'none',
+});
+
+export const searchResults = style({
+  overflowY: 'auto',
+  maxHeight: '400px',
+});
+
+export const searchResult = style({
+  padding: `${B.space['3']} ${B.space['4']}`,
+  borderBottom: `1px solid ${B.border.default}`,
+  cursor: 'pointer',
+  transition: 'background-color 0.15s',
+  ':hover': {
+    backgroundColor: B.surface.sunken,
+  },
+});
+
+export const searchResultSelected = style({
+  backgroundColor: B.surface.sunken,
+});
+
+export const searchResultTitle = style({
+  fontFamily: B.font.sans,
+  fontSize: B.size.base,
+  fontWeight: '600',
+  color: B.content.primary,
+  marginBottom: B.space['1'],
+});
+
+export const searchResultDesc = style({
+  fontFamily: B.font.sans,
+  fontSize: B.size.sm,
+  color: B.content.muted,
+});
+
+export const searchResultType = style({
+  display: 'inline-block',
+  fontSize: B.size.xs,
+  padding: `${B.space['1']} ${B.space['2']}`,
+  borderRadius: B.radius.sm,
+  backgroundColor: B.surface.raised,
+  color: B.content.secondary,
+  marginRight: B.space['2'],
+});
+
+export const searchEmpty = style({
+  padding: `${B.space['8']} ${B.space['4']}`,
+  textAlign: 'center',
+  color: B.content.muted,
+});
+
+export const searchHint = style({
+  padding: `${B.space['2']} ${B.space['4']}`,
+  fontSize: B.size.xs,
+  color: B.content.tertiary,
+  borderTop: `1px solid ${B.border.default}`,
+  display: 'flex',
+  justifyContent: 'space-between',
+});

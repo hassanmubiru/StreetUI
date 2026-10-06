@@ -3,6 +3,7 @@ import { BrowserDOMAdapter } from 'streetui';
 import { createClientApp } from './app.js';
 import { websiteShell } from './shell.js';
 import { theme } from './theme.js';
+import { initSearchShortcut } from './search.js';
 import { brand } from './design-system.js';
 
 const container = document.getElementById('app')!;
@@ -34,3 +35,6 @@ mountRouter(router, {
     websiteShellFn(page);
   },
 });
+
+// Initialize search keyboard shortcut (Cmd/Ctrl+K)
+initSearchShortcut();

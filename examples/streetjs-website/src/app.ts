@@ -1,45 +1,37 @@
 import { createRouter, createMemoryHistory, createBrowserHistory } from 'streetui';
 import {
   homePage, gettingStartedPage, docsPage, apiPage,
-  examplesPage, notFoundPage, placeholderPage,
+  examplesPage, guidesPage, playgroundPage, pluginsPage,
+  changelogPage, blogPage, aboutPage, notFoundPage,
 } from './routes.js';
 
+const routes = [
+  { path: '/',                builder: homePage },
+  { path: '/getting-started', builder: gettingStartedPage },
+  { path: '/docs',            builder: docsPage },
+  { path: '/docs/:section',   builder: docsPage },
+  { path: '/guides',          builder: guidesPage },
+  { path: '/guides/:slug',    builder: guidesPage },
+  { path: '/api',             builder: apiPage },
+  { path: '/examples',        builder: examplesPage },
+  { path: '/playground',      builder: playgroundPage },
+  { path: '/plugins',         builder: pluginsPage },
+  { path: '/changelog',       builder: changelogPage },
+  { path: '/blog',            builder: blogPage },
+  { path: '/about',           builder: aboutPage },
+  { path: '*',                builder: notFoundPage },
+];
+
 export function createApp(path = '/') {
-  const router = createRouter({
-    routes: [
-      { path: '/',                builder: homePage },
-      { path: '/getting-started', builder: gettingStartedPage },
-      { path: '/docs',            builder: docsPage },
-      { path: '/docs/:section',   builder: docsPage },
-      { path: '/api',             builder: apiPage },
-      { path: '/examples',        builder: examplesPage },
-      { path: '/guides',          builder: placeholderPage('Guides') },
-      { path: '/changelog',       builder: placeholderPage('Changelog') },
-      { path: '/blog',            builder: placeholderPage('Blog') },
-      { path: '/about',           builder: placeholderPage('About') },
-      { path: '*',                builder: notFoundPage },
-    ],
+  return createRouter({
+    routes,
     history: createMemoryHistory(path),
   });
-  return router;
 }
 
 export function createClientApp() {
-  const router = createRouter({
-    routes: [
-      { path: '/',                builder: homePage },
-      { path: '/getting-started', builder: gettingStartedPage },
-      { path: '/docs',            builder: docsPage },
-      { path: '/docs/:section',   builder: docsPage },
-      { path: '/api',             builder: apiPage },
-      { path: '/examples',        builder: examplesPage },
-      { path: '/guides',          builder: placeholderPage('Guides') },
-      { path: '/changelog',       builder: placeholderPage('Changelog') },
-      { path: '/blog',            builder: placeholderPage('Blog') },
-      { path: '/about',           builder: placeholderPage('About') },
-      { path: '*',                builder: notFoundPage },
-    ],
+  return createRouter({
+    routes,
     history: createBrowserHistory(),
   });
-  return router;
 }

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "private": true,
-  "description": "Official StreetJS framework documentation website built with StreetUI",
+  "description": "Official StreetJS v1.2.8 documentation website built with StreetUI 3.0.0",
   "scripts": {
     "dev": "node src/server-entry.ts",
     "build": "tsup",
