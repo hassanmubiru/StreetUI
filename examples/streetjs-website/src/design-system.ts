@@ -90,14 +90,14 @@ export const themeToggle = style({
   borderRadius: B.radius.md, paddingTop: B.space['1'], paddingBottom: B.space['1'],
   paddingLeft: B.space['3'], paddingRight: B.space['3'],
   cursor: 'pointer',
-  on: { hover: { color: B.content.primary, borderColor: B.border.strong, background: B.surface.sunken } },
-  on_focusVisible: { outline: `2px solid ${B.focus.ring}`, outlineOffset: '2px' },
+  on: { hover: { color: B.content.primary, borderColor: B.border.strong, background: B.surface.sunken },
+        focusVisible: { outline: `2px solid ${B.focus.ring}`, outlineOffset: '2px' } },
 });
 
 export const mainContent = style({ maxWidth: '1200px', marginLeft: 'auto', marginRight: 'auto', padding: `${B.space['8']} ${B.space['4']}` });
 
 export const siteFooter = style({
-  borderTop: `1px solid ${B.surface.line}`,
+  boxShadow: `inset 0 1px 0 ${B.surface.line}`,
   paddingTop: B.space['6'], paddingBottom: B.space['6'],
   paddingLeft: B.space['4'], paddingRight: B.space['4'],
   marginTop: B.space['10'],
