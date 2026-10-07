@@ -1,23 +1,23 @@
 {
   "name": "streetjs-website",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
-  "description": "Official StreetJS v1.2.8 documentation website built with StreetUI 3.0.0",
+  "type": "module",
+  "description": "The StreetJS website: docs, guides, API, examples, playground, plugins, changelog and blog in one StreetUI application.",
   "scripts": {
-    "dev": "node src/server-entry.ts",
     "build": "tsup",
-    "start": "node dist/server-entry.js",
+    "start": "node server.mjs",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
-    "streetui": "^3.0.0"
+    "streetui": "3.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "tsup": "^8.0.0",
-    "typescript": "^5.5.0",
-    "vitest": "^2.0.0"
+    "happy-dom": "*",
+    "tsup": "*",
+    "typescript": "*",
+    "vitest": "*"
   }
 }
