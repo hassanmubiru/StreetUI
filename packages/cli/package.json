@@ -52,6 +52,7 @@
     "url": "https://github.com/hassanmubiru/StreetUI.git",
     "directory": "packages/cli"
   },
+  "homepage": "https://github.com/hassanmubiru/StreetUI#readme",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
