@@ -47,6 +47,16 @@ export function isKnownPath(path: string): boolean {
     : postBySlug(slug) !== undefined;
 }
 
+/** Every indexable path, for the sitemap. Derived from content, never hand-listed. */
+export function allPaths(): string[] {
+  return [
+    '/', '/getting-started', '/docs', '/guides', '/api', '/examples', '/playground', '/plugins', '/changelog', '/blog', '/about',
+    ...DOCS.map((d) => `/docs/${d.slug}`),
+    ...GUIDES.map((g) => `/guides/${g.slug}`),
+    ...BLOG_POSTS.map((b) => `/blog/${b.slug}`),
+  ];
+}
+
 /* ── shared renderers ───────────────────────────────────────────────────── */
 
 /** Render content blocks. Lists use list/listitem roles; warnings are notes. */
