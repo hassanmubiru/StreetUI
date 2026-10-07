@@ -17,7 +17,7 @@ import { buildRoutes } from './routes.js';
 import { createSearchState, type SearchState } from './search.js';
 import { installSearchKeys } from './search-keys.js';
 import { websiteShell } from './shell.js';
-import { createTheme, type ThemeController, type ThemeStorage } from './theme.js';
+import { createTheme, defaultThemeStorage, type ThemeChoice, type ThemeController, type ThemeStorage } from './theme.js';
 // Side-effect import: registers every design-system style identity at module
 // load, so the stylesheet is complete and identical for every route.
 import './design-system.js';
@@ -71,7 +71,16 @@ export function createWebsite(options: WebsiteOptions = {}): Website {
   const playground = createPlayground();
   const backend = createBackendPanel(options.fetchImpl);
   const search = createSearchState();
-  const theme = createTheme(options.themeStorage !== undefined ? { storage: options.themeStorage } : {});
+  // While hydrating, the theme must START as the server rendered it ("System")
+  // so the first client render matches the adopted markup; the stored choice
+  // is applied right after mount (see mountWebsite). Reading it earlier would
+  // make the first render disagree with the server's "Theme: System" label,
+  // and hydration adopts text rather than re-patching it.
+  const realStorage = options.themeStorage ?? defaultThemeStorage();
+  const storage: ThemeStorage = options.hydrate === true
+    ? { read: () => null, write: (c: ThemeChoice) => realStorage.write(c) }
+    : realStorage;
+  const theme = createTheme({ storage });
   let routerRef: Router | undefined;
   const routes = buildRoutes({
     getRouter: () => {
@@ -101,6 +110,12 @@ export function mountWebsite(container: Element, options: WebsiteOptions = {}): 
       router: site.router, theme: site.theme, search: site.search, menuOpen: site.menuOpen,
     }),
   });
+
+  if (hydrate) {
+    // Apply the visitor's stored theme now that the server markup is adopted.
+    const stored = (options.themeStorage ?? defaultThemeStorage()).read();
+    if (stored !== null && stored !== site.theme.choice.peek()) site.theme.choice.set(stored);
+  }
 
   const doc = options.doc ?? (typeof document !== 'undefined' ? document : undefined);
   const disposeKeys = installSearchKeys(doc !== undefined
