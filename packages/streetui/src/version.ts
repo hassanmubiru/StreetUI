@@ -7,4 +7,4 @@
  * (`streetui --version`) — the consolidated test-suite pins all three to the
  * same coordinated release so they can never silently drift apart.
  */
-export const VERSION = '3.0.0';
+export const VERSION = '3.0.1';
