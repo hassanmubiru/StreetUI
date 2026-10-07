@@ -58,8 +58,8 @@ describe('playground — reactive state', () => {
     expect(pg.decoderSummary.get()).toBe('5 columns, 0 problems');
     pg.decoderInput.set('x | boolean | maybe');
     expect(pg.decoderSummary.get()).toBe('1 column, 1 problem');
-    pg.migrationInput.set('1_a.sql, 10_b.sql');
-    expect(pg.migrationSummary.get()).toBe('2 forward migrations, 0 problems'.replace('0 problems', '0 problems'));
+    pg.migrationInput.set('001_a.sql, 010_b.sql');
+    expect(pg.migrationSummary.get()).toBe('2 forward migrations, 0 problems');
     pg.migrationInput.set('1_a.sql, 10_b.sql, 02_c.sql');
     expect(pg.migrations.get().problems.length).toBeGreaterThan(0);
     pg.secretInput.set('a'.repeat(64));

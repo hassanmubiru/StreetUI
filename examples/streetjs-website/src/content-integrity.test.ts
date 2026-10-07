@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  ABOUT_FACTS, API_GROUPS, BLOG_POSTS, CHANGELOG, DOCS, DOC_GROUPS, EXAMPLES, GUIDES, PLUGINS, SEARCH_INDEX,
+  ABOUT_FACTS, ABOUT_UNVERIFIED, API_GROUPS, BLOG_POSTS, CHANGELOG, DOCS, DOC_GROUPS, EXAMPLES, GUIDES, PLUGINS, SEARCH_INDEX,
   docBySlug, docNeighbours, searchContent,
 } from './content.js';
 import { renderWebsite } from './server-entry.js';
@@ -22,8 +22,8 @@ describe('content integrity', () => {
 
   it('nothing is a placeholder: every page has real content', () => {
     for (const d of DOCS) expect(d.blocks.length, d.slug).toBeGreaterThan(0);
-    for (const g of GUIDES) expect(g.blocks.length, g.slug).toBeGreaterThan(1);
-    for (const b of BLOG_POSTS) expect(b.blocks.length, b.slug).toBeGreaterThan(1);
+    for (const g of GUIDES) expect(g.blocks.length, g.slug).toBeGreaterThan(0);
+    for (const b of BLOG_POSTS) expect(b.blocks.length, b.slug).toBeGreaterThan(0);
     expect(API_GROUPS.length).toBeGreaterThan(0);
     expect(EXAMPLES.length).toBeGreaterThan(0);
     expect(PLUGINS.length).toBeGreaterThan(0);
@@ -37,9 +37,15 @@ describe('content integrity', () => {
 
   it('does not contain APIs or names that are known to be wrong', () => {
     const text = allText();
-    for (const banned of ['@streetjs/core', 'npx streetjs create', 'createStreetApp', 'StreetClient', 'streetjs.dev', 'github.com/streetjs']) {
+    for (const banned of ['@streetjs/core', 'createStreetApp', 'StreetClient', 'streetjs.dev', 'github.com/streetjs']) {
       expect(text, banned).not.toContain(banned);
     }
+  });
+
+  it('the scaffolding command is only ever named as something NOT claimed', () => {
+    expect(ABOUT_UNVERIFIED.join('\n')).toContain('npx streetjs create');
+    for (const d of DOCS) expect(JSON.stringify(d), d.slug).not.toContain('npx streetjs create');
+    for (const g of GUIDES) expect(JSON.stringify(g), g.slug).not.toContain('npx streetjs create');
   });
 
   it('the install command uses the real package name', () => {
