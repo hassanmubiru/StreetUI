@@ -9,6 +9,7 @@
 import { derived, type Signal, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import type { CodeSample } from './content-types.js';
+// (content.ts is the public facade; components only need the type.)
 import { pageHead } from './metadata.js';
 import { ds } from './design-system.js';
 

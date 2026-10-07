@@ -8,13 +8,7 @@
 import type { ApiGroup, BlogPost, Block, ChangelogEntry, ExampleItem, PluginItem } from './content-types.js';
 
 const p = (text: string): Block => ({ kind: 'p', text });
-const h = (text: string): Block => ({ kind: 'h', text });
 const list = (...items: string[]): Block => ({ kind: 'list', items });
-const warn = (text: string): Block => ({ kind: 'warn', text });
-const code = (label: string, body: string, language = 'ts'): Block => ({
-  kind: 'code',
-  sample: { label, language, code: body },
-});
 
 export const API_GROUPS: readonly ApiGroup[] = [
   {
@@ -329,5 +323,3 @@ export const ABOUT_UNVERIFIED: readonly string[] = [
   'Benchmark figures',
   'A scaffolding command (npx streetjs create)',
 ];
-
-export { h, warn, code, list };
