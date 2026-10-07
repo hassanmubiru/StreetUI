@@ -17,11 +17,16 @@ import {
 } from './content.js';
 import { ds } from './design-system.js';
 import type { BackendPanel, ProbeResult } from './backend.js';
-import type { PlaygroundState } from './playground.js';
+import { DECODER_SAMPLE, type PlaygroundState } from './playground.js';
 import { DOCS_SITE_URL } from './shell.js';
 
 export interface RoutesDeps {
-  readonly router: Router;
+  /**
+   * Lazy router accessor. Routes need the router (active-link state in the docs
+   * sidebar) but the router is created FROM these routes, so it is resolved at
+   * build time of a page, never at definition time.
+   */
+  readonly getRouter: () => Router;
   readonly playground: PlaygroundState;
   readonly backend: BackendPanel;
 }
@@ -100,7 +105,7 @@ const FEATURES: readonly { title: string; href: string; text: string }[] = [
 /* ── route table ────────────────────────────────────────────────────────── */
 
 export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
-  const { router, playground, backend } = deps;
+  const { getRouter, playground, backend } = deps;
 
   return [
     {
@@ -201,7 +206,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
               DOC_GROUPS.forEach((group, gi) => {
                 s.text(group, { id: `side-group-${gi}`, class: ds.docsSidebarGroup });
                 DOCS.filter((d) => d.group === group).forEach((d) => {
-                  navLink(s, router, { label: d.title, href: `/docs/${d.slug}`, id: `side-doc-${d.slug}`, exact: true }, ds.docsSidebarLink);
+                  navLink(s, getRouter(), { label: d.title, href: `/docs/${d.slug}`, id: `side-doc-${d.slug}`, exact: true }, ds.docsSidebarLink);
                 });
               });
             }, { id: 'doc-sidebar', class: ds.docsSidebar, role: 'navigation', ariaLabel: 'Documentation sections' });
@@ -328,7 +333,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
               r.button('Boolean', { id: 'decoder-preset-bool', onClick: () => pg.decoderInput.set('active | boolean | t'), class: ds.buttonSecondary });
               r.button('Bigint', { id: 'decoder-preset-bigint', onClick: () => pg.decoderInput.set('id | bigint | 9007199254740993'), class: ds.buttonSecondary });
               r.button('Timestamp', { id: 'decoder-preset-ts', onClick: () => pg.decoderInput.set('created_at | timestamp | 2026-01-02 03:04:05.123456+00'), class: ds.buttonSecondary });
-              r.button('Sample row', { id: 'decoder-preset-sample', onClick: () => pg.decoderInput.set(DECODER_SAMPLE_REF()), class: ds.buttonSecondary });
+              r.button('Sample row', { id: 'decoder-preset-sample', onClick: () => pg.decoderInput.set(DECODER_SAMPLE), class: ds.buttonSecondary });
             }, { id: 'decoder-presets', class: ds.ctaRow });
             t.text(pg.decoderSummary, { id: 'decoder-summary', class: ds.metaText, ariaLive: 'polite' });
             const rows: ReadonlySignal<{ id: string; line: string }[]> = derived(() =>
@@ -510,6 +515,3 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
     },
   ];
 }
-
-import { DECODER_SAMPLE } from './playground.js';
-function DECODER_SAMPLE_REF(): string { return DECODER_SAMPLE; }
