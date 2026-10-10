@@ -189,27 +189,32 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
         }, { id: 'page-home-capabilities' });
 
         // ── Request lifecycle (prose + code, alternating band) ────────────
-        const dbExample = EXAMPLES.find((e) => /postgres|transaction|database/i.test(e.title)) ?? EXAMPLES[2];
+        // ── Request lifecycle (restrained diagram) ────────────────────────
         page.section('home-arch', (s) => {
           s.container('arch-band', (b) => {
             b.container('arch-inner', (bi) => {
-              bi.container('arch-grid', (g) => {
-                g.container('arch-text', (tx) => {
-                  tx.text('Architecture', { id: 'arch-kicker', class: ds.kicker });
-                  tx.heading('Decorators in, typed data out', { level: 2, id: 'arch-title', class: ds.sectionHeading });
-                  tx.text('A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.', { id: 'arch-body', class: ds.bodyText });
-                  tx.container('arch-links', (l) => {
-                    l.link('HTTP & controllers', { href: '/docs/http', id: 'arch-link-http', class: ds.inlineLink });
-                    l.link('Working with PostgreSQL', { href: '/docs/database', id: 'arch-link-db', class: ds.inlineLink });
-                  }, { id: 'arch-links', class: ds.ctaRow });
-                }, { id: 'arch-text', class: ds.heroCol });
-                if (dbExample !== undefined) {
-                  g.container('arch-code', (cc) => {
-                    const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : 'repository.ts';
-                    codeWindow(cc, { code: dbExample.sample.code, filename: fn, idBase: 'arch-code-win' });
-                  }, { id: 'arch-code', class: ds.heroCol });
-                }
-              }, { id: 'arch-grid', class: ds.splitGrid });
+              bi.container('arch-intro', (i) => {
+                i.text('Architecture', { id: 'arch-kicker', class: ds.kicker });
+                i.heading('How a request moves through StreetJS', { level: 2, id: 'arch-title', class: ds.sectionHeading });
+                i.text('A request enters the HTTP server, matches a decorated controller, is validated, runs with a per-request context, reaches your data layer through the native PostgreSQL driver, and returns a typed response.', { id: 'arch-body', class: ds.bodyText });
+              }, { id: 'arch-intro', class: ds.sectionIntro });
+              bi.container('arch-lane', (lane) => {
+                ARCH_STEPS.forEach((step, i) => {
+                  lane.container(`arch-step-${i}`, (st) => {
+                    st.container(`arch-step-${i}-head`, (h) => {
+                      h.text(String(i + 1), { id: `arch-step-${i}-num`, class: ds.archStepNum });
+                      h.text(step.name, { id: `arch-step-${i}-name`, class: ds.archStepName });
+                    }, { id: `arch-step-${i}-head`, class: ds.archStepHead });
+                    st.text(step.api, { id: `arch-step-${i}-api`, class: ds.archStepApi });
+                    st.text(step.text, { id: `arch-step-${i}-text`, class: ds.archStepText });
+                  }, { id: `arch-step-${i}`, class: ds.archStep });
+                });
+              }, { id: 'arch-lane', class: ds.archLane, role: 'list', ariaLabel: 'Request lifecycle' });
+              bi.container('arch-links', (l) => {
+                l.link('HTTP & controllers', { href: '/docs/http', id: 'arch-link-http', class: ds.inlineLink });
+                l.link('The request context', { href: '/docs/context', id: 'arch-link-ctx', class: ds.inlineLink });
+                l.link('Working with PostgreSQL', { href: '/docs/database', id: 'arch-link-db', class: ds.inlineLink });
+              }, { id: 'arch-links', class: ds.ctaRow });
             }, { id: 'arch-inner', class: ds.bandInner });
           }, { id: 'arch-band', class: ds.bandAlt });
         }, { id: 'page-home-arch' });
