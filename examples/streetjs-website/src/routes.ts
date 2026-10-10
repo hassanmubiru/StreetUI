@@ -169,7 +169,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
           }, { id: 'hero-outer', class: ds.heroOuter });
         }, { id: 'page-home' });
 
-        // ── Capabilities ──────────────────────────────────────────────────
+        // ── Capabilities (editorial rows, not a card grid) ────────────────
         page.section('home-capabilities', (s) => {
           s.container('cap-inner', (c) => {
             c.container('cap-intro', (i) => {
@@ -177,8 +177,14 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
               i.heading('Everything a service needs, documented and typed', { level: 2, id: 'home-features-title', class: ds.sectionHeading });
             }, { id: 'cap-intro', class: ds.sectionIntro });
             c.container('home-features', (g) => {
-              FEATURES.forEach((f, i) => linkCard(g, `feature-${i}`, f.title, f.href, f.text));
-            }, { id: 'home-features', class: ds.cardGrid });
+              FEATURES.forEach((f, i) => {
+                g.container(`feature-${i}`, (row) => {
+                  row.link(f.title, { href: f.href, id: `feature-${i}-link`, class: ds.capName });
+                  row.text(f.text, { id: `feature-${i}-summary`, class: ds.capText });
+                  row.link('Docs', { href: f.href, id: `feature-${i}-more`, class: ds.capLink });
+                }, { id: `feature-${i}`, class: ds.capRow });
+              });
+            }, { id: 'home-features', class: ds.capList });
           }, { id: 'cap-inner', class: ds.pageSection });
         }, { id: 'page-home-capabilities' });
 
