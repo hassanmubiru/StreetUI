@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm install --legacy-peer-deps && node build.mjs",
-  "outputDirectory": "dist",
-  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "installCommand": "echo 'no install needed'",
   "framework": null,
   "functions": {
     "api/render.mjs": {
@@ -16,9 +16,9 @@
       "dest": "/favicon.svg"
     },
     {
-      "src": "/browser-entry\\.js(\\.map)?$",
+      "src": "/browser-entry\\.js$",
       "headers": { "cache-control": "public, max-age=300" },
-      "dest": "/browser-entry.js$1"
+      "dest": "/dist/browser-entry.js"
     },
     {
       "src": "/(.*)",
