@@ -175,6 +175,8 @@ export const navInner = cx(
 export const brand = style({
   fontFamily: t.font.sans, fontSize: t.size.lg, fontWeight: t.weight.bold,
   letterSpacing: '-0.02em', color: t.content.primary, textDecoration: 'none',
+  borderRadius: t.radius.sm,
+  on: { focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 3 } },
 });
 
 export const brandLink = style({
@@ -720,7 +722,11 @@ export const docsTocLink = style({
 });
 
 // A doc section heading that also serves as an anchor target under the sticky nav.
-export const docHeading = cx(sectionHeading, style({ paddingTop: t.space['3'] }));
+export const docHeading = style({
+  fontFamily: t.font.sans, fontSize: t.size.xl, fontWeight: t.weight.semibold,
+  lineHeight: t.leading.tight, letterSpacing: '-0.015em', color: t.content.primary,
+  paddingTop: 72, marginTop: -48,
+});
 
 // ── Prose primitives (docs/guide/blog article bodies) ────────────────────────
 

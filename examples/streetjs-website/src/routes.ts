@@ -9,13 +9,14 @@
 
 import { derived, type ReadonlySignal } from 'streetui';
 import type { ContainerDSL, PageDSL, RouteContext, RouteDefinition, Router } from 'streetui';
-import { breadcrumb, codeExample, navLink, pageLayout, provenanceNotice, tagRow } from './components.js';
+import { breadcrumb, codeExample, codeWindow, navLink, pageLayout, provenanceNotice, tagRow } from './components.js';
 import {
   ABOUT_FACTS, ABOUT_UNVERIFIED, API_GROUPS, BLOG_POSTS, CHANGELOG, DOCS, DOC_GROUPS, EXAMPLES, GUIDES,
   PLUGINS, PLUGINS_NOTE, docBySlug, docNeighbours, guideBySlug, postBySlug,
   type Block,
 } from './content.js';
 import { ds } from './design-system.js';
+import { pageHead } from './metadata.js';
 import type { BackendPanel, ProbeResult } from './backend.js';
 import { DECODER_SAMPLE, type PlaygroundState } from './playground.js';
 import { DOCS_SITE_URL } from './shell.js';
@@ -65,15 +66,15 @@ function renderBlocks(scope: ContainerDSL, blocks: readonly Block[], idBase: str
     const id = `${idBase}-${i}`;
     switch (b.kind) {
       case 'p':
-        scope.text(b.text, { id, class: ds.bodyText });
+        scope.text(b.text, { id, class: ds.prose });
         break;
       case 'h':
-        scope.heading(b.text, { level: 2, id, class: ds.sectionHeading });
+        scope.heading(b.text, { level: 2, id, class: ds.docHeading });
         break;
       case 'list':
         scope.container(id, (l) => {
-          b.items.forEach((item, j) => l.text(item, { id: `${id}-${j}`, class: ds.bodyText, role: 'listitem' }));
-        }, { id, class: ds.linkList, role: 'list' });
+          b.items.forEach((item, j) => l.text(item, { id: `${id}-${j}`, class: ds.proseListItem, role: 'listitem' }));
+        }, { id, class: ds.proseList, role: 'list' });
         break;
       case 'code':
         codeExample(scope, b.sample, id);
@@ -85,13 +86,24 @@ function renderBlocks(scope: ContainerDSL, blocks: readonly Block[], idBase: str
   });
 }
 
-/** A card: linked title + summary. */
+/** Headings within a block list, for an in-page table of contents. */
+function blockHeadings(blocks: readonly Block[], idBase: string): { id: string; text: string }[] {
+  const out: { id: string; text: string }[] = [];
+  blocks.forEach((b, i) => { if (b.kind === 'h') out.push({ id: `${idBase}-${i}`, text: b.text }); });
+  return out;
+}
+
+/** A whole-card link: title + summary, optional badge. */
 function linkCard(scope: ContainerDSL, idBase: string, title: string, href: string, summary: string, badge?: string): void {
   scope.container(idBase, (c) => {
-    c.link(title, { href, id: `${idBase}-link`, class: ds.inlineLink });
-    if (badge !== undefined) c.text(badge, { id: `${idBase}-badge`, class: ds.badge });
-    c.text(summary, { id: `${idBase}-summary`, class: ds.metaText });
-  }, { id: idBase, class: ds.card });
+    if (badge !== undefined) {
+      c.container(`${idBase}-top`, (top) => {
+        top.text(badge, { id: `${idBase}-badge`, class: ds.badge });
+      }, { id: `${idBase}-top`, class: ds.badgeRow });
+    }
+    c.link(title, { href, id: `${idBase}-link`, class: ds.cardTitleLink });
+    c.text(summary, { id: `${idBase}-summary`, class: ds.cardSummary });
+  }, { id: idBase, class: ds.linkCardShell });
 }
 
 function notFoundBody(c: ContainerDSL, what: string): void {
@@ -121,29 +133,114 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
     {
       path: '/',
       builder: (page: PageDSL) => {
-        pageLayout(page, {
-          id: 'home',
-          title: 'StreetJS',
-          lead: 'Production-grade TypeScript backend framework. Native PostgreSQL wire driver, JWT, WebSockets, clustering, runtime input validation, field-level encryption. No Express. No pg. No Prisma.',
+        page.head(pageHead({
+          title: 'StreetJS — TypeScript backend framework',
+          description: 'Production-grade TypeScript backend framework: native PostgreSQL wire driver, decorator HTTP, JWT and RBAC, migrations, jobs and health routes. No Express. No pg. No Prisma.',
           path: '/',
-        }, (c) => {
-          c.container('home-cta', (r) => {
-            r.link('Get started', { href: '/getting-started', id: 'cta-start', class: ds.buttonPrimary });
-            r.link('Read the docs', { href: '/docs', id: 'cta-docs', class: ds.buttonSecondary });
-            r.link('Try the playground', { href: '/playground', id: 'cta-playground', class: ds.buttonSecondary });
-          }, { id: 'home-cta', class: ds.ctaRow });
-          provenanceNotice(c, 'home-provenance');
-          c.heading('What is documented here', { level: 2, id: 'home-features-title', class: ds.sectionHeading });
-          c.container('home-features', (g) => {
-            FEATURES.forEach((f, i) => linkCard(g, `feature-${i}`, f.title, f.href, f.text));
-          }, { id: 'home-features', class: ds.cardGrid });
-          c.heading('Read the sharp edges first', { level: 2, id: 'home-traps-title', class: ds.sectionHeading });
-          c.text('StreetJS has behaviours that surprise people: global rbacGuard authorises everything, no password hashing ships, and framework 5xx errors can expose database settings. They are written up plainly.', { id: 'home-traps-text', class: ds.bodyText });
-          c.container('home-trap-links', (l) => {
-            l.link('Known traps', { href: '/docs/known-traps', id: 'home-trap-doc', class: ds.inlineLink });
-            l.link('Blog', { href: '/blog', id: 'home-trap-blog', class: ds.inlineLink });
-          }, { id: 'home-trap-links', class: ds.linkList });
-        });
+        }));
+        const hero = EXAMPLES[0];
+
+        // ── Hero ──────────────────────────────────────────────────────────
+        page.section('home', (s) => {
+          s.container('hero-outer', (ho) => {
+            ho.container('hero-wrap', (hw) => {
+              hw.container('hero-col', (col) => {
+                col.text('TypeScript backend framework', { id: 'hero-kicker', class: ds.kicker });
+                col.heading('The backend framework that ships with its batteries.', { level: 1, id: 'home-title', class: ds.heroTitle });
+                col.text('StreetJS is a production-grade TypeScript server framework with a native PostgreSQL wire driver, decorator-based HTTP, JWT sessions and RBAC, migrations, background jobs and health routes — no Express, no pg, no Prisma.', { id: 'home-lead', class: ds.heroLead });
+                col.container('home-cta', (r) => {
+                  r.link('Get started', { href: '/getting-started', id: 'cta-start', class: ds.buttonPrimary });
+                  r.link('Read the docs', { href: '/docs', id: 'cta-docs', class: ds.buttonSecondary });
+                  r.link('Open the playground', { href: '/playground', id: 'cta-playground', class: ds.buttonGhost });
+                }, { id: 'home-cta', class: ds.ctaRow });
+                col.container('hero-meta', (mr) => {
+                  mr.text('npm i streetjs', { id: 'hero-meta-install', class: ds.inlineCode });
+                  mr.text('TypeScript-first', { id: 'hero-meta-ts', class: ds.heroMetaItem });
+                  mr.text('PostgreSQL native', { id: 'hero-meta-pg', class: ds.heroMetaItem });
+                }, { id: 'hero-meta', class: ds.heroMetaRow });
+              }, { id: 'hero-col', class: ds.heroCol });
+              if (hero !== undefined) {
+                hw.container('hero-code', (cc) => {
+                  const fn = hero.sample.label.length > 0 ? hero.sample.label : 'app.controller.ts';
+                  codeWindow(cc, { code: hero.sample.code, filename: fn, idBase: 'hero-code-win' });
+                }, { id: 'hero-code', class: ds.heroCol });
+              }
+            }, { id: 'hero-wrap', class: ds.heroWrap });
+          }, { id: 'hero-outer', class: ds.heroOuter });
+        }, { id: 'page-home' });
+
+        // ── Capabilities ──────────────────────────────────────────────────
+        page.section('home-capabilities', (s) => {
+          s.container('cap-inner', (c) => {
+            c.container('cap-intro', (i) => {
+              i.text('What you get', { id: 'cap-kicker', class: ds.kicker });
+              i.heading('Everything a service needs, documented and typed', { level: 2, id: 'home-features-title', class: ds.sectionHeading });
+            }, { id: 'cap-intro', class: ds.sectionIntro });
+            c.container('home-features', (g) => {
+              FEATURES.forEach((f, i) => linkCard(g, `feature-${i}`, f.title, f.href, f.text));
+            }, { id: 'home-features', class: ds.cardGrid });
+          }, { id: 'cap-inner', class: ds.pageSection });
+        }, { id: 'page-home-capabilities' });
+
+        // ── Request lifecycle (prose + code, alternating band) ────────────
+        const dbExample = EXAMPLES.find((e) => /postgres|transaction|database/i.test(e.title)) ?? EXAMPLES[2];
+        page.section('home-arch', (s) => {
+          s.container('arch-band', (b) => {
+            b.container('arch-grid', (g) => {
+              g.container('arch-text', (tx) => {
+                tx.text('Architecture', { id: 'arch-kicker', class: ds.kicker });
+                tx.heading('Decorators in, typed data out', { level: 2, id: 'arch-title', class: ds.sectionHeading });
+                tx.text('A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.', { id: 'arch-body', class: ds.bodyText });
+                tx.container('arch-links', (l) => {
+                  l.link('HTTP & controllers', { href: '/docs/http', id: 'arch-link-http', class: ds.inlineLink });
+                  l.link('Working with PostgreSQL', { href: '/docs/database', id: 'arch-link-db', class: ds.inlineLink });
+                }, { id: 'arch-links', class: ds.ctaRow });
+              }, { id: 'arch-text', class: ds.heroCol });
+              if (dbExample !== undefined) {
+                g.container('arch-code', (cc) => {
+                  const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : 'repository.ts';
+                  codeWindow(cc, { code: dbExample.sample.code, filename: fn, idBase: 'arch-code-win' });
+                }, { id: 'arch-code', class: ds.heroCol });
+              }
+            }, { id: 'arch-grid', class: ds.heroWrap });
+          }, { id: 'arch-band', class: ds.bandAlt });
+        }, { id: 'page-home-arch' });
+
+        // ── Quick start ───────────────────────────────────────────────────
+        page.section('home-start', (s) => {
+          s.container('start-inner', (c) => {
+            c.container('qs-grid', (g) => {
+              g.container('qs-text', (tx) => {
+                tx.text('Quick start', { id: 'qs-kicker', class: ds.kicker });
+                tx.heading('Install and serve in minutes', { level: 2, id: 'qs-title', class: ds.sectionHeading });
+                tx.container('qs-steps', (st) => {
+                  st.text('Install the package into a TypeScript project.', { id: 'qs-step-0', class: ds.proseListItem, role: 'listitem' });
+                  st.text('Enable the decorators the framework needs in tsconfig.', { id: 'qs-step-1', class: ds.proseListItem, role: 'listitem' });
+                  st.text('Define a @Controller and call streetApp().listen().', { id: 'qs-step-2', class: ds.proseListItem, role: 'listitem' });
+                }, { id: 'qs-steps', class: ds.proseList, role: 'list' });
+                tx.link('Full getting-started guide', { href: '/getting-started', id: 'qs-link', class: ds.inlineLink });
+              }, { id: 'qs-text', class: ds.heroCol });
+              g.container('qs-code', (cc) => {
+                codeWindow(cc, { code: 'npm install streetjs\n\n# enable in tsconfig.json:\n# "experimentalDecorators": true,\n# "emitDecoratorMetadata": true', filename: 'terminal', idBase: 'qs-code-win' });
+              }, { id: 'qs-code', class: ds.heroCol });
+            }, { id: 'qs-grid', class: ds.heroWrap });
+          }, { id: 'start-inner', class: ds.pageSection });
+        }, { id: 'page-home-start' });
+
+        // ── Sharp edges + explore ─────────────────────────────────────────
+        page.section('home-explore', (s) => {
+          s.container('explore-inner', (c) => {
+            c.container('home-traps', (tr) => {
+              tr.text('Read the sharp edges first', { id: 'home-traps-title', class: ds.subHeading });
+              tr.text('StreetJS has defaults that surprise people: a global rbacGuard authorises everything, no password hashing ships, and framework 5xx errors can expose database settings. They are written up plainly, not hidden.', { id: 'home-traps-text', class: ds.bodyText });
+              tr.container('home-trap-links', (l) => {
+                l.link('Known traps', { href: '/docs/known-traps', id: 'home-trap-doc', class: ds.inlineLink });
+                l.link('Read the blog', { href: '/blog', id: 'home-trap-blog', class: ds.inlineLink });
+              }, { id: 'home-trap-links', class: ds.ctaRow });
+            }, { id: 'home-traps', class: ds.alert, role: 'note' });
+            provenanceNotice(c, 'home-provenance');
+          }, { id: 'explore-inner', class: ds.pageSection });
+        }, { id: 'page-home-explore' });
       },
     },
 
@@ -209,25 +306,46 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
           return;
         }
         const { prev, next } = docNeighbours(doc.slug);
+        const toc = blockHeadings(doc.blocks, 'doc-block');
         pageLayout(page, { id: 'doc', title: doc.title, lead: doc.summary, path: `/docs/${doc.slug}` }, (c) => {
           breadcrumb(c, [{ label: 'Docs', href: '/docs' }, { label: doc.group }, { label: doc.title }], 'doc-crumbs');
           c.container('doc-layout', (layout) => {
             layout.container('doc-sidebar', (s) => {
               DOC_GROUPS.forEach((group, gi) => {
-                s.text(group, { id: `side-group-${gi}`, class: ds.docsSidebarGroup });
-                DOCS.filter((d) => d.group === group).forEach((d) => {
-                  navLink(s, getRouter(), { label: d.title, href: `/docs/${d.slug}`, id: `side-doc-${d.slug}`, exact: true }, ds.docsSidebarLink);
-                });
+                s.container(`side-grp-${gi}`, (gb) => {
+                  gb.text(group, { id: `side-group-${gi}`, class: ds.docsSidebarGroup });
+                  DOCS.filter((d) => d.group === group).forEach((d) => {
+                    navLink(gb, getRouter(), { label: d.title, href: `/docs/${d.slug}`, id: `side-doc-${d.slug}`, exact: true }, ds.docsSidebarLink, ds.docsSidebarLinkActive);
+                  });
+                }, { id: `side-grp-${gi}`, class: ds.docsSidebarGroupBlock });
               });
             }, { id: 'doc-sidebar', class: ds.docsSidebar, role: 'navigation', ariaLabel: 'Documentation sections' });
             layout.container('doc-content', (body) => {
               provenanceNotice(body, 'doc-provenance');
               renderBlocks(body, doc.blocks, 'doc-block');
               body.container('doc-pager', (p) => {
-                if (prev !== undefined) p.link(`Previous: ${prev.title}`, { href: `/docs/${prev.slug}`, id: 'doc-prev', class: ds.inlineLink });
-                if (next !== undefined) p.link(`Next: ${next.title}`, { href: `/docs/${next.slug}`, id: 'doc-next', class: ds.inlineLink });
+                if (prev !== undefined) {
+                  p.container('doc-prev', (pp) => {
+                    pp.text('Previous', { id: 'doc-prev-dir', class: ds.pagerDir });
+                    pp.link(prev.title, { href: `/docs/${prev.slug}`, id: 'doc-prev', class: ds.pagerTitle });
+                  }, { id: 'doc-prev-card', class: ds.pagerLink });
+                }
+                if (next !== undefined) {
+                  p.container('doc-next', (nn) => {
+                    nn.text('Next', { id: 'doc-next-dir', class: ds.pagerDir });
+                    nn.link(next.title, { href: `/docs/${next.slug}`, id: 'doc-next', class: ds.pagerTitle });
+                  }, { id: 'doc-next-card', class: ds.pagerNext });
+                }
               }, { id: 'doc-pager', class: ds.pagerRow });
             }, { id: 'doc-content', class: ds.docsContent });
+            if (toc.length > 1) {
+              layout.container('doc-toc', (tc) => {
+                tc.text('On this page', { id: 'doc-toc-title', class: ds.docsTocTitle });
+                toc.forEach((h, hi) => {
+                  tc.link(h.text, { href: `#${h.id}`, id: `doc-toc-${hi}`, class: ds.docsTocLink });
+                });
+              }, { id: 'doc-toc', class: ds.docsToc, role: 'navigation', ariaLabel: 'On this page' });
+            }
           }, { id: 'doc-layout', class: ds.docsLayout });
         });
       },

@@ -44,7 +44,10 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
 
   shell.section('nav', (n) => {
     n.container('nav-inner', (inner) => {
-      inner.link('StreetJS', { href: '/', id: 'brand', class: ds.brandLink });
+      inner.container('brand-lockup', (b) => {
+        b.text('S', { id: 'brand-mark', class: ds.brandMark, ariaHidden: true });
+        b.link('StreetJS', { href: '/', id: 'brand', class: ds.brand });
+      }, { id: 'brand-lockup', class: ds.brandLink });
 
       inner.container('nav-links', (links) => {
         for (const item of PRIMARY_NAV) navLink(links, router, item);
@@ -70,7 +73,7 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
     n.when(menuOpen, (m) => {
       m.container('mobile-menu', (links) => {
         for (const item of PRIMARY_NAV) {
-          navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink);
+          navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
         }
       }, { id: 'mobile-menu', class: ds.mobileMenu });
     });
@@ -129,9 +132,9 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
         { id: 'footer-text', class: ds.footerText },
       );
       fi.container('footer-links', (links) => {
-        links.link('Official docs', { href: DOCS_SITE_URL, external: true, id: 'footer-docs', class: ds.inlineLink });
-        links.link('About this site', { href: '/about', id: 'footer-about', class: ds.inlineLink });
-        links.link('Changelog', { href: '/changelog', id: 'footer-changelog', class: ds.inlineLink });
+        links.link('Official docs', { href: DOCS_SITE_URL, external: true, id: 'footer-docs', class: ds.footerLink });
+        links.link('About this site', { href: '/about', id: 'footer-about', class: ds.footerLink });
+        links.link('Changelog', { href: '/changelog', id: 'footer-changelog', class: ds.footerLink });
       }, { id: 'footer-links', class: ds.footerLinks });
     }, { id: 'footer-inner', class: ds.footerInner });
   }, { id: 'site-footer', class: ds.footer });
