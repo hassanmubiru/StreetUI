@@ -973,6 +973,44 @@ var MENU_BASE = {
   zIndex: t4.z.dropdown
 };
 var t5 = tokens.ref;
+var KEYFRAMES = {
+  "streetui-fade-in": "from{opacity:0}to{opacity:1}",
+  "streetui-fade-out": "from{opacity:1}to{opacity:0}",
+  "streetui-scale-in": "from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}",
+  "streetui-scale-out": "from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.96)}",
+  "streetui-slide-in-up": "from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}",
+  "streetui-slide-out-down": "from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(8px)}",
+  "streetui-spin": "to{transform:rotate(360deg)}"
+};
+function ensureKeyframes(name) {
+  const id = `kf-${name}`;
+  if (!styleRegistry.has(id)) {
+    styleRegistry.register(id, "base", `@keyframes ${name}{${KEYFRAMES[name]}}`);
+  }
+}
+function animate(name, opts = {}) {
+  ensureKeyframes(name);
+  const duration = t5.duration[opts.duration ?? "base"];
+  const easing = t5.easing[opts.easing ?? "standard"];
+  const iterations = opts.iterations ?? 1;
+  const fill = opts.fill ?? "both";
+  return style({
+    animationName: name,
+    animationDuration: duration,
+    animationTimingFunction: easing,
+    animationFillMode: fill,
+    animationIterationCount: String(iterations),
+    ...opts.delay !== void 0 ? { animationDelay: opts.delay } : {}
+  });
+}
+function transition(properties, opts = {}) {
+  const props = typeof properties === "string" ? [properties] : properties;
+  const duration = t5.duration[opts.duration ?? "base"];
+  const easing = t5.easing[opts.easing ?? "standard"];
+  const delay = opts.delay !== void 0 ? ` ${typeof opts.delay === "number" ? `${opts.delay}ms` : opts.delay}` : "";
+  return props.map((p3) => `${p3} ${duration} ${easing}${delay}`).join(", ");
+}
+var animation = { animate, transition, keyframes: KEYFRAMES };
 var GraphNode = class _GraphNode {
   id;
   type;
@@ -4345,12 +4383,7 @@ function createRouter(options) {
     }
   };
 }
-var ROUTER_OUTLET_ID = "streetui-router-outlet";
 var ROUTER_OUTLET_KEY = "router-outlet";
-function routerOutlet(scope, id = ROUTER_OUTLET_ID) {
-  scope.container(ROUTER_OUTLET_KEY, () => {
-  }, { id });
-}
 var DEVTOOLS_CSS = [
   ".st-devtools{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;margin:0;color:#e6e6e6;background:#1e1e28}",
   ".st-header{padding:12px 16px;border-bottom:1px solid #333;background:#15151c}",
@@ -4815,7 +4848,48 @@ function pageHead(opts) {
     }
   };
 }
+var brandTokens = createThemeTokens({
+  light: {
+    surface: { background: "#ffffff", raised: "#f7f9fc", sunken: "#eef2f7", overlay: "rgba(13,22,38,0.5)" },
+    content: { primary: "#0b1a2b", secondary: "#44536a", muted: "#6a7788", inverse: "#ffffff" },
+    border: { default: "#e3e9f0", strong: "#cbd5e2", subtle: "#eef2f7" },
+    accent: { primary: "#1766d6", hover: "#114fab", contrast: "#ffffff" },
+    focus: { ring: "#1766d6" },
+    danger: { surface: "#fef2f2", border: "#f4c9c9", content: "#b42318", solid: "#e5484d" },
+    success: { content: "#0f7a45", solid: "#16a34a" },
+    shadow: {
+      sm: "0 1px 2px rgba(13,22,38,0.06)",
+      md: "0 6px 20px -8px rgba(13,22,38,0.14)",
+      lg: "0 24px 50px -16px rgba(13,22,38,0.20)"
+    }
+  },
+  dark: {
+    surface: { background: "#0a0e15", raised: "#121926", sunken: "#0d131d", overlay: "rgba(2,5,10,0.66)" },
+    content: { primary: "#e8eef7", secondary: "#aab6c7", muted: "#7d8aa0", inverse: "#0a0e15" },
+    border: { default: "#1f2a3a", strong: "#30415c", subtle: "#18212e" },
+    accent: { primary: "#4c8dff", hover: "#6ba3ff", contrast: "#06142b" },
+    focus: { ring: "#4c8dff" },
+    danger: { surface: "#2a1316", border: "#5c2328", content: "#ff8d8d", solid: "#e5484d" },
+    success: { content: "#58d68a", solid: "#22c55e" },
+    shadow: {
+      sm: "0 1px 2px rgba(0,0,0,0.5)",
+      md: "0 10px 28px -10px rgba(0,0,0,0.6)",
+      lg: "0 30px 64px -20px rgba(0,0,0,0.72)"
+    }
+  }
+});
 var t6 = tokens.ref;
+var codeBg = "#0b1120";
+var codeBgBar = "#0e1424";
+var codeFg = "#dbe4f0";
+var codeBorder = "#1c2740";
+var CONTENT_MAX = 1160;
+var PROSE_MAX = "72ch";
+styleRegistry.register(
+  "streetjs-website-reduced-motion",
+  "base",
+  "@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}}"
+);
 var appRoot = cx(
   layout.stack({ gap: "0" }),
   style({
@@ -4827,175 +4901,255 @@ var appRoot = cx(
     lineHeight: t6.leading.normal
   })
 );
-var pageContainer = layout.container({ max: 1120, padX: "5" });
+var pageContainer = layout.container({ max: CONTENT_MAX, padX: "5" });
 var pageSection = cx(
   pageContainer,
-  layout.stack({ gap: "5" }),
-  style({ paddingTop: t6.space["8"], paddingBottom: t6.space["8"] })
+  layout.stack({ gap: "6" }),
+  style({ paddingTop: t6.space["10"], paddingBottom: t6.space["10"] })
 );
 var pageBody = layout.stack({ gap: "5" });
-var pageTitle = text.heading({ level: 1 });
-var pageLead = cx(text.body({ muted: true, measure: "65ch" }), style({ fontSize: t6.size.lg }));
-var sectionHeading = text.heading({ level: 2 });
-var subHeading = text.heading({ level: 3 });
-var bodyText = text.body({ measure: "70ch" });
-var metaText = text.caption();
-var inlineLink = text.link();
-var heroTitle = style({
+var pageHeader = cx(
+  layout.stack({ gap: "3" }),
+  style({ paddingBottom: t6.space["5"], boxShadow: `inset 0 -1px 0 ${t6.border.subtle}` })
+);
+var pageTitle = style({
   fontFamily: t6.font.sans,
   fontSize: t6.size["3xl"],
   fontWeight: t6.weight.bold,
   lineHeight: t6.leading.tight,
-  letterSpacing: "-0.02em",
+  letterSpacing: "-0.025em",
   color: t6.content.primary,
-  maxWidth: "22ch"
+  maxWidth: "20ch"
+});
+var pageLead = style({
+  fontSize: t6.size.lg,
+  lineHeight: t6.leading.relaxed,
+  color: t6.content.secondary,
+  maxWidth: "62ch"
+});
+var sectionHeading = style({
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.xl,
+  fontWeight: t6.weight.semibold,
+  lineHeight: t6.leading.tight,
+  letterSpacing: "-0.015em",
+  color: t6.content.primary
+});
+var subHeading = style({
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.lg,
+  fontWeight: t6.weight.semibold,
+  color: t6.content.primary
+});
+var bodyText = style({
+  fontSize: t6.size.md,
+  lineHeight: t6.leading.relaxed,
+  color: t6.content.secondary,
+  maxWidth: PROSE_MAX
+});
+var metaText = cx(text.caption(), style({ color: t6.content.secondary }));
+var inlineLink = text.link();
+var kicker = style({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: t6.space["2"],
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.medium,
+  color: t6.accent.primary,
+  letterSpacing: "0"
 });
 var navBar = style({
   position: "sticky",
   top: 0,
   zIndex: t6.z.dropdown,
-  background: t6.surface.raised,
-  boxShadow: t6.shadow.sm
+  background: t6.surface.background,
+  boxShadow: `inset 0 -1px 0 ${t6.border.default}`
 });
 var navInner = cx(
-  pageContainer,
-  layout.row({ gap: "4", align: "center", justify: "between", wrap: true }),
-  style({ paddingTop: t6.space["3"], paddingBottom: t6.space["3"] })
+  layout.container({ max: CONTENT_MAX, padX: "5" }),
+  layout.row({ gap: "3", align: "center", justify: "between", wrap: false }),
+  style({ paddingTop: t6.space["3"], paddingBottom: t6.space["3"], minHeight: 60 })
 );
 var brand = style({
   fontFamily: t6.font.sans,
   fontSize: t6.size.lg,
   fontWeight: t6.weight.bold,
-  letterSpacing: "-0.01em",
+  letterSpacing: "-0.02em",
   color: t6.content.primary,
-  textDecoration: "none"
+  textDecoration: "none",
+  borderRadius: t6.radius.sm,
+  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 3 } }
 });
 var brandLink = style({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: t6.space["2"],
   fontFamily: t6.font.sans,
   fontSize: t6.size.lg,
   fontWeight: t6.weight.bold,
-  letterSpacing: "-0.01em",
+  letterSpacing: "-0.02em",
   color: t6.content.primary,
   textDecoration: "none",
   borderRadius: t6.radius.sm,
-  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+  flexShrink: 0,
+  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 3 } }
+});
+var brandMark = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 26,
+  height: 26,
+  borderRadius: t6.radius.md,
+  background: t6.accent.primary,
+  color: t6.accent.contrast,
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.bold,
+  letterSpacing: "-0.03em",
+  flexShrink: 0
 });
 var navLinks = style({
-  display: { base: "none", md: "flex" },
+  display: { base: "none", lg: "flex" },
   flexDirection: "row",
-  flexWrap: "wrap",
+  flexWrap: "nowrap",
   alignItems: "center",
-  gap: t6.space["4"]
+  gap: t6.space["1"],
+  marginLeft: t6.space["4"],
+  marginRight: "auto"
 });
-var navLinkItem = style({
+var navLinkBase = {
   fontSize: t6.size.sm,
   fontWeight: t6.weight.medium,
-  color: t6.content.secondary,
   textDecoration: "none",
-  borderRadius: t6.radius.sm,
-  paddingTop: t6.space["1"],
-  paddingBottom: t6.space["1"],
-  paddingLeft: t6.space["2"],
-  paddingRight: t6.space["2"],
-  transition: `color ${t6.duration.fast} ${t6.easing.standard}, background ${t6.duration.fast} ${t6.easing.standard}`,
+  borderRadius: t6.radius.md,
+  paddingTop: t6.space["2"],
+  paddingBottom: t6.space["2"],
+  paddingLeft: t6.space["3"],
+  paddingRight: t6.space["3"],
+  whiteSpace: "nowrap"
+};
+var navLinkItem = style({
+  ...navLinkBase,
+  color: t6.content.secondary,
+  transition: animation.transition(["color", "background"], { duration: "fast" }),
   on: {
-    hover: { color: t6.accent.primary, background: t6.surface.sunken },
+    hover: { color: t6.content.primary, background: t6.surface.sunken },
     focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
   }
 });
+var navLinkActive = style({
+  ...navLinkBase,
+  fontWeight: t6.weight.semibold,
+  color: t6.accent.primary,
+  background: t6.surface.sunken,
+  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+});
 var navActiveMark = a11y.visuallyHidden();
-var navControls = layout.row({ gap: "3", align: "center", wrap: true });
-var compactButton = {
+var navControls = layout.row({ gap: "2", align: "center", wrap: false });
+var controlButton = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: t6.space["2"],
   fontFamily: t6.font.sans,
   fontSize: t6.size.sm,
   fontWeight: t6.weight.medium,
-  color: t6.content.primary,
-  background: t6.surface.background,
-  borderWidth: 1,
-  borderStyle: "solid",
-  borderColor: t6.border.strong,
-  borderRadius: t6.radius.md,
-  paddingTop: t6.space["1"],
-  paddingBottom: t6.space["1"],
-  paddingLeft: t6.space["3"],
-  paddingRight: t6.space["3"],
-  cursor: "pointer",
-  appearance: "none",
-  transition: `background ${t6.duration.fast} ${t6.easing.standard}`
-};
-var themeToggle = style({
-  ...compactButton,
-  on: {
-    hover: { background: t6.surface.sunken },
-    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
-  }
-});
-var menuToggle = style({
-  ...compactButton,
-  display: { base: "inline-flex", md: "none" },
-  alignItems: "center",
-  on: {
-    hover: { background: t6.surface.sunken },
-    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
-  }
-});
-var mobileMenu = style({
-  display: { base: "flex", md: "none" },
-  flexDirection: "column",
-  gap: t6.space["1"],
+  color: t6.content.secondary,
   background: t6.surface.raised,
   borderWidth: 1,
   borderStyle: "solid",
   borderColor: t6.border.default,
-  paddingTop: t6.space["3"],
-  paddingBottom: t6.space["3"],
-  paddingLeft: t6.space["5"],
-  paddingRight: t6.space["5"]
-});
-var mobileMenuLink = style({
-  fontSize: t6.size.md,
-  fontWeight: t6.weight.medium,
-  color: t6.content.primary,
-  textDecoration: "none",
-  borderRadius: t6.radius.sm,
+  borderRadius: t6.radius.md,
   paddingTop: t6.space["2"],
   paddingBottom: t6.space["2"],
+  paddingLeft: t6.space["3"],
+  paddingRight: t6.space["3"],
+  cursor: "pointer",
+  appearance: "none",
+  whiteSpace: "nowrap",
+  transition: animation.transition(["background", "border-color", "color"], { duration: "fast" })
+};
+var themeToggle = style({
+  ...controlButton,
   on: {
-    hover: { color: t6.accent.primary },
-    focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
+    hover: { background: t6.surface.sunken, borderColor: t6.border.strong, color: t6.content.primary },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
+  }
+});
+var menuToggle = style({
+  ...controlButton,
+  display: { base: "inline-flex", lg: "none" },
+  on: {
+    hover: { background: t6.surface.sunken, borderColor: t6.border.strong, color: t6.content.primary },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
   }
 });
 var searchTrigger = style({
-  ...compactButton,
-  display: "inline-flex",
-  alignItems: "center",
-  gap: t6.space["2"],
-  color: t6.content.secondary,
-  minWidth: 120,
+  ...controlButton,
+  justifyContent: "space-between",
+  minWidth: { base: 0, md: 200 },
   on: {
-    hover: { background: t6.surface.sunken },
+    hover: { background: t6.surface.sunken, borderColor: t6.border.strong },
     focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
   }
 });
 var kbd = style({
   fontFamily: t6.font.mono,
   fontSize: t6.size.xs,
-  color: t6.content.secondary,
-  background: t6.surface.sunken,
+  color: t6.content.muted,
+  background: t6.surface.background,
   borderWidth: 1,
   borderStyle: "solid",
   borderColor: t6.border.default,
   borderRadius: t6.radius.sm,
   paddingLeft: t6.space["1"],
-  paddingRight: t6.space["1"]
+  paddingRight: t6.space["1"],
+  display: { base: "none", md: "inline-flex" }
+});
+var mobileMenu = style({
+  display: { base: "flex", lg: "none" },
+  flexDirection: "column",
+  gap: t6.space["1"],
+  background: t6.surface.raised,
+  boxShadow: `inset 0 1px 0 ${t6.border.default}`,
+  paddingTop: t6.space["3"],
+  paddingBottom: t6.space["4"],
+  paddingLeft: t6.space["5"],
+  paddingRight: t6.space["5"]
+});
+var mobileMenuLink = style({
+  fontSize: t6.size.md,
+  fontWeight: t6.weight.medium,
+  color: t6.content.secondary,
+  textDecoration: "none",
+  borderRadius: t6.radius.md,
+  paddingTop: t6.space["2"],
+  paddingBottom: t6.space["2"],
+  paddingLeft: t6.space["2"],
+  paddingRight: t6.space["2"],
+  on: {
+    hover: { color: t6.content.primary, background: t6.surface.sunken },
+    focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
+  }
+});
+var mobileMenuLinkActive = style({
+  fontSize: t6.size.md,
+  fontWeight: t6.weight.semibold,
+  color: t6.accent.primary,
+  textDecoration: "none",
+  borderRadius: t6.radius.md,
+  background: t6.surface.sunken,
+  paddingTop: t6.space["2"],
+  paddingBottom: t6.space["2"],
+  paddingLeft: t6.space["2"],
+  paddingRight: t6.space["2"]
 });
 var searchPanel = style({
   position: "fixed",
-  top: "10vh",
+  top: "12vh",
   left: "50%",
   transform: "translateX(-50%)",
-  width: "min(640px, 92vw)",
-  maxHeight: "78vh",
+  width: "min(620px, 92vw)",
+  maxHeight: "72vh",
   overflowY: "auto",
   zIndex: t6.z.overlay,
   display: "flex",
@@ -5011,12 +5165,12 @@ var searchPanel = style({
   boxShadow: `${t6.shadow.lg}, 0 0 0 100vmax ${t6.surface.overlay}`
 });
 var searchPanelHeader = layout.row({ gap: "3", align: "center", justify: "between" });
-var searchPanelTitle = style({ fontSize: t6.size.md, fontWeight: t6.weight.semibold });
+var searchPanelTitle = style({ fontSize: t6.size.md, fontWeight: t6.weight.semibold, color: t6.content.primary });
 var searchDialogInput = cx(
   form.input(),
   style({ fontSize: t6.size.md, width: "100%" })
 );
-var searchHint = text.caption();
+var searchHint = cx(text.caption(), style({ color: t6.content.muted }));
 var searchResultsList = layout.stack({ gap: "1" });
 var searchResultLink = style({
   display: "flex",
@@ -5025,33 +5179,44 @@ var searchResultLink = style({
   color: t6.content.primary,
   textDecoration: "none",
   borderRadius: t6.radius.md,
-  padding: t6.space["2"],
+  padding: t6.space["3"],
   borderWidth: 1,
   borderStyle: "solid",
   borderColor: "transparent",
+  transition: animation.transition(["background", "border-color"], { duration: "fast" }),
   on: {
     hover: { background: t6.surface.sunken },
     focus: { background: t6.surface.sunken, borderColor: t6.accent.primary },
     focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: -2 }
   }
 });
-var searchResultTitle = style({ fontSize: t6.size.sm, fontWeight: t6.weight.semibold });
-var searchResultMeta = text.caption();
-var searchEmpty = cx(text.body({ muted: true }), style({ padding: t6.space["2"] }));
+var searchResultTitle = style({ fontSize: t6.size.sm, fontWeight: t6.weight.semibold, color: t6.content.primary });
+var searchResultMeta = cx(text.caption(), style({ color: t6.content.muted }));
+var searchEmpty = cx(style({ color: t6.content.secondary, padding: t6.space["2"] }));
 var footer = style({
-  borderStyle: "solid",
-  borderColor: t6.border.default,
-  borderWidth: 1,
   background: t6.surface.raised,
+  boxShadow: `inset 0 1px 0 ${t6.border.default}`,
   marginTop: t6.space["10"]
 });
 var footerInner = cx(
-  pageContainer,
-  layout.stack({ gap: "3" }),
-  style({ paddingTop: t6.space["5"], paddingBottom: t6.space["5"] })
+  layout.container({ max: CONTENT_MAX, padX: "5" }),
+  style({
+    display: "grid",
+    gap: t6.space["5"],
+    gridTemplateColumns: { base: "1fr", md: "minmax(0, 1fr) auto" },
+    alignItems: "center",
+    paddingTop: t6.space["6"],
+    paddingBottom: t6.space["6"]
+  })
 );
-var footerLinks = layout.row({ gap: "4", align: "center", wrap: true });
-var footerText = text.caption();
+var footerLinks = layout.row({ gap: "5", align: "center", wrap: true });
+var footerText = cx(text.caption(), style({ color: t6.content.secondary, maxWidth: "60ch" }));
+var footerLink = style({
+  fontSize: t6.size.sm,
+  color: t6.content.secondary,
+  textDecoration: "none",
+  on: { hover: { color: t6.accent.primary }, focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+});
 var skipLink2 = a11y.skipLink();
 var card = cx(
   layout.stack({ gap: "3" }),
@@ -5061,118 +5226,301 @@ var card = cx(
     borderStyle: "solid",
     borderColor: t6.border.default,
     borderRadius: t6.radius.lg,
-    padding: t6.space["5"],
-    transition: `box-shadow ${t6.duration.fast} ${t6.easing.standard}, border-color ${t6.duration.fast} ${t6.easing.standard}`,
-    on: { hover: { boxShadow: t6.shadow.md, borderColor: t6.border.strong } }
+    padding: t6.space["5"]
   })
 );
-var cardGrid = layout.grid({ columns: "auto", min: 260, gap: "5" });
-var featureGrid = style({
-  display: "grid",
-  gap: t6.space["5"],
-  gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" }
-});
-var codeBlock = layout.stack({ gap: "2" });
-var codeLabel = cx(text.label(), style({ color: t6.content.secondary }));
-var codeSurface = text.pre();
-var inlineCode = text.code();
-var breadcrumbTrail = cx(layout.row({ gap: "2", align: "center", wrap: true }), text.caption());
-var breadcrumbLink = cx(text.link(), style({ fontSize: t6.size.xs, textDecoration: "none" }));
-var breadcrumbCurrent = cx(text.caption(), style({ color: t6.content.secondary }));
-var buttonPrimary = form.button();
-var buttonSecondary = style({
-  fontFamily: t6.font.sans,
+var linkCardShell = cx(
+  layout.stack({ gap: "2" }),
+  style({
+    background: t6.surface.raised,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: t6.border.default,
+    borderRadius: t6.radius.lg,
+    padding: t6.space["5"],
+    height: "100%",
+    transition: animation.transition(["border-color", "box-shadow", "transform"], { duration: "fast" }),
+    on: {
+      hover: { borderColor: t6.border.strong, boxShadow: t6.shadow.md },
+      focusWithin: { borderColor: t6.accent.primary, boxShadow: t6.shadow.md }
+    }
+  })
+);
+var cardTitleLink = style({
   fontSize: t6.size.md,
   fontWeight: t6.weight.semibold,
   color: t6.content.primary,
-  background: t6.surface.background,
+  textDecoration: "none",
+  letterSpacing: "-0.01em",
+  on: {
+    hover: { color: t6.accent.primary },
+    focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
+  }
+});
+var cardSummary = style({ fontSize: t6.size.sm, lineHeight: t6.leading.normal, color: t6.content.secondary });
+var cardGrid = style({
+  display: "grid",
+  gap: t6.space["4"],
+  gridTemplateColumns: { base: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(3, minmax(0, 1fr))" }
+});
+var cardGrid2 = style({
+  display: "grid",
+  gap: t6.space["4"],
+  gridTemplateColumns: { base: "1fr", md: "repeat(2, minmax(0, 1fr))" }
+});
+var featureGrid = cardGrid2;
+var heroOuter = style({
+  background: `radial-gradient(1200px 480px at 78% -10%, ${t6.surface.sunken}, transparent 60%)`,
+  boxShadow: `inset 0 -1px 0 ${t6.border.subtle}`
+});
+var heroWrap = cx(
+  layout.container({ max: CONTENT_MAX, padX: "5" }),
+  style({
+    display: "grid",
+    gap: t6.space["8"],
+    alignItems: "center",
+    gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) minmax(0, 1fr)" },
+    paddingTop: { base: t6.space["8"], md: t6.space["10"] },
+    paddingBottom: { base: t6.space["8"], md: t6.space["10"] }
+  })
+);
+var heroCol = layout.stack({ gap: "5" });
+var heroTitle = style({
+  fontFamily: t6.font.sans,
+  fontSize: "clamp(34px, 5.4vw, 54px)",
+  fontWeight: t6.weight.bold,
+  lineHeight: "1.05",
+  letterSpacing: "-0.035em",
+  color: t6.content.primary,
+  maxWidth: "15ch"
+});
+var heroLead = style({
+  fontSize: t6.size.lg,
+  lineHeight: t6.leading.relaxed,
+  color: t6.content.secondary,
+  maxWidth: "54ch"
+});
+var heroMetaRow = cx(layout.row({ gap: "4", align: "center", wrap: true }), style({ color: t6.content.muted }));
+var heroMetaItem = style({ fontSize: t6.size.sm, color: t6.content.muted });
+var bandAlt = style({ background: t6.surface.raised, boxShadow: `inset 0 1px 0 ${t6.border.subtle}, inset 0 -1px 0 ${t6.border.subtle}` });
+var bandInner = cx(
+  layout.container({ max: CONTENT_MAX, padX: "5" }),
+  layout.stack({ gap: "6" }),
+  style({ paddingTop: t6.space["10"], paddingBottom: t6.space["10"] })
+);
+var sectionIntro = layout.stack({ gap: "2" });
+var codeWindow = style({
+  background: codeBg,
   borderWidth: 1,
   borderStyle: "solid",
-  borderColor: t6.border.strong,
-  borderRadius: t6.radius.md,
+  borderColor: codeBorder,
+  borderRadius: t6.radius.lg,
+  overflow: "hidden",
+  boxShadow: t6.shadow.md
+});
+var codeBar = style({
+  display: "flex",
+  alignItems: "center",
+  gap: t6.space["3"],
+  background: codeBgBar,
+  boxShadow: `inset 0 -1px 0 ${codeBorder}`,
   paddingTop: t6.space["2"],
   paddingBottom: t6.space["2"],
   paddingLeft: t6.space["4"],
-  paddingRight: t6.space["4"],
+  paddingRight: t6.space["3"]
+});
+var codeDots = cx(layout.row({ gap: "2", align: "center" }), style({ flexShrink: 0 }));
+var codeDot = style({ width: 11, height: 11, borderRadius: t6.radius.full, background: "#2a3344" });
+var codeName = style({ fontFamily: t6.font.mono, fontSize: t6.size.xs, color: "#8595ad", marginRight: "auto", whiteSpace: "nowrap", overflow: "hidden" });
+var codeCopy = style({
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.xs,
+  fontWeight: t6.weight.medium,
+  color: "#aeb9cc",
+  background: "transparent",
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: codeBorder,
+  borderRadius: t6.radius.sm,
+  paddingTop: 3,
+  paddingBottom: 3,
+  paddingLeft: t6.space["2"],
+  paddingRight: t6.space["2"],
+  cursor: "pointer",
+  appearance: "none",
+  flexShrink: 0,
+  transition: animation.transition(["background", "color", "border-color"], { duration: "fast" }),
+  on: {
+    hover: { background: "#182134", color: "#e6edf6", borderColor: "#334259" },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 2px ${t6.focus.ring}` }
+  }
+});
+var codeScroll = style({ overflowX: "auto", padding: t6.space["4"] });
+var codePre = style({
+  margin: 0,
+  fontFamily: t6.font.mono,
+  fontSize: t6.size.sm,
+  lineHeight: "1.7",
+  color: codeFg,
+  whiteSpace: "pre"
+});
+var tokPlain = style({ color: codeFg });
+var tokComment = style({ color: "#6b7a90" });
+var tokKeyword = style({ color: "#79b8ff" });
+var tokString = style({ color: "#8ddb8c" });
+var tokNumber = style({ color: "#f0b072" });
+var tokType = style({ color: "#6cc0ff" });
+var tokDecorator = style({ color: "#d2a8ff" });
+var tokFn = style({ color: "#c3a7ff" });
+var tokPunct = style({ color: "#8b98ac" });
+var codeBlock = layout.stack({ gap: "2" });
+var codeLabel = cx(text.label(), style({ color: t6.content.secondary }));
+var codeSurface = style({
+  display: "block",
+  fontFamily: t6.font.mono,
+  fontSize: t6.size.sm,
+  lineHeight: "1.6",
+  color: codeFg,
+  background: codeBg,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: codeBorder,
+  borderRadius: t6.radius.md,
+  padding: t6.space["3"],
+  overflowX: "auto",
+  whiteSpace: "pre"
+});
+var inlineCode = style({
+  fontFamily: t6.font.mono,
+  fontSize: "0.9em",
+  color: t6.accent.primary,
+  background: t6.surface.sunken,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t6.border.subtle,
+  borderRadius: t6.radius.sm,
+  paddingLeft: 5,
+  paddingRight: 5,
+  paddingTop: 1,
+  paddingBottom: 1
+});
+var buttonBase = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: t6.space["2"],
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.md,
+  fontWeight: t6.weight.semibold,
+  borderRadius: t6.radius.md,
   cursor: "pointer",
   appearance: "none",
   textDecoration: "none",
-  transition: `background ${t6.duration.fast} ${t6.easing.standard}`,
+  paddingTop: t6.space["3"],
+  paddingBottom: t6.space["3"],
+  paddingLeft: t6.space["5"],
+  paddingRight: t6.space["5"],
+  borderWidth: 1,
+  borderStyle: "solid",
+  transition: animation.transition(["background", "border-color", "color", "box-shadow"], { duration: "fast" })
+};
+var buttonPrimary = style({
+  ...buttonBase,
+  color: t6.accent.contrast,
+  background: t6.accent.primary,
+  borderColor: t6.accent.primary,
+  boxShadow: t6.shadow.sm,
+  on: {
+    hover: { background: t6.accent.hover, borderColor: t6.accent.hover },
+    active: { boxShadow: "none" },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
+  }
+});
+var buttonSecondary = style({
+  ...buttonBase,
+  color: t6.content.primary,
+  background: t6.surface.raised,
+  borderColor: t6.border.strong,
+  on: {
+    hover: { background: t6.surface.sunken, borderColor: t6.content.muted },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
+  }
+});
+var buttonGhost = style({
+  ...buttonBase,
+  color: t6.accent.primary,
+  background: "transparent",
+  borderColor: "transparent",
+  paddingLeft: t6.space["3"],
+  paddingRight: t6.space["3"],
   on: {
     hover: { background: t6.surface.sunken },
     focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
   }
 });
 var ctaRow = layout.row({ gap: "3", align: "center", wrap: true });
+var breadcrumbTrail = cx(layout.row({ gap: "2", align: "center", wrap: true }), style({ color: t6.content.muted }));
+var breadcrumbLink = style({
+  fontSize: t6.size.xs,
+  color: t6.content.secondary,
+  textDecoration: "none",
+  on: { hover: { color: t6.accent.primary }, focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+});
+var breadcrumbCurrent = style({ fontSize: t6.size.xs, color: t6.content.muted });
 var pill = {
   display: "inline-flex",
   alignItems: "center",
+  gap: t6.space["1"],
   fontSize: t6.size.xs,
   fontWeight: t6.weight.medium,
   borderRadius: t6.radius.full,
-  paddingLeft: t6.space["2"],
-  paddingRight: t6.space["2"],
-  paddingTop: 2,
-  paddingBottom: 2,
+  paddingLeft: t6.space["3"],
+  paddingRight: t6.space["3"],
+  paddingTop: 3,
+  paddingBottom: 3,
   borderWidth: 1,
   borderStyle: "solid"
 };
-var badge = style({
-  ...pill,
-  color: t6.accent.primary,
-  background: t6.surface.sunken,
-  borderColor: t6.border.subtle
-});
-var statusOk = style({
-  ...pill,
-  color: t6.success.content,
-  background: t6.surface.sunken,
-  borderColor: t6.success.solid
-});
-var statusError = style({
-  ...pill,
-  color: t6.danger.content,
-  background: t6.danger.surface,
-  borderColor: t6.danger.border
-});
-var statusNeutral = style({
-  ...pill,
-  color: t6.content.secondary,
-  background: t6.surface.sunken,
-  borderColor: t6.border.default
-});
+var badge = style({ ...pill, color: t6.accent.primary, background: t6.surface.sunken, borderColor: t6.border.subtle });
+var statusOk = style({ ...pill, color: t6.success.content, background: t6.surface.sunken, borderColor: t6.success.solid });
+var statusError = style({ ...pill, color: t6.danger.content, background: t6.danger.surface, borderColor: t6.danger.border });
+var statusNeutral = style({ ...pill, color: t6.content.secondary, background: t6.surface.sunken, borderColor: t6.border.default });
 var badgeRow = layout.row({ gap: "2", align: "center", wrap: true });
 var alert = cx(
   layout.stack({ gap: "2" }),
   style({
     background: t6.surface.sunken,
+    borderWidth: 1,
     borderStyle: "solid",
     borderColor: t6.border.default,
-    borderWidth: 1,
     borderRadius: t6.radius.md,
-    padding: t6.space["4"]
-  })
-);
-var notice = cx(
-  layout.stack({ gap: "1" }),
-  style({
-    background: t6.surface.sunken,
-    borderStyle: "solid",
-    borderColor: t6.accent.primary,
-    borderWidth: 1,
-    borderRadius: t6.radius.md,
-    padding: t6.space["3"],
+    padding: t6.space["4"],
     fontSize: t6.size.sm,
     color: t6.content.secondary
   })
 );
+var notice = style({
+  background: t6.surface.sunken,
+  boxShadow: `inset 3px 0 0 ${t6.accent.primary}`,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t6.border.default,
+  borderRadius: t6.radius.md,
+  paddingTop: t6.space["3"],
+  paddingBottom: t6.space["3"],
+  paddingLeft: t6.space["4"],
+  paddingRight: t6.space["4"],
+  fontSize: t6.size.sm,
+  color: t6.content.secondary,
+  maxWidth: PROSE_MAX
+});
 var errorBox = cx(
   layout.stack({ gap: "2" }),
   style({
     background: t6.danger.surface,
+    borderWidth: 1,
     borderStyle: "solid",
     borderColor: t6.danger.border,
-    borderWidth: 1,
     borderRadius: t6.radius.md,
     padding: t6.space["3"],
     color: t6.danger.content,
@@ -5182,59 +5530,156 @@ var errorBox = cx(
 var table = style({ width: "100%", fontSize: t6.size.sm, color: t6.content.primary });
 var docsLayout = style({
   display: "grid",
-  gap: t6.space["6"],
-  gridTemplateColumns: { base: "1fr", md: "230px minmax(0, 1fr)" },
-  alignItems: "start"
+  gap: t6.space["8"],
+  alignItems: "start",
+  gridTemplateColumns: { base: "1fr", md: "232px minmax(0, 1fr)", xl: "232px minmax(0, 1fr) 200px" }
 });
 var docsSidebar = cx(
-  layout.stack({ gap: "2" }),
-  style({ position: { base: "static", md: "sticky" }, top: t6.space["10"] })
+  layout.stack({ gap: "4" }),
+  style({
+    position: { base: "static", md: "sticky" },
+    top: 76,
+    maxHeight: { md: "calc(100vh - 92px)" },
+    overflowY: { md: "auto" },
+    paddingRight: t6.space["2"]
+  })
 );
-var docsSidebarGroup = text.label();
+var docsSidebarGroupBlock = layout.stack({ gap: "1" });
+var docsSidebarGroup = style({
+  fontSize: t6.size.xs,
+  fontWeight: t6.weight.semibold,
+  color: t6.content.muted,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  paddingLeft: t6.space["2"],
+  marginBottom: t6.space["1"],
+  marginTop: t6.space["3"]
+});
 var docsSidebarLink = style({
+  display: "block",
   fontSize: t6.size.sm,
   color: t6.content.secondary,
   textDecoration: "none",
   borderRadius: t6.radius.sm,
-  paddingTop: t6.space["1"],
-  paddingBottom: t6.space["1"],
+  paddingTop: 5,
+  paddingBottom: 5,
   paddingLeft: t6.space["2"],
   paddingRight: t6.space["2"],
+  boxShadow: `inset 2px 0 0 transparent`,
   on: {
-    hover: { color: t6.accent.primary, background: t6.surface.sunken },
+    hover: { color: t6.content.primary, background: t6.surface.sunken },
     focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
   }
 });
-var docsContent = cx(layout.stack({ gap: "5" }), style({ minWidth: 0 }));
+var docsSidebarLinkActive = style({
+  display: "block",
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.semibold,
+  color: t6.accent.primary,
+  textDecoration: "none",
+  borderRadius: t6.radius.sm,
+  paddingTop: 5,
+  paddingBottom: 5,
+  paddingLeft: t6.space["2"],
+  paddingRight: t6.space["2"],
+  background: t6.surface.sunken,
+  boxShadow: `inset 2px 0 0 ${t6.accent.primary}`
+});
+var docsContent = cx(layout.stack({ gap: "5" }), style({ minWidth: 0, maxWidth: "78ch" }));
 var linkList = layout.stack({ gap: "2" });
-var pagerRow = layout.row({ gap: "4", align: "center", justify: "between", wrap: true });
+var pagerRow = style({
+  display: "grid",
+  gap: t6.space["3"],
+  gridTemplateColumns: { base: "1fr", sm: "1fr 1fr" },
+  marginTop: t6.space["6"]
+});
+var pagerLink = style({
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
+  textDecoration: "none",
+  color: t6.content.primary,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t6.border.default,
+  borderRadius: t6.radius.md,
+  padding: t6.space["4"],
+  transition: animation.transition(["border-color", "background"], { duration: "fast" }),
+  on: {
+    hover: { borderColor: t6.border.strong, background: t6.surface.raised },
+    focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
+  }
+});
+var pagerDir = style({ fontSize: t6.size.xs, color: t6.content.muted });
+var pagerTitle = style({ fontSize: t6.size.sm, fontWeight: t6.weight.semibold, color: t6.accent.primary });
+var pagerNext = cx(pagerLink, style({ textAlign: "right" }));
+var docsToc = cx(
+  layout.stack({ gap: "2" }),
+  style({
+    display: { base: "none", xl: "flex" },
+    position: "sticky",
+    top: 76,
+    boxShadow: `inset 2px 0 0 ${t6.border.default}`,
+    paddingLeft: t6.space["4"]
+  })
+);
+var docsTocTitle = style({
+  fontSize: t6.size.xs,
+  fontWeight: t6.weight.semibold,
+  color: t6.content.muted,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em"
+});
+var docsTocLink = style({
+  fontSize: t6.size.sm,
+  color: t6.content.secondary,
+  textDecoration: "none",
+  lineHeight: t6.leading.normal,
+  on: { hover: { color: t6.accent.primary }, focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+});
+var docHeading = style({
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.xl,
+  fontWeight: t6.weight.semibold,
+  lineHeight: t6.leading.tight,
+  letterSpacing: "-0.015em",
+  color: t6.content.primary,
+  paddingTop: 72,
+  marginTop: -48
+});
+var prose = style({ fontSize: t6.size.md, lineHeight: t6.leading.relaxed, color: t6.content.secondary, maxWidth: "78ch" });
+var proseList = cx(layout.stack({ gap: "2" }), style({ paddingLeft: t6.space["4"] }));
+var proseListItem = style({
+  position: "relative",
+  fontSize: t6.size.md,
+  lineHeight: t6.leading.relaxed,
+  color: t6.content.secondary,
+  boxShadow: `inset 6px 0 0 -4px ${t6.border.strong}`,
+  paddingLeft: t6.space["3"]
+});
 var fieldGroup = layout.stack({ gap: "2" });
-var fieldLabel2 = text.label();
+var fieldLabel2 = cx(text.label(), style({ color: t6.content.primary }));
+var textInput = cx(form.input(), style({ width: "100%" }));
 var textarea = cx(
   form.input(),
   style({ fontFamily: t6.font.mono, fontSize: t6.size.sm, minHeight: 120, width: "100%" })
 );
-var textInput = cx(form.input(), style({ width: "100%" }));
 var outputBox = cx(
   layout.stack({ gap: "1" }),
   style({
     fontFamily: t6.font.mono,
     fontSize: t6.size.sm,
-    background: t6.surface.sunken,
+    color: codeFg,
+    background: codeBg,
     borderWidth: 1,
     borderStyle: "solid",
-    borderColor: t6.border.default,
+    borderColor: codeBorder,
     borderRadius: t6.radius.md,
     padding: t6.space["3"],
     overflowX: "auto"
   })
 );
-var outputRow = style({
-  display: "grid",
-  gridTemplateColumns: { base: "1fr", md: "160px 1fr 1fr" },
-  gap: t6.space["2"],
-  alignItems: "start"
-});
+var outputRow = style({ fontFamily: t6.font.mono, fontSize: t6.size.sm, color: codeFg, whiteSpace: "pre-wrap" });
 var toolPanel = cx(
   layout.stack({ gap: "4" }),
   style({
@@ -5243,14 +5688,21 @@ var toolPanel = cx(
     borderStyle: "solid",
     borderColor: t6.border.default,
     borderRadius: t6.radius.lg,
-    padding: t6.space["5"]
+    padding: { base: t6.space["4"], md: t6.space["5"] }
   })
 );
+var toolGrid = style({
+  display: "grid",
+  gap: t6.space["5"],
+  gridTemplateColumns: { base: "1fr", lg: "repeat(2, minmax(0, 1fr))" },
+  alignItems: "start"
+});
 var ds = {
   appRoot,
   pageContainer,
   pageSection,
   pageBody,
+  pageHeader,
   pageTitle,
   pageLead,
   sectionHeading,
@@ -5258,21 +5710,24 @@ var ds = {
   bodyText,
   metaText,
   inlineLink,
-  heroTitle,
+  kicker,
   navBar,
   navInner,
   brand,
   brandLink,
+  brandMark,
   navLinks,
   navLinkItem,
+  navLinkActive,
   navActiveMark,
   navControls,
   themeToggle,
   menuToggle,
-  mobileMenu,
-  mobileMenuLink,
   searchTrigger,
   kbd,
+  mobileMenu,
+  mobileMenuLink,
+  mobileMenuLinkActive,
   searchPanel,
   searchPanelHeader,
   searchPanelTitle,
@@ -5287,20 +5742,53 @@ var ds = {
   footerInner,
   footerLinks,
   footerText,
+  footerLink,
   skipLink: skipLink2,
   card,
+  linkCardShell,
+  cardTitleLink,
+  cardSummary,
   cardGrid,
+  cardGrid2,
   featureGrid,
+  heroOuter,
+  heroWrap,
+  heroCol,
+  heroTitle,
+  heroLead,
+  heroMetaRow,
+  heroMetaItem,
+  bandAlt,
+  bandInner,
+  sectionIntro,
+  codeWindow,
+  codeBar,
+  codeDots,
+  codeDot,
+  codeName,
+  codeCopy,
+  codeScroll,
+  codePre,
+  tokPlain,
+  tokComment,
+  tokKeyword,
+  tokString,
+  tokNumber,
+  tokType,
+  tokDecorator,
+  tokFn,
+  tokPunct,
   codeBlock,
   codeLabel,
   codeSurface,
   inlineCode,
+  buttonPrimary,
+  buttonSecondary,
+  buttonGhost,
+  ctaRow,
   breadcrumbTrail,
   breadcrumbLink,
   breadcrumbCurrent,
-  buttonPrimary,
-  buttonSecondary,
-  ctaRow,
   badge,
   statusOk,
   statusError,
@@ -5312,19 +5800,188 @@ var ds = {
   table,
   docsLayout,
   docsSidebar,
+  docsSidebarGroupBlock,
   docsSidebarGroup,
   docsSidebarLink,
+  docsSidebarLinkActive,
   docsContent,
   linkList,
   pagerRow,
+  pagerLink,
+  pagerDir,
+  pagerTitle,
+  pagerNext,
+  docsToc,
+  docsTocTitle,
+  docsTocLink,
+  docHeading,
+  prose,
+  proseList,
+  proseListItem,
   fieldGroup,
   fieldLabel: fieldLabel2,
-  textarea,
   textInput,
+  textarea,
   outputBox,
   outputRow,
-  toolPanel
+  toolPanel,
+  toolGrid
 };
+var codeTokens = {
+  plain: tokPlain,
+  comment: tokComment,
+  keyword: tokKeyword,
+  string: tokString,
+  number: tokNumber,
+  type: tokType,
+  decorator: tokDecorator,
+  fn: tokFn,
+  punct: tokPunct
+};
+var KEYWORDS = /* @__PURE__ */ new Set([
+  "import",
+  "export",
+  "from",
+  "const",
+  "let",
+  "var",
+  "function",
+  "return",
+  "class",
+  "extends",
+  "implements",
+  "interface",
+  "type",
+  "enum",
+  "new",
+  "await",
+  "async",
+  "if",
+  "else",
+  "for",
+  "while",
+  "do",
+  "switch",
+  "case",
+  "break",
+  "continue",
+  "throw",
+  "try",
+  "catch",
+  "finally",
+  "this",
+  "super",
+  "public",
+  "private",
+  "protected",
+  "readonly",
+  "static",
+  "get",
+  "set",
+  "void",
+  "as",
+  "in",
+  "of",
+  "typeof",
+  "instanceof",
+  "true",
+  "false",
+  "null",
+  "undefined",
+  "default",
+  "yield",
+  "declare",
+  "namespace",
+  "keyof"
+]);
+var WORD = /[A-Za-z_$][\w$]*/y;
+var NUMBER = /\d[\d_]*(?:\.\d+)?(?:n)?/y;
+var LINE_COMMENT = /\/\/[^\n]*/y;
+var BLOCK_COMMENT = /\/\*[\s\S]*?\*\//y;
+var DECORATOR = /@[A-Za-z_]\w*/y;
+var WS = /\s+/y;
+function stringAt(src, i) {
+  const q = src[i];
+  if (q !== '"' && q !== "'" && q !== "`") return null;
+  let j = i + 1;
+  while (j < src.length) {
+    const c = src[j];
+    if (c === "\\") {
+      j += 2;
+      continue;
+    }
+    if (c === q) {
+      j += 1;
+      break;
+    }
+    j += 1;
+  }
+  return src.slice(i, j);
+}
+function highlightTs(src) {
+  const out = [];
+  let i = 0;
+  const push = (text2, kind) => {
+    if (text2.length === 0) return;
+    const last = out[out.length - 1];
+    if (last !== void 0 && last.kind === kind) {
+      out[out.length - 1] = { text: last.text + text2, kind };
+    } else {
+      out.push({ text: text2, kind });
+    }
+  };
+  const tryRe = (re) => {
+    re.lastIndex = i;
+    const m = re.exec(src);
+    return m !== null && m.index === i ? m[0] : null;
+  };
+  while (i < src.length) {
+    let m;
+    if ((m = tryRe(WS)) !== null) {
+      push(m, "plain");
+      i += m.length;
+      continue;
+    }
+    if ((m = tryRe(LINE_COMMENT)) !== null) {
+      push(m, "comment");
+      i += m.length;
+      continue;
+    }
+    if ((m = tryRe(BLOCK_COMMENT)) !== null) {
+      push(m, "comment");
+      i += m.length;
+      continue;
+    }
+    m = stringAt(src, i);
+    if (m !== null) {
+      push(m, "string");
+      i += m.length;
+      continue;
+    }
+    if ((m = tryRe(DECORATOR)) !== null) {
+      push(m, "decorator");
+      i += m.length;
+      continue;
+    }
+    if ((m = tryRe(NUMBER)) !== null) {
+      push(m, "number");
+      i += m.length;
+      continue;
+    }
+    if ((m = tryRe(WORD)) !== null) {
+      let j = i + m.length;
+      while (j < src.length && (src[j] === " " || src[j] === "	")) j += 1;
+      const isCall = src[j] === "(";
+      const kind = KEYWORDS.has(m) ? "keyword" : /^[A-Z]/.test(m) ? "type" : isCall ? "fn" : "plain";
+      push(m, kind);
+      i += m.length;
+      continue;
+    }
+    push(src[i] ?? "", "punct");
+    i += 1;
+  }
+  return out;
+}
 function pageLayout(page, opts, body2) {
   if (opts.path !== void 0) {
     page.head(
@@ -5337,26 +5994,68 @@ function pageLayout(page, opts, body2) {
     );
   }
   page.section(opts.id, (s) => {
-    s.heading(opts.title, { level: 1, id: `${opts.id}-title`, class: ds.pageTitle });
-    if (opts.lead !== void 0) {
-      s.text(opts.lead, { id: `${opts.id}-lead`, class: ds.pageLead });
-    }
+    s.container(`${opts.id}-header`, (h2) => {
+      h2.heading(opts.title, { level: 1, id: `${opts.id}-title`, class: ds.pageTitle });
+      if (opts.lead !== void 0) {
+        h2.text(opts.lead, { id: `${opts.id}-lead`, class: ds.pageLead });
+      }
+    }, { id: `${opts.id}-header`, class: ds.pageHeader });
     s.container(`${opts.id}-body`, (content) => body2(content), { id: `${opts.id}-body`, class: ds.pageBody });
   }, { id: `page-${opts.id}`, class: ds.pageSection });
 }
-function navLink(scope, router, item, cls = ds.navLinkItem) {
-  scope.link(item.label, { href: item.href, id: item.id, class: cls });
-  scope.when(router.isActive(item.href, { exact: item.exact ?? false }), (c) => {
+function navLink(scope, router, item, cls = ds.navLinkItem, activeCls = ds.navLinkActive) {
+  const active = router.isActive(item.href, { exact: item.exact ?? false });
+  scope.when(derived(() => !active.get()), (c) => {
+    c.link(item.label, { href: item.href, id: item.id, class: cls });
+  });
+  scope.when(active, (c) => {
+    c.link(item.label, { href: item.href, id: item.id, class: activeCls });
     c.text(" (active)", { id: `${item.id}-active`, class: ds.navActiveMark });
   });
 }
+function codeWindow2(scope, opts) {
+  const { code: code3, idBase } = opts;
+  const label2 = signal("Copy");
+  scope.container(idBase, (w) => {
+    w.container(`${idBase}-bar`, (bar) => {
+      bar.container(`${idBase}-dots`, (d) => {
+        d.container(`${idBase}-dot0`, () => {
+        }, { id: `${idBase}-dot0`, class: ds.codeDot });
+        d.container(`${idBase}-dot1`, () => {
+        }, { id: `${idBase}-dot1`, class: ds.codeDot });
+        d.container(`${idBase}-dot2`, () => {
+        }, { id: `${idBase}-dot2`, class: ds.codeDot });
+      }, { id: `${idBase}-dots`, class: ds.codeDots });
+      bar.text(opts.filename ?? "example.ts", { id: `${idBase}-name`, class: ds.codeName });
+      bar.button(label2, {
+        id: `${idBase}-copy`,
+        class: ds.codeCopy,
+        ariaLabel: "Copy code to clipboard",
+        onClick: () => {
+          try {
+            const nav = globalThis.navigator;
+            void nav?.clipboard?.writeText(code3);
+            label2.set("Copied");
+            setTimeout(() => label2.set("Copy"), 1600);
+          } catch {
+          }
+        }
+      });
+    }, { id: `${idBase}-bar`, class: ds.codeBar });
+    w.container(`${idBase}-scroll`, (sc) => {
+      sc.container(`${idBase}-src`, (pre2) => {
+        highlightTs(code3).forEach((tok, i) => {
+          pre2.text(tok.text, { id: `${idBase}-t${i}`, class: codeTokens[tok.kind] });
+        });
+      }, { id: `${idBase}-src`, class: ds.codePre });
+    }, { id: `${idBase}-scroll`, class: ds.codeScroll, tabIndex: 0, ariaLabel: "Code sample (scrollable)" });
+  }, { id: idBase, class: ds.codeWindow });
+}
 function codeExample(scope, sample, idBase) {
-  scope.container(idBase, (c) => {
-    c.text(sample.label, { id: `${idBase}-label`, class: ds.codeLabel });
-    const codeOpts = { id: `${idBase}-src`, class: ds.codeSurface };
-    if (sample.language !== void 0) codeOpts.language = sample.language;
-    c.code(sample.code, codeOpts);
-  }, { id: idBase, class: ds.codeBlock });
+  const filename = sample.label.length > 0 ? sample.label : void 0;
+  const windowOpts = { code: sample.code, idBase };
+  if (filename !== void 0) windowOpts.filename = filename;
+  codeWindow2(scope, windowOpts);
 }
 function breadcrumb(scope, trail, idBase) {
   scope.container(idBase, (c) => {
@@ -6162,7 +6861,10 @@ function websiteShell(shell, ctx) {
   }, { id: "site-skip" });
   shell.section("nav", (n) => {
     n.container("nav-inner", (inner) => {
-      inner.link("StreetJS", { href: "/", id: "brand", class: ds.brandLink });
+      inner.container("brand-lockup", (b) => {
+        b.text("S", { id: "brand-mark", class: ds.brandMark, ariaHidden: true });
+        b.link("StreetJS", { href: "/", id: "brand", class: ds.brand });
+      }, { id: "brand-lockup", class: ds.brandLink });
       inner.container("nav-links", (links) => {
         for (const item of PRIMARY_NAV) navLink(links, router, item);
       }, { id: "nav-links", class: ds.navLinks });
@@ -6185,11 +6887,11 @@ function websiteShell(shell, ctx) {
     n.when(menuOpen, (m) => {
       m.container("mobile-menu", (links) => {
         for (const item of PRIMARY_NAV) {
-          navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink);
+          navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
         }
       }, { id: "mobile-menu", class: ds.mobileMenu });
     });
-  }, { id: "site-nav", class: ds.navBar });
+  }, { id: "site-nav", class: ds.navBar, role: "navigation", ariaLabel: "Primary navigation" });
   shell.dialog("search-dialog", {
     open: search.open,
     onClose: () => search.closeSearch(),
@@ -6224,9 +6926,10 @@ function websiteShell(shell, ctx) {
   });
   if (ctx.renderOutlet !== void 0) {
     const fill = ctx.renderOutlet;
-    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: "page-outlet" });
+    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: "page-outlet", role: "main" });
   } else {
-    routerOutlet(shell, "page-outlet");
+    shell.container(ROUTER_OUTLET_KEY, () => {
+    }, { id: "page-outlet", role: "main" });
   }
   shell.section("footer", (f) => {
     f.container("footer-inner", (fi) => {
@@ -6235,12 +6938,12 @@ function websiteShell(shell, ctx) {
         { id: "footer-text", class: ds.footerText }
       );
       fi.container("footer-links", (links) => {
-        links.link("Official docs", { href: DOCS_SITE_URL, external: true, id: "footer-docs", class: ds.inlineLink });
-        links.link("About this site", { href: "/about", id: "footer-about", class: ds.inlineLink });
-        links.link("Changelog", { href: "/changelog", id: "footer-changelog", class: ds.inlineLink });
+        links.link("Official docs", { href: DOCS_SITE_URL, external: true, id: "footer-docs", class: ds.footerLink });
+        links.link("About this site", { href: "/about", id: "footer-about", class: ds.footerLink });
+        links.link("Changelog", { href: "/changelog", id: "footer-changelog", class: ds.footerLink });
       }, { id: "footer-links", class: ds.footerLinks });
     }, { id: "footer-inner", class: ds.footerInner });
-  }, { id: "site-footer", class: ds.footer });
+  }, { id: "site-footer", class: ds.footer, role: "contentinfo" });
 }
 function isKnownPath(path) {
   const clean = path.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
@@ -6286,15 +6989,15 @@ function renderBlocks(scope, blocks, idBase) {
     const id = `${idBase}-${i}`;
     switch (b.kind) {
       case "p":
-        scope.text(b.text, { id, class: ds.bodyText });
+        scope.text(b.text, { id, class: ds.prose });
         break;
       case "h":
-        scope.heading(b.text, { level: 2, id, class: ds.sectionHeading });
+        scope.heading(b.text, { level: 2, id, class: ds.docHeading });
         break;
       case "list":
         scope.container(id, (l) => {
-          b.items.forEach((item, j) => l.text(item, { id: `${id}-${j}`, class: ds.bodyText, role: "listitem" }));
-        }, { id, class: ds.linkList, role: "list" });
+          b.items.forEach((item, j) => l.text(item, { id: `${id}-${j}`, class: ds.proseListItem, role: "listitem" }));
+        }, { id, class: ds.proseList, role: "list" });
         break;
       case "code":
         codeExample(scope, b.sample, id);
@@ -6307,12 +7010,23 @@ function renderBlocks(scope, blocks, idBase) {
     }
   });
 }
+function blockHeadings(blocks, idBase) {
+  const out = [];
+  blocks.forEach((b, i) => {
+    if (b.kind === "h") out.push({ id: `${idBase}-${i}`, text: b.text });
+  });
+  return out;
+}
 function linkCard(scope, idBase, title, href, summary, badge2) {
   scope.container(idBase, (c) => {
-    c.link(title, { href, id: `${idBase}-link`, class: ds.inlineLink });
-    if (badge2 !== void 0) c.text(badge2, { id: `${idBase}-badge`, class: ds.badge });
-    c.text(summary, { id: `${idBase}-summary`, class: ds.metaText });
-  }, { id: idBase, class: ds.card });
+    if (badge2 !== void 0) {
+      c.container(`${idBase}-top`, (top) => {
+        top.text(badge2, { id: `${idBase}-badge`, class: ds.badge });
+      }, { id: `${idBase}-top`, class: ds.badgeRow });
+    }
+    c.link(title, { href, id: `${idBase}-link`, class: ds.cardTitleLink });
+    c.text(summary, { id: `${idBase}-summary`, class: ds.cardSummary });
+  }, { id: idBase, class: ds.linkCardShell });
 }
 function notFoundBody(c, what) {
   c.text(`${what} Use search (Ctrl+K), or start from one of these pages.`, { id: "nf-text", class: ds.bodyText });
@@ -6336,29 +7050,104 @@ function buildRoutes(deps) {
     {
       path: "/",
       builder: (page) => {
-        pageLayout(page, {
-          id: "home",
-          title: "StreetJS",
-          lead: "Production-grade TypeScript backend framework. Native PostgreSQL wire driver, JWT, WebSockets, clustering, runtime input validation, field-level encryption. No Express. No pg. No Prisma.",
+        page.head(pageHead({
+          title: "StreetJS \u2014 TypeScript backend framework",
+          description: "Production-grade TypeScript backend framework: native PostgreSQL wire driver, decorator HTTP, JWT and RBAC, migrations, jobs and health routes. No Express. No pg. No Prisma.",
           path: "/"
-        }, (c) => {
-          c.container("home-cta", (r) => {
-            r.link("Get started", { href: "/getting-started", id: "cta-start", class: ds.buttonPrimary });
-            r.link("Read the docs", { href: "/docs", id: "cta-docs", class: ds.buttonSecondary });
-            r.link("Try the playground", { href: "/playground", id: "cta-playground", class: ds.buttonSecondary });
-          }, { id: "home-cta", class: ds.ctaRow });
-          provenanceNotice(c, "home-provenance");
-          c.heading("What is documented here", { level: 2, id: "home-features-title", class: ds.sectionHeading });
-          c.container("home-features", (g) => {
-            FEATURES.forEach((f, i) => linkCard(g, `feature-${i}`, f.title, f.href, f.text));
-          }, { id: "home-features", class: ds.cardGrid });
-          c.heading("Read the sharp edges first", { level: 2, id: "home-traps-title", class: ds.sectionHeading });
-          c.text("StreetJS has behaviours that surprise people: global rbacGuard authorises everything, no password hashing ships, and framework 5xx errors can expose database settings. They are written up plainly.", { id: "home-traps-text", class: ds.bodyText });
-          c.container("home-trap-links", (l) => {
-            l.link("Known traps", { href: "/docs/known-traps", id: "home-trap-doc", class: ds.inlineLink });
-            l.link("Blog", { href: "/blog", id: "home-trap-blog", class: ds.inlineLink });
-          }, { id: "home-trap-links", class: ds.linkList });
-        });
+        }));
+        const hero = EXAMPLES[0];
+        page.section("home", (s) => {
+          s.container("hero-outer", (ho) => {
+            ho.container("hero-wrap", (hw) => {
+              hw.container("hero-col", (col) => {
+                col.text("TypeScript backend framework", { id: "hero-kicker", class: ds.kicker });
+                col.heading("The backend framework that ships with its batteries.", { level: 1, id: "home-title", class: ds.heroTitle });
+                col.text("StreetJS is a production-grade TypeScript server framework with a native PostgreSQL wire driver, decorator-based HTTP, JWT sessions and RBAC, migrations, background jobs and health routes \u2014 no Express, no pg, no Prisma.", { id: "home-lead", class: ds.heroLead });
+                col.container("home-cta", (r) => {
+                  r.link("Get started", { href: "/getting-started", id: "cta-start", class: ds.buttonPrimary });
+                  r.link("Read the docs", { href: "/docs", id: "cta-docs", class: ds.buttonSecondary });
+                  r.link("Open the playground", { href: "/playground", id: "cta-playground", class: ds.buttonGhost });
+                }, { id: "home-cta", class: ds.ctaRow });
+                col.container("hero-meta", (mr) => {
+                  mr.text("npm i streetjs", { id: "hero-meta-install", class: ds.inlineCode });
+                  mr.text("TypeScript-first", { id: "hero-meta-ts", class: ds.heroMetaItem });
+                  mr.text("PostgreSQL native", { id: "hero-meta-pg", class: ds.heroMetaItem });
+                }, { id: "hero-meta", class: ds.heroMetaRow });
+              }, { id: "hero-col", class: ds.heroCol });
+              if (hero !== void 0) {
+                hw.container("hero-code", (cc) => {
+                  const fn = hero.sample.label.length > 0 ? hero.sample.label : "app.controller.ts";
+                  codeWindow2(cc, { code: hero.sample.code, filename: fn, idBase: "hero-code-win" });
+                }, { id: "hero-code", class: ds.heroCol });
+              }
+            }, { id: "hero-wrap", class: ds.heroWrap });
+          }, { id: "hero-outer", class: ds.heroOuter });
+        }, { id: "page-home" });
+        page.section("home-capabilities", (s) => {
+          s.container("cap-inner", (c) => {
+            c.container("cap-intro", (i) => {
+              i.text("What you get", { id: "cap-kicker", class: ds.kicker });
+              i.heading("Everything a service needs, documented and typed", { level: 2, id: "home-features-title", class: ds.sectionHeading });
+            }, { id: "cap-intro", class: ds.sectionIntro });
+            c.container("home-features", (g) => {
+              FEATURES.forEach((f, i) => linkCard(g, `feature-${i}`, f.title, f.href, f.text));
+            }, { id: "home-features", class: ds.cardGrid });
+          }, { id: "cap-inner", class: ds.pageSection });
+        }, { id: "page-home-capabilities" });
+        const dbExample = EXAMPLES.find((e) => /postgres|transaction|database/i.test(e.title)) ?? EXAMPLES[2];
+        page.section("home-arch", (s) => {
+          s.container("arch-band", (b) => {
+            b.container("arch-grid", (g) => {
+              g.container("arch-text", (tx) => {
+                tx.text("Architecture", { id: "arch-kicker", class: ds.kicker });
+                tx.heading("Decorators in, typed data out", { level: 2, id: "arch-title", class: ds.sectionHeading });
+                tx.text("A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.", { id: "arch-body", class: ds.bodyText });
+                tx.container("arch-links", (l) => {
+                  l.link("HTTP & controllers", { href: "/docs/http", id: "arch-link-http", class: ds.inlineLink });
+                  l.link("Working with PostgreSQL", { href: "/docs/database", id: "arch-link-db", class: ds.inlineLink });
+                }, { id: "arch-links", class: ds.ctaRow });
+              }, { id: "arch-text", class: ds.heroCol });
+              if (dbExample !== void 0) {
+                g.container("arch-code", (cc) => {
+                  const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : "repository.ts";
+                  codeWindow2(cc, { code: dbExample.sample.code, filename: fn, idBase: "arch-code-win" });
+                }, { id: "arch-code", class: ds.heroCol });
+              }
+            }, { id: "arch-grid", class: ds.heroWrap });
+          }, { id: "arch-band", class: ds.bandAlt });
+        }, { id: "page-home-arch" });
+        page.section("home-start", (s) => {
+          s.container("start-inner", (c) => {
+            c.container("qs-grid", (g) => {
+              g.container("qs-text", (tx) => {
+                tx.text("Quick start", { id: "qs-kicker", class: ds.kicker });
+                tx.heading("Install and serve in minutes", { level: 2, id: "qs-title", class: ds.sectionHeading });
+                tx.container("qs-steps", (st) => {
+                  st.text("Install the package into a TypeScript project.", { id: "qs-step-0", class: ds.proseListItem, role: "listitem" });
+                  st.text("Enable the decorators the framework needs in tsconfig.", { id: "qs-step-1", class: ds.proseListItem, role: "listitem" });
+                  st.text("Define a @Controller and call streetApp().listen().", { id: "qs-step-2", class: ds.proseListItem, role: "listitem" });
+                }, { id: "qs-steps", class: ds.proseList, role: "list" });
+                tx.link("Full getting-started guide", { href: "/getting-started", id: "qs-link", class: ds.inlineLink });
+              }, { id: "qs-text", class: ds.heroCol });
+              g.container("qs-code", (cc) => {
+                codeWindow2(cc, { code: 'npm install streetjs\n\n# enable in tsconfig.json:\n# "experimentalDecorators": true,\n# "emitDecoratorMetadata": true', filename: "terminal", idBase: "qs-code-win" });
+              }, { id: "qs-code", class: ds.heroCol });
+            }, { id: "qs-grid", class: ds.heroWrap });
+          }, { id: "start-inner", class: ds.pageSection });
+        }, { id: "page-home-start" });
+        page.section("home-explore", (s) => {
+          s.container("explore-inner", (c) => {
+            c.container("home-traps", (tr) => {
+              tr.text("Read the sharp edges first", { id: "home-traps-title", class: ds.subHeading });
+              tr.text("StreetJS has defaults that surprise people: a global rbacGuard authorises everything, no password hashing ships, and framework 5xx errors can expose database settings. They are written up plainly, not hidden.", { id: "home-traps-text", class: ds.bodyText });
+              tr.container("home-trap-links", (l) => {
+                l.link("Known traps", { href: "/docs/known-traps", id: "home-trap-doc", class: ds.inlineLink });
+                l.link("Read the blog", { href: "/blog", id: "home-trap-blog", class: ds.inlineLink });
+              }, { id: "home-trap-links", class: ds.ctaRow });
+            }, { id: "home-traps", class: ds.alert, role: "note" });
+            provenanceNotice(c, "home-provenance");
+          }, { id: "explore-inner", class: ds.pageSection });
+        }, { id: "page-home-explore" });
       }
     },
     {
@@ -6424,25 +7213,46 @@ function buildRoutes(deps) {
           return;
         }
         const { prev, next } = docNeighbours(doc.slug);
+        const toc = blockHeadings(doc.blocks, "doc-block");
         pageLayout(page, { id: "doc", title: doc.title, lead: doc.summary, path: `/docs/${doc.slug}` }, (c) => {
           breadcrumb(c, [{ label: "Docs", href: "/docs" }, { label: doc.group }, { label: doc.title }], "doc-crumbs");
           c.container("doc-layout", (layout2) => {
             layout2.container("doc-sidebar", (s) => {
               DOC_GROUPS.forEach((group, gi) => {
-                s.text(group, { id: `side-group-${gi}`, class: ds.docsSidebarGroup });
-                DOCS.filter((d) => d.group === group).forEach((d) => {
-                  navLink(s, getRouter(), { label: d.title, href: `/docs/${d.slug}`, id: `side-doc-${d.slug}`, exact: true }, ds.docsSidebarLink);
-                });
+                s.container(`side-grp-${gi}`, (gb) => {
+                  gb.text(group, { id: `side-group-${gi}`, class: ds.docsSidebarGroup });
+                  DOCS.filter((d) => d.group === group).forEach((d) => {
+                    navLink(gb, getRouter(), { label: d.title, href: `/docs/${d.slug}`, id: `side-doc-${d.slug}`, exact: true }, ds.docsSidebarLink, ds.docsSidebarLinkActive);
+                  });
+                }, { id: `side-grp-${gi}`, class: ds.docsSidebarGroupBlock });
               });
             }, { id: "doc-sidebar", class: ds.docsSidebar, role: "navigation", ariaLabel: "Documentation sections" });
             layout2.container("doc-content", (body2) => {
               provenanceNotice(body2, "doc-provenance");
               renderBlocks(body2, doc.blocks, "doc-block");
               body2.container("doc-pager", (p3) => {
-                if (prev !== void 0) p3.link(`Previous: ${prev.title}`, { href: `/docs/${prev.slug}`, id: "doc-prev", class: ds.inlineLink });
-                if (next !== void 0) p3.link(`Next: ${next.title}`, { href: `/docs/${next.slug}`, id: "doc-next", class: ds.inlineLink });
+                if (prev !== void 0) {
+                  p3.container("doc-prev", (pp) => {
+                    pp.text("Previous", { id: "doc-prev-dir", class: ds.pagerDir });
+                    pp.link(prev.title, { href: `/docs/${prev.slug}`, id: "doc-prev", class: ds.pagerTitle });
+                  }, { id: "doc-prev-card", class: ds.pagerLink });
+                }
+                if (next !== void 0) {
+                  p3.container("doc-next", (nn) => {
+                    nn.text("Next", { id: "doc-next-dir", class: ds.pagerDir });
+                    nn.link(next.title, { href: `/docs/${next.slug}`, id: "doc-next", class: ds.pagerTitle });
+                  }, { id: "doc-next-card", class: ds.pagerNext });
+                }
               }, { id: "doc-pager", class: ds.pagerRow });
             }, { id: "doc-content", class: ds.docsContent });
+            if (toc.length > 1) {
+              layout2.container("doc-toc", (tc) => {
+                tc.text("On this page", { id: "doc-toc-title", class: ds.docsTocTitle });
+                toc.forEach((h2, hi) => {
+                  tc.link(h2.text, { href: `#${h2.id}`, id: `doc-toc-${hi}`, class: ds.docsTocLink });
+                });
+              }, { id: "doc-toc", class: ds.docsToc, role: "navigation", ariaLabel: "On this page" });
+            }
           }, { id: "doc-layout", class: ds.docsLayout });
         });
       }
@@ -6896,12 +7706,13 @@ var ssr_source_default = async (req) => {
     const siteUrl = url.origin;
     const pathname = decodeURIComponent(url.pathname);
     if (pathname === "/robots.txt") {
-      return new Response(`User-agent: *
+      return new Response(
+        `User-agent: *
 Allow: /
 Sitemap: ${siteUrl}/sitemap.xml
-`, {
-        headers: { "content-type": "text/plain; charset=utf-8" }
-      });
+`,
+        { headers: { "content-type": "text/plain; charset=utf-8" } }
+      );
     }
     if (pathname === "/sitemap.xml") {
       const body2 = `<?xml version="1.0" encoding="UTF-8"?>
