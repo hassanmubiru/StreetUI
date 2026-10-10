@@ -89,72 +89,54 @@ async function checkInteractions(page) {
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 15000 });
   await page.waitForSelector('#page-outlet h1');
 
-  // Dump mobile HTML to see what selectors exist
-  const mobileMenuInfo = await page.evaluate(() => {
-    const buttons = Array.from(document.querySelectorAll('button')).map(b => ({
-      text: b.textContent.trim().slice(0, 30),
-      ariaLabel: b.getAttribute('aria-label'),
-      id: b.id,
-      className: b.className,
-    }));
-    const nav = document.querySelector('nav');
-    const navVisible = nav ? (getComputedStyle(nav).display !== 'none' && nav.offsetWidth > 0) : false;
-    return { buttons, navVisible };
-  });
-
-  // Try to find a hamburger/menu button
-  const menuBtn = await page.$('[aria-label*="menu" i], [aria-label*="nav" i], #nav-toggle, #mobile-toggle, .hamburger, button[aria-expanded]');
-  if (menuBtn) {
-    await menuBtn.click();
+  // The #menu-toggle button controls #mobile-menu via aria-controls
+  const menuToggle = await page.$('#menu-toggle');
+  if (menuToggle) {
+    // Check mobile-menu is hidden before click
+    const menuBefore = await page.$eval('#mobile-menu', el => el.offsetHeight > 0).catch(() => false);
+    await menuToggle.click();
     await page.waitForTimeout(200);
-    const navOpenState = await page.evaluate(() => {
-      const nav = document.querySelector('nav');
-      if (!nav) return 'no nav';
-      const visible = getComputedStyle(nav).display !== 'none' && nav.offsetHeight > 0;
-      return visible ? 'visible' : 'hidden';
-    });
-    results.push({ check: 'Mobile menu toggle', pass: navOpenState === 'visible', detail: `after click: ${navOpenState}` });
-  } else if (mobileMenuInfo.navVisible) {
-    results.push({ check: 'Mobile menu toggle', pass: true, detail: 'nav always visible at mobile (no toggle needed)' });
+    // Check #mobile-menu is now visible
+    const menuAfter = await page.$eval('#mobile-menu', el => el.offsetHeight > 0).catch(() => false);
+    results.push({ check: 'Mobile menu toggle', pass: menuAfter, detail: `mobile-menu before=${menuBefore} after=${menuAfter}` });
   } else {
-    results.push({ check: 'Mobile menu toggle', pass: false, detail: `no toggle found; buttons: ${JSON.stringify(mobileMenuInfo.buttons.slice(0,3))}` });
+    results.push({ check: 'Mobile menu toggle', pass: false, detail: 'no #menu-toggle found' });
   }
   await page.setViewportSize({ width: 1440, height: 900 });
 
-  // 4. Theme toggle — inspect actual markup
+  // 4. Theme toggle — three-state cycle (System→Light→Dark→System)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 15000 });
   await page.waitForSelector('#page-outlet h1');
 
-  const themeInfo = await page.evaluate(() => {
-    const buttons = Array.from(document.querySelectorAll('button')).map(b => ({
-      text: b.textContent.trim().slice(0, 30),
-      ariaLabel: b.getAttribute('aria-label'),
-      id: b.id,
-      className: b.className,
-    }));
-    const htmlTheme = document.documentElement.getAttribute('data-theme');
-    return { buttons, htmlTheme };
-  });
-
-  const themeBtn = await page.$(
-    '#theme-toggle, .theme-toggle, [data-theme-toggle], [aria-label*="theme" i], [aria-label*="dark" i], [aria-label*="light" i], [aria-label*="color" i]'
-  );
+  const themeBtn = await page.$('#theme-toggle');
   if (themeBtn) {
-    const themeBefore = await page.$eval('html', el => el.getAttribute('data-theme'));
+    const t0 = await page.$eval('html', el => el.getAttribute('data-theme'));
+    const label0 = await page.$eval('#theme-toggle', el => el.textContent?.trim());
+    // First click: System → Light (data-theme stays light if system is light)
     await themeBtn.click();
     await page.waitForTimeout(150);
-    const themeAfter = await page.$eval('html', el => el.getAttribute('data-theme'));
-    results.push({ check: 'Theme toggle changes data-theme', pass: themeBefore !== themeAfter, detail: `${themeBefore} → ${themeAfter}` });
+    const t1 = await page.$eval('html', el => el.getAttribute('data-theme'));
+    const label1 = await page.$eval('#theme-toggle', el => el.textContent?.trim());
+    // Second click: Light → Dark
+    await themeBtn.click();
+    await page.waitForTimeout(150);
+    const t2 = await page.$eval('html', el => el.getAttribute('data-theme'));
+    const label2 = await page.$eval('#theme-toggle', el => el.textContent?.trim());
+    // Third click: Dark → System
+    await themeBtn.click();
+    await page.waitForTimeout(150);
+    const t3 = await page.$eval('html', el => el.getAttribute('data-theme'));
+    const label3 = await page.$eval('#theme-toggle', el => el.textContent?.trim());
+    // Success: we should see dark mode at some point, then back to system/light
+    const sawDark = t1 === 'dark' || t2 === 'dark';
+    const cycledBack = t3 !== 'dark';
+    results.push({
+      check: 'Theme toggle cycles System→Light→Dark→System',
+      pass: sawDark && cycledBack,
+      detail: `${label0}(${t0}) → ${label1}(${t1}) → ${label2}(${t2}) → ${label3}(${t3})`
+    });
   } else {
-    // Look at all buttons to see if any is theme-related
-    const themeCandidates = themeInfo.buttons.filter(b =>
-      /theme|dark|light|mode|sun|moon/i.test(b.text + (b.ariaLabel || '') + b.className)
-    );
-    if (themeCandidates.length > 0) {
-      results.push({ check: 'Theme toggle changes data-theme', pass: false, detail: `candidates: ${JSON.stringify(themeCandidates)}` });
-    } else {
-      results.push({ check: 'Theme toggle changes data-theme', pass: false, detail: `no theme button found; data-theme=${themeInfo.htmlTheme}; buttons: ${JSON.stringify(themeInfo.buttons.slice(0,5))}` });
-    }
+    results.push({ check: 'Theme toggle cycles System→Light→Dark→System', pass: false, detail: '#theme-toggle not found' });
   }
 
   // 5. Search dialog opens (Ctrl+K)
@@ -177,14 +159,18 @@ async function checkInteractions(page) {
     await page.waitForTimeout(100);
   }
 
-  // 6. Skip link present
+  // 6. Skip link present (href="#page-outlet" which is the main landmark)
   await page.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 15000 });
   await page.waitForSelector('#page-outlet h1');
   const skipLinkInfo = await page.evaluate(() => {
-    const candidates = ['a[href="#main-content"]', 'a[href="#content"]', 'a.skip-link', 'a[href="#main"]'];
+    // The skip link targets #page-outlet (the main landmark)
+    const candidates = [
+      'a[href="#page-outlet"]', 'a[href="#main-content"]', 'a[href="#content"]',
+      'a.skip-link', 'a[href="#main"]', '#skip-link',
+    ];
     for (const sel of candidates) {
       const el = document.querySelector(sel);
-      if (el) return { found: true, href: el.href, text: el.textContent.trim() };
+      if (el) return { found: true, href: el.getAttribute('href'), text: el.textContent?.trim(), id: el.id };
     }
     return { found: false };
   });
@@ -309,8 +295,10 @@ async function runBrowser(browserType, name, browserOptions = {}) {
       let n = 0;
       for (const el of document.querySelectorAll('*')) {
         const cs = getComputedStyle(el);
-        if ((cs.animationName && cs.animationName !== 'none') ||
-            (cs.transitionDuration && cs.transitionDuration !== '0s')) n++;
+        const transDurMs = parseFloat(cs.transitionDuration || '0') * 1000;
+        const animDurMs = parseFloat(cs.animationDuration || '0') * 1000;
+        const animName = cs.animationName && cs.animationName !== 'none';
+        if ((animName && animDurMs > 20) || transDurMs > 20) n++;
       }
       return n;
     });
@@ -321,8 +309,11 @@ async function runBrowser(browserType, name, browserOptions = {}) {
       let n = 0;
       for (const el of document.querySelectorAll('*')) {
         const cs = getComputedStyle(el);
-        if ((cs.animationName && cs.animationName !== 'none') ||
-            (cs.transitionDuration && cs.transitionDuration !== '0s')) n++;
+        // Anything > 20ms is a real animation (0.01ms = reduced-motion override = pass)
+        const animName = cs.animationName && cs.animationName !== 'none';
+        const transDurMs = parseFloat(cs.transitionDuration || '0') * 1000;
+        const animDurMs = parseFloat(cs.animationDuration || '0') * 1000;
+        if ((animName && animDurMs > 20) || transDurMs > 20) n++;
       }
       return n;
     });
