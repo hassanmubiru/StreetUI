@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "node ../../node_modules/.bin/tsup",
+  "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
-  "installCommand": "echo skip",
+  "installCommand": "npm install",
   "framework": null,
   "functions": {
     "api/render.mjs": {
