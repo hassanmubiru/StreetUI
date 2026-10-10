@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": null,
+  "buildCommand": "echo 'dist already built'",
   "outputDirectory": ".",
   "installCommand": "echo 'no install needed'",
   "framework": null,
