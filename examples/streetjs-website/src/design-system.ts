@@ -635,7 +635,57 @@ export const errorBox = cx(
 
 export const table = style({ width: '100%', fontSize: t.size.sm, color: t.content.primary });
 
+// ── Docs layout (sidebar + article + TOC) ────────────────────────────────────
+
+export const docsLayout = style({
+  display: 'grid', gap: t.space['8'], alignItems: 'start',
+  gridTemplateColumns: { base: '1fr', md: '232px minmax(0, 1fr)', xl: '232px minmax(0, 1fr) 200px' },
+});
+
+export const docsSidebar = cx(
+  layout.stack({ gap: '4' }),
+  style({
+    position: { base: 'static', md: 'sticky' }, top: 76,
+    maxHeight: { md: 'calc(100vh - 92px)' }, overflowY: { md: 'auto' },
+    paddingRight: t.space['2'],
+  }),
+);
+
+export const docsSidebarGroupBlock = layout.stack({ gap: '1' });
+export const docsSidebarGroup = style({
+  fontSize: t.size.xs, fontWeight: t.weight.semibold, color: t.content.muted,
+  textTransform: 'uppercase', letterSpacing: '0.06em',
+  paddingLeft: t.space['2'], marginBottom: t.space['1'], marginTop: t.space['3'],
+});
+
+export const docsSidebarLink = style({
+  display: 'block', fontSize: t.size.sm, color: t.content.secondary, textDecoration: 'none',
+  borderRadius: t.radius.sm, paddingTop: 5, paddingBottom: 5,
+  paddingLeft: t.space['2'], paddingRight: t.space['2'],
+  boxShadow: `inset 2px 0 0 transparent`,
+  on: {
+    hover: { color: t.content.primary, background: t.surface.sunken },
+    focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 },
+  },
+});
+
+export const docsSidebarLinkActive = style({
+  display: 'block', fontSize: t.size.sm, fontWeight: t.weight.semibold, color: t.accent.primary,
+  textDecoration: 'none', borderRadius: t.radius.sm, paddingTop: 5, paddingBottom: 5,
+  paddingLeft: t.space['2'], paddingRight: t.space['2'],
+  background: t.surface.sunken, boxShadow: `inset 2px 0 0 ${t.accent.primary}`,
+});
+
+export const docsContent = cx(layout.stack({ gap: '5' }), style({ minWidth: 0, maxWidth: '78ch' }));
+export const linkList = layout.stack({ gap: '2' });
+export const pagerRow = style({
+  display: 'grid', gap: t.space['3'],
+  gridTemplateColumns: { base: '1fr', sm: '1fr 1fr' },
+  marginTop: t.space['6'],
+});
+
 // APPEND-MARKER
+
 
 
 
