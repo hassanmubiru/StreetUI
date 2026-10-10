@@ -10,7 +10,7 @@
  * the shell does not merge with the route's on the client).
  */
 
-import { derived, routerOutlet, ROUTER_OUTLET_KEY, type Signal } from 'streetui';
+import { derived, ROUTER_OUTLET_KEY, type Signal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import { navLink } from './components.js';
 import { PRIMARY_NAV } from './content.js';

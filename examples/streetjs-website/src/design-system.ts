@@ -71,6 +71,20 @@ const codeBorder = '#1c2740';
 const CONTENT_MAX = 1160;
 const PROSE_MAX = '72ch';
 
+/**
+ * Global reduced-motion override — injected once into the shared stylesheet.
+ * When the user requests `prefers-reduced-motion: reduce`, all CSS transitions
+ * and animations are removed so no element moves unprompted. StreetUI's
+ * animation.transition() helpers do not emit this automatically; we register it
+ * here via the public styleRegistry API so it lands in the single
+ * <style data-streetui-css> block (WCAG 2.1 SC 2.3.3).
+ */
+styleRegistry.register(
+  'streetjs-website-reduced-motion',
+  'base',
+  '@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}}',
+);
+
 // ── Document & page scaffolding ────────────────────────────────────────────
 
 export const appRoot = cx(
