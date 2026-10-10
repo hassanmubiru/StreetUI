@@ -13,7 +13,7 @@
 import { derived, ROUTER_OUTLET_KEY, type Signal } from 'streetui';
 import type { ContainerDSL, PageDSL, Router } from 'streetui';
 import { navLink } from './components.js';
-import { PRIMARY_NAV } from './content.js';
+import { NPM_URL, PRIMARY_NAV, SECONDARY_NAV } from './content.js';
 import { ds } from './design-system.js';
 import { resultId, type SearchState } from './search.js';
 import { SEARCH_INPUT_ID } from './search-keys.js';
@@ -59,6 +59,7 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
       }, { id: 'nav-links', class: ds.navLinks });
 
       inner.container('nav-controls', (right) => {
+        right.link('npm', { href: NPM_URL, external: true, id: 'nav-npm', class: ds.navExternal });
         right.button('Search', {
           id: 'search-trigger',
           ariaLabel: 'Search (Ctrl+K)',
@@ -81,6 +82,10 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
         for (const item of PRIMARY_NAV) {
           navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
         }
+        for (const item of SECONDARY_NAV) {
+          navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
+        }
+        links.link('npm', { href: NPM_URL, external: true, id: 'm-nav-npm', class: ds.mobileMenuLink });
       }, { id: 'mobile-menu', class: ds.mobileMenu });
     });
   }, { id: 'site-nav', class: ds.navBar, role: 'navigation', ariaLabel: 'Primary navigation' });
@@ -134,15 +139,40 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
 
   root.section('footer', (f) => {
     f.container('footer-inner', (fi) => {
-      fi.text(
-        'StreetJS is a TypeScript backend framework. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.',
-        { id: 'footer-text', class: ds.footerText },
-      );
-      fi.container('footer-links', (links) => {
-        links.link('Official docs', { href: DOCS_SITE_URL, external: true, id: 'footer-docs', class: ds.footerLink });
-        links.link('About this site', { href: '/about', id: 'footer-about', class: ds.footerLink });
-        links.link('Changelog', { href: '/changelog', id: 'footer-changelog', class: ds.footerLink });
-      }, { id: 'footer-links', class: ds.footerLinks });
+      fi.container('footer-brand', (fb) => {
+        fb.container('footer-brand-lockup', (bl) => {
+          bl.text('S', { id: 'footer-mark', class: ds.footerMark, ariaHidden: true });
+          bl.text('StreetJS', { id: 'footer-wordmark', class: ds.footerWordmark });
+        }, { id: 'footer-brand-lockup', class: ds.footerBrandLockup });
+        fb.text(
+          'A TypeScript backend framework for Node.js. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.',
+          { id: 'footer-text', class: ds.footerText },
+        );
+      }, { id: 'footer-brand', class: ds.footerBrand });
+
+      fi.container('footer-cols', (cols) => {
+        cols.container('footer-col-docs', (c) => {
+          c.text('Documentation', { id: 'footer-col-docs-h', class: ds.footerColTitle });
+          c.link('Getting started', { href: '/getting-started', id: 'footer-getting', class: ds.footerLink });
+          c.link('Docs', { href: '/docs', id: 'footer-docs', class: ds.footerLink });
+          c.link('API reference', { href: '/api', id: 'footer-api', class: ds.footerLink });
+          c.link('Guides', { href: '/guides', id: 'footer-guides', class: ds.footerLink });
+        }, { id: 'footer-col-docs', class: ds.footerCol });
+        cols.container('footer-col-explore', (c) => {
+          c.text('Explore', { id: 'footer-col-explore-h', class: ds.footerColTitle });
+          c.link('Examples', { href: '/examples', id: 'footer-examples', class: ds.footerLink });
+          c.link('Playground', { href: '/playground', id: 'footer-playground', class: ds.footerLink });
+          c.link('Plugins', { href: '/plugins', id: 'footer-plugins', class: ds.footerLink });
+          c.link('Blog', { href: '/blog', id: 'footer-blog', class: ds.footerLink });
+        }, { id: 'footer-col-explore', class: ds.footerCol });
+        cols.container('footer-col-project', (c) => {
+          c.text('Project', { id: 'footer-col-project-h', class: ds.footerColTitle });
+          c.link('npm package', { href: NPM_URL, external: true, id: 'footer-npm', class: ds.footerLink });
+          c.link('Official docs', { href: DOCS_SITE_URL, external: true, id: 'footer-official', class: ds.footerLink });
+          c.link('Changelog', { href: '/changelog', id: 'footer-changelog', class: ds.footerLink });
+          c.link('About', { href: '/about', id: 'footer-about', class: ds.footerLink });
+        }, { id: 'footer-col-project', class: ds.footerCol });
+      }, { id: 'footer-cols', class: ds.footerCols });
     }, { id: 'footer-inner', class: ds.footerInner });
   }, { id: 'site-footer', class: ds.footer, role: 'contentinfo' });
 

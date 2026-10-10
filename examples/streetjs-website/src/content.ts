@@ -21,9 +21,26 @@ export const PRIMARY_NAV: readonly NavItem[] = [
   { label: 'Docs', href: '/docs', id: 'nav-docs' },
   { label: 'Guides', href: '/guides', id: 'nav-guides' },
   { label: 'API', href: '/api', id: 'nav-api' },
-  { label: 'Playground', href: '/playground', id: 'nav-playground' },
-  { label: 'Blog', href: '/blog', id: 'nav-blog' },
+  { label: 'Examples', href: '/examples', id: 'nav-examples' },
+  { label: 'Plugins', href: '/plugins', id: 'nav-plugins' },
 ];
+
+/** Secondary destinations — in the mobile menu and footer, not the desktop bar. */
+export const SECONDARY_NAV: readonly NavItem[] = [
+  { label: 'Getting started', href: '/getting-started', id: 'nav-getting-started' },
+  { label: 'Playground', href: '/playground', id: 'nav-playground' },
+  { label: 'Changelog', href: '/changelog', id: 'nav-changelog' },
+  { label: 'Blog', href: '/blog', id: 'nav-blog' },
+  { label: 'About', href: '/about', id: 'nav-about' },
+];
+
+/**
+ * External destinations. Only the npm package page (a canonical URL for the
+ * VERIFIED package name `streetjs`) and the official docs site are linked. The
+ * source-repository URL is explicitly unverified (see ABOUT_UNVERIFIED), so no
+ * GitHub link is fabricated.
+ */
+export const NPM_URL = 'https://www.npmjs.com/package/streetjs';
 
 export const docBySlug = (slug: string) => DOCS.find((d) => d.slug === slug);
 export const guideBySlug = (slug: string) => GUIDES.find((g) => g.slug === slug);

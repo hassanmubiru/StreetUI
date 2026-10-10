@@ -270,6 +270,22 @@ export const navLinkActive = style({
 export const navActiveMark = a11y.visuallyHidden();
 export const navControls = layout.row({ gap: '2', align: 'center', wrap: false });
 
+/** External link in the header (npm), styled quietly on the charcoal bar. */
+export const navExternal = style({
+  display: { base: 'none', md: 'inline-flex' },
+  alignItems: 'center', fontFamily: t.font.sans,
+  fontSize: t.size.sm, fontWeight: t.weight.medium,
+  color: brandInk.navText, textDecoration: 'none',
+  borderRadius: t.radius.md,
+  paddingTop: t.space['2'], paddingBottom: t.space['2'], paddingLeft: t.space['3'], paddingRight: t.space['3'],
+  whiteSpace: 'nowrap',
+  transition: animation.transition(['color', 'background'], { duration: 'fast' }),
+  on: {
+    hover: { color: brandInk.navTextStrong, background: brandInk.navHoverBg },
+    focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 },
+  },
+});
+
 /** The emphasized primary action in the header. */
 export const navCta = style({
   display: { base: 'none', md: 'inline-flex' },
@@ -419,22 +435,35 @@ export const footer = style({
 export const footerInner = cx(
   layout.container({ max: CONTENT_MAX, padX: '5' }),
   style({
-    display: 'grid', gap: t.space['5'],
-    gridTemplateColumns: { base: '1fr', md: 'minmax(0, 1fr) auto' },
-    alignItems: 'center',
-    paddingTop: t.space['6'], paddingBottom: t.space['6'],
+    display: 'grid', gap: { base: t.space['6'], md: t.space['8'] },
+    gridTemplateColumns: { base: '1fr', md: 'minmax(0, 1.4fr) minmax(0, 2fr)' },
+    alignItems: 'start',
+    paddingTop: t.space['8'], paddingBottom: t.space['8'],
   }),
 );
 
+export const footerBrand = layout.stack({ gap: '3' });
+export const footerBrandLockup = cx(layout.row({ gap: '2', align: 'center' }));
+export const footerMark = style({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  width: 24, height: 24, borderRadius: t.radius.md,
+  background: t.accent.primary, color: t.accent.contrast,
+  fontSize: t.size.sm, fontWeight: t.weight.bold, letterSpacing: '-0.03em', flexShrink: 0,
+});
+export const footerWordmark = style({ fontSize: t.size.md, fontWeight: t.weight.bold, letterSpacing: '-0.02em', color: t.content.primary });
+
+export const footerCols = style({
+  display: 'grid', gap: t.space['6'],
+  gridTemplateColumns: { base: 'repeat(2, minmax(0, 1fr))', sm: 'repeat(3, minmax(0, 1fr))' },
+});
+export const footerCol = layout.stack({ gap: '2' });
+export const footerColTitle = style({
+  fontSize: t.size.xs, fontWeight: t.weight.semibold, color: t.content.muted,
+  textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: t.space['1'],
+});
+
 export const footerLinks = layout.row({ gap: '5', align: 'center', wrap: true });
-/**
- * Footer body copy: uses secondary content colour (not muted) so that the text
- * reliably passes WCAG 2.1 AA contrast (≥4.5:1) against the raised surface
- * background (#f7f9fc light / #121926 dark).
- * Light: #44536a on #f7f9fc → 7.4:1 ✓
- * Dark:  #aab6c7 on #121926 → 7.9:1 ✓
- */
-export const footerText = cx(text.caption(), style({ color: t.content.secondary, maxWidth: '60ch' }));
+export const footerText = cx(text.caption(), style({ color: t.content.secondary, maxWidth: '48ch' }));
 export const footerLink = style({
   fontSize: t.size.sm, color: t.content.secondary, textDecoration: 'none',
   on: { hover: { color: t.accent.primary }, focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 } },
@@ -545,6 +574,60 @@ export const bandInner = cx(
 );
 
 export const sectionIntro = layout.stack({ gap: '2' });
+
+// ── Architecture flow (restrained request-lifecycle diagram) ────────────────
+
+export const archLane = style({
+  display: 'flex',
+  flexDirection: { base: 'column', md: 'row' },
+  alignItems: { base: 'stretch', md: 'stretch' },
+  gap: 0,
+  borderWidth: 1, borderStyle: 'solid', borderColor: t.border.default,
+  borderRadius: t.radius.lg, overflow: 'hidden',
+  background: t.surface.raised,
+});
+
+export const archStep = style({
+  flex: '1 1 0',
+  display: 'flex', flexDirection: 'column', gap: t.space['1'],
+  padding: t.space['4'],
+  boxShadow: `inset 0 -1px 0 ${t.border.subtle}`,
+});
+
+export const archStepHead = style({ display: 'flex', alignItems: 'center', gap: t.space['2'] });
+export const archStepNum = style({
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+  width: 22, height: 22, borderRadius: t.radius.full,
+  background: t.accent.primary, color: t.accent.contrast,
+  fontSize: t.size.xs, fontWeight: t.weight.bold, flexShrink: 0,
+});
+export const archStepName = style({ fontSize: t.size.sm, fontWeight: t.weight.semibold, color: t.content.primary });
+export const archStepApi = style({ fontFamily: t.font.mono, fontSize: t.size.xs, color: t.accent.primary });
+export const archStepText = style({ fontSize: t.size.sm, lineHeight: t.leading.normal, color: t.content.secondary });
+
+// ── Capabilities (editorial rows, not a uniform card grid) ──────────────────
+
+export const capList = style({
+  display: 'grid', gap: 0,
+  borderWidth: 1, borderStyle: 'solid', borderColor: t.border.default,
+  borderRadius: t.radius.lg, overflow: 'hidden',
+  background: t.surface.raised,
+});
+export const capRow = style({
+  display: 'grid', gap: { base: t.space['1'], md: t.space['5'] },
+  gridTemplateColumns: { base: '1fr', md: '220px minmax(0, 1fr) auto' },
+  alignItems: { base: 'start', md: 'baseline' },
+  padding: { base: t.space['4'], md: t.space['5'] },
+  boxShadow: `inset 0 -1px 0 ${t.border.subtle}`,
+  transition: animation.transition(['background'], { duration: 'fast' }),
+  on: { hover: { background: t.surface.sunken } },
+});
+export const capName = style({ fontSize: t.size.md, fontWeight: t.weight.semibold, color: t.content.primary, letterSpacing: '-0.01em' });
+export const capText = style({ fontSize: t.size.sm, lineHeight: t.leading.normal, color: t.content.secondary });
+export const capLink = style({
+  fontSize: t.size.sm, fontWeight: t.weight.medium, color: t.accent.primary, textDecoration: 'none', whiteSpace: 'nowrap',
+  on: { hover: { color: t.accent.hover }, focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 } },
+});
 
 // ── Code window (the signature code presentation) ────────────────────────────
 
@@ -854,15 +937,18 @@ export const toolGrid = style({
 export const ds = {
   appRoot, pageContainer, pageSection, pageBody, pageHeader, pageTitle, pageLead,
   sectionHeading, subHeading, bodyText, metaText, inlineLink, kicker,
-  navBar, navInner, brand, brandLink, brandMark, navLinks, navLinkItem, navLinkActive, navActiveMark, navControls, navCta,
+  navBar, navInner, brand, brandLink, brandMark, navLinks, navLinkItem, navLinkActive, navActiveMark, navControls, navCta, navExternal,
   themeToggle, menuToggle, searchTrigger, kbd,
   mobileMenu, mobileMenuLink, mobileMenuLinkActive,
   searchPanel, searchPanelHeader, searchPanelTitle, searchDialogInput, searchHint,
   searchResultsList, searchResultLink, searchResultTitle, searchResultMeta, searchEmpty,
   footer, footerInner, footerLinks, footerText, footerLink, skipLink,
+  footerBrand, footerBrandLockup, footerMark, footerWordmark, footerCols, footerCol, footerColTitle,
   card, linkCardShell, cardTitleLink, cardSummary, cardGrid, cardGrid2, featureGrid,
   heroOuter, heroWrap, heroCol, splitGrid, heroTitle, heroLead, heroMetaRow, heroMetaItem,
   bandAlt, bandInner, sectionIntro,
+  archLane, archStep, archStepHead, archStepNum, archStepName, archStepApi, archStepText,
+  capList, capRow, capName, capText, capLink,
   codeWindow, codeBar, codeDots, codeDot, codeName, codeCopy, codeScroll, codePre,
   tokPlain, tokComment, tokKeyword, tokString, tokNumber, tokType, tokDecorator, tokFn, tokPunct,
   codeBlock, codeLabel, codeSurface, inlineCode,
