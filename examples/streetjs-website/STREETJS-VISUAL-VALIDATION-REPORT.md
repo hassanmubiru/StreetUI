@@ -155,3 +155,29 @@ the `!important` reduced-motion override is treated as zero).
 | Multi-viewport Firefox — desktop / tablet / mobile | ✅ PASS — 0 horizontal scroll |
 | Reduced-motion Chrome | ✅ PASS — 27 → 0 animated elements |
 | Reduced-motion Firefox | ✅ PASS — 27 → 0 animated elements |
+
+---
+
+## 10. Addendum — information-architecture pass (2026-10-10)
+
+A later pass changed the navigation, homepage composition and footer (see the Brand Design Report §5):
+the desktop header now shows **Docs, Guides, API, Examples, Plugins** + npm + Get started (the earlier
+scan in §6–§7 was taken against the previous `Docs/Guides/API/Playground/Blog` trim); capabilities became
+editorial rows; a request-lifecycle diagram and a grouped footer were added; the only external links are
+the official docs site and the verified **npm package page** (a GitHub link was intentionally omitted
+because the repository URL is unverified).
+
+Re-validated in **this sandbox** after those changes — all **EXECUTED, PASS**: `tsc` 0 (project +
+clean-install from the 3.0.1 tarball); `vitest` 73/73; `tsup` 0 warnings; SSR 12×200/2×404 with one
+`<h1>` per route and a **byte-identical 39,189 B** stylesheet; no broken internal links; structure checks
+for the new nav/diagram/rows/footer; and a real-Chromium render check (via the artifact view) of the
+header, hero and capability rows at a narrow panel width with no horizontal overflow.
+
+**Must be re-run in the authoritative environment:** the browser/axe/multi-viewport/reduced-motion scans
+in §6–§8 predate these navigation/homepage/footer changes and should be re-executed there to re-confirm
+0 axe violations and 0 horizontal overflow against the new markup. Those browser tools are not available
+in this sandbox, so I did not reproduce §6–§8 here.
+
+> Note: these report files changed on disk between steps during this work (concurrent editing from the
+> authoritative environment). The code state verified above is the current merged on-disk state and
+> builds green.
