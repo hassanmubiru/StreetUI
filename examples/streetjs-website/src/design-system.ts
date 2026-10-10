@@ -110,6 +110,7 @@ export const appRoot = cx(
   layout.stack({ gap: '0' }),
   style({
     minHeight: '100vh',
+    overflowX: 'hidden',      // prevent horizontal page scroll from content-box padded containers
     background: t.surface.background,
     color: t.content.primary,
     fontFamily: t.font.sans,
