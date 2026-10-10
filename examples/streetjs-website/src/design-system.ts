@@ -684,7 +684,46 @@ export const pagerRow = style({
   marginTop: t.space['6'],
 });
 
+// Prev/next pager cards.
+export const pagerLink = style({
+  display: 'flex', flexDirection: 'column', gap: 2,
+  textDecoration: 'none', color: t.content.primary,
+  borderWidth: 1, borderStyle: 'solid', borderColor: t.border.default, borderRadius: t.radius.md,
+  padding: t.space['4'],
+  transition: animation.transition(['border-color', 'background'], { duration: 'fast' }),
+  on: {
+    hover: { borderColor: t.border.strong, background: t.surface.raised },
+    focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 },
+  },
+});
+export const pagerDir = style({ fontSize: t.size.xs, color: t.content.muted });
+export const pagerTitle = style({ fontSize: t.size.sm, fontWeight: t.weight.semibold, color: t.accent.primary });
+export const pagerNext = cx(pagerLink, style({ textAlign: 'right' }));
+
+// In-page table of contents (right column, large screens).
+export const docsToc = cx(
+  layout.stack({ gap: '2' }),
+  style({
+    display: { base: 'none', xl: 'flex' },
+    position: 'sticky', top: 76,
+    boxShadow: `inset 2px 0 0 ${t.border.default}`,
+    paddingLeft: t.space['4'],
+  }),
+);
+export const docsTocTitle = style({
+  fontSize: t.size.xs, fontWeight: t.weight.semibold, color: t.content.muted,
+  textTransform: 'uppercase', letterSpacing: '0.06em',
+});
+export const docsTocLink = style({
+  fontSize: t.size.sm, color: t.content.secondary, textDecoration: 'none', lineHeight: t.leading.normal,
+  on: { hover: { color: t.accent.primary }, focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 } },
+});
+
+// A doc section heading that also serves as an anchor target under the sticky nav.
+export const docHeading = cx(sectionHeading, style({ paddingTop: t.space['3'] }));
+
 // APPEND-MARKER
+
 
 
 
