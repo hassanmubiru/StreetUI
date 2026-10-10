@@ -1,0 +1,17 @@
+[build]
+  publish = "netlify-static"
+  command = "echo 'pre-built'"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "none"
+
+[[headers]]
+  for = "/browser-entry.js"
+  [headers.values]
+    Cache-Control = "public, max-age=300"
+
+[[headers]]
+  for = "/favicon.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
