@@ -19,6 +19,7 @@
     "happy-dom": "*",
     "tsup": "*",
     "typescript": "*",
+    "vite": "^6.4.4",
     "vitest": "*"
   },
   "allowScripts": {
