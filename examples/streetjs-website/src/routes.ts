@@ -124,6 +124,16 @@ const FEATURES: readonly { title: string; href: string; text: string }[] = [
   { title: 'Health routes', href: '/docs/health', text: 'HealthCheckRegistry and registerHealthRoutes serve /health/live and /health/ready.' },
 ];
 
+/** Request lifecycle, each step tied to a real StreetJS API (no invented stages). */
+const ARCH_STEPS: readonly { name: string; api: string; text: string }[] = [
+  { name: 'HTTP server', api: 'streetApp()', text: 'The app accepts the request and applies global middleware.' },
+  { name: 'Routing', api: '@Controller · @Get', text: 'Decorated controller methods match the method and path.' },
+  { name: 'Validation', api: '@Validate', text: 'Field rules (zod) check the request before your code runs.' },
+  { name: 'Context', api: 'StreetContext', text: 'A per-request context carries request, response and state.' },
+  { name: 'Data', api: 'Repository · PgPool', text: 'The native PostgreSQL driver returns rows your repositories map.' },
+  { name: 'Response', api: 'ctx.json()', text: 'A typed response is written back to the client.' },
+];
+
 /* ── route table ────────────────────────────────────────────────────────── */
 
 export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {

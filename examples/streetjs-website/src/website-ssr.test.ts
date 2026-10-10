@@ -120,12 +120,15 @@ describe('SSR — internal links', () => {
     expect(bad).toEqual([]);
   });
 
-  it('external links are only the official docs site', () => {
+  it('external links are only verified destinations (official docs + npm package page)', () => {
     const external = new Set<string>();
     for (const p of allPaths()) {
       for (const m of renderWebsite(p).html.matchAll(/<a [^>]*href="(https?:\/\/[^"]*)"/g)) external.add(m[1]!);
     }
-    expect([...external]).toEqual(['https://hassanmubiru.github.io/StreetJS/']);
+    expect([...external].sort()).toEqual([
+      'https://hassanmubiru.github.io/StreetJS/',
+      'https://www.npmjs.com/package/streetjs',
+    ]);
   });
 });
 
