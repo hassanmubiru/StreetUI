@@ -77,7 +77,7 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
         }
       }, { id: 'mobile-menu', class: ds.mobileMenu });
     });
-  }, { id: 'site-nav', class: ds.navBar });
+  }, { id: 'site-nav', class: ds.navBar, role: 'navigation', ariaLabel: 'Primary navigation' });
 
   // Search dialog — modal, focus-trapped, Esc closes (framework behaviour).
   shell.dialog('search-dialog', {
@@ -137,5 +137,5 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
         links.link('Changelog', { href: '/changelog', id: 'footer-changelog', class: ds.footerLink });
       }, { id: 'footer-links', class: ds.footerLinks });
     }, { id: 'footer-inner', class: ds.footerInner });
-  }, { id: 'site-footer', class: ds.footer });
+  }, { id: 'site-footer', class: ds.footer, role: 'contentinfo' });
 }
