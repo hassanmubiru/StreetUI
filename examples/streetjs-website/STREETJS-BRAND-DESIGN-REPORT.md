@@ -93,3 +93,34 @@ The site reads as StreetJS without the logo: charcoal foundation, one confident 
 typography, consistent dark code windows. Light mode has strong contrast; dark mode has balanced
 surfaces and readable blue accents. See the Visual Validation Report for the measured contrast table and
 the before/after inspection.
+
+---
+
+## 5. Pass 3 — information architecture & distinctive identity (2026-10-10)
+
+A follow-up pass addressed the "generic / crowded / repetitive" feedback and the ecosystem links, keeping
+the same palette and StreetUI, no framework change.
+
+- **Decluttered navigation.** The desktop header previously carried all ten destinations. It now shows
+  the five a framework developer reaches for — **Docs, Guides, API, Examples, Plugins** — plus an **npm**
+  link, Search, Theme and the blue **Get started** CTA. The remaining destinations (Getting started,
+  Playground, Changelog, Blog, About) moved to the mobile menu and the footer. Active-route state and
+  keyboard focus are preserved.
+- **Honest external links only.** The npm link points to `https://www.npmjs.com/package/streetjs` — the
+  canonical page for the **verified** package name. A **GitHub link was deliberately omitted**: the
+  source-repository URL is listed as unverified on the About page and could not be confirmed in this
+  environment, so inventing one would violate the no-fabrication rule. Only the official docs site and
+  the npm page are linked externally.
+- **Capabilities as editorial rows, not a card grid.** The six capabilities are now a bordered,
+  hairline-divided list — each row a linked name, a one-line description and a "Docs" link — instead of
+  the repeated three-up card grid.
+- **A real architecture diagram (Section C).** A restrained request-lifecycle lane shows the six real
+  stages a request passes through, each tied to an actual API: `streetApp()` → `@Controller`/`@Get` →
+  `@Validate` → `StreetContext` → `Repository`/`PgPool` → `ctx.json()`. No invented stages or APIs.
+- **A real, grouped footer.** Three columns — Documentation, Explore, Project — of genuine internal
+  routes plus the verified npm and official-docs links. No social accounts, no community statistics.
+
+Changed files this pass: `src/content.ts` (nav split + `NPM_URL`), `src/shell.ts` (header, mobile menu,
+footer), `src/routes.ts` (home capabilities + architecture diagram), `src/design-system.ts` (nav/footer/
+arch/capability styles), `src/website-ssr.test.ts` (external-link allowlist now includes the npm page).
+
