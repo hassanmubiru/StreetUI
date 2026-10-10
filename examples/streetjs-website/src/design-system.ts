@@ -767,7 +767,39 @@ export const toolGrid = style({
   alignItems: 'start',
 });
 
-// APPEND-MARKER
+/** The namespace object — one import for the whole design system. */
+export const ds = {
+  appRoot, pageContainer, pageSection, pageBody, pageHeader, pageTitle, pageLead,
+  sectionHeading, subHeading, bodyText, metaText, inlineLink, kicker,
+  navBar, navInner, brand, brandLink, brandMark, navLinks, navLinkItem, navLinkActive, navActiveMark, navControls,
+  themeToggle, menuToggle, searchTrigger, kbd,
+  mobileMenu, mobileMenuLink, mobileMenuLinkActive,
+  searchPanel, searchPanelHeader, searchPanelTitle, searchDialogInput, searchHint,
+  searchResultsList, searchResultLink, searchResultTitle, searchResultMeta, searchEmpty,
+  footer, footerInner, footerLinks, footerText, footerLink, skipLink,
+  card, linkCardShell, cardTitleLink, cardSummary, cardGrid, cardGrid2, featureGrid,
+  heroOuter, heroWrap, heroCol, heroTitle, heroLead, heroMetaRow, heroMetaItem,
+  bandAlt, bandInner, sectionIntro,
+  codeWindow, codeBar, codeDots, codeDot, codeName, codeCopy, codeScroll, codePre,
+  tokPlain, tokComment, tokKeyword, tokString, tokNumber, tokType, tokDecorator, tokFn, tokPunct,
+  codeBlock, codeLabel, codeSurface, inlineCode,
+  buttonPrimary, buttonSecondary, buttonGhost, ctaRow,
+  breadcrumbTrail, breadcrumbLink, breadcrumbCurrent,
+  badge, statusOk, statusError, statusNeutral, badgeRow, alert, notice, errorBox, table,
+  docsLayout, docsSidebar, docsSidebarGroupBlock, docsSidebarGroup, docsSidebarLink, docsSidebarLinkActive,
+  docsContent, linkList, pagerRow, pagerLink, pagerDir, pagerTitle, pagerNext,
+  docsToc, docsTocTitle, docsTocLink, docHeading,
+  prose, proseList, proseListItem,
+  fieldGroup, fieldLabel, textInput, textarea, outputBox, outputRow, toolPanel, toolGrid,
+} as const;
+
+/** Syntax-highlight token classes, keyed for the highlighter. */
+export const codeTokens = {
+  plain: tokPlain, comment: tokComment, keyword: tokKeyword, string: tokString,
+  number: tokNumber, type: tokType, decorator: tokDecorator, fn: tokFn, punct: tokPunct,
+} as const;
+export type CodeTokenKind = keyof typeof codeTokens;
+
 
 
 
