@@ -117,7 +117,7 @@ export function codeWindow(
           pre.text(tok.text, { id: `${idBase}-t${i}`, class: codeTokens[tok.kind] });
         });
       }, { id: `${idBase}-src`, class: ds.codePre });
-    }, { id: `${idBase}-scroll`, class: ds.codeScroll });
+    }, { id: `${idBase}-scroll`, class: ds.codeScroll, tabIndex: 0, ariaLabel: 'Code sample (scrollable)' });
   }, { id: idBase, class: ds.codeWindow });
 }
 
