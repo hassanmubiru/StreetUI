@@ -1,0 +1,44 @@
+headersOrigin = "config"
+plugins = []
+functionsDirectory = "/home/error51/Downloads/StreetUI/examples/streetjs-website/netlify/functions"
+functionsDirectoryOrigin = "config"
+redirects = []
+
+[functions]
+
+[functions."*"]
+node_bundler = "none"
+
+[build]
+publish = "/home/error51/Downloads/StreetUI/examples/streetjs-website/netlify-static"
+publishOrigin = "config"
+commandOrigin = "config"
+base = "/home/error51/Downloads/StreetUI/examples/streetjs-website"
+command = "echo 'pre-built'"
+functions = "/home/error51/Downloads/StreetUI/examples/streetjs-website/netlify/functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[[headers]]
+for = "/browser-entry.js"
+
+[headers.values]
+Cache-Control = "public, max-age=300"
+
+[[headers]]
+for = "/favicon.svg"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
