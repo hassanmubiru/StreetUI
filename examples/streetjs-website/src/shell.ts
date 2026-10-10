@@ -120,9 +120,10 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   // The active route renders here; the shell persists around it.
   if (ctx.renderOutlet !== undefined) {
     const fill = ctx.renderOutlet;
-    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet' });
+    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet', role: 'main' });
   } else {
-    routerOutlet(shell, 'page-outlet');
+    // Use container directly (same as routerOutlet but with role="main" for landmark)
+    shell.container(ROUTER_OUTLET_KEY, () => { /* filled by the router at runtime */ }, { id: 'page-outlet', role: 'main' });
   }
 
   shell.section('footer', (f) => {
