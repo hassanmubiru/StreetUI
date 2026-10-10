@@ -722,7 +722,53 @@ export const docsTocLink = style({
 // A doc section heading that also serves as an anchor target under the sticky nav.
 export const docHeading = cx(sectionHeading, style({ paddingTop: t.space['3'] }));
 
+// ── Prose primitives (docs/guide/blog article bodies) ────────────────────────
+
+export const prose = style({ fontSize: t.size.md, lineHeight: t.leading.relaxed, color: t.content.secondary, maxWidth: '78ch' });
+export const proseList = cx(layout.stack({ gap: '2' }), style({ paddingLeft: t.space['4'] }));
+export const proseListItem = style({
+  position: 'relative', fontSize: t.size.md, lineHeight: t.leading.relaxed, color: t.content.secondary,
+  boxShadow: `inset 6px 0 0 -4px ${t.border.strong}`, paddingLeft: t.space['3'],
+});
+
+// ── Playground / backend tools ────────────────────────────────────────────
+
+export const fieldGroup = layout.stack({ gap: '2' });
+export const fieldLabel = cx(text.label(), style({ color: t.content.primary }));
+
+export const textInput = cx(form.input(), style({ width: '100%' }));
+export const textarea = cx(
+  form.input(),
+  style({ fontFamily: t.font.mono, fontSize: t.size.sm, minHeight: 120, width: '100%' }),
+);
+
+export const outputBox = cx(
+  layout.stack({ gap: '1' }),
+  style({
+    fontFamily: t.font.mono, fontSize: t.size.sm, color: codeFg,
+    background: codeBg, borderWidth: 1, borderStyle: 'solid', borderColor: codeBorder,
+    borderRadius: t.radius.md, padding: t.space['3'], overflowX: 'auto',
+  }),
+);
+
+export const outputRow = style({ fontFamily: t.font.mono, fontSize: t.size.sm, color: codeFg, whiteSpace: 'pre-wrap' });
+
+export const toolPanel = cx(
+  layout.stack({ gap: '4' }),
+  style({
+    background: t.surface.raised, borderWidth: 1, borderStyle: 'solid', borderColor: t.border.default,
+    borderRadius: t.radius.lg, padding: { base: t.space['4'], md: t.space['5'] },
+  }),
+);
+
+export const toolGrid = style({
+  display: 'grid', gap: t.space['5'],
+  gridTemplateColumns: { base: '1fr', lg: 'repeat(2, minmax(0, 1fr))' },
+  alignItems: 'start',
+});
+
 // APPEND-MARKER
+
 
 
 
