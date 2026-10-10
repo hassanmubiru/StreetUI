@@ -30,25 +30,31 @@ import { a11y, animation, cx, createThemeTokens, form, layout, style, styleRegis
  */
 export const brandTokens = createThemeTokens({
   light: {
-    surface: { background: '#ffffff', raised: '#f7f9fc', sunken: '#eef2f7', overlay: 'rgba(13,22,38,0.5)' },
-    content: { primary: '#0b1a2b', secondary: '#44536a', muted: '#6a7788', inverse: '#ffffff' },
-    border: { default: '#e3e9f0', strong: '#cbd5e2', subtle: '#eef2f7' },
-    accent: { primary: '#1766d6', hover: '#114fab', contrast: '#ffffff' },
-    focus: { ring: '#1766d6' },
+    // Official StreetJS brand palette (source of truth).
+    surface: { background: '#f8fafc', raised: '#ffffff', sunken: '#eef2f7', overlay: 'rgba(11,16,32,0.5)' },
+    content: { primary: '#0f172a', secondary: '#334155', muted: '#475569', inverse: '#ffffff' },
+    border: { default: '#cbd5e1', strong: '#94a3b8', subtle: '#e2e8f0' },
+    accent: { primary: '#2563eb', hover: '#1d4ed8', contrast: '#ffffff' },
+    focus: { ring: '#2563eb' },
     danger: { surface: '#fef2f2', border: '#f4c9c9', content: '#b42318', solid: '#e5484d' },
     success: { content: '#0f7a45', solid: '#16a34a' },
+    // Consistent system sans + mono everywhere (re-points --font-sans/--font-mono).
+    font: {
+      sans: 'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif',
+      mono: 'ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace',
+    },
     shadow: {
-      sm: '0 1px 2px rgba(13,22,38,0.06)',
-      md: '0 6px 20px -8px rgba(13,22,38,0.14)',
-      lg: '0 24px 50px -16px rgba(13,22,38,0.20)',
+      sm: '0 1px 2px rgba(15,23,42,0.06)',
+      md: '0 6px 20px -8px rgba(15,23,42,0.14)',
+      lg: '0 24px 50px -16px rgba(15,23,42,0.20)',
     },
   },
   dark: {
-    surface: { background: '#0a0e15', raised: '#121926', sunken: '#0d131d', overlay: 'rgba(2,5,10,0.66)' },
-    content: { primary: '#e8eef7', secondary: '#aab6c7', muted: '#7d8aa0', inverse: '#0a0e15' },
-    border: { default: '#1f2a3a', strong: '#30415c', subtle: '#18212e' },
-    accent: { primary: '#4c8dff', hover: '#6ba3ff', contrast: '#06142b' },
-    focus: { ring: '#4c8dff' },
+    surface: { background: '#0b1020', raised: '#172235', sunken: '#111827', overlay: 'rgba(3,6,15,0.68)' },
+    content: { primary: '#f8fafc', secondary: '#cbd5e1', muted: '#a8b5c7', inverse: '#0b1020' },
+    border: { default: '#263449', strong: '#33465f', subtle: '#1b2535' },
+    accent: { primary: '#60a5fa', hover: '#93c5fd', contrast: '#0b1020' },
+    focus: { ring: '#60a5fa' },
     danger: { surface: '#2a1316', border: '#5c2328', content: '#ff8d8d', solid: '#e5484d' },
     success: { content: '#58d68a', solid: '#22c55e' },
     shadow: {
@@ -61,11 +67,24 @@ export const brandTokens = createThemeTokens({
 
 const t = tokens.ref;
 
+/** Deep-charcoal brand chrome, theme-invariant (the header is charcoal in BOTH themes). */
+const brandInk = {
+  header: '#0b1020',
+  headerBorder: '#263449',
+  wordmark: '#f8fafc',
+  navText: '#a8b5c7',
+  navTextStrong: '#f8fafc',
+  navHoverBg: 'rgba(248,250,252,0.07)',
+  blue: '#2563eb',
+  blueText: '#ffffff',
+  linkBlue: '#60a5fa',
+} as const;
+
 /** Code surfaces stay a deep slate in BOTH themes — code reads best on dark. */
-const codeBg = '#0b1120';
-const codeBgBar = '#0e1424';
-const codeFg = '#dbe4f0';
-const codeBorder = '#1c2740';
+const codeBg = '#080d16';
+const codeBgBar = '#111827';
+const codeFg = '#cbd5e1';
+const codeBorder = '#1f2b3d';
 
 /** Content column widths. */
 const CONTENT_MAX = 1160;
@@ -104,7 +123,7 @@ export const pageContainer = layout.container({ max: CONTENT_MAX, padX: '5' });
 export const pageSection = cx(
   pageContainer,
   layout.stack({ gap: '6' }),
-  style({ paddingTop: t.space['10'], paddingBottom: t.space['10'] }),
+  style({ paddingTop: t.space['8'], paddingBottom: t.space['8'] }),
 );
 
 export const pageBody = layout.stack({ gap: '5' });
@@ -180,8 +199,8 @@ export const navBar = style({
   position: 'sticky',
   top: 0,
   zIndex: t.z.dropdown,
-  background: t.surface.background,
-  boxShadow: `inset 0 -1px 0 ${t.border.default}`,
+  background: brandInk.header,
+  boxShadow: `inset 0 -1px 0 ${brandInk.headerBorder}`,
 });
 
 export const navInner = cx(
@@ -192,24 +211,24 @@ export const navInner = cx(
 
 export const brand = style({
   fontFamily: t.font.sans, fontSize: t.size.lg, fontWeight: t.weight.bold,
-  letterSpacing: '-0.02em', color: t.content.primary, textDecoration: 'none',
+  letterSpacing: '-0.02em', color: brandInk.wordmark, textDecoration: 'none',
   borderRadius: t.radius.sm,
-  on: { focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 3 } },
+  on: { focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 3 } },
 });
 
 export const brandLink = style({
   display: 'inline-flex', alignItems: 'center', gap: t.space['2'],
   fontFamily: t.font.sans, fontSize: t.size.lg, fontWeight: t.weight.bold,
-  letterSpacing: '-0.02em', color: t.content.primary, textDecoration: 'none',
+  letterSpacing: '-0.02em', color: brandInk.wordmark, textDecoration: 'none',
   borderRadius: t.radius.sm, flexShrink: 0,
-  on: { focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 3 } },
+  on: { focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 3 } },
 });
 
 export const brandMark = style({
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-  width: 26, height: 26, borderRadius: t.radius.md,
-  background: t.accent.primary, color: t.accent.contrast,
-  fontSize: t.size.sm, fontWeight: t.weight.bold, letterSpacing: '-0.03em', flexShrink: 0,
+  width: 28, height: 28, borderRadius: t.radius.md,
+  background: brandInk.blue, color: brandInk.blueText,
+  fontSize: t.size.md, fontWeight: t.weight.bold, letterSpacing: '-0.03em', flexShrink: 0,
 });
 
 export const navLinks = style({
@@ -219,6 +238,7 @@ export const navLinks = style({
 });
 
 const navLinkBase = {
+  fontFamily: t.font.sans,
   fontSize: t.size.sm, fontWeight: t.weight.medium, textDecoration: 'none',
   borderRadius: t.radius.md,
   paddingTop: t.space['2'], paddingBottom: t.space['2'],
@@ -228,32 +248,49 @@ const navLinkBase = {
 
 export const navLinkItem = style({
   ...navLinkBase,
-  color: t.content.secondary,
+  color: brandInk.navText,
   transition: animation.transition(['color', 'background'], { duration: 'fast' }),
   on: {
-    hover: { color: t.content.primary, background: t.surface.sunken },
-    focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 },
+    hover: { color: brandInk.navTextStrong, background: brandInk.navHoverBg },
+    focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 },
   },
 });
 
 export const navLinkActive = style({
   ...navLinkBase,
   fontWeight: t.weight.semibold,
-  color: t.accent.primary,
-  background: t.surface.sunken,
-  on: { focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 } },
+  color: brandInk.navTextStrong,
+  background: brandInk.navHoverBg,
+  boxShadow: `inset 0 -2px 0 ${brandInk.blue}`,
+  on: { focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 } },
 });
 
 export const navActiveMark = a11y.visuallyHidden();
 export const navControls = layout.row({ gap: '2', align: 'center', wrap: false });
+
+/** The emphasized primary action in the header. */
+export const navCta = style({
+  display: { base: 'none', md: 'inline-flex' },
+  alignItems: 'center', fontFamily: t.font.sans,
+  fontSize: t.size.sm, fontWeight: t.weight.semibold,
+  color: brandInk.blueText, background: brandInk.blue, textDecoration: 'none',
+  borderRadius: t.radius.md, borderWidth: 1, borderStyle: 'solid', borderColor: brandInk.blue,
+  paddingTop: t.space['2'], paddingBottom: t.space['2'], paddingLeft: t.space['4'], paddingRight: t.space['4'],
+  whiteSpace: 'nowrap',
+  transition: animation.transition(['background', 'border-color'], { duration: 'fast' }),
+  on: {
+    hover: { background: '#1d4ed8', borderColor: '#1d4ed8' },
+    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${brandInk.linkBlue}` },
+  },
+});
 
 // ── Nav controls (search / theme / menu) ────────────────────────────────────
 
 const controlButton = {
   display: 'inline-flex', alignItems: 'center', gap: t.space['2'],
   fontFamily: t.font.sans, fontSize: t.size.sm, fontWeight: t.weight.medium,
-  color: t.content.secondary, background: t.surface.raised,
-  borderWidth: 1, borderStyle: 'solid', borderColor: t.border.default,
+  color: brandInk.navText, background: 'transparent',
+  borderWidth: 1, borderStyle: 'solid', borderColor: brandInk.headerBorder,
   borderRadius: t.radius.md,
   paddingTop: t.space['2'], paddingBottom: t.space['2'],
   paddingLeft: t.space['3'], paddingRight: t.space['3'],
@@ -264,8 +301,8 @@ const controlButton = {
 export const themeToggle = style({
   ...controlButton,
   on: {
-    hover: { background: t.surface.sunken, borderColor: t.border.strong, color: t.content.primary },
-    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${t.focus.ring}` },
+    hover: { background: brandInk.navHoverBg, borderColor: '#33465f', color: brandInk.navTextStrong },
+    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${brandInk.linkBlue}` },
   },
 });
 
@@ -273,25 +310,25 @@ export const menuToggle = style({
   ...controlButton,
   display: { base: 'inline-flex', lg: 'none' },
   on: {
-    hover: { background: t.surface.sunken, borderColor: t.border.strong, color: t.content.primary },
-    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${t.focus.ring}` },
+    hover: { background: brandInk.navHoverBg, borderColor: '#33465f', color: brandInk.navTextStrong },
+    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${brandInk.linkBlue}` },
   },
 });
 
 export const searchTrigger = style({
   ...controlButton,
   justifyContent: 'space-between',
-  minWidth: { base: 0, md: 200 },
+  minWidth: { base: 0, md: 190 },
   on: {
-    hover: { background: t.surface.sunken, borderColor: t.border.strong },
-    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${t.focus.ring}` },
+    hover: { background: brandInk.navHoverBg, borderColor: '#33465f', color: brandInk.navTextStrong },
+    focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${brandInk.linkBlue}` },
   },
 });
 
 export const kbd = style({
-  fontFamily: t.font.mono, fontSize: t.size.xs, color: t.content.muted,
-  background: t.surface.background, borderWidth: 1, borderStyle: 'solid',
-  borderColor: t.border.default, borderRadius: t.radius.sm,
+  fontFamily: t.font.mono, fontSize: t.size.xs, color: brandInk.navText,
+  background: 'rgba(248,250,252,0.06)', borderWidth: 1, borderStyle: 'solid',
+  borderColor: brandInk.headerBorder, borderRadius: t.radius.sm,
   paddingLeft: t.space['1'], paddingRight: t.space['1'],
   display: { base: 'none', md: 'inline-flex' },
 });
@@ -301,26 +338,29 @@ export const kbd = style({
 export const mobileMenu = style({
   display: { base: 'flex', lg: 'none' },
   flexDirection: 'column', gap: t.space['1'],
-  background: t.surface.raised,
-  boxShadow: `inset 0 1px 0 ${t.border.default}`,
+  background: brandInk.header,
+  boxShadow: `inset 0 1px 0 ${brandInk.headerBorder}`,
   paddingTop: t.space['3'], paddingBottom: t.space['4'],
   paddingLeft: t.space['5'], paddingRight: t.space['5'],
 });
 
 export const mobileMenuLink = style({
-  fontSize: t.size.md, fontWeight: t.weight.medium, color: t.content.secondary,
+  fontFamily: t.font.sans,
+  fontSize: t.size.md, fontWeight: t.weight.medium, color: brandInk.navText,
   textDecoration: 'none', borderRadius: t.radius.md,
   paddingTop: t.space['2'], paddingBottom: t.space['2'],
   paddingLeft: t.space['2'], paddingRight: t.space['2'],
   on: {
-    hover: { color: t.content.primary, background: t.surface.sunken },
-    focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 },
+    hover: { color: brandInk.navTextStrong, background: brandInk.navHoverBg },
+    focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 },
   },
 });
 
 export const mobileMenuLinkActive = style({
-  fontSize: t.size.md, fontWeight: t.weight.semibold, color: t.accent.primary,
-  textDecoration: 'none', borderRadius: t.radius.md, background: t.surface.sunken,
+  fontFamily: t.font.sans,
+  fontSize: t.size.md, fontWeight: t.weight.semibold, color: brandInk.navTextStrong,
+  textDecoration: 'none', borderRadius: t.radius.md, background: brandInk.navHoverBg,
+  boxShadow: `inset 2px 0 0 ${brandInk.blue}`,
   paddingTop: t.space['2'], paddingBottom: t.space['2'],
   paddingLeft: t.space['2'], paddingRight: t.space['2'],
 });
@@ -331,6 +371,7 @@ export const searchPanel = style({
   position: 'fixed', top: '12vh', left: '50%', transform: 'translateX(-50%)',
   width: 'min(620px, 92vw)', maxHeight: '72vh', overflowY: 'auto',
   zIndex: t.z.overlay, display: 'flex', flexDirection: 'column', gap: t.space['3'],
+  fontFamily: t.font.sans,
   background: t.surface.raised, color: t.content.primary,
   borderWidth: 1, borderStyle: 'solid', borderColor: t.border.strong,
   borderRadius: t.radius.lg, padding: t.space['4'],
@@ -451,21 +492,30 @@ export const featureGrid = cardGrid2;
 // ── Home hero + section rhythm ───────────────────────────────────────────────
 
 export const heroOuter = style({
-  background: `radial-gradient(1200px 480px at 78% -10%, ${t.surface.sunken}, transparent 60%)`,
+  background: t.surface.background,
   boxShadow: `inset 0 -1px 0 ${t.border.subtle}`,
 });
 
 export const heroWrap = cx(
   layout.container({ max: CONTENT_MAX, padX: '5' }),
   style({
-    display: 'grid', gap: t.space['8'], alignItems: 'center',
-    gridTemplateColumns: { base: '1fr', lg: 'minmax(0, 1fr) minmax(0, 1fr)' },
+    display: 'grid', gap: { base: t.space['6'], lg: t.space['8'] }, alignItems: 'center',
+    gridTemplateColumns: { base: '1fr', lg: 'minmax(0, 1.05fr) minmax(0, 1fr)' },
     paddingTop: { base: t.space['8'], md: t.space['10'] },
     paddingBottom: { base: t.space['8'], md: t.space['10'] },
   }),
 );
 
 export const heroCol = layout.stack({ gap: '5' });
+
+/** A two-column split (text + code) that provides NO container/padding of its
+ * own — the surrounding section owns width and padding, so it never double-pads. */
+export const splitGrid = style({
+  display: 'grid',
+  gap: { base: t.space['6'], lg: t.space['8'] },
+  alignItems: 'center',
+  gridTemplateColumns: { base: '1fr', lg: 'minmax(0, 1fr) minmax(0, 1fr)' },
+});
 
 export const heroTitle = style({
   fontFamily: t.font.sans,
@@ -489,7 +539,7 @@ export const bandAlt = style({ background: t.surface.raised, boxShadow: `inset 0
 export const bandInner = cx(
   layout.container({ max: CONTENT_MAX, padX: '5' }),
   layout.stack({ gap: '6' }),
-  style({ paddingTop: t.space['10'], paddingBottom: t.space['10'] }),
+  style({ paddingTop: t.space['8'], paddingBottom: t.space['8'] }),
 );
 
 export const sectionIntro = layout.stack({ gap: '2' });
@@ -802,14 +852,14 @@ export const toolGrid = style({
 export const ds = {
   appRoot, pageContainer, pageSection, pageBody, pageHeader, pageTitle, pageLead,
   sectionHeading, subHeading, bodyText, metaText, inlineLink, kicker,
-  navBar, navInner, brand, brandLink, brandMark, navLinks, navLinkItem, navLinkActive, navActiveMark, navControls,
+  navBar, navInner, brand, brandLink, brandMark, navLinks, navLinkItem, navLinkActive, navActiveMark, navControls, navCta,
   themeToggle, menuToggle, searchTrigger, kbd,
   mobileMenu, mobileMenuLink, mobileMenuLinkActive,
   searchPanel, searchPanelHeader, searchPanelTitle, searchDialogInput, searchHint,
   searchResultsList, searchResultLink, searchResultTitle, searchResultMeta, searchEmpty,
   footer, footerInner, footerLinks, footerText, footerLink, skipLink,
   card, linkCardShell, cardTitleLink, cardSummary, cardGrid, cardGrid2, featureGrid,
-  heroOuter, heroWrap, heroCol, heroTitle, heroLead, heroMetaRow, heroMetaItem,
+  heroOuter, heroWrap, heroCol, splitGrid, heroTitle, heroLead, heroMetaRow, heroMetaItem,
   bandAlt, bandInner, sectionIntro,
   codeWindow, codeBar, codeDots, codeDot, codeName, codeCopy, codeScroll, codePre,
   tokPlain, tokComment, tokKeyword, tokString, tokNumber, tokType, tokDecorator, tokFn, tokPunct,

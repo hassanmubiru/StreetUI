@@ -186,23 +186,25 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
         const dbExample = EXAMPLES.find((e) => /postgres|transaction|database/i.test(e.title)) ?? EXAMPLES[2];
         page.section('home-arch', (s) => {
           s.container('arch-band', (b) => {
-            b.container('arch-grid', (g) => {
-              g.container('arch-text', (tx) => {
-                tx.text('Architecture', { id: 'arch-kicker', class: ds.kicker });
-                tx.heading('Decorators in, typed data out', { level: 2, id: 'arch-title', class: ds.sectionHeading });
-                tx.text('A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.', { id: 'arch-body', class: ds.bodyText });
-                tx.container('arch-links', (l) => {
-                  l.link('HTTP & controllers', { href: '/docs/http', id: 'arch-link-http', class: ds.inlineLink });
-                  l.link('Working with PostgreSQL', { href: '/docs/database', id: 'arch-link-db', class: ds.inlineLink });
-                }, { id: 'arch-links', class: ds.ctaRow });
-              }, { id: 'arch-text', class: ds.heroCol });
-              if (dbExample !== undefined) {
-                g.container('arch-code', (cc) => {
-                  const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : 'repository.ts';
-                  codeWindow(cc, { code: dbExample.sample.code, filename: fn, idBase: 'arch-code-win' });
-                }, { id: 'arch-code', class: ds.heroCol });
-              }
-            }, { id: 'arch-grid', class: ds.heroWrap });
+            b.container('arch-inner', (bi) => {
+              bi.container('arch-grid', (g) => {
+                g.container('arch-text', (tx) => {
+                  tx.text('Architecture', { id: 'arch-kicker', class: ds.kicker });
+                  tx.heading('Decorators in, typed data out', { level: 2, id: 'arch-title', class: ds.sectionHeading });
+                  tx.text('A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.', { id: 'arch-body', class: ds.bodyText });
+                  tx.container('arch-links', (l) => {
+                    l.link('HTTP & controllers', { href: '/docs/http', id: 'arch-link-http', class: ds.inlineLink });
+                    l.link('Working with PostgreSQL', { href: '/docs/database', id: 'arch-link-db', class: ds.inlineLink });
+                  }, { id: 'arch-links', class: ds.ctaRow });
+                }, { id: 'arch-text', class: ds.heroCol });
+                if (dbExample !== undefined) {
+                  g.container('arch-code', (cc) => {
+                    const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : 'repository.ts';
+                    codeWindow(cc, { code: dbExample.sample.code, filename: fn, idBase: 'arch-code-win' });
+                  }, { id: 'arch-code', class: ds.heroCol });
+                }
+              }, { id: 'arch-grid', class: ds.splitGrid });
+            }, { id: 'arch-inner', class: ds.bandInner });
           }, { id: 'arch-band', class: ds.bandAlt });
         }, { id: 'page-home-arch' });
 
@@ -223,7 +225,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
               g.container('qs-code', (cc) => {
                 codeWindow(cc, { code: 'npm install streetjs\n\n# enable in tsconfig.json:\n# "experimentalDecorators": true,\n# "emitDecoratorMetadata": true', filename: 'terminal', idBase: 'qs-code-win' });
               }, { id: 'qs-code', class: ds.heroCol });
-            }, { id: 'qs-grid', class: ds.heroWrap });
+            }, { id: 'qs-grid', class: ds.splitGrid });
           }, { id: 'start-inner', class: ds.pageSection });
         }, { id: 'page-home-start' });
 

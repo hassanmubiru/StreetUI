@@ -38,11 +38,16 @@ export interface ShellContext {
 export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   const { router, theme, search, menuOpen } = ctx;
 
-  shell.section('skip', (s) => {
+  // One app-root wrapper carries the base font, colour and page background, so
+  // every descendant inherits the sans stack and themed surface (without it the
+  // body default — a serif face on a white page — leaked through).
+  shell.container('app-root', (root) => {
+
+  root.section('skip', (s) => {
     s.link('Skip to content', { href: '#page-outlet', id: 'skip-link', class: ds.skipLink });
   }, { id: 'site-skip' });
 
-  shell.section('nav', (n) => {
+  root.section('nav', (n) => {
     n.container('nav-inner', (inner) => {
       inner.container('brand-lockup', (b) => {
         b.text('S', { id: 'brand-mark', class: ds.brandMark, ariaHidden: true });
@@ -67,6 +72,7 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
           onClick: () => menuOpen.set(!menuOpen.peek()),
           class: ds.menuToggle,
         });
+        right.link('Get started', { href: '/getting-started', id: 'nav-cta', class: ds.navCta });
       }, { id: 'nav-controls', class: ds.navControls });
     }, { id: 'nav-inner', class: ds.navInner });
 
@@ -80,7 +86,7 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   }, { id: 'site-nav', class: ds.navBar, role: 'navigation', ariaLabel: 'Primary navigation' });
 
   // Search dialog — modal, focus-trapped, Esc closes (framework behaviour).
-  shell.dialog('search-dialog', {
+  root.dialog('search-dialog', {
     open: search.open,
     onClose: () => search.closeSearch(),
     initialFocusId: SEARCH_INPUT_ID,
@@ -120,13 +126,13 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
   // The active route renders here; the shell persists around it.
   if (ctx.renderOutlet !== undefined) {
     const fill = ctx.renderOutlet;
-    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet', role: 'main' });
+    root.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet', role: 'main' });
   } else {
     // Use container directly (same as routerOutlet but with role="main" for landmark)
-    shell.container(ROUTER_OUTLET_KEY, () => { /* filled by the router at runtime */ }, { id: 'page-outlet', role: 'main' });
+    root.container(ROUTER_OUTLET_KEY, () => { /* filled by the router at runtime */ }, { id: 'page-outlet', role: 'main' });
   }
 
-  shell.section('footer', (f) => {
+  root.section('footer', (f) => {
     f.container('footer-inner', (fi) => {
       fi.text(
         'StreetJS is a TypeScript backend framework. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.',
@@ -139,4 +145,6 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
       }, { id: 'footer-links', class: ds.footerLinks });
     }, { id: 'footer-inner', class: ds.footerInner });
   }, { id: 'site-footer', class: ds.footer, role: 'contentinfo' });
+
+  }, { id: 'app-root', class: ds.appRoot });
 }
