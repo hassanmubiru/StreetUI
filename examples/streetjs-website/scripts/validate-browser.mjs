@@ -6,7 +6,8 @@
  * Usage:
  *   node scripts/validate-browser.mjs --base=http://127.0.0.1:4173 --out=validation-results.json
  */
-import { chromium, firefox } from '/home/error51/Downloads/StreetUI/benchmarks/node_modules/playwright/index.js';
+import pkg from '/home/error51/Downloads/StreetUI/benchmarks/node_modules/playwright/index.js';
+const { chromium, firefox } = pkg;
 import { readFileSync } from 'fs';
 import { writeFileSync } from 'fs';
 import { mkdirSync } from 'fs';
