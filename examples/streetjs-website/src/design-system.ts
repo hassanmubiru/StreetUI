@@ -367,17 +367,13 @@ export const footerInner = cx(
 
 export const footerLinks = layout.row({ gap: '5', align: 'center', wrap: true });
 /**
- * Footer body copy: uses a dedicated, slightly-darker-than-muted colour so that
- * the text reliably passes WCAG 2.1 AA contrast (≥4.5:1) against the raised
- * surface background (#f7f9fc in light / #121926 in dark).
- * Light: #5d6c7f on #f7f9fc → 5.08:1 ✓
- * Dark:  #7d8aa0 on #121926 → 5.19:1 ✓
+ * Footer body copy: uses secondary content colour (not muted) so that the text
+ * reliably passes WCAG 2.1 AA contrast (≥4.5:1) against the raised surface
+ * background (#f7f9fc light / #121926 dark).
+ * Light: #44536a on #f7f9fc → 7.4:1 ✓
+ * Dark:  #aab6c7 on #121926 → 7.9:1 ✓
  */
-export const footerText = cx(text.caption(), style({
-  color: '#5d6c7f',
-  [':root[data-theme="dark"] &, [data-theme="dark"] &']: { color: t.content.muted },
-  maxWidth: '60ch',
-}));
+export const footerText = cx(text.caption(), style({ color: t.content.secondary, maxWidth: '60ch' }));
 export const footerLink = style({
   fontSize: t.size.sm, color: t.content.secondary, textDecoration: 'none',
   on: { hover: { color: t.accent.primary }, focusVisible: { outline: `2px solid ${t.focus.ring}`, outlineOffset: 2 } },
