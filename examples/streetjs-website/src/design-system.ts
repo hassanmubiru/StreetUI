@@ -17,7 +17,7 @@
  * identical for every route.
  */
 
-import { a11y, animation, cx, createThemeTokens, form, layout, style, text, tokens } from 'streetui';
+import { a11y, animation, cx, createThemeTokens, form, layout, style, styleRegistry, text, tokens } from 'streetui';
 
 /**
  * Install the StreetJS palette. Same key shape as the default tokens, so the
