@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "buildCommand": "node build.mjs",
+  "outputDirectory": ".vercel-output",
+  "installCommand": "npm install",
+  "framework": null,
+  "functions": {
+    "api/render.mjs": {
+      "runtime": "nodejs22.x",
+      "memory": 256,
+      "maxDuration": 10
+    }
+  },
+  "routes": [
+    {
+      "src": "/favicon\\.svg",
+      "dest": "/favicon.svg"
+    },
+    {
+      "src": "/browser-entry\\.js(\\.map)?",
+      "headers": { "cache-control": "public, max-age=300" },
+      "dest": "/browser-entry.js$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/render.mjs"
+    }
+  ]
+}
