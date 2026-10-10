@@ -212,7 +212,24 @@ async function runViewportSuite(browserType, browserName, launchOpts) {
         const title   = await page.title();
         const h1      = await page.$eval('#page-outlet h1', el => el.textContent.trim()).catch(() => null);
         const visible = await page.evaluate(() => document.body.offsetHeight > 0);
-        const hScroll = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 2);
+        const hScroll = await page.evaluate(() => {
+          // Only count real page-level overflow, not elements inside overflow:auto/hidden containers
+          function hasClippingAncestor(el) {
+            let p = el.parentElement;
+            while (p && p !== document.documentElement) {
+              const cs = getComputedStyle(p);
+              if (cs.overflow === 'hidden' || cs.overflow === 'auto' || cs.overflowX === 'hidden' || cs.overflowX === 'auto' || cs.overflowX === 'scroll') return true;
+              p = p.parentElement;
+            }
+            return false;
+          }
+          const docW = document.documentElement.clientWidth;
+          const overflowEls = Array.from(document.querySelectorAll('*')).filter(el => {
+            const r = el.getBoundingClientRect();
+            return r.right > docW + 2 && !hasClippingAncestor(el);
+          });
+          return overflowEls.length > 0;
+        });
         result.viewports[vp.name][route.path] = { status, title, h1, visible, hScroll };
       } catch(e) {
         result.viewports[vp.name][route.path] = { error: e.message };
