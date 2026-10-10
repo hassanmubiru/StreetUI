@@ -5,16 +5,17 @@
   "type": "module",
   "description": "The StreetJS website: docs, guides, API, examples, playground, plugins, changelog and blog in one StreetUI application.",
   "scripts": {
-    "build": "tsup",
+    "build": "node build.mjs",
     "start": "node server.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "streetui": "3.0.0"
+    "streetui": "3.0.1"
   },
   "devDependencies": {
+    "esbuild": "0.24.2",
     "happy-dom": "*",
     "tsup": "*",
     "typescript": "*",
