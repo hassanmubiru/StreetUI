@@ -141,7 +141,11 @@ export const bodyText = style({
   maxWidth: PROSE_MAX,
 });
 
-export const metaText = cx(text.caption(), style({ color: t.content.muted }));
+/**
+ * Metadata / caption text: uses secondary content colour to meet WCAG AA
+ * contrast (≥4.5:1) on the raised surface (#f7f9fc light / #121926 dark).
+ */
+export const metaText = cx(text.caption(), style({ color: t.content.secondary }));
 export const inlineLink = text.link();
 
 // ── Kicker (restrained, sentence-case — not an ALL-CAPS eyebrow) ────────────
