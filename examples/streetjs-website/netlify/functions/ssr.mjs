@@ -4850,25 +4850,31 @@ function pageHead(opts) {
 }
 var brandTokens = createThemeTokens({
   light: {
-    surface: { background: "#ffffff", raised: "#f7f9fc", sunken: "#eef2f7", overlay: "rgba(13,22,38,0.5)" },
-    content: { primary: "#0b1a2b", secondary: "#44536a", muted: "#6a7788", inverse: "#ffffff" },
-    border: { default: "#e3e9f0", strong: "#cbd5e2", subtle: "#eef2f7" },
-    accent: { primary: "#1766d6", hover: "#114fab", contrast: "#ffffff" },
-    focus: { ring: "#1766d6" },
+    // Official StreetJS brand palette (source of truth).
+    surface: { background: "#f8fafc", raised: "#ffffff", sunken: "#eef2f7", overlay: "rgba(11,16,32,0.5)" },
+    content: { primary: "#0f172a", secondary: "#334155", muted: "#475569", inverse: "#ffffff" },
+    border: { default: "#cbd5e1", strong: "#94a3b8", subtle: "#e2e8f0" },
+    accent: { primary: "#2563eb", hover: "#1d4ed8", contrast: "#ffffff" },
+    focus: { ring: "#2563eb" },
     danger: { surface: "#fef2f2", border: "#f4c9c9", content: "#b42318", solid: "#e5484d" },
     success: { content: "#0f7a45", solid: "#16a34a" },
+    // Consistent system sans + mono everywhere (re-points --font-sans/--font-mono).
+    font: {
+      sans: 'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif',
+      mono: 'ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace'
+    },
     shadow: {
-      sm: "0 1px 2px rgba(13,22,38,0.06)",
-      md: "0 6px 20px -8px rgba(13,22,38,0.14)",
-      lg: "0 24px 50px -16px rgba(13,22,38,0.20)"
+      sm: "0 1px 2px rgba(15,23,42,0.06)",
+      md: "0 6px 20px -8px rgba(15,23,42,0.14)",
+      lg: "0 24px 50px -16px rgba(15,23,42,0.20)"
     }
   },
   dark: {
-    surface: { background: "#0a0e15", raised: "#121926", sunken: "#0d131d", overlay: "rgba(2,5,10,0.66)" },
-    content: { primary: "#e8eef7", secondary: "#aab6c7", muted: "#7d8aa0", inverse: "#0a0e15" },
-    border: { default: "#1f2a3a", strong: "#30415c", subtle: "#18212e" },
-    accent: { primary: "#4c8dff", hover: "#6ba3ff", contrast: "#06142b" },
-    focus: { ring: "#4c8dff" },
+    surface: { background: "#0b1020", raised: "#172235", sunken: "#111827", overlay: "rgba(3,6,15,0.68)" },
+    content: { primary: "#f8fafc", secondary: "#cbd5e1", muted: "#a8b5c7", inverse: "#0b1020" },
+    border: { default: "#263449", strong: "#33465f", subtle: "#1b2535" },
+    accent: { primary: "#60a5fa", hover: "#93c5fd", contrast: "#0b1020" },
+    focus: { ring: "#60a5fa" },
     danger: { surface: "#2a1316", border: "#5c2328", content: "#ff8d8d", solid: "#e5484d" },
     success: { content: "#58d68a", solid: "#22c55e" },
     shadow: {
@@ -4879,10 +4885,21 @@ var brandTokens = createThemeTokens({
   }
 });
 var t6 = tokens.ref;
-var codeBg = "#0b1120";
-var codeBgBar = "#0e1424";
-var codeFg = "#dbe4f0";
-var codeBorder = "#1c2740";
+var brandInk = {
+  header: "#0b1020",
+  headerBorder: "#263449",
+  wordmark: "#f8fafc",
+  navText: "#a8b5c7",
+  navTextStrong: "#f8fafc",
+  navHoverBg: "rgba(248,250,252,0.07)",
+  blue: "#2563eb",
+  blueText: "#ffffff",
+  linkBlue: "#60a5fa"
+};
+var codeBg = "#080d16";
+var codeBgBar = "#111827";
+var codeFg = "#cbd5e1";
+var codeBorder = "#1f2b3d";
 var CONTENT_MAX = 1160;
 var PROSE_MAX = "72ch";
 styleRegistry.register(
@@ -4894,6 +4911,8 @@ var appRoot = cx(
   layout.stack({ gap: "0" }),
   style({
     minHeight: "100vh",
+    overflowX: "hidden",
+    // prevent horizontal page scroll from content-box padded containers
     background: t6.surface.background,
     color: t6.content.primary,
     fontFamily: t6.font.sans,
@@ -4905,7 +4924,7 @@ var pageContainer = layout.container({ max: CONTENT_MAX, padX: "5" });
 var pageSection = cx(
   pageContainer,
   layout.stack({ gap: "6" }),
-  style({ paddingTop: t6.space["10"], paddingBottom: t6.space["10"] })
+  style({ paddingTop: t6.space["8"], paddingBottom: t6.space["8"] })
 );
 var pageBody = layout.stack({ gap: "5" });
 var pageHeader = cx(
@@ -4962,8 +4981,10 @@ var navBar = style({
   position: "sticky",
   top: 0,
   zIndex: t6.z.dropdown,
-  background: t6.surface.background,
-  boxShadow: `inset 0 -1px 0 ${t6.border.default}`
+  overflow: "hidden",
+  // clip nav controls that might exceed content-box at narrow widths
+  background: brandInk.header,
+  boxShadow: `inset 0 -1px 0 ${brandInk.headerBorder}`
 });
 var navInner = cx(
   layout.container({ max: CONTENT_MAX, padX: "5" }),
@@ -4975,10 +4996,10 @@ var brand = style({
   fontSize: t6.size.lg,
   fontWeight: t6.weight.bold,
   letterSpacing: "-0.02em",
-  color: t6.content.primary,
+  color: brandInk.wordmark,
   textDecoration: "none",
   borderRadius: t6.radius.sm,
-  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 3 } }
+  on: { focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 3 } }
 });
 var brandLink = style({
   display: "inline-flex",
@@ -4988,22 +5009,22 @@ var brandLink = style({
   fontSize: t6.size.lg,
   fontWeight: t6.weight.bold,
   letterSpacing: "-0.02em",
-  color: t6.content.primary,
+  color: brandInk.wordmark,
   textDecoration: "none",
   borderRadius: t6.radius.sm,
   flexShrink: 0,
-  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 3 } }
+  on: { focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 3 } }
 });
 var brandMark = style({
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  width: 26,
-  height: 26,
+  width: 28,
+  height: 28,
   borderRadius: t6.radius.md,
-  background: t6.accent.primary,
-  color: t6.accent.contrast,
-  fontSize: t6.size.sm,
+  background: brandInk.blue,
+  color: brandInk.blueText,
+  fontSize: t6.size.md,
   fontWeight: t6.weight.bold,
   letterSpacing: "-0.03em",
   flexShrink: 0
@@ -5018,6 +5039,7 @@ var navLinks = style({
   marginRight: "auto"
 });
 var navLinkBase = {
+  fontFamily: t6.font.sans,
   fontSize: t6.size.sm,
   fontWeight: t6.weight.medium,
   textDecoration: "none",
@@ -5030,22 +5052,47 @@ var navLinkBase = {
 };
 var navLinkItem = style({
   ...navLinkBase,
-  color: t6.content.secondary,
+  color: brandInk.navText,
   transition: animation.transition(["color", "background"], { duration: "fast" }),
   on: {
-    hover: { color: t6.content.primary, background: t6.surface.sunken },
-    focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
+    hover: { color: brandInk.navTextStrong, background: brandInk.navHoverBg },
+    focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 }
   }
 });
 var navLinkActive = style({
   ...navLinkBase,
   fontWeight: t6.weight.semibold,
-  color: t6.accent.primary,
-  background: t6.surface.sunken,
-  on: { focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+  color: brandInk.navTextStrong,
+  background: brandInk.navHoverBg,
+  boxShadow: `inset 0 -2px 0 ${brandInk.blue}`,
+  on: { focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 } }
 });
 var navActiveMark = a11y.visuallyHidden();
 var navControls = layout.row({ gap: "2", align: "center", wrap: false });
+var navCta = style({
+  display: { base: "none", md: "inline-flex" },
+  alignItems: "center",
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.semibold,
+  color: brandInk.blueText,
+  background: brandInk.blue,
+  textDecoration: "none",
+  borderRadius: t6.radius.md,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: brandInk.blue,
+  paddingTop: t6.space["2"],
+  paddingBottom: t6.space["2"],
+  paddingLeft: t6.space["4"],
+  paddingRight: t6.space["4"],
+  whiteSpace: "nowrap",
+  transition: animation.transition(["background", "border-color"], { duration: "fast" }),
+  on: {
+    hover: { background: "#1d4ed8", borderColor: "#1d4ed8" },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${brandInk.linkBlue}` }
+  }
+});
 var controlButton = {
   display: "inline-flex",
   alignItems: "center",
@@ -5053,11 +5100,11 @@ var controlButton = {
   fontFamily: t6.font.sans,
   fontSize: t6.size.sm,
   fontWeight: t6.weight.medium,
-  color: t6.content.secondary,
-  background: t6.surface.raised,
+  color: brandInk.navText,
+  background: "transparent",
   borderWidth: 1,
   borderStyle: "solid",
-  borderColor: t6.border.default,
+  borderColor: brandInk.headerBorder,
   borderRadius: t6.radius.md,
   paddingTop: t6.space["2"],
   paddingBottom: t6.space["2"],
@@ -5071,35 +5118,35 @@ var controlButton = {
 var themeToggle = style({
   ...controlButton,
   on: {
-    hover: { background: t6.surface.sunken, borderColor: t6.border.strong, color: t6.content.primary },
-    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
+    hover: { background: brandInk.navHoverBg, borderColor: "#33465f", color: brandInk.navTextStrong },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${brandInk.linkBlue}` }
   }
 });
 var menuToggle = style({
   ...controlButton,
   display: { base: "inline-flex", lg: "none" },
   on: {
-    hover: { background: t6.surface.sunken, borderColor: t6.border.strong, color: t6.content.primary },
-    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
+    hover: { background: brandInk.navHoverBg, borderColor: "#33465f", color: brandInk.navTextStrong },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${brandInk.linkBlue}` }
   }
 });
 var searchTrigger = style({
   ...controlButton,
   justifyContent: "space-between",
-  minWidth: { base: 0, md: 200 },
+  minWidth: { base: 0, md: 160 },
   on: {
-    hover: { background: t6.surface.sunken, borderColor: t6.border.strong },
-    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${t6.focus.ring}` }
+    hover: { background: brandInk.navHoverBg, borderColor: "#33465f", color: brandInk.navTextStrong },
+    focusVisible: { outline: "none", boxShadow: `0 0 0 3px ${brandInk.linkBlue}` }
   }
 });
 var kbd = style({
   fontFamily: t6.font.mono,
   fontSize: t6.size.xs,
-  color: t6.content.muted,
-  background: t6.surface.background,
+  color: brandInk.navText,
+  background: "rgba(248,250,252,0.06)",
   borderWidth: 1,
   borderStyle: "solid",
-  borderColor: t6.border.default,
+  borderColor: brandInk.headerBorder,
   borderRadius: t6.radius.sm,
   paddingLeft: t6.space["1"],
   paddingRight: t6.space["1"],
@@ -5109,17 +5156,18 @@ var mobileMenu = style({
   display: { base: "flex", lg: "none" },
   flexDirection: "column",
   gap: t6.space["1"],
-  background: t6.surface.raised,
-  boxShadow: `inset 0 1px 0 ${t6.border.default}`,
+  background: brandInk.header,
+  boxShadow: `inset 0 1px 0 ${brandInk.headerBorder}`,
   paddingTop: t6.space["3"],
   paddingBottom: t6.space["4"],
   paddingLeft: t6.space["5"],
   paddingRight: t6.space["5"]
 });
 var mobileMenuLink = style({
+  fontFamily: t6.font.sans,
   fontSize: t6.size.md,
   fontWeight: t6.weight.medium,
-  color: t6.content.secondary,
+  color: brandInk.navText,
   textDecoration: "none",
   borderRadius: t6.radius.md,
   paddingTop: t6.space["2"],
@@ -5127,17 +5175,19 @@ var mobileMenuLink = style({
   paddingLeft: t6.space["2"],
   paddingRight: t6.space["2"],
   on: {
-    hover: { color: t6.content.primary, background: t6.surface.sunken },
-    focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 }
+    hover: { color: brandInk.navTextStrong, background: brandInk.navHoverBg },
+    focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 }
   }
 });
 var mobileMenuLinkActive = style({
+  fontFamily: t6.font.sans,
   fontSize: t6.size.md,
   fontWeight: t6.weight.semibold,
-  color: t6.accent.primary,
+  color: brandInk.navTextStrong,
   textDecoration: "none",
   borderRadius: t6.radius.md,
-  background: t6.surface.sunken,
+  background: brandInk.navHoverBg,
+  boxShadow: `inset 2px 0 0 ${brandInk.blue}`,
   paddingTop: t6.space["2"],
   paddingBottom: t6.space["2"],
   paddingLeft: t6.space["2"],
@@ -5155,6 +5205,7 @@ var searchPanel = style({
   display: "flex",
   flexDirection: "column",
   gap: t6.space["3"],
+  fontFamily: t6.font.sans,
   background: t6.surface.raised,
   color: t6.content.primary,
   borderWidth: 1,
@@ -5270,21 +5321,27 @@ var cardGrid2 = style({
 });
 var featureGrid = cardGrid2;
 var heroOuter = style({
-  background: `radial-gradient(1200px 480px at 78% -10%, ${t6.surface.sunken}, transparent 60%)`,
+  background: t6.surface.background,
   boxShadow: `inset 0 -1px 0 ${t6.border.subtle}`
 });
 var heroWrap = cx(
   layout.container({ max: CONTENT_MAX, padX: "5" }),
   style({
     display: "grid",
-    gap: t6.space["8"],
+    gap: { base: t6.space["6"], lg: t6.space["8"] },
     alignItems: "center",
-    gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) minmax(0, 1fr)" },
+    gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1.05fr) minmax(0, 1fr)" },
     paddingTop: { base: t6.space["8"], md: t6.space["10"] },
     paddingBottom: { base: t6.space["8"], md: t6.space["10"] }
   })
 );
 var heroCol = layout.stack({ gap: "5" });
+var splitGrid = style({
+  display: "grid",
+  gap: { base: t6.space["6"], lg: t6.space["8"] },
+  alignItems: "center",
+  gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1fr) minmax(0, 1fr)" }
+});
 var heroTitle = style({
   fontFamily: t6.font.sans,
   fontSize: "clamp(34px, 5.4vw, 54px)",
@@ -5306,7 +5363,7 @@ var bandAlt = style({ background: t6.surface.raised, boxShadow: `inset 0 1px 0 $
 var bandInner = cx(
   layout.container({ max: CONTENT_MAX, padX: "5" }),
   layout.stack({ gap: "6" }),
-  style({ paddingTop: t6.space["10"], paddingBottom: t6.space["10"] })
+  style({ paddingTop: t6.space["8"], paddingBottom: t6.space["8"] })
 );
 var sectionIntro = layout.stack({ gap: "2" });
 var codeWindow = style({
@@ -5721,6 +5778,7 @@ var ds = {
   navLinkActive,
   navActiveMark,
   navControls,
+  navCta,
   themeToggle,
   menuToggle,
   searchTrigger,
@@ -5754,6 +5812,7 @@ var ds = {
   heroOuter,
   heroWrap,
   heroCol,
+  splitGrid,
   heroTitle,
   heroLead,
   heroMetaRow,
@@ -6721,16 +6780,11 @@ var ABOUT_UNVERIFIED = [
   "A scaffolding command (npx streetjs create)"
 ];
 var PRIMARY_NAV = [
-  { label: "Getting started", href: "/getting-started", id: "nav-getting-started" },
   { label: "Docs", href: "/docs", id: "nav-docs" },
   { label: "Guides", href: "/guides", id: "nav-guides" },
   { label: "API", href: "/api", id: "nav-api" },
-  { label: "Examples", href: "/examples", id: "nav-examples" },
   { label: "Playground", href: "/playground", id: "nav-playground" },
-  { label: "Plugins", href: "/plugins", id: "nav-plugins" },
-  { label: "Changelog", href: "/changelog", id: "nav-changelog" },
-  { label: "Blog", href: "/blog", id: "nav-blog" },
-  { label: "About", href: "/about", id: "nav-about" }
+  { label: "Blog", href: "/blog", id: "nav-blog" }
 ];
 var docBySlug = (slug) => DOCS.find((d) => d.slug === slug);
 var guideBySlug = (slug) => GUIDES.find((g) => g.slug === slug);
@@ -6856,94 +6910,97 @@ var SEARCH_INPUT_ID = "search-input";
 var DOCS_SITE_URL = "https://hassanmubiru.github.io/StreetJS/";
 function websiteShell(shell, ctx) {
   const { router, theme, search, menuOpen } = ctx;
-  shell.section("skip", (s) => {
-    s.link("Skip to content", { href: "#page-outlet", id: "skip-link", class: ds.skipLink });
-  }, { id: "site-skip" });
-  shell.section("nav", (n) => {
-    n.container("nav-inner", (inner) => {
-      inner.container("brand-lockup", (b) => {
-        b.text("S", { id: "brand-mark", class: ds.brandMark, ariaHidden: true });
-        b.link("StreetJS", { href: "/", id: "brand", class: ds.brand });
-      }, { id: "brand-lockup", class: ds.brandLink });
-      inner.container("nav-links", (links) => {
-        for (const item of PRIMARY_NAV) navLink(links, router, item);
-      }, { id: "nav-links", class: ds.navLinks });
-      inner.container("nav-controls", (right) => {
-        right.button("Search", {
-          id: "search-trigger",
-          ariaLabel: "Search (Ctrl+K)",
-          onClick: () => search.openSearch(),
-          class: ds.searchTrigger
+  shell.container("app-root", (root) => {
+    root.section("skip", (s) => {
+      s.link("Skip to content", { href: "#page-outlet", id: "skip-link", class: ds.skipLink });
+    }, { id: "site-skip" });
+    root.section("nav", (n) => {
+      n.container("nav-inner", (inner) => {
+        inner.container("brand-lockup", (b) => {
+          b.text("S", { id: "brand-mark", class: ds.brandMark, ariaHidden: true });
+          b.link("StreetJS", { href: "/", id: "brand", class: ds.brand });
+        }, { id: "brand-lockup", class: ds.brandLink });
+        inner.container("nav-links", (links) => {
+          for (const item of PRIMARY_NAV) navLink(links, router, item);
+        }, { id: "nav-links", class: ds.navLinks });
+        inner.container("nav-controls", (right) => {
+          right.button("Search", {
+            id: "search-trigger",
+            ariaLabel: "Search (Ctrl+K)",
+            onClick: () => search.openSearch(),
+            class: ds.searchTrigger
+          });
+          right.button(theme.label, { id: "theme-toggle", onClick: () => theme.cycle(), class: ds.themeToggle });
+          right.button(derived(() => menuOpen.get() ? "Close menu" : "Menu"), {
+            id: "menu-toggle",
+            ariaControls: "mobile-menu",
+            onClick: () => menuOpen.set(!menuOpen.peek()),
+            class: ds.menuToggle
+          });
+          right.link("Get started", { href: "/getting-started", id: "nav-cta", class: ds.navCta });
+        }, { id: "nav-controls", class: ds.navControls });
+      }, { id: "nav-inner", class: ds.navInner });
+      n.when(menuOpen, (m) => {
+        m.container("mobile-menu", (links) => {
+          for (const item of PRIMARY_NAV) {
+            navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
+          }
+        }, { id: "mobile-menu", class: ds.mobileMenu });
+      });
+    }, { id: "site-nav", class: ds.navBar, role: "navigation", ariaLabel: "Primary navigation" });
+    root.dialog("search-dialog", {
+      open: search.open,
+      onClose: () => search.closeSearch(),
+      initialFocusId: SEARCH_INPUT_ID,
+      ariaLabel: "Search the StreetJS site",
+      class: ds.searchPanel
+    }, (d) => {
+      d.container("search-header", (h2) => {
+        h2.text("Search", { id: "search-title", class: ds.searchPanelTitle });
+        h2.button("Close", { id: "search-close", onClick: () => search.closeSearch(), class: ds.buttonSecondary });
+      }, { id: "search-header", class: ds.searchPanelHeader });
+      d.input({
+        id: SEARCH_INPUT_ID,
+        type: "search",
+        placeholder: "Search docs, guides, API, examples\u2026",
+        ariaLabel: "Search query",
+        bind: search.query,
+        class: ds.searchDialogInput
+      });
+      d.text(search.status, { id: "search-status", class: ds.searchHint, ariaLive: "polite" });
+      d.listOf("search-results", search.results, (item, _i, row2) => {
+        const rid = resultId(item);
+        row2.link(`${item.title} (${item.kind})`, { href: item.href, id: rid, class: ds.searchResultLink });
+        row2.text(item.summary, { id: `${rid}-summary`, class: ds.searchResultMeta });
+      }, { id: "search-results", class: ds.searchResultsList });
+      d.when(search.isEmpty, (empty) => {
+        empty.text('No matches. Try a shorter term such as "migration", "jwt" or "pool".', {
+          id: "search-empty",
+          class: ds.searchEmpty
         });
-        right.button(theme.label, { id: "theme-toggle", onClick: () => theme.cycle(), class: ds.themeToggle });
-        right.button(derived(() => menuOpen.get() ? "Close menu" : "Menu"), {
-          id: "menu-toggle",
-          ariaControls: "mobile-menu",
-          onClick: () => menuOpen.set(!menuOpen.peek()),
-          class: ds.menuToggle
-        });
-      }, { id: "nav-controls", class: ds.navControls });
-    }, { id: "nav-inner", class: ds.navInner });
-    n.when(menuOpen, (m) => {
-      m.container("mobile-menu", (links) => {
-        for (const item of PRIMARY_NAV) {
-          navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
-        }
-      }, { id: "mobile-menu", class: ds.mobileMenu });
-    });
-  }, { id: "site-nav", class: ds.navBar, role: "navigation", ariaLabel: "Primary navigation" });
-  shell.dialog("search-dialog", {
-    open: search.open,
-    onClose: () => search.closeSearch(),
-    initialFocusId: SEARCH_INPUT_ID,
-    ariaLabel: "Search the StreetJS site",
-    class: ds.searchPanel
-  }, (d) => {
-    d.container("search-header", (h2) => {
-      h2.text("Search", { id: "search-title", class: ds.searchPanelTitle });
-      h2.button("Close", { id: "search-close", onClick: () => search.closeSearch(), class: ds.buttonSecondary });
-    }, { id: "search-header", class: ds.searchPanelHeader });
-    d.input({
-      id: SEARCH_INPUT_ID,
-      type: "search",
-      placeholder: "Search docs, guides, API, examples\u2026",
-      ariaLabel: "Search query",
-      bind: search.query,
-      class: ds.searchDialogInput
-    });
-    d.text(search.status, { id: "search-status", class: ds.searchHint, ariaLive: "polite" });
-    d.listOf("search-results", search.results, (item, _i, row2) => {
-      const rid = resultId(item);
-      row2.link(`${item.title} (${item.kind})`, { href: item.href, id: rid, class: ds.searchResultLink });
-      row2.text(item.summary, { id: `${rid}-summary`, class: ds.searchResultMeta });
-    }, { id: "search-results", class: ds.searchResultsList });
-    d.when(search.isEmpty, (empty) => {
-      empty.text('No matches. Try a shorter term such as "migration", "jwt" or "pool".', {
-        id: "search-empty",
-        class: ds.searchEmpty
       });
     });
-  });
-  if (ctx.renderOutlet !== void 0) {
-    const fill = ctx.renderOutlet;
-    shell.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: "page-outlet", role: "main" });
-  } else {
-    shell.container(ROUTER_OUTLET_KEY, () => {
-    }, { id: "page-outlet", role: "main" });
-  }
-  shell.section("footer", (f) => {
-    f.container("footer-inner", (fi) => {
-      fi.text(
-        "StreetJS is a TypeScript backend framework. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.",
-        { id: "footer-text", class: ds.footerText }
-      );
-      fi.container("footer-links", (links) => {
-        links.link("Official docs", { href: DOCS_SITE_URL, external: true, id: "footer-docs", class: ds.footerLink });
-        links.link("About this site", { href: "/about", id: "footer-about", class: ds.footerLink });
-        links.link("Changelog", { href: "/changelog", id: "footer-changelog", class: ds.footerLink });
-      }, { id: "footer-links", class: ds.footerLinks });
-    }, { id: "footer-inner", class: ds.footerInner });
-  }, { id: "site-footer", class: ds.footer, role: "contentinfo" });
+    if (ctx.renderOutlet !== void 0) {
+      const fill = ctx.renderOutlet;
+      root.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: "page-outlet", role: "main" });
+    } else {
+      root.container(ROUTER_OUTLET_KEY, () => {
+      }, { id: "page-outlet", role: "main" });
+    }
+    root.section("footer", (f) => {
+      f.container("footer-inner", (fi) => {
+        fi.text(
+          "StreetJS is a TypeScript backend framework. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.",
+          { id: "footer-text", class: ds.footerText }
+        );
+        fi.container("footer-links", (links) => {
+          links.link("Official docs", { href: DOCS_SITE_URL, external: true, id: "footer-docs", class: ds.footerLink });
+          links.link("About this site", { href: "/about", id: "footer-about", class: ds.footerLink });
+          links.link("Changelog", { href: "/changelog", id: "footer-changelog", class: ds.footerLink });
+        }, { id: "footer-links", class: ds.footerLinks });
+      }, { id: "footer-inner", class: ds.footerInner });
+    }, { id: "site-footer", class: ds.footer, role: "contentinfo" });
+  }, { id: "app-root", class: ds.appRoot });
 }
 function isKnownPath(path) {
   const clean = path.split("?")[0].split("#")[0].replace(/\/+$/, "") || "/";
@@ -7097,23 +7154,25 @@ function buildRoutes(deps) {
         const dbExample = EXAMPLES.find((e) => /postgres|transaction|database/i.test(e.title)) ?? EXAMPLES[2];
         page.section("home-arch", (s) => {
           s.container("arch-band", (b) => {
-            b.container("arch-grid", (g) => {
-              g.container("arch-text", (tx) => {
-                tx.text("Architecture", { id: "arch-kicker", class: ds.kicker });
-                tx.heading("Decorators in, typed data out", { level: 2, id: "arch-title", class: ds.sectionHeading });
-                tx.text("A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.", { id: "arch-body", class: ds.bodyText });
-                tx.container("arch-links", (l) => {
-                  l.link("HTTP & controllers", { href: "/docs/http", id: "arch-link-http", class: ds.inlineLink });
-                  l.link("Working with PostgreSQL", { href: "/docs/database", id: "arch-link-db", class: ds.inlineLink });
-                }, { id: "arch-links", class: ds.ctaRow });
-              }, { id: "arch-text", class: ds.heroCol });
-              if (dbExample !== void 0) {
-                g.container("arch-code", (cc) => {
-                  const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : "repository.ts";
-                  codeWindow2(cc, { code: dbExample.sample.code, filename: fn, idBase: "arch-code-win" });
-                }, { id: "arch-code", class: ds.heroCol });
-              }
-            }, { id: "arch-grid", class: ds.heroWrap });
+            b.container("arch-inner", (bi) => {
+              bi.container("arch-grid", (g) => {
+                g.container("arch-text", (tx) => {
+                  tx.text("Architecture", { id: "arch-kicker", class: ds.kicker });
+                  tx.heading("Decorators in, typed data out", { level: 2, id: "arch-title", class: ds.sectionHeading });
+                  tx.text("A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.", { id: "arch-body", class: ds.bodyText });
+                  tx.container("arch-links", (l) => {
+                    l.link("HTTP & controllers", { href: "/docs/http", id: "arch-link-http", class: ds.inlineLink });
+                    l.link("Working with PostgreSQL", { href: "/docs/database", id: "arch-link-db", class: ds.inlineLink });
+                  }, { id: "arch-links", class: ds.ctaRow });
+                }, { id: "arch-text", class: ds.heroCol });
+                if (dbExample !== void 0) {
+                  g.container("arch-code", (cc) => {
+                    const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : "repository.ts";
+                    codeWindow2(cc, { code: dbExample.sample.code, filename: fn, idBase: "arch-code-win" });
+                  }, { id: "arch-code", class: ds.heroCol });
+                }
+              }, { id: "arch-grid", class: ds.splitGrid });
+            }, { id: "arch-inner", class: ds.bandInner });
           }, { id: "arch-band", class: ds.bandAlt });
         }, { id: "page-home-arch" });
         page.section("home-start", (s) => {
@@ -7132,7 +7191,7 @@ function buildRoutes(deps) {
               g.container("qs-code", (cc) => {
                 codeWindow2(cc, { code: 'npm install streetjs\n\n# enable in tsconfig.json:\n# "experimentalDecorators": true,\n# "emitDecoratorMetadata": true', filename: "terminal", idBase: "qs-code-win" });
               }, { id: "qs-code", class: ds.heroCol });
-            }, { id: "qs-grid", class: ds.heroWrap });
+            }, { id: "qs-grid", class: ds.splitGrid });
           }, { id: "start-inner", class: ds.pageSection });
         }, { id: "page-home-start" });
         page.section("home-explore", (s) => {
