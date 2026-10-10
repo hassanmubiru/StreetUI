@@ -1,0 +1,7 @@
+node_modules
+*.map
+dist/*.map
+*.md
+vitest.config.ts
+tsup.config.ts
+tsconfig.json

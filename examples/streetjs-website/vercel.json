@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "node build.mjs",
-  "outputDirectory": ".vercel-output",
-  "installCommand": "npm install",
+  "buildCommand": "node ../../node_modules/.bin/tsup",
+  "outputDirectory": "dist",
+  "installCommand": "echo skip",
   "framework": null,
   "functions": {
     "api/render.mjs": {
@@ -17,7 +17,7 @@
       "dest": "/favicon.svg"
     },
     {
-      "src": "/browser-entry\\.js(\\.map)?",
+      "src": "/browser-entry\\.js(\\.map)?$",
       "headers": { "cache-control": "public, max-age=300" },
       "dest": "/browser-entry.js$1"
     },
