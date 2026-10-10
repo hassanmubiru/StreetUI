@@ -318,7 +318,7 @@ export const menuToggle = style({
 export const searchTrigger = style({
   ...controlButton,
   justifyContent: 'space-between',
-  minWidth: { base: 0, md: 190 },
+  minWidth: { base: 0, md: 160 },
   on: {
     hover: { background: brandInk.navHoverBg, borderColor: '#33465f', color: brandInk.navTextStrong },
     focusVisible: { outline: 'none', boxShadow: `0 0 0 3px ${brandInk.linkBlue}` },
