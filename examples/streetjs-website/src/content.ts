@@ -18,16 +18,11 @@ export {
 } from './content-reference.js';
 
 export const PRIMARY_NAV: readonly NavItem[] = [
-  { label: 'Getting started', href: '/getting-started', id: 'nav-getting-started' },
   { label: 'Docs', href: '/docs', id: 'nav-docs' },
   { label: 'Guides', href: '/guides', id: 'nav-guides' },
   { label: 'API', href: '/api', id: 'nav-api' },
-  { label: 'Examples', href: '/examples', id: 'nav-examples' },
   { label: 'Playground', href: '/playground', id: 'nav-playground' },
-  { label: 'Plugins', href: '/plugins', id: 'nav-plugins' },
-  { label: 'Changelog', href: '/changelog', id: 'nav-changelog' },
   { label: 'Blog', href: '/blog', id: 'nav-blog' },
-  { label: 'About', href: '/about', id: 'nav-about' },
 ];
 
 export const docBySlug = (slug: string) => DOCS.find((d) => d.slug === slug);
