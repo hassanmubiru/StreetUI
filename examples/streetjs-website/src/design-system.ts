@@ -200,6 +200,7 @@ export const navBar = style({
   position: 'sticky',
   top: 0,
   zIndex: t.z.dropdown,
+  overflow: 'hidden',         // clip nav controls that might exceed content-box at narrow widths
   background: brandInk.header,
   boxShadow: `inset 0 -1px 0 ${brandInk.headerBorder}`,
 });
