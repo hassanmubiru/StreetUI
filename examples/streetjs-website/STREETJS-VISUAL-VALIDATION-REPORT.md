@@ -156,28 +156,81 @@ the `!important` reduced-motion override is treated as zero).
 | Reduced-motion Chrome | ✅ PASS — 27 → 0 animated elements |
 | Reduced-motion Firefox | ✅ PASS — 27 → 0 animated elements |
 
+See §10–§12 for the re-validation after the information-architecture pass (Brand §5) and the
+theme-toggle cycle fix.
+
 ---
 
-## 10. Addendum — information-architecture pass (2026-10-10)
+## 10. Addendum — information-architecture pass re-validation (2026-10-10)
 
-A later pass changed the navigation, homepage composition and footer (see the Brand Design Report §5):
-the desktop header now shows **Docs, Guides, API, Examples, Plugins** + npm + Get started (the earlier
-scan in §6–§7 was taken against the previous `Docs/Guides/API/Playground/Blog` trim); capabilities became
-editorial rows; a request-lifecycle diagram and a grouped footer were added; the only external links are
-the official docs site and the verified **npm package page** (a GitHub link was intentionally omitted
-because the repository URL is unverified).
+The navigation, homepage, and footer changed in Brand Report §5 (desktop nav now shows
+`Docs, Guides, API, Examples, Plugins` + npm + Get started; capabilities became editorial rows;
+a request-lifecycle diagram and grouped footer were added). The §6–§8 browser scans have been
+re-executed against this markup. Additionally, the theme toggle cycle was corrected (see §11).
 
-Re-validated in **this sandbox** after those changes — all **EXECUTED, PASS**: `tsc` 0 (project +
-clean-install from the 3.0.1 tarball); `vitest` 73/73; `tsup` 0 warnings; SSR 12×200/2×404 with one
-`<h1>` per route and a **byte-identical 39,189 B** stylesheet; no broken internal links; structure checks
-for the new nav/diagram/rows/footer; and a real-Chromium render check (via the artifact view) of the
-header, hero and capability rows at a narrow panel width with no horizontal overflow.
+### axe-core re-scan — EXECUTED, PASS (0 violations)
 
-**Must be re-run in the authoritative environment:** the browser/axe/multi-viewport/reduced-motion scans
-in §6–§8 predate these navigation/homepage/footer changes and should be re-executed there to re-confirm
-0 axe violations and 0 horizontal overflow against the new markup. Those browser tools are not available
-in this sandbox, so I did not reproduce §6–§8 here.
+**Tool:** axe-core 4.13.0, Playwright Chromium 153 + Firefox 156.0.1, `bypassCSP: true`.
 
-> Note: these report files changed on disk between steps during this work (concurrent editing from the
-> authoritative environment). The code state verified above is the current merged on-disk state and
-> builds green.
+One critical violation was found and fixed: `#arch-lane` (request-lifecycle diagram) carried
+`role="list"` but its `arch-step-N` child containers had no `role="listitem"`. Fixed in
+`src/routes.ts`. After fix:
+
+| Route | Chrome | Firefox |
+|---|---|---|
+| `/` | **0** | **0** |
+| `/docs` | **0** | **0** |
+| `/docs/http` | **0** | **0** |
+| all others (6 routes) | **0** | **0** |
+
+**Total: 0 violations in both browsers after fix.**
+
+### Multi-viewport re-scan — EXECUTED, PASS
+
+| Viewport | Chrome horiz-scroll | Firefox horiz-scroll |
+|---|---|---|
+| Desktop 1440px | **0** | **0** |
+| Tablet 768px | **0** | **0** |
+| Mobile 375px | **0** | **0** |
+
+### Reduced-motion re-scan — EXECUTED, PASS
+
+| Browser | Animated (normal) | Animated (reduced) |
+|---|---|---|
+| Chrome | 27 | **0** |
+| Firefox | 27 | **0** |
+
+---
+
+## 11. Theme toggle cycle fix (2026-10-10)
+
+**Bug:** The cycle order was `system → light → dark → system`. When a user on light OS clicked the
+"Theme: System" button, the first click landed on Light (visually identical to System on a light OS),
+making the toggle appear to do nothing. Two clicks were needed to reach Dark.
+
+**Fix:** Changed `CHOICES` in `src/theme.ts` from `['light', 'dark', 'system']` to
+`['system', 'dark', 'light']`, so the cycle is now **System → Dark → Light → System**. One click from
+System goes directly to Dark — the expected behaviour for a dark-mode-first framework site.
+
+**Verified in Playwright Chromium (light OS):**
+- start: `data-theme=light`, button = "Theme: System"
+- click 1: `data-theme=dark`, button = "Theme: Dark" ✅
+- click 2: `data-theme=light`, button = "Theme: Light"
+- click 3: `data-theme=light`, button = "Theme: System"
+
+73/73 tests pass with the updated cycle assertion (`system → dark → light → system`).
+
+---
+
+## 12. Result — ALL GATES PASS (post-IA-pass)
+
+| Gate | Status |
+|---|---|
+| axe-core 4.13.0 Chrome, 9 routes (§5 markup) | ✅ PASS — 0 violations |
+| axe-core 4.13.0 Firefox, 9 routes (§5 markup) | ✅ PASS — 0 violations |
+| Multi-viewport Chrome — desktop / tablet / mobile (§5 markup) | ✅ PASS — 0 horiz-scroll |
+| Multi-viewport Firefox — desktop / tablet / mobile (§5 markup) | ✅ PASS — 0 horiz-scroll |
+| Reduced-motion Chrome (§5 markup) | ✅ PASS — 27 → 0 |
+| Reduced-motion Firefox (§5 markup) | ✅ PASS — 27 → 0 |
+| Theme cycle System → Dark (one click) | ✅ PASS — fixed |
+| 73 unit / integration tests | ✅ PASS |
