@@ -217,7 +217,7 @@ export function buildRoutes(deps: RoutesDeps): RouteDefinition[] {
                     }, { id: `arch-step-${i}-head`, class: ds.archStepHead });
                     st.text(step.api, { id: `arch-step-${i}-api`, class: ds.archStepApi });
                     st.text(step.text, { id: `arch-step-${i}-text`, class: ds.archStepText });
-                  }, { id: `arch-step-${i}`, class: ds.archStep });
+                  }, { id: `arch-step-${i}`, class: ds.archStep, role: 'listitem' });
                 });
               }, { id: 'arch-lane', class: ds.archLane, role: 'list', ariaLabel: 'Request lifecycle' });
               bi.container('arch-links', (l) => {
