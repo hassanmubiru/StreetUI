@@ -5069,6 +5069,26 @@ var navLinkActive = style({
 });
 var navActiveMark = a11y.visuallyHidden();
 var navControls = layout.row({ gap: "2", align: "center", wrap: false });
+var navExternal = style({
+  display: { base: "none", md: "inline-flex" },
+  alignItems: "center",
+  fontFamily: t6.font.sans,
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.medium,
+  color: brandInk.navText,
+  textDecoration: "none",
+  borderRadius: t6.radius.md,
+  paddingTop: t6.space["2"],
+  paddingBottom: t6.space["2"],
+  paddingLeft: t6.space["3"],
+  paddingRight: t6.space["3"],
+  whiteSpace: "nowrap",
+  transition: animation.transition(["color", "background"], { duration: "fast" }),
+  on: {
+    hover: { color: brandInk.navTextStrong, background: brandInk.navHoverBg },
+    focusVisible: { outline: `2px solid ${brandInk.linkBlue}`, outlineOffset: 2 }
+  }
+});
 var navCta = style({
   display: { base: "none", md: "inline-flex" },
   alignItems: "center",
@@ -5253,15 +5273,46 @@ var footerInner = cx(
   layout.container({ max: CONTENT_MAX, padX: "5" }),
   style({
     display: "grid",
-    gap: t6.space["5"],
-    gridTemplateColumns: { base: "1fr", md: "minmax(0, 1fr) auto" },
-    alignItems: "center",
-    paddingTop: t6.space["6"],
-    paddingBottom: t6.space["6"]
+    gap: { base: t6.space["6"], md: t6.space["8"] },
+    gridTemplateColumns: { base: "1fr", md: "minmax(0, 1.4fr) minmax(0, 2fr)" },
+    alignItems: "start",
+    paddingTop: t6.space["8"],
+    paddingBottom: t6.space["8"]
   })
 );
+var footerBrand = layout.stack({ gap: "3" });
+var footerBrandLockup = cx(layout.row({ gap: "2", align: "center" }));
+var footerMark = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 24,
+  height: 24,
+  borderRadius: t6.radius.md,
+  background: t6.accent.primary,
+  color: t6.accent.contrast,
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.bold,
+  letterSpacing: "-0.03em",
+  flexShrink: 0
+});
+var footerWordmark = style({ fontSize: t6.size.md, fontWeight: t6.weight.bold, letterSpacing: "-0.02em", color: t6.content.primary });
+var footerCols = style({
+  display: "grid",
+  gap: t6.space["6"],
+  gridTemplateColumns: { base: "repeat(2, minmax(0, 1fr))", sm: "repeat(3, minmax(0, 1fr))" }
+});
+var footerCol = layout.stack({ gap: "2" });
+var footerColTitle = style({
+  fontSize: t6.size.xs,
+  fontWeight: t6.weight.semibold,
+  color: t6.content.muted,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  marginBottom: t6.space["1"]
+});
 var footerLinks = layout.row({ gap: "5", align: "center", wrap: true });
-var footerText = cx(text.caption(), style({ color: t6.content.secondary, maxWidth: "60ch" }));
+var footerText = cx(text.caption(), style({ color: t6.content.secondary, maxWidth: "48ch" }));
 var footerLink = style({
   fontSize: t6.size.sm,
   color: t6.content.secondary,
@@ -5366,6 +5417,73 @@ var bandInner = cx(
   style({ paddingTop: t6.space["8"], paddingBottom: t6.space["8"] })
 );
 var sectionIntro = layout.stack({ gap: "2" });
+var archLane = style({
+  display: "flex",
+  flexDirection: { base: "column", md: "row" },
+  alignItems: { base: "stretch", md: "stretch" },
+  gap: 0,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t6.border.default,
+  borderRadius: t6.radius.lg,
+  overflow: "hidden",
+  background: t6.surface.raised
+});
+var archStep = style({
+  flex: "1 1 0",
+  display: "flex",
+  flexDirection: "column",
+  gap: t6.space["1"],
+  padding: t6.space["4"],
+  boxShadow: `inset 0 -1px 0 ${t6.border.subtle}`
+});
+var archStepHead = style({ display: "flex", alignItems: "center", gap: t6.space["2"] });
+var archStepNum = style({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: 22,
+  height: 22,
+  borderRadius: t6.radius.full,
+  background: t6.accent.primary,
+  color: t6.accent.contrast,
+  fontSize: t6.size.xs,
+  fontWeight: t6.weight.bold,
+  flexShrink: 0
+});
+var archStepName = style({ fontSize: t6.size.sm, fontWeight: t6.weight.semibold, color: t6.content.primary });
+var archStepApi = style({ fontFamily: t6.font.mono, fontSize: t6.size.xs, color: t6.accent.primary });
+var archStepText = style({ fontSize: t6.size.sm, lineHeight: t6.leading.normal, color: t6.content.secondary });
+var capList = style({
+  display: "grid",
+  gap: 0,
+  borderWidth: 1,
+  borderStyle: "solid",
+  borderColor: t6.border.default,
+  borderRadius: t6.radius.lg,
+  overflow: "hidden",
+  background: t6.surface.raised
+});
+var capRow = style({
+  display: "grid",
+  gap: { base: t6.space["1"], md: t6.space["5"] },
+  gridTemplateColumns: { base: "1fr", md: "220px minmax(0, 1fr) auto" },
+  alignItems: { base: "start", md: "baseline" },
+  padding: { base: t6.space["4"], md: t6.space["5"] },
+  boxShadow: `inset 0 -1px 0 ${t6.border.subtle}`,
+  transition: animation.transition(["background"], { duration: "fast" }),
+  on: { hover: { background: t6.surface.sunken } }
+});
+var capName = style({ fontSize: t6.size.md, fontWeight: t6.weight.semibold, color: t6.content.primary, letterSpacing: "-0.01em" });
+var capText = style({ fontSize: t6.size.sm, lineHeight: t6.leading.normal, color: t6.content.secondary });
+var capLink = style({
+  fontSize: t6.size.sm,
+  fontWeight: t6.weight.medium,
+  color: t6.accent.primary,
+  textDecoration: "none",
+  whiteSpace: "nowrap",
+  on: { hover: { color: t6.accent.hover }, focusVisible: { outline: `2px solid ${t6.focus.ring}`, outlineOffset: 2 } }
+});
 var codeWindow = style({
   background: codeBg,
   borderWidth: 1,
@@ -5779,6 +5897,7 @@ var ds = {
   navActiveMark,
   navControls,
   navCta,
+  navExternal,
   themeToggle,
   menuToggle,
   searchTrigger,
@@ -5802,6 +5921,13 @@ var ds = {
   footerText,
   footerLink,
   skipLink: skipLink2,
+  footerBrand,
+  footerBrandLockup,
+  footerMark,
+  footerWordmark,
+  footerCols,
+  footerCol,
+  footerColTitle,
   card,
   linkCardShell,
   cardTitleLink,
@@ -5820,6 +5946,18 @@ var ds = {
   bandAlt,
   bandInner,
   sectionIntro,
+  archLane,
+  archStep,
+  archStepHead,
+  archStepNum,
+  archStepName,
+  archStepApi,
+  archStepText,
+  capList,
+  capRow,
+  capName,
+  capText,
+  capLink,
   codeWindow,
   codeBar,
   codeDots,
@@ -6783,9 +6921,17 @@ var PRIMARY_NAV = [
   { label: "Docs", href: "/docs", id: "nav-docs" },
   { label: "Guides", href: "/guides", id: "nav-guides" },
   { label: "API", href: "/api", id: "nav-api" },
-  { label: "Playground", href: "/playground", id: "nav-playground" },
-  { label: "Blog", href: "/blog", id: "nav-blog" }
+  { label: "Examples", href: "/examples", id: "nav-examples" },
+  { label: "Plugins", href: "/plugins", id: "nav-plugins" }
 ];
+var SECONDARY_NAV = [
+  { label: "Getting started", href: "/getting-started", id: "nav-getting-started" },
+  { label: "Playground", href: "/playground", id: "nav-playground" },
+  { label: "Changelog", href: "/changelog", id: "nav-changelog" },
+  { label: "Blog", href: "/blog", id: "nav-blog" },
+  { label: "About", href: "/about", id: "nav-about" }
+];
+var NPM_URL = "https://www.npmjs.com/package/streetjs";
 var docBySlug = (slug) => DOCS.find((d) => d.slug === slug);
 var guideBySlug = (slug) => GUIDES.find((g) => g.slug === slug);
 var postBySlug = (slug) => BLOG_POSTS.find((b) => b.slug === slug);
@@ -6924,6 +7070,7 @@ function websiteShell(shell, ctx) {
           for (const item of PRIMARY_NAV) navLink(links, router, item);
         }, { id: "nav-links", class: ds.navLinks });
         inner.container("nav-controls", (right) => {
+          right.link("npm", { href: NPM_URL, external: true, id: "nav-npm", class: ds.navExternal });
           right.button("Search", {
             id: "search-trigger",
             ariaLabel: "Search (Ctrl+K)",
@@ -6945,6 +7092,10 @@ function websiteShell(shell, ctx) {
           for (const item of PRIMARY_NAV) {
             navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
           }
+          for (const item of SECONDARY_NAV) {
+            navLink(links, router, { ...item, id: `m-${item.id}` }, ds.mobileMenuLink, ds.mobileMenuLinkActive);
+          }
+          links.link("npm", { href: NPM_URL, external: true, id: "m-nav-npm", class: ds.mobileMenuLink });
         }, { id: "mobile-menu", class: ds.mobileMenu });
       });
     }, { id: "site-nav", class: ds.navBar, role: "navigation", ariaLabel: "Primary navigation" });
@@ -6989,15 +7140,39 @@ function websiteShell(shell, ctx) {
     }
     root.section("footer", (f) => {
       f.container("footer-inner", (fi) => {
-        fi.text(
-          "StreetJS is a TypeScript backend framework. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.",
-          { id: "footer-text", class: ds.footerText }
-        );
-        fi.container("footer-links", (links) => {
-          links.link("Official docs", { href: DOCS_SITE_URL, external: true, id: "footer-docs", class: ds.footerLink });
-          links.link("About this site", { href: "/about", id: "footer-about", class: ds.footerLink });
-          links.link("Changelog", { href: "/changelog", id: "footer-changelog", class: ds.footerLink });
-        }, { id: "footer-links", class: ds.footerLinks });
+        fi.container("footer-brand", (fb) => {
+          fb.container("footer-brand-lockup", (bl) => {
+            bl.text("S", { id: "footer-mark", class: ds.footerMark, ariaHidden: true });
+            bl.text("StreetJS", { id: "footer-wordmark", class: ds.footerWordmark });
+          }, { id: "footer-brand-lockup", class: ds.footerBrandLockup });
+          fb.text(
+            "A TypeScript backend framework for Node.js. This site is built entirely with StreetUI and records facts from the StreetJS v1.2.8 type declarations.",
+            { id: "footer-text", class: ds.footerText }
+          );
+        }, { id: "footer-brand", class: ds.footerBrand });
+        fi.container("footer-cols", (cols) => {
+          cols.container("footer-col-docs", (c) => {
+            c.text("Documentation", { id: "footer-col-docs-h", class: ds.footerColTitle });
+            c.link("Getting started", { href: "/getting-started", id: "footer-getting", class: ds.footerLink });
+            c.link("Docs", { href: "/docs", id: "footer-docs", class: ds.footerLink });
+            c.link("API reference", { href: "/api", id: "footer-api", class: ds.footerLink });
+            c.link("Guides", { href: "/guides", id: "footer-guides", class: ds.footerLink });
+          }, { id: "footer-col-docs", class: ds.footerCol });
+          cols.container("footer-col-explore", (c) => {
+            c.text("Explore", { id: "footer-col-explore-h", class: ds.footerColTitle });
+            c.link("Examples", { href: "/examples", id: "footer-examples", class: ds.footerLink });
+            c.link("Playground", { href: "/playground", id: "footer-playground", class: ds.footerLink });
+            c.link("Plugins", { href: "/plugins", id: "footer-plugins", class: ds.footerLink });
+            c.link("Blog", { href: "/blog", id: "footer-blog", class: ds.footerLink });
+          }, { id: "footer-col-explore", class: ds.footerCol });
+          cols.container("footer-col-project", (c) => {
+            c.text("Project", { id: "footer-col-project-h", class: ds.footerColTitle });
+            c.link("npm package", { href: NPM_URL, external: true, id: "footer-npm", class: ds.footerLink });
+            c.link("Official docs", { href: DOCS_SITE_URL, external: true, id: "footer-official", class: ds.footerLink });
+            c.link("Changelog", { href: "/changelog", id: "footer-changelog", class: ds.footerLink });
+            c.link("About", { href: "/about", id: "footer-about", class: ds.footerLink });
+          }, { id: "footer-col-project", class: ds.footerCol });
+        }, { id: "footer-cols", class: ds.footerCols });
       }, { id: "footer-inner", class: ds.footerInner });
     }, { id: "site-footer", class: ds.footer, role: "contentinfo" });
   }, { id: "app-root", class: ds.appRoot });
@@ -7101,6 +7276,14 @@ var FEATURES = [
   { title: "Jobs and workflows", href: "/docs/jobs", text: "JobQueue, CronScheduler, WorkflowEngine and SagaOrchestrator." },
   { title: "Health routes", href: "/docs/health", text: "HealthCheckRegistry and registerHealthRoutes serve /health/live and /health/ready." }
 ];
+var ARCH_STEPS = [
+  { name: "HTTP server", api: "streetApp()", text: "The app accepts the request and applies global middleware." },
+  { name: "Routing", api: "@Controller \xB7 @Get", text: "Decorated controller methods match the method and path." },
+  { name: "Validation", api: "@Validate", text: "Field rules (zod) check the request before your code runs." },
+  { name: "Context", api: "StreetContext", text: "A per-request context carries request, response and state." },
+  { name: "Data", api: "Repository \xB7 PgPool", text: "The native PostgreSQL driver returns rows your repositories map." },
+  { name: "Response", api: "ctx.json()", text: "A typed response is written back to the client." }
+];
 function buildRoutes(deps) {
   const { getRouter, playground, backend } = deps;
   return [
@@ -7147,31 +7330,41 @@ function buildRoutes(deps) {
               i.heading("Everything a service needs, documented and typed", { level: 2, id: "home-features-title", class: ds.sectionHeading });
             }, { id: "cap-intro", class: ds.sectionIntro });
             c.container("home-features", (g) => {
-              FEATURES.forEach((f, i) => linkCard(g, `feature-${i}`, f.title, f.href, f.text));
-            }, { id: "home-features", class: ds.cardGrid });
+              FEATURES.forEach((f, i) => {
+                g.container(`feature-${i}`, (row2) => {
+                  row2.link(f.title, { href: f.href, id: `feature-${i}-link`, class: ds.capName });
+                  row2.text(f.text, { id: `feature-${i}-summary`, class: ds.capText });
+                  row2.link("Docs", { href: f.href, id: `feature-${i}-more`, class: ds.capLink });
+                }, { id: `feature-${i}`, class: ds.capRow });
+              });
+            }, { id: "home-features", class: ds.capList });
           }, { id: "cap-inner", class: ds.pageSection });
         }, { id: "page-home-capabilities" });
-        const dbExample = EXAMPLES.find((e) => /postgres|transaction|database/i.test(e.title)) ?? EXAMPLES[2];
         page.section("home-arch", (s) => {
           s.container("arch-band", (b) => {
             b.container("arch-inner", (bi) => {
-              bi.container("arch-grid", (g) => {
-                g.container("arch-text", (tx) => {
-                  tx.text("Architecture", { id: "arch-kicker", class: ds.kicker });
-                  tx.heading("Decorators in, typed data out", { level: 2, id: "arch-title", class: ds.sectionHeading });
-                  tx.text("A request enters a @Controller method with a per-request StreetContext. Validation decorators run first; the native PostgreSQL driver returns rows your repositories map to types. The same decorators describe the OpenAPI surface.", { id: "arch-body", class: ds.bodyText });
-                  tx.container("arch-links", (l) => {
-                    l.link("HTTP & controllers", { href: "/docs/http", id: "arch-link-http", class: ds.inlineLink });
-                    l.link("Working with PostgreSQL", { href: "/docs/database", id: "arch-link-db", class: ds.inlineLink });
-                  }, { id: "arch-links", class: ds.ctaRow });
-                }, { id: "arch-text", class: ds.heroCol });
-                if (dbExample !== void 0) {
-                  g.container("arch-code", (cc) => {
-                    const fn = dbExample.sample.label.length > 0 ? dbExample.sample.label : "repository.ts";
-                    codeWindow2(cc, { code: dbExample.sample.code, filename: fn, idBase: "arch-code-win" });
-                  }, { id: "arch-code", class: ds.heroCol });
-                }
-              }, { id: "arch-grid", class: ds.splitGrid });
+              bi.container("arch-intro", (i) => {
+                i.text("Architecture", { id: "arch-kicker", class: ds.kicker });
+                i.heading("How a request moves through StreetJS", { level: 2, id: "arch-title", class: ds.sectionHeading });
+                i.text("A request enters the HTTP server, matches a decorated controller, is validated, runs with a per-request context, reaches your data layer through the native PostgreSQL driver, and returns a typed response.", { id: "arch-body", class: ds.bodyText });
+              }, { id: "arch-intro", class: ds.sectionIntro });
+              bi.container("arch-lane", (lane) => {
+                ARCH_STEPS.forEach((step, i) => {
+                  lane.container(`arch-step-${i}`, (st) => {
+                    st.container(`arch-step-${i}-head`, (h2) => {
+                      h2.text(String(i + 1), { id: `arch-step-${i}-num`, class: ds.archStepNum });
+                      h2.text(step.name, { id: `arch-step-${i}-name`, class: ds.archStepName });
+                    }, { id: `arch-step-${i}-head`, class: ds.archStepHead });
+                    st.text(step.api, { id: `arch-step-${i}-api`, class: ds.archStepApi });
+                    st.text(step.text, { id: `arch-step-${i}-text`, class: ds.archStepText });
+                  }, { id: `arch-step-${i}`, class: ds.archStep, role: "listitem" });
+                });
+              }, { id: "arch-lane", class: ds.archLane, role: "list", ariaLabel: "Request lifecycle" });
+              bi.container("arch-links", (l) => {
+                l.link("HTTP & controllers", { href: "/docs/http", id: "arch-link-http", class: ds.inlineLink });
+                l.link("The request context", { href: "/docs/context", id: "arch-link-ctx", class: ds.inlineLink });
+                l.link("Working with PostgreSQL", { href: "/docs/database", id: "arch-link-db", class: ds.inlineLink });
+              }, { id: "arch-links", class: ds.ctaRow });
             }, { id: "arch-inner", class: ds.bandInner });
           }, { id: "arch-band", class: ds.bandAlt });
         }, { id: "page-home-arch" });
@@ -7610,7 +7803,7 @@ function buildRoutes(deps) {
   ];
 }
 var THEME_STORAGE_KEY = "streetjs-theme";
-var CHOICES = ["light", "dark", "system"];
+var CHOICES = ["system", "dark", "light"];
 function defaultThemeStorage() {
   try {
     if (typeof localStorage !== "undefined") {
