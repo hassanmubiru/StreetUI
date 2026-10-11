@@ -14,7 +14,10 @@ export type ThemeChoice = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 
 export const THEME_STORAGE_KEY = 'streetjs-theme';
-const CHOICES: readonly ThemeChoice[] = ['light', 'dark', 'system'];
+/** Cycle order: System → Dark → Light → System.
+ * Starting from System the first click lands on Dark — the expected behaviour
+ * for a dark-mode-first framework site. */
+const CHOICES: readonly ThemeChoice[] = ['system', 'dark', 'light'];
 
 export interface ThemeStorage {
   read(): ThemeChoice | null;
@@ -55,7 +58,7 @@ export interface ThemeController {
   readonly choice: Signal<ThemeChoice>;
   readonly resolved: ReadonlySignal<ResolvedTheme>;
   set(choice: ThemeChoice): void;
-  /** light → dark → system → light. */
+  /** system → dark → light → system. */
   cycle(): void;
   /** e.g. "Theme: System" — bind to the toggle button. */
   readonly label: ReadonlySignal<string>;
