@@ -124,3 +124,9 @@ Changed files this pass: `src/content.ts` (nav split + `NPM_URL`), `src/shell.ts
 footer), `src/routes.ts` (home capabilities + architecture diagram), `src/design-system.ts` (nav/footer/
 arch/capability styles), `src/website-ssr.test.ts` (external-link allowlist now includes the npm page).
 
+**Validated in browser after this pass (axe-core 4.13.0, Playwright Chromium 153 + Firefox 156, 9
+routes):** 0 violations in both browsers. Multi-viewport (1440 / 768 / 375) 0 horizontal-scroll in
+both browsers. Reduced-motion: 0 elements still animated under `prefers-reduced-motion: reduce`.
+One additional fix applied during validation: `#arch-lane` (the request-lifecycle diagram) had
+`role="list"` but its child step containers lacked `role="listitem"` — fixed in `src/routes.ts`.
+
