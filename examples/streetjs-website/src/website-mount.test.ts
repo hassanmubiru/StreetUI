@@ -118,7 +118,7 @@ describe('mobile menu', () => {
 });
 
 describe('theme', () => {
-  it('cycles system → light → dark → system, persists, and writes data-theme on <html>', async () => {
+  it('cycles system → dark → light → system, persists, and writes data-theme on <html>', async () => {
     const storage = memoryStorage();
     const s = mount('/', { themeStorage: storage });
     await flushUpdates();
@@ -126,13 +126,13 @@ describe('theme', () => {
 
     const toggle = (): void => trigger(container.querySelector('#theme-toggle')!, 'click');
     toggle(); await flushUpdates();
-    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Light');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-    expect(storage.value()).toBe('light');
-
-    toggle(); await flushUpdates();
     expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Dark');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(storage.value()).toBe('dark');
+
+    toggle(); await flushUpdates();
+    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
 
     toggle(); await flushUpdates();
     expect(s.theme.choice.get()).toBe('system');
