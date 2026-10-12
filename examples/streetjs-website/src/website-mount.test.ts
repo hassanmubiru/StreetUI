@@ -360,9 +360,10 @@ describe('SSR → hydrate', () => {
 
   it('reconciles the theme label when a stored choice differs from the server\'s "System"', async () => {
     const { r } = await hydrateFrom('/', 'dark');
-    expect(r.html).toContain('Theme: System');
+    // SSR emits system choice, resolved to light in server env → "Auto (light)"
+    expect(r.html).toContain('Auto (light)');
     // After mount the control reflects the stored choice, and <html> carries it.
-    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Dark');
+    expect(text(container.querySelector('#theme-toggle'))).toBe('Dark mode');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 });
