@@ -10,9 +10,6 @@
 import { createHash } from 'node:crypto';
 import { renderWebsite, allPaths } from '../../dist/index.js';
 
-// Static file extensions the CDN should serve from netlify-static/
-const STATIC_EXT = /\.(js|mjs|css|svg|png|jpg|jpeg|ico|webp|woff|woff2|ttf|map|txt|xml)$/i;
-
 const THEME_SCRIPT =
   "try{var c=localStorage.getItem('streetjs-theme');var d=c==='dark'||((c===null||c==='system')&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light')}catch(e){}";
 const themeHash = `'sha256-${createHash('sha256').update(THEME_SCRIPT).digest('base64')}'`;
@@ -43,15 +40,14 @@ ${r.stateScript}
 </html>`;
 }
 
-export default async (req, context) => {
+export default async (req) => {
   try {
     const url = new URL(req.url);
     const pathname = decodeURIComponent(url.pathname);
 
-    // Pass static assets through to Netlify CDN (netlify-static/ publish dir)
-    if (STATIC_EXT.test(pathname)) {
-      return context.next();
-    }
+    // Static assets (.js, .svg) are served by Netlify CDN before this function
+    // is invoked (via [[redirects]] rules in netlify.toml that force=false).
+    // This handler only sees HTML page requests.
 
     const siteUrl = url.origin;
 
