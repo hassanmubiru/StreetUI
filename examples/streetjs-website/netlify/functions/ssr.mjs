@@ -7932,6 +7932,7 @@ function renderWebsite(path, options = {}) {
 }
 
 // netlify/functions/ssr-source.mjs
+var STATIC_EXT = /\.(js|mjs|css|svg|png|jpg|jpeg|ico|webp|woff|woff2|ttf|map|txt|xml)$/i;
 var THEME_SCRIPT = "try{var c=localStorage.getItem('streetjs-theme');var d=c==='dark'||((c===null||c==='system')&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light')}catch(e){}";
 var themeHash = `'sha256-${createHash("sha256").update(THEME_SCRIPT).digest("base64")}'`;
 var SECURITY_HEADERS = {
@@ -7957,11 +7958,14 @@ ${r.stateScript}
 </body>
 </html>`;
 }
-var ssr_source_default = async (req) => {
+var ssr_source_default = async (req, context) => {
   try {
     const url = new URL(req.url);
-    const siteUrl = url.origin;
     const pathname = decodeURIComponent(url.pathname);
+    if (STATIC_EXT.test(pathname)) {
+      return context.next();
+    }
+    const siteUrl = url.origin;
     if (pathname === "/robots.txt") {
       return new Response(
         `User-agent: *
