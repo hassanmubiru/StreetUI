@@ -1,13 +1,17 @@
 /**
  * Netlify Edge Function — SSR handler for the StreetJS website.
- * Handles every route (path: "/*"). Static files are served by Netlify CDN
- * from the netlify-static/ publish directory.
  *
- * This file is bundled with esbuild into ssr.mjs (self-contained, no imports
- * resolved at runtime). See the rebuild step below.
+ * The edge function intercepts every request (path: "/*") BEFORE Netlify's CDN
+ * can serve static files. For static assets (.js, .svg, .png, .ico, .map,
+ * .txt, .xml, .css, .woff2) we call context.next() to hand off to the CDN
+ * so the publish directory files are served normally. Everything else is
+ * server-side rendered.
  */
 import { createHash } from 'node:crypto';
 import { renderWebsite, allPaths } from '../../dist/index.js';
+
+// Static file extensions the CDN should serve from netlify-static/
+const STATIC_EXT = /\.(js|mjs|css|svg|png|jpg|jpeg|ico|webp|woff|woff2|ttf|map|txt|xml)$/i;
 
 const THEME_SCRIPT =
   "try{var c=localStorage.getItem('streetjs-theme');var d=c==='dark'||((c===null||c==='system')&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.setAttribute('data-theme',d?'dark':'light')}catch(e){}";
@@ -39,11 +43,17 @@ ${r.stateScript}
 </html>`;
 }
 
-export default async (req) => {
+export default async (req, context) => {
   try {
     const url = new URL(req.url);
-    const siteUrl = url.origin;
     const pathname = decodeURIComponent(url.pathname);
+
+    // Pass static assets through to Netlify CDN (netlify-static/ publish dir)
+    if (STATIC_EXT.test(pathname)) {
+      return context.next();
+    }
+
+    const siteUrl = url.origin;
 
     if (pathname === '/robots.txt') {
       return new Response(
