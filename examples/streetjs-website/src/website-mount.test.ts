@@ -122,16 +122,17 @@ describe('theme', () => {
     const storage = memoryStorage();
     const s = mount('/', { themeStorage: storage });
     await flushUpdates();
-    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: System');
+    // system, no OS dark preference in test env → "Auto (light)"
+    expect(text(container.querySelector('#theme-toggle'))).toBe('Auto (light)');
 
     const toggle = (): void => trigger(container.querySelector('#theme-toggle')!, 'click');
     toggle(); await flushUpdates();
-    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Dark');
+    expect(text(container.querySelector('#theme-toggle'))).toBe('Dark mode');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     expect(storage.value()).toBe('dark');
 
     toggle(); await flushUpdates();
-    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Light');
+    expect(text(container.querySelector('#theme-toggle'))).toBe('Light mode');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
 
     toggle(); await flushUpdates();
@@ -142,7 +143,7 @@ describe('theme', () => {
   it('restores a stored choice on mount', async () => {
     mount('/', { themeStorage: memoryStorage('dark') });
     await flushUpdates();
-    expect(text(container.querySelector('#theme-toggle'))).toBe('Theme: Dark');
+    expect(text(container.querySelector('#theme-toggle'))).toBe('Dark mode');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 });
