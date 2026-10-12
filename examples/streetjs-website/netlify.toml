@@ -6,27 +6,6 @@
   directory = "netlify/functions"
   node_bundler = "none"
 
-# Static assets: served directly from the publish dir (force=false means CDN wins over redirect).
-# These rules must come BEFORE the catch-all SSR redirect.
-[[redirects]]
-  from = "/browser-entry.js"
-  to = "/browser-entry.js"
-  status = 200
-  force = false
-
-[[redirects]]
-  from = "/favicon.svg"
-  to = "/favicon.svg"
-  status = 200
-  force = false
-
-# All other requests → SSR function
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/ssr"
-  status = 200
-  force = true
-
 [[headers]]
   for = "/browser-entry.js"
   [headers.values]

@@ -73,4 +73,8 @@ export default async (req) => {
   }
 };
 
-export const config = { path: '/*' };
+export const config = {
+  path: '/*',
+  // Exclude static assets so Netlify CDN serves them from the publish directory
+  excludedPath: ['/browser-entry.js', '/browser-entry.js.map', '/favicon.svg'],
+};
