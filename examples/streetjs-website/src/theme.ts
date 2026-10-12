@@ -81,7 +81,12 @@ export function createTheme(options: ThemeOptions = {}): ThemeController {
   });
   const label = derived(() => {
     const c = choice.get();
-    return c === 'light' ? 'Theme: Light' : c === 'dark' ? 'Theme: Dark' : 'Theme: System';
+    const r = resolved.get();
+    // Label shows the CURRENT state so it's always clear what mode is active.
+    // "Auto" = system preference; "(dark)" / "(light)" shows the resolved result
+    // so the user knows exactly what they're seeing.
+    if (c === 'system') return r === 'dark' ? 'Auto (dark)' : 'Auto (light)';
+    return c === 'dark' ? 'Dark mode' : 'Light mode';
   });
 
   const root = options.root ?? (typeof document !== 'undefined' ? document.documentElement : null);

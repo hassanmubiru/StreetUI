@@ -110,7 +110,7 @@ export const appRoot = cx(
   layout.stack({ gap: '0' }),
   style({
     minHeight: '100vh',
-    overflowX: 'hidden',      // prevent horizontal page scroll from content-box padded containers
+    overflowX: 'hidden',
     background: t.surface.background,
     color: t.content.primary,
     fontFamily: t.font.sans,
@@ -118,6 +118,10 @@ export const appRoot = cx(
     lineHeight: t.leading.normal,
   }),
 );
+
+/** The router outlet grows to fill all available space in the flex-column shell,
+ * so short pages push the footer to the bottom of the viewport. */
+export const pageOutletGrow = style({ flexGrow: 1 });
 
 export const pageContainer = layout.container({ max: CONTENT_MAX, padX: '5' });
 
@@ -532,8 +536,10 @@ export const heroWrap = cx(
   style({
     display: 'grid', gap: { base: t.space['6'], lg: t.space['8'] }, alignItems: 'center',
     gridTemplateColumns: { base: '1fr', lg: 'minmax(0, 1.05fr) minmax(0, 1fr)' },
-    paddingTop: { base: t.space['8'], md: t.space['10'] },
-    paddingBottom: { base: t.space['8'], md: t.space['10'] },
+    // Fill the screen below the sticky nav so the hero occupies the full first viewport
+    minHeight: { base: 'auto', lg: 'calc(100vh - 84px)' },
+    paddingTop: { base: t.space['10'], md: t.space['10'] },
+    paddingBottom: { base: t.space['10'], md: t.space['10'] },
   }),
 );
 
