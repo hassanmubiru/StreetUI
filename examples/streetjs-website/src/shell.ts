@@ -128,13 +128,13 @@ export function websiteShell(shell: PageDSL, ctx: ShellContext): void {
     });
   });
 
-  // The active route renders here; the shell persists around it.
+  // The active route renders here; flex-grow:1 pushes the footer to the bottom
+  // on short pages while letting long pages scroll naturally.
   if (ctx.renderOutlet !== undefined) {
     const fill = ctx.renderOutlet;
-    root.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet', role: 'main' });
+    root.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: 'page-outlet', role: 'main', class: ds.pageOutletGrow });
   } else {
-    // Use container directly (same as routerOutlet but with role="main" for landmark)
-    root.container(ROUTER_OUTLET_KEY, () => { /* filled by the router at runtime */ }, { id: 'page-outlet', role: 'main' });
+    root.container(ROUTER_OUTLET_KEY, () => { /* filled by the router at runtime */ }, { id: 'page-outlet', role: 'main', class: ds.pageOutletGrow });
   }
 
   root.section('footer', (f) => {
