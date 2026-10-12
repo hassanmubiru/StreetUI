@@ -1,8 +1,8 @@
 headersOrigin = "config"
-redirectsOrigin = "config"
 plugins = []
 functionsDirectory = "/home/error51/Downloads/StreetUI/examples/streetjs-website/netlify/functions"
 functionsDirectoryOrigin = "config"
+redirects = []
 
 [functions]
 
@@ -42,39 +42,3 @@ for = "/favicon.svg"
 
 [headers.values]
 Cache-Control = "public, max-age=86400"
-
-[[redirects]]
-from = "/browser-entry.js"
-to = "/browser-entry.js"
-status = 200.0
-force = false
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "/favicon.svg"
-to = "/favicon.svg"
-status = 200.0
-force = false
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
-
-[[redirects]]
-from = "/*"
-to = "/.netlify/functions/ssr"
-status = 200.0
-force = true
-
-[redirects.query]
-
-[redirects.conditions]
-
-[redirects.headers]
