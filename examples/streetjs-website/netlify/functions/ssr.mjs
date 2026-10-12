@@ -7989,7 +7989,11 @@ ${allPaths().map((p3) => `<url><loc>${siteUrl}${p3}</loc></url>`).join("\n")}
     return new Response("Internal server error", { status: 500 });
   }
 };
-var config = { path: "/*" };
+var config = {
+  path: "/*",
+  // Exclude static assets so Netlify CDN serves them from the publish directory
+  excludedPath: ["/browser-entry.js", "/browser-entry.js.map", "/favicon.svg"]
+};
 export {
   config,
   ssr_source_default as default
