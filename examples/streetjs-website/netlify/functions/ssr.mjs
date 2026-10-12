@@ -4912,7 +4912,6 @@ var appRoot = cx(
   style({
     minHeight: "100vh",
     overflowX: "hidden",
-    // prevent horizontal page scroll from content-box padded containers
     background: t6.surface.background,
     color: t6.content.primary,
     fontFamily: t6.font.sans,
@@ -4920,6 +4919,7 @@ var appRoot = cx(
     lineHeight: t6.leading.normal
   })
 );
+var pageOutletGrow = style({ flexGrow: 1 });
 var pageContainer = layout.container({ max: CONTENT_MAX, padX: "5" });
 var pageSection = cx(
   pageContainer,
@@ -5382,8 +5382,10 @@ var heroWrap = cx(
     gap: { base: t6.space["6"], lg: t6.space["8"] },
     alignItems: "center",
     gridTemplateColumns: { base: "1fr", lg: "minmax(0, 1.05fr) minmax(0, 1fr)" },
-    paddingTop: { base: t6.space["8"], md: t6.space["10"] },
-    paddingBottom: { base: t6.space["8"], md: t6.space["10"] }
+    // Fill the screen below the sticky nav so the hero occupies the full first viewport
+    minHeight: { base: "auto", lg: "calc(100vh - 84px)" },
+    paddingTop: { base: t6.space["10"], md: t6.space["10"] },
+    paddingBottom: { base: t6.space["10"], md: t6.space["10"] }
   })
 );
 var heroCol = layout.stack({ gap: "5" });
@@ -5874,6 +5876,7 @@ var toolGrid = style({
 });
 var ds = {
   appRoot,
+  pageOutletGrow,
   pageContainer,
   pageSection,
   pageBody,
@@ -7133,10 +7136,10 @@ function websiteShell(shell, ctx) {
     });
     if (ctx.renderOutlet !== void 0) {
       const fill = ctx.renderOutlet;
-      root.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: "page-outlet", role: "main" });
+      root.container(ROUTER_OUTLET_KEY, (c) => fill(c), { id: "page-outlet", role: "main", class: ds.pageOutletGrow });
     } else {
       root.container(ROUTER_OUTLET_KEY, () => {
-      }, { id: "page-outlet", role: "main" });
+      }, { id: "page-outlet", role: "main", class: ds.pageOutletGrow });
     }
     root.section("footer", (f) => {
       f.container("footer-inner", (fi) => {
@@ -7844,7 +7847,9 @@ function createTheme(options = {}) {
   });
   const label2 = derived(() => {
     const c = choice.get();
-    return c === "light" ? "Theme: Light" : c === "dark" ? "Theme: Dark" : "Theme: System";
+    const r = resolved.get();
+    if (c === "system") return r === "dark" ? "Auto (dark)" : "Auto (light)";
+    return c === "dark" ? "Dark mode" : "Light mode";
   });
   const root = options.root ?? (typeof document !== "undefined" ? document.documentElement : null);
   const stop = root !== null ? effect(() => {
