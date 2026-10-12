@@ -941,7 +941,7 @@ export const toolGrid = style({
 
 /** The namespace object — one import for the whole design system. */
 export const ds = {
-  appRoot, pageContainer, pageSection, pageBody, pageHeader, pageTitle, pageLead,
+  appRoot, pageOutletGrow, pageContainer, pageSection, pageBody, pageHeader, pageTitle, pageLead,
   sectionHeading, subHeading, bodyText, metaText, inlineLink, kicker,
   navBar, navInner, brand, brandLink, brandMark, navLinks, navLinkItem, navLinkActive, navActiveMark, navControls, navCta, navExternal,
   themeToggle, menuToggle, searchTrigger, kbd,
