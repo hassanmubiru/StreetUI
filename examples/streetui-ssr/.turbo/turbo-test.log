@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-ssr
 
- ✓ src/ssr-example.test.ts  (7 tests) 136ms
+ ✓ src/ssr-example.test.ts  (7 tests) 94ms
 
  Test Files  1 passed (1)
       Tests  7 passed (7)
-   Start at  18:10:10
-   Duration  5.10s (transform 1.20s, setup 0ms, collect 1.15s, tests 136ms, environment 1.73s, prepare 462ms)
+   Start at  18:11:26
+   Duration  5.74s (transform 1.06s, setup 0ms, collect 1.08s, tests 94ms, environment 1.98s, prepare 794ms)
 
