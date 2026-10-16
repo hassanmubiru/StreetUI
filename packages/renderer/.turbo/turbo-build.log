@@ -1,23 +1,22 @@
 
-
 > @streetui/renderer@3.0.2 build /home/error51/Downloads/StreetUI/packages/renderer
 > tsup
 
-[34mCLI[39m Building entry: src/index.ts
-[34mCLI[39m Using tsconfig: tsconfig.json
-[34mCLI[39m tsup v8.3.5
-[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/renderer/tsup.config.ts
-[34mCLI[39m Target: es2022
-[34mCLI[39m Cleaning output folder
-[34mESM[39m Build start
-[34mCJS[39m Build start
-[32mCJS[39m [1mdist/index.cjs     [22m[32m64.36 KB[39m
-[32mCJS[39m [1mdist/index.cjs.map [22m[32m177.46 KB[39m
-[32mCJS[39m ⚡️ Build success in 35ms
-[32mESM[39m [1mdist/index.js     [22m[32m61.25 KB[39m
-[32mESM[39m [1mdist/index.js.map [22m[32m176.64 KB[39m
-[32mESM[39m ⚡️ Build success in 35ms
+CLI Building entry: src/index.ts
+CLI Using tsconfig: tsconfig.json
+CLI tsup v8.3.5
+CLI Using tsup config: /home/error51/Downloads/StreetUI/packages/renderer/tsup.config.ts
+CLI Target: es2022
+CLI Cleaning output folder
+ESM Build start
+CJS Build start
+ESM dist/index.js     61.25 KB
+ESM dist/index.js.map 176.64 KB
+ESM ⚡️ Build success in 82ms
+CJS dist/index.cjs     64.36 KB
+CJS dist/index.cjs.map 177.46 KB
+CJS ⚡️ Build success in 101ms
 DTS Build start
-DTS ⚡️ Build success in 588ms
+DTS ⚡️ Build success in 1359ms
 DTS dist/index.d.ts  39.17 KB
 DTS dist/index.d.cts 39.17 KB
