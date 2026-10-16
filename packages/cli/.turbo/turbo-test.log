@@ -5,32 +5,32 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/cli
 
- ✓ src/env.test.ts  (5 tests) 18ms
- ✓ src/templates.test.ts  (8 tests) 39ms
- ✓ src/args.test.ts  (10 tests) 27ms
- ✓ src/diagnostics.test.ts  (7 tests) 19ms
- ✓ src/create.test.ts  (6 tests) 214ms
+ ✓ src/templates.test.ts  (8 tests) 71ms
+ ✓ src/diagnostics.test.ts  (7 tests) 41ms
+ ✓ src/create.test.ts  (6 tests) 178ms
+ ✓ src/args.test.ts  (10 tests) 58ms
+ ✓ src/env.test.ts  (5 tests) 39ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 27ms
+ ✓ src/cli.test.ts  (5 tests) 45ms
 stderr | src/serve.test.ts > serve — error disclosure boundary > production hides the stack and returns a generic 500
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-D1WdjT/server.mjs:1:32)
+    at render (/tmp/streetui-serve-T60TFx/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
 stderr | src/serve.test.ts > serve — error disclosure boundary > dev exposes the error detail for debugging
 [StreetUI] render error for /: Error: BOOM secret detail
-    at render (/tmp/streetui-serve-98lMZz/server.mjs:1:32)
+    at render (/tmp/streetui-serve-TzpLD5/server.mjs:1:32)
     at handleRequest (/home/error51/Downloads/StreetUI/packages/cli/src/serve.ts:232:26)
     at processTicksAndRejections (node:internal/process/task_queues:104:5)
 
- ✓ src/public-api.stability.test.ts  (3 tests) 10ms
- ✓ src/cli.test.ts  (5 tests) 15ms
- ✓ src/serve.test.ts  (8 tests) 892ms
-   ✓ serve — static assets > serves a static file with the correct MIME and nosniff header 320ms
- ✓ src/e2e.test.ts  (1 test) 1015ms
-   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 1000ms
+ ✓ src/serve.test.ts  (8 tests) 1211ms
+   ✓ serve — static assets > serves a static file with the correct MIME and nosniff header 302ms
+ ✓ src/e2e.test.ts  (1 test) 1183ms
+   ✓ developer journey (create → build → start → request) > serves the generated SSR app over real HTTP with hydratable markup 1168ms
 
  Test Files  9 passed (9)
       Tests  53 passed (53)
-   Start at  18:08:44
-   Duration  2.92s (transform 1.46s, setup 0ms, collect 3.00s, tests 2.25s, environment 7ms, prepare 2.50s)
+   Start at  18:09:45
+   Duration  3.20s (transform 2.74s, setup 0ms, collect 4.62s, tests 2.85s, environment 4ms, prepare 3.02s)
 
