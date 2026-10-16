@@ -1,7 +1,7 @@
 {
   "name": "@streetui/renderer",
-  "version": "3.0.1",
-  "description": "StreetUI renderer — framework-owned DOM renderer, reconciliation, patching",
+  "version": "3.0.2",
+  "description": "StreetUI renderer \u2014 framework-owned DOM renderer, reconciliation, patching",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

@@ -1,7 +1,7 @@
 {
   "name": "@streetui/devtools",
-  "version": "3.0.1",
-  "description": "StreetUI devtools — graph inspection, serialization, debug helpers",
+  "version": "3.0.2",
+  "description": "StreetUI devtools \u2014 graph inspection, serialization, debug helpers",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

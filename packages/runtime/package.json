@@ -1,7 +1,7 @@
 {
   "name": "@streetui/runtime",
-  "version": "3.0.1",
-  "description": "StreetUI runtime — application mounting, lifecycle, node instances, state/event integration",
+  "version": "3.0.2",
+  "description": "StreetUI runtime \u2014 application mounting, lifecycle, node instances, state/event integration",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

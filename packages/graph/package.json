@@ -1,7 +1,7 @@
 {
   "name": "@streetui/graph",
-  "version": "3.0.1",
-  "description": "StreetUI Semantic Application Graph — nodes, relationships, traversal, validation",
+  "version": "3.0.2",
+  "description": "StreetUI Semantic Application Graph \u2014 nodes, relationships, traversal, validation",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
