@@ -5,39 +5,38 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/renderer
 
- ✓ src/code.test.ts  (11 tests) 43ms
- ✓ src/static-ssr-plan.test.ts  (15 tests) 58ms
- ✓ src/head.test.ts  (9 tests) 58ms
- ✓ src/renderer.test.ts  (43 tests) 98ms
- ✓ src/api-improvements.test.ts  (27 tests) 99ms
- ✓ src/async-boundary.test.ts  (6 tests) 95ms
- ✓ src/transition.test.ts  (7 tests) 103ms
- ✓ src/overlay.test.ts  (12 tests) 112ms
- ✓ src/hydrate.test.ts  (20 tests) 123ms
- ✓ src/component.test.ts  (11 tests) 120ms
- ✓ src/memory.test.ts  (10 tests) 676ms
- ✓ src/error-boundary.test.ts  (7 tests) 89ms
- ✓ src/ssr.test.ts  (13 tests) 30ms
- ✓ src/data-flow.test.ts  (3 tests) 30ms
- ✓ src/a11y.test.ts  (6 tests) 52ms
- ✓ src/portal.test.ts  (6 tests) 74ms
- ✓ src/batch-render.test.ts  (3 tests) 25ms
- ✓ src/public-api.stability.test.ts  (4 tests) 72ms
- ✓ src/reconcile-perf.test.ts  (7 tests) 424ms
- ✓ src/overlay-memory.test.ts  (3 tests) 477ms
- ✓ src/update-independence.test.ts  (4 tests) 595ms
-   ✓ fine-grained update locality — independent of N (spec §9) > updating K distinct signals writes exactly K nodes, independent of N 367ms
+ ✓ src/head.test.ts  (9 tests) 33ms
+ ✓ src/static-ssr-plan.test.ts  (15 tests) 52ms
+ ✓ src/renderer.test.ts  (43 tests) 70ms
+ ✓ src/async-boundary.test.ts  (6 tests) 73ms
+ ✓ src/code.test.ts  (11 tests) 77ms
+ ✓ src/hydrate.test.ts  (20 tests) 83ms
+ ✓ src/overlay.test.ts  (12 tests) 84ms
+ ✓ src/transition.test.ts  (7 tests) 106ms
+ ✓ src/api-improvements.test.ts  (27 tests) 118ms
+ ✓ src/component.test.ts  (11 tests) 133ms
+ ✓ src/memory.test.ts  (10 tests) 538ms
+ ✓ src/portal.test.ts  (6 tests) 67ms
+ ✓ src/error-boundary.test.ts  (7 tests) 33ms
+ ✓ src/batch-render.test.ts  (3 tests) 19ms
+ ✓ src/data-flow.test.ts  (3 tests) 36ms
+ ✓ src/reconcile-perf.test.ts  (7 tests) 282ms
+ ✓ src/a11y.test.ts  (6 tests) 51ms
+ ✓ src/ssr.test.ts  (13 tests) 36ms
+ ✓ src/public-api.stability.test.ts  (4 tests) 32ms
+ ✓ src/update-independence.test.ts  (4 tests) 305ms
+ ✓ src/overlay-memory.test.ts  (3 tests) 304ms
+ ✓ src/styles.test.ts  (6 tests) 10ms
+ ✓ src/theme.test.ts  (7 tests) 13ms
  ✓ src/styling-transitions.test.ts  (6 tests) 14ms
- ✓ src/styles.test.ts  (6 tests) 20ms
- ✓ src/theme.test.ts  (7 tests) 38ms
- ✓ src/reactive-style.test.ts  (3 tests) 12ms
- ✓ src/component-memory.test.ts  (3 tests) 2187ms
-   ✓ component memory cycles — 50 iterations > disposes cleanly every cycle with a stable handler baseline 414ms
-   ✓ component memory cycles — 100 iterations > disposes cleanly every cycle with a stable handler baseline 584ms
-   ✓ component memory cycles — 200 iterations > disposes cleanly every cycle with a stable handler baseline 1187ms
+ ✓ src/reactive-style.test.ts  (3 tests) 11ms
+ ✓ src/component-memory.test.ts  (3 tests) 2455ms
+   ✓ component memory cycles — 50 iterations > disposes cleanly every cycle with a stable handler baseline 462ms
+   ✓ component memory cycles — 100 iterations > disposes cleanly every cycle with a stable handler baseline 596ms
+   ✓ component memory cycles — 200 iterations > disposes cleanly every cycle with a stable handler baseline 1396ms
 
  Test Files  26 passed (26)
       Tests  252 passed (252)
-   Start at  18:11:08
-   Duration  6.58s (transform 2.00s, setup 0ms, collect 8.12s, tests 5.72s, environment 19.65s, prepare 4.80s)
+   Start at  18:21:26
+   Duration  5.05s (transform 1.31s, setup 0ms, collect 5.99s, tests 5.03s, environment 11.32s, prepare 3.09s)
 
