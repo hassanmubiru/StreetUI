@@ -51,7 +51,7 @@ function docsShell(shell, router) {
     navLink(n, router, "Docs", "/docs", "nav-docs");
     navLink(n, router, "Examples", "/examples", "nav-examples");
     navLink(n, router, "About", "/about", "nav-about");
-    n.link("GitHub", { href: "https://example.com/streetui", external: true, id: "nav-github" });
+    n.link("GitHub", { href: "https://github.com/hassanmubiru/StreetUI", external: true, id: "nav-github" });
   }, { id: "site-nav" });
   routerOutlet(shell);
   shell.section("footer", (f) => {

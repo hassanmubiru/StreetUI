@@ -89,7 +89,7 @@ function createShowcaseApp() {
       nav.heading("StreetUI", { level: 1, id: "brand" });
       nav.link("Home", { href: "#home", id: "nav-home" });
       nav.link("Features", { href: "#features", id: "nav-features" });
-      nav.link("GitHub", { href: "https://example.com", external: true, id: "nav-github" });
+      nav.link("GitHub", { href: "https://github.com/hassanmubiru/StreetUI", external: true, id: "nav-github" });
     }, { id: "navbar" });
     page.section("hero", (hero) => {
       hero.heading("Build UIs from a semantic graph", { level: 1, id: "hero-title" });
