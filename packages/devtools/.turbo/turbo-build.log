@@ -10,20 +10,13 @@ CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
 CJS Build start
-ESM dist/index.js     41.72 KB
-ESM dist/index.js.map 111.19 KB
-ESM ⚡️ Build success in 18ms
 CJS dist/index.cjs     43.77 KB
 CJS dist/index.cjs.map 111.60 KB
 CJS ⚡️ Build success in 17ms
+ESM dist/index.js     41.72 KB
+ESM dist/index.js.map 111.19 KB
+ESM ⚡️ Build success in 17ms
 DTS Build start
-src/inspect-ssr.ts(19,30): error TS2307: Cannot find module '@streetui/compiler/diagnostics' or its corresponding type declarations.
-
-Error: error occurred in dts build
-    at Worker.<anonymous> (/home/error51/Downloads/StreetUI/node_modules/.pnpm/tsup@8.3.5_postcss@8.5.28_typescript@5.6.3/node_modules/tsup/dist/index.js:1541:26)
-    at Worker.emit (node:events:509:28)
-    at MessagePort.<anonymous> (node:internal/worker:350:14)
-    at [nodejs.internal.kHybridDispatch] (node:internal/event_target:843:20)
-    at MessagePort.<anonymous> (node:internal/per_context/messageport:23:28)
-DTS Build error
- ELIFECYCLE  Command failed with exit code 1.
+DTS ⚡️ Build success in 487ms
+DTS dist/index.d.ts  38.50 KB
+DTS dist/index.d.cts 38.50 KB
