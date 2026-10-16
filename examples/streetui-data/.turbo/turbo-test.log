@@ -1,0 +1,18 @@
+
+> @streetui/example-data@0.3.0 test /home/error51/Downloads/StreetUI/examples/streetui-data
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-data
+
+ ❯ src/data-app.test.ts  (6 tests | 5 failed) 10191ms
+   × streetui-data — loading → success against a real HTTP API > shows a loading state, then renders the fetched product list (no hardcoded data) 2062ms
+     → waitFor: condition not met in time
+   × streetui-data — loading → success against a real HTTP API > reflects the server data exactly — swapping the backing data changes the render 2009ms
+     → waitFor: condition not met in time
+   × streetui-data — loading → success against a real HTTP API > renders the empty state when the API returns no products 2007ms
+     → waitFor: condition not met in time
+   × streetui-data — error → error UI → retry > shows the error fallback with a Retry button, then recovers on retry 2015ms
+     → waitFor: condition not met in time
+   × streetui-data — router integration cleans up the previous route resource > creates a fresh resource per navigation and tears down the previous one 2005ms
+     → waitFor: condition not met in time
