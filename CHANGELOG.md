@@ -79,6 +79,16 @@ runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
 - Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
 - Registry-backed `npm install` / `npm publish`.
 
+## 3.0.1 — Repository metadata fix (2026-10-06)
+
+Patch to correct the npm package metadata. No source, API, or behaviour changes.
+
+### Fixed
+- `package.json` `repository.url` corrected to `https://github.com/hassanmubiru/StreetUI.git`
+  (previously resolved to `https://github.com/streetui/streetui` on npm). Closes the broken
+  "Repository" link shown on the npm package page.
+- `homepage` field added pointing to the GitHub README.
+
 ## 3.0.0 — Final Production Readiness (2026-10-05)
 
 **Major version** — validation completion milestone. Zero framework source
