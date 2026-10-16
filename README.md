@@ -1,9 +1,12 @@
 # StreetUI
 
-**StreetUI — a complete TypeScript application framework.** One install, one
-import, every layer owned end-to-end: compiler, semantic graph, reactivity, DOM
-renderer, SSR, hydration, router, forms, data, components, overlays,
-transitions, accessibility, DevTools, and CLI.
+**StreetUI is a complete TypeScript application framework.** It ships its own
+reactivity, a semantic UI DSL, a compiler, a semantic application graph, a
+direct DOM renderer (no virtual DOM), a router, async resources, data mutations,
+first-class components, overlays with portals and focus management, CSS
+transitions, a unified styling system, an accessibility platform, forms,
+context, i18n, SSR with static-plan acceleration, hydration, testing utilities,
+DevTools, and a CLI — as **one package, one import**.
 
 No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 
@@ -11,7 +14,7 @@ No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
 
-Current version: **3.0.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
+Current version: **3.0.2** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
 
 ---
 
@@ -21,7 +24,7 @@ Current version: **3.0.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npm
 npm install streetui
 ```
 
-Everything comes from the one package:
+Everything comes from one package:
 
 ```ts
 import {
@@ -31,12 +34,13 @@ import {
   component, resource, createForm,
   createRouter, mountRouter, routerOutlet,
   dialog, portal,
+  style, cx, createThemeTokens, tokens,
 } from 'streetui';
 ```
 
-Two curated subpaths in the **same** package (still just `npm install streetui`):
+Two curated subpaths (still just `npm install streetui`):
 
-- `streetui/server` — `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`
+- `streetui/server` — `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`, `renderDevToolsReport`
 - `streetui/testing` — `render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `renderComponent`, `findComponent`, `trigger`
 
 ---
@@ -53,7 +57,7 @@ CLI commands: `streetui create | dev | build | start` (flags `--port`, `--host`,
 
 ---
 
-## The full platform (v2.1)
+## The full platform
 
 ### Reactivity
 
@@ -101,6 +105,47 @@ const Card = component<{ title: Signal<string>; count: Signal<number> }>(
 
 page.component('my-card', Card, { title: signal('Hello'), count });
 ```
+
+### Styling
+
+A first-class, unified styling system — build polished, responsive, themeable
+interfaces using StreetUI itself, with no external CSS framework required.
+
+```ts
+import { style, cx, createThemeTokens, tokens, layout, text } from 'streetui';
+
+const t = tokens.ref;
+
+// Design tokens — light + dark in one call
+const brand = createThemeTokens({
+  light: { surface: { background: '#f8fafc' }, accent: { primary: '#2563eb' } },
+  dark:  { surface: { background: '#0b1020' }, accent: { primary: '#60a5fa' } },
+});
+
+// Deduped, atomic class tokens
+const card = style({
+  background: t.surface.background,
+  borderRadius: t.radius.lg,
+  padding: t.space['5'],
+  on: { hover: { boxShadow: t.shadow.md } },
+});
+
+// Responsive layouts with the preset helpers
+const grid = layout.grid({ cols: { base: 1, md: 2, lg: 3 }, gap: '6' });
+
+// Typography presets
+const heading = cx(text.heading({ level: 2 }), style({ color: t.content.primary }));
+```
+
+- `style()` — deduped, atomic class tokens (computed at module load, SSR-safe)
+- `cx()` — merge class tokens
+- `styleVariants()` — type-safe variant maps
+- `createThemeTokens()` — light/dark CSS custom properties, single `data-theme` flip
+- `layout.*` — container, stack, row, grid, center presets
+- `text.*` — heading, body, caption, code, blockquote presets
+- `form.*` — input, label, field, error presets
+- `a11y.*` — focus ring, visually-hidden, skip-link presets
+- `animation.*` — transition helpers, keyframe declarations
 
 ### Router
 
@@ -172,15 +217,13 @@ page.dialog('confirm', {
 });
 ```
 
-Available kinds and their ARIA/focus behaviour:
-
-| Kind | Role | aria-modal | Focus trap | Escape closes | Restore focus | aria-live |
-|---|---|---|---|---|---|---|
-| `dialog` | dialog | ✅ | ✅ | ✅ | ✅ | — |
-| `popover` | dialog | ❌ | ❌ | ✅ | ✅ | — |
-| `dropdown` | menu | ❌ | ❌ | ✅ | ✅ | — |
-| `tooltip` | tooltip | ❌ | ❌ | ❌ | ❌ | — |
-| `toast` | status | ❌ | ❌ | ❌ | ❌ | polite |
+| Kind | Role | aria-modal | Focus trap | Escape closes | Restore focus |
+|---|---|---|---|---|---|
+| `dialog` | dialog | ✅ | ✅ | ✅ | ✅ |
+| `popover` | dialog | ❌ | ❌ | ✅ | ✅ |
+| `dropdown` | menu | ❌ | ❌ | ✅ | ✅ |
+| `tooltip` | tooltip | ❌ | ❌ | ❌ | ❌ |
+| `toast` | status | ❌ | ❌ | ❌ | ❌ |
 
 ### CSS transitions
 
@@ -244,16 +287,16 @@ page.button(
 
 ### SSR, hydration & head
 
-Server rendering with static-plan acceleration (13.5× speedup on large routes),
-zero-node hydration (adopts server DOM in place), and per-route `<head>` metadata.
+Server rendering with static-plan acceleration, zero-node hydration (adopts
+server DOM in place), and per-route `<head>` metadata.
 
 ```ts
 // server
 import { renderToString, renderHead } from 'streetui/server';
 
 const compiled = compile(app);
-const html  = renderToString(compiled);
-const head  = renderHead(compiled, { title: 'My App' });
+const html = renderToString(compiled);
+const head = renderHead(compiled, { title: 'My App' });
 
 // client — adopts server DOM, no recreation
 import { hydrate } from 'streetui';
@@ -266,8 +309,7 @@ Non-instrumenting, pull-based graph inspection. Runs in Node, a worker, or a
 browser — zero production cost.
 
 ```ts
-import { inspectComponents, inspectInteractions } from 'streetui/server';
-import { renderDevToolsReport } from 'streetui/server';
+import { inspectComponents, renderDevToolsReport } from 'streetui/server';
 
 const report = renderDevToolsReport(compiled);
 // → complete self-contained HTML document
@@ -275,17 +317,17 @@ const report = renderDevToolsReport(compiled);
 
 ---
 
-## Real-browser benchmark results (Chrome 154)
+## Real-browser benchmark results
 
-Measured on this machine with Google Chrome 154.0.8037.57 via Playwright.
-All numbers are from a real browser engine, not happy-dom.
+Measured with Google Chrome 155 via Playwright. All numbers are from a real
+browser engine, not happy-dom.
 
 | Scenario | Result |
 |---|---|
 | Initial mount 10k rows | 210.7 ms · 80,031 DOM nodes |
 | Hydrate 10k rows | 149.7 ms · **0 nodes recreated** |
 | Reactive search narrow (10k) | 189.6 ms · 10,004 mutations |
-| Fine-grained toggle 1 of 1,000 | **0 mutations** (only the subscribed node updated) |
+| Fine-grained toggle 1 of 1,000 | **0 mutations** (only the subscribed node) |
 | Router navigations (4 routes) | 32.9 / 415.7 / 50.0 / 33.4 ms |
 
 **Keyed list reorder (10k rows):**
@@ -305,14 +347,14 @@ All numbers are from a real browser engine, not happy-dom.
 
 ```
 packages/
-  core/        Application identity, lifecycle, diagnostics, environment
+  core/        Styling system, tokens, typography, animation, diagnostics, environment
   dsl/         Semantic TypeScript DSL (the authoring surface)
   compiler/    DSL → validation → graph compilation; static SSR plan analysis
   graph/       Semantic Application Graph (nodes, traversal, validation)
   runtime/     Application mounting, lifecycle, signal/event integration
   state/       Reactive signals, derived state, resources, mutations, stores
   events/      Event bus, DOM event bridge
-  scheduler/   Microtask update scheduler with priority queues
+  scheduler/   Microtask update scheduler
   dom/         DOM adapter abstraction (BrowserDOMAdapter, ServerDOMAdapter)
   renderer/    StreetUI's own DOM renderer — mount, patch, reconcile, SSR, hydrate
   testing/     Test renderer, query helpers, component helpers
@@ -322,13 +364,17 @@ packages/
   context/     Build-time provider/consumer scoping (no prop drilling)
   i18n/        Reactive, typed internationalization
   cli/         Developer CLI — create/dev/build/start + project tooling
+  streetui/    Public barrel — one install, one import
 
 examples/
-  basic-app/         Counter app — full end-to-end
-  streetui-account/  Full platform: router + resources + forms + context + i18n + a11y + SSR
-  streetui-data/     Resources + error boundaries against a real HTTP API
-  streetui-ssr/      SSR + hydration
-  streetui-showcase/ Overlays, transitions, components, a11y, all together
+  basic-app/                Counter app — full end-to-end
+  streetui-account/         Full platform: router + resources + forms + context + i18n + a11y + SSR
+  streetui-data/            Resources + error boundaries against a real HTTP API
+  streetui-ssr/             SSR + hydration
+  streetui-showcase/        Overlays, transitions, components, a11y, all together
+  streetui-stress-app/      10k-row keyed list, fine-grained reactivity, router
+  streetui-website/         Framework documentation site built entirely with StreetUI
+  streetjs-website/         StreetJS docs site — live at streetjs-website.netlify.app
 ```
 
 ---
@@ -338,23 +384,28 @@ examples/
 ```bash
 pnpm install
 pnpm build        # build all 18 packages
-pnpm test         # 863 tests, 0 failures
-pnpm typecheck    # 47 packages
+pnpm test         # 1,148+ tests across all packages
+pnpm typecheck    # strict TypeScript across all packages
 ```
 
 ---
 
 ## Versioning & release
 
-StreetUI is at **2.1.0**. Every public package shares one coordinated version.
-The v1.0 public surface (168 values, 171 types) is frozen; every addition since
-then is purely additive.
+Every public package shares one coordinated version. The v1.0 public surface is
+frozen; every addition since then is purely additive.
 
 ```bash
-npm install streetui@2.1.0
-npm install streetui@latest
+npm install streetui            # latest (3.0.2)
+npm install streetui@3.0.2
 ```
 
 - [Changelog](CHANGELOG.md)
 - [Public API statement](docs/api-v1.0.md)
-- [Browser support](docs/browser-support.md)
+- [npm package](https://www.npmjs.com/package/streetui)
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
