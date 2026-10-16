@@ -12,10 +12,10 @@ ESM Build start
 CJS Build start
 ESM dist/index.js     41.72 KB
 ESM dist/index.js.map 111.19 KB
-ESM ⚡️ Build success in 21ms
+ESM ⚡️ Build success in 18ms
 CJS dist/index.cjs     43.77 KB
 CJS dist/index.cjs.map 111.60 KB
-CJS ⚡️ Build success in 21ms
+CJS ⚡️ Build success in 17ms
 DTS Build start
 src/inspect-ssr.ts(19,30): error TS2307: Cannot find module '@streetui/compiler/diagnostics' or its corresponding type declarations.
 
