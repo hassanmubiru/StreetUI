@@ -1,0 +1,18 @@
+
+> @streetui/example-showcase@0.1.0 test /home/error51/Downloads/StreetUI/examples/streetui-showcase
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-showcase
+
+ ✓ src/platform-showcase.test.ts  (13 tests) 485ms
+ ✓ src/showcase-app.test.ts  (20 tests) 555ms
+ ✓ src/stress-suites.test.ts  (12 tests) 3137ms
+   ✓ stress 1 — 10k-row data grid > renders 10,000 keyed rows through the real reconciler 1682ms
+   ✓ stress 1 — 10k-row data grid > reuses DOM nodes by key across a full reverse (no re-creation) 1241ms
+
+ Test Files  3 passed (3)
+      Tests  45 passed (45)
+   Start at  18:24:00
+   Duration  10.20s (transform 1.99s, setup 0ms, collect 3.13s, tests 4.18s, environment 6.45s, prepare 5.83s)
+
