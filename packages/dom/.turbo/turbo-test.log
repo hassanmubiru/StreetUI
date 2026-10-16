@@ -5,14 +5,14 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/dom
 
- ✓ src/public-api.stability.test.ts  (3 tests) 20ms
- ✓ src/dom.test.ts  (15 tests) 22ms
- ✓ src/focus.test.ts  (17 tests) 162ms
- ✓ src/live-region.test.ts  (4 tests) 43ms
- ✓ src/server-node.lazy-alloc.test.ts  (12 tests) 110ms
+ ✓ src/dom.test.ts  (15 tests) 25ms
+ ✓ src/server-node.lazy-alloc.test.ts  (12 tests) 41ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 38ms
+ ✓ src/live-region.test.ts  (4 tests) 112ms
+ ✓ src/focus.test.ts  (17 tests) 280ms
 
  Test Files  5 passed (5)
       Tests  51 passed (51)
-   Start at  18:10:48
-   Duration  3.71s (transform 653ms, setup 0ms, collect 735ms, tests 356ms, environment 5.98s, prepare 3.88s)
+   Start at  18:21:18
+   Duration  1.62s (transform 611ms, setup 0ms, collect 1.28s, tests 494ms, environment 2.44s, prepare 657ms)
 

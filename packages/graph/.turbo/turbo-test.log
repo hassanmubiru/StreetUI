@@ -5,11 +5,11 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/graph
 
- ✓ src/graph.test.ts  (26 tests) 21ms
- ✓ src/public-api.stability.test.ts  (1 test) 9ms
+ ✓ src/public-api.stability.test.ts  (1 test) 5ms
+ ✓ src/graph.test.ts  (26 tests) 20ms
 
  Test Files  2 passed (2)
       Tests  27 passed (27)
-   Start at  18:10:55
-   Duration  1.08s (transform 366ms, setup 0ms, collect 489ms, tests 31ms, environment 1ms, prepare 352ms)
+   Start at  18:21:19
+   Duration  980ms (transform 329ms, setup 0ms, collect 485ms, tests 25ms, environment 1ms, prepare 275ms)
 
