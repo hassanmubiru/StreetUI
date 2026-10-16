@@ -1,0 +1,42 @@
+
+
+> @streetui/cli@3.0.2 build /home/error51/Downloads/StreetUI/packages/cli
+> tsup
+
+[34mCLI[39m Building entry: src/bin.ts, src/create-bin.ts, src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.3.5
+[34mCLI[39m Using tsup config: /home/error51/Downloads/StreetUI/packages/cli/tsup.config.ts
+[34mCLI[39m Target: es2022
+[34mCLI[39m Cleaning output folder
+[34mESM[39m Build start
+[34mCJS[39m Build start
+
+[90m[[90m6:02:29 PM[90m][39m [43m[30m WARN [39m[49m [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m"import.meta" is not available with the "cjs" output format and will be empty[0m [empty-import-meta]
+
+    src/templates.ts:41:37:
+[37m      41 │   const here = dirname(fileURLToPath([32mimport.meta[37m.url));
+         ╵                                      [32m~~~~~~~~~~~[0m
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+
+
+[32mCJS[39m [1mdist/bin.cjs            [22m[32m30.46 KB[39m
+[32mCJS[39m [1mdist/index.cjs          [22m[32m32.21 KB[39m
+[32mCJS[39m [1mdist/create-bin.cjs     [22m[32m30.58 KB[39m
+[32mCJS[39m [1mdist/bin.cjs.map        [22m[32m74.97 KB[39m
+[32mCJS[39m [1mdist/index.cjs.map      [22m[32m74.46 KB[39m
+[32mCJS[39m [1mdist/create-bin.cjs.map [22m[32m75.26 KB[39m
+[32mCJS[39m ⚡️ Build success in 96ms
+[32mESM[39m [1mdist/index.js          [22m[32m29.48 KB[39m
+[32mESM[39m [1mdist/bin.js            [22m[32m29.29 KB[39m
+[32mESM[39m [1mdist/create-bin.js     [22m[32m29.40 KB[39m
+[32mESM[39m [1mdist/index.js.map      [22m[32m74.59 KB[39m
+[32mESM[39m [1mdist/bin.js.map        [22m[32m75.22 KB[39m
+[32mESM[39m [1mdist/create-bin.js.map [22m[32m75.51 KB[39m
+[32mESM[39m ⚡️ Build success in 97ms
+DTS Build start
+DTS ⚡️ Build success in 1640ms
+DTS dist/index.d.ts  14.57 KB
+DTS dist/index.d.cts 14.57 KB
