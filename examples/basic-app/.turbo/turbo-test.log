@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/basic-app
 
- ✓ src/counter-app.test.ts  (12 tests) 110ms
+ ✓ src/counter-app.test.ts  (12 tests) 65ms
 
  Test Files  1 passed (1)
       Tests  12 passed (12)
-   Start at  18:11:26
-   Duration  6.72s (transform 908ms, setup 0ms, collect 960ms, tests 110ms, environment 1.29s, prepare 553ms)
+   Start at  18:21:37
+   Duration  4.23s (transform 955ms, setup 0ms, collect 808ms, tests 65ms, environment 1.07s, prepare 386ms)
 

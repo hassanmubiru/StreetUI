@@ -5,14 +5,14 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-showcase
 
- ✓ src/platform-showcase.test.ts  (13 tests) 492ms
- ✓ src/showcase-app.test.ts  (20 tests) 564ms
- ✓ src/stress-suites.test.ts  (12 tests) 2859ms
-   ✓ stress 1 — 10k-row data grid > renders 10,000 keyed rows through the real reconciler 1404ms
-   ✓ stress 1 — 10k-row data grid > reuses DOM nodes by key across a full reverse (no re-creation) 1240ms
+ ✓ src/showcase-app.test.ts  (20 tests) 358ms
+ ✓ src/platform-showcase.test.ts  (13 tests) 396ms
+ ✓ src/stress-suites.test.ts  (12 tests) 2270ms
+   ✓ stress 1 — 10k-row data grid > renders 10,000 keyed rows through the real reconciler 980ms
+   ✓ stress 1 — 10k-row data grid > reuses DOM nodes by key across a full reverse (no re-creation) 1091ms
 
  Test Files  3 passed (3)
       Tests  45 passed (45)
-   Start at  18:11:26
-   Duration  9.13s (transform 2.37s, setup 0ms, collect 4.48s, tests 3.91s, environment 3.41s, prepare 2.07s)
+   Start at  18:21:37
+   Duration  7.04s (transform 1.77s, setup 0ms, collect 3.92s, tests 3.02s, environment 3.32s, prepare 882ms)
 
