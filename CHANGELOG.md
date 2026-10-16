@@ -79,6 +79,15 @@ runs. Full detail in [`V2.6.0-RELEASE-REPORT.md`](./V2.6.0-RELEASE-REPORT.md).
 - Accessibility VISUAL (axe-core) and ASSISTIVE_TECHNOLOGY (Orca + AT-SPI).
 - Registry-backed `npm install` / `npm publish`.
 
+## 3.0.2 — README version fix (2026-10-13)
+
+Patch to correct stale version number in the published README. No source, API,
+or behaviour changes.
+
+### Fixed
+- README `Current version` badge updated from `3.0.0` to the correct `3.0.2`.
+- CHANGELOG entry added for the preceding `3.0.1` patch (was missing).
+
 ## 3.0.1 — Repository metadata fix (2026-10-06)
 
 Patch to correct the npm package metadata. No source, API, or behaviour changes.
