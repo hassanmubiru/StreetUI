@@ -5,17 +5,17 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/router
 
- ✓ src/matching.test.ts  (13 tests) 44ms
- ✓ src/router.test.ts  (11 tests) 60ms
- ✓ src/public-api.stability.test.ts  (7 tests) 36ms
- ✓ src/outlet-key.hydration.test.ts  (3 tests) 101ms
- ✓ src/mount-router-transition.test.ts  (5 tests) 124ms
- ✓ src/hydrate-router.test.ts  (4 tests) 88ms
- ✓ src/mount-router.test.ts  (7 tests) 115ms
- ✓ src/router-memory.test.ts  (6 tests) 580ms
+ ✓ src/router.test.ts  (11 tests) 57ms
+ ✓ src/matching.test.ts  (13 tests) 23ms
+ ✓ src/public-api.stability.test.ts  (7 tests) 26ms
+ ✓ src/outlet-key.hydration.test.ts  (3 tests) 60ms
+ ✓ src/mount-router.test.ts  (7 tests) 96ms
+ ✓ src/mount-router-transition.test.ts  (5 tests) 97ms
+ ✓ src/hydrate-router.test.ts  (4 tests) 144ms
+ ✓ src/router-memory.test.ts  (6 tests) 624ms
 
  Test Files  8 passed (8)
       Tests  56 passed (56)
-   Start at  18:22:30
-   Duration  3.37s (transform 1.36s, setup 0ms, collect 4.46s, tests 1.15s, environment 7.24s, prepare 2.22s)
+   Start at  18:23:49
+   Duration  4.65s (transform 1.96s, setup 0ms, collect 6.11s, tests 1.13s, environment 9.58s, prepare 3.09s)
 
