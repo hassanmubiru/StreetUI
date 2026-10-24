@@ -4,10 +4,6 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     include: ['src/**/*.test.ts'],
-    environmentOptions: {
-      happyDOM: {
-        settings: { navigation: { disableMainFrameNavigation: true } },
-      },
-    },
+    setupFiles: ['./src/test-setup.ts'],
   },
 });

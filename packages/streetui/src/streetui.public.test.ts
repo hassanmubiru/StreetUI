@@ -42,9 +42,7 @@ import {
   defineConfig,
 } from 'streetui';
 
-// eslint-disable-next-line import/no-unresolved
 import { renderToString as serverRenderToString, serializeState as serverSerializeState, ServerDOMAdapter as ServerAdapterFromServer } from 'streetui/server';
-// eslint-disable-next-line import/no-unresolved
 import { render, findByRole, waitFor } from 'streetui/testing';
 
 const flush = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -245,7 +243,6 @@ describe('streetui/testing — compiler diagnostics (v1.2 §14)', () => {
     // `streetui/testing` subpath but deliberately kept OFF the runtime barrel
     // so it tree-shakes out of shipped apps.
     const { inspectCompilation, formatInspection, analyzeGraph } = await import(
-      // eslint-disable-next-line import/no-unresolved
       'streetui/testing'
     );
     const label = signal('tick');
@@ -279,7 +276,6 @@ describe('streetui/testing — compiler diagnostics (v1.2 §14)', () => {
   });
 
   it('keeps diagnostics OFF the runtime barrel (tree-shakeable)', async () => {
-    // eslint-disable-next-line import/no-unresolved
     const runtime = await import('streetui');
     expect('inspectCompilation' in runtime).toBe(false);
     expect('analyzeGraph' in runtime).toBe(false);

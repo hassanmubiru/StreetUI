@@ -5,21 +5,21 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/devtools
 
- ✓ src/inspect-mutation.test.ts  (5 tests) 18ms
- ✓ src/inspect-reactive.test.ts  (10 tests) 15ms
- ✓ src/application.test.ts  (10 tests) 22ms
- ✓ src/inspect-detail.test.ts  (5 tests) 25ms
- ✓ src/devtools.test.ts  (15 tests) 33ms
- ✓ src/diagnostics.test.ts  (4 tests) 18ms
- ✓ src/inspect-ssr.test.ts  (4 tests) 19ms
- ✓ src/panels.test.ts  (13 tests) 32ms
- ✓ src/view.test.ts  (7 tests) 36ms
- ✓ src/devtools-report.test.ts  (3 tests) 20ms
- ✓ src/interactive.test.ts  (8 tests) 124ms
- ✓ src/public-api.stability.test.ts  (1 test) 8ms
+ ✓ src/inspect-reactive.test.ts  (10 tests) 18ms
+ ✓ src/inspect-mutation.test.ts  (5 tests) 33ms
+ ✓ src/application.test.ts  (10 tests) 21ms
+ ✓ src/inspect-detail.test.ts  (5 tests) 40ms
+ ✓ src/inspect-ssr.test.ts  (4 tests) 27ms
+ ✓ src/diagnostics.test.ts  (4 tests) 26ms
+ ✓ src/devtools.test.ts  (15 tests) 82ms
+ ✓ src/panels.test.ts  (13 tests) 74ms
+ ✓ src/devtools-report.test.ts  (3 tests) 34ms
+ ✓ src/view.test.ts  (7 tests) 112ms
+ ✓ src/interactive.test.ts  (8 tests) 136ms
+ ✓ src/public-api.stability.test.ts  (1 test) 7ms
 
  Test Files  12 passed (12)
       Tests  85 passed (85)
-   Start at  18:23:40
-   Duration  1.85s (transform 1.29s, setup 0ms, collect 4.29s, tests 372ms, environment 11ms, prepare 2.76s)
+   Start at  00:31:05
+   Duration  2.58s (transform 3.72s, setup 0ms, collect 10.25s, tests 609ms, environment 13ms, prepare 3.26s)
 

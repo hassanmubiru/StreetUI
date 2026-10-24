@@ -1,0 +1,4 @@
+
+> @streetui/example-full-app@0.8.0 typecheck /home/error51/Downloads/StreetUI/examples/streetui-full-app
+> tsc --noEmit
+

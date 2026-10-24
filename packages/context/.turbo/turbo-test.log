@@ -5,11 +5,11 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/context
 
- ✓ src/public-api.stability.test.ts  (2 tests) 24ms
- ✓ src/context.test.ts  (8 tests) 42ms
+ ✓ src/context.test.ts  (8 tests) 23ms
+ ✓ src/public-api.stability.test.ts  (2 tests) 18ms
 
  Test Files  2 passed (2)
       Tests  10 passed (10)
-   Start at  18:23:27
-   Duration  1.89s (transform 316ms, setup 0ms, collect 410ms, tests 66ms, environment 1ms, prepare 770ms)
+   Start at  00:30:50
+   Duration  2.02s (transform 387ms, setup 0ms, collect 461ms, tests 41ms, environment 2ms, prepare 882ms)
 

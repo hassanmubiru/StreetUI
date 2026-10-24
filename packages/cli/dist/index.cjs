@@ -704,9 +704,16 @@ var import_node_path8 = require("path");
 
 // src/templates.ts
 var import_node_fs6 = require("fs");
+var import_node_module = require("module");
 var import_node_path7 = require("path");
-var import_node_url3 = require("url");
-var import_meta = {};
+var packageRequire = (0, import_node_module.createRequire)((0, import_node_path7.join)(process.cwd(), "package.json"));
+function packageModuleDirectory() {
+  try {
+    return (0, import_node_path7.dirname)(packageRequire.resolve("@streetui/cli"));
+  } catch {
+    return void 0;
+  }
+}
 var TEMPLATES = ["basic", "ssr"];
 var DEFAULT_TEMPLATE = "ssr";
 var NAME_MAP = {
@@ -715,12 +722,20 @@ var NAME_MAP = {
   "_package.json": "package.json"
 };
 function templatesRoot() {
-  const here = (0, import_node_path7.dirname)((0, import_node_url3.fileURLToPath)(import_meta.url));
-  const candidates = [(0, import_node_path7.resolve)(here, "..", "templates"), (0, import_node_path7.resolve)(here, "..", "..", "templates")];
-  for (const c of candidates) {
-    if ((0, import_node_fs6.existsSync)(c)) return c;
+  const hereCandidates = [
+    typeof __dirname === "string" ? __dirname : void 0,
+    packageModuleDirectory(),
+    process.cwd()
+  ].filter((value) => value !== void 0);
+  const candidates = hereCandidates.flatMap((here) => [
+    (0, import_node_path7.resolve)(here, "templates"),
+    (0, import_node_path7.resolve)(here, "..", "templates"),
+    (0, import_node_path7.resolve)(here, "..", "..", "templates")
+  ]);
+  for (const candidate of candidates) {
+    if ((0, import_node_fs6.existsSync)(candidate)) return candidate;
   }
-  return candidates[0] ?? (0, import_node_path7.resolve)(here, "..", "templates");
+  return candidates[0] ?? (0, import_node_path7.resolve)(process.cwd(), "templates");
 }
 function templateDir(name) {
   return (0, import_node_path7.join)(templatesRoot(), name);

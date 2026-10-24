@@ -5,16 +5,16 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/state
 
- ✓ src/mutation.test.ts  (8 tests) 63ms
- ✓ src/resource-memory.test.ts  (6 tests) 104ms
- ✓ src/auth.test.ts  (5 tests) 34ms
- ✓ src/public-api.stability.test.ts  (8 tests) 29ms
- ✓ src/resource.test.ts  (19 tests) 59ms
- ✓ src/state.test.ts  (25 tests) 58ms
- ✓ src/client.test.ts  (5 tests) 77ms
+ ✓ src/state.test.ts  (25 tests) 184ms
+ ✓ src/auth.test.ts  (5 tests) 112ms
+ ✓ src/public-api.stability.test.ts  (8 tests) 106ms
+ ✓ src/client.test.ts  (5 tests) 229ms
+ ✓ src/mutation.test.ts  (8 tests) 190ms
+ ✓ src/resource.test.ts  (19 tests) 226ms
+ ✓ src/resource-memory.test.ts  (6 tests) 540ms
 
  Test Files  7 passed (7)
       Tests  76 passed (76)
-   Start at  18:23:24
-   Duration  1.64s (transform 751ms, setup 0ms, collect 1.56s, tests 425ms, environment 2ms, prepare 1.91s)
+   Start at  00:30:02
+   Duration  43.37s (transform 3.78s, setup 0ms, collect 7.53s, tests 1.59s, environment 7ms, prepare 151.19s)
 

@@ -8,8 +8,20 @@
  */
 
 import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+
+const packageRequire = createRequire(join(process.cwd(), 'package.json'));
+
+function packageModuleDirectory(): string | undefined {
+  try {
+    return dirname(packageRequire.resolve('@streetui/cli'));
+  } catch {
+    // The package self-reference is unavailable when this module is run from
+    // an unpacked source tree without its workspace link.
+    return undefined;
+  }
+}
 
 /** Available starter templates. */
 export type TemplateName = 'basic' | 'ssr';
@@ -36,16 +48,24 @@ const NAME_MAP: Record<string, string> = {
 
 /** Absolute path to the shipped `templates/` directory. */
 export function templatesRoot(): string {
-  // dist/index.js (or the test-time src) lives one level below the package
-  // root; templates/ sits beside dist/. Resolve relative to this module.
-  const here = dirname(fileURLToPath(import.meta.url));
-  // From dist/ or src/, go up to the package root, then into templates/.
-  const candidates = [resolve(here, '..', 'templates'), resolve(here, '..', '..', 'templates')];
-  for (const c of candidates) {
-    if (existsSync(c)) return c;
+  // In a built CommonJS bundle `import.meta.url` is unavailable. Resolve from
+  // the package self-reference when possible, with source-tree and cwd fallbacks
+  // for tests and unpacked development checkouts.
+  const hereCandidates = [
+    typeof __dirname === 'string' ? __dirname : undefined,
+    packageModuleDirectory(),
+    process.cwd(),
+  ].filter((value): value is string => value !== undefined);
+  const candidates = hereCandidates.flatMap((here) => [
+    resolve(here, 'templates'),
+    resolve(here, '..', 'templates'),
+    resolve(here, '..', '..', 'templates'),
+  ]);
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
   }
   // Fall back to the first candidate; callers surface a clear error if missing.
-  return candidates[0] ?? resolve(here, '..', 'templates');
+  return candidates[0] ?? resolve(process.cwd(), 'templates');
 }
 
 /** Absolute path to a specific template's source directory. */

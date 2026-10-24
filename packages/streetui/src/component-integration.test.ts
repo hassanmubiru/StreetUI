@@ -23,7 +23,6 @@ import {
   type Signal,
   type ContainerDSL,
 } from 'streetui';
-// eslint-disable-next-line import/no-unresolved
 import { render } from 'streetui/testing';
 
 const flush = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
@@ -197,7 +196,6 @@ describe('component + error boundary (§20)', () => {
 
 describe('component — public export surface (§3/§30)', () => {
   it('exposes component + isComponentDefinition additively from streetui', async () => {
-    // eslint-disable-next-line import/no-unresolved
     const api = await import('streetui');
     expect(typeof api.component).toBe('function');
     expect(typeof api.isComponentDefinition).toBe('function');

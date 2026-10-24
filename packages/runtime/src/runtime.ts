@@ -60,12 +60,11 @@ export class Runtime {
     // Wire signal subscriptions from the graph
     this._bindSignals(compiled.graph);
 
-    const self = this;
     return {
       renderHandle: this._renderHandle,
       runtime: this,
-      unmount() { self.unmount(); },
-      flush() { self._scheduler.flush(); },
+      unmount: () => this.unmount(),
+      flush: () => this._scheduler.flush(),
     };
   }
 
@@ -96,12 +95,11 @@ export class Runtime {
 
     this._bindSignals(compiled.graph);
 
-    const self = this;
     return {
       renderHandle: this._renderHandle,
       runtime: this,
-      unmount() { self.unmount(); },
-      flush() { self._scheduler.flush(); },
+      unmount: () => this.unmount(),
+      flush: () => this._scheduler.flush(),
     };
   }
 

@@ -92,16 +92,11 @@ var Runtime = class {
     this._renderHandle = this._renderer.mount(compiled, container);
     this._mounted = true;
     this._bindSignals(compiled.graph);
-    const self = this;
     return {
       renderHandle: this._renderHandle,
       runtime: this,
-      unmount() {
-        self.unmount();
-      },
-      flush() {
-        self._scheduler.flush();
-      }
+      unmount: () => this.unmount(),
+      flush: () => this._scheduler.flush()
     };
   }
   unmount() {
@@ -125,16 +120,11 @@ var Runtime = class {
     this._renderHandle = this._renderer.hydrate !== void 0 ? this._renderer.hydrate(compiled, container) : this._renderer.mount(compiled, container);
     this._mounted = true;
     this._bindSignals(compiled.graph);
-    const self = this;
     return {
       renderHandle: this._renderHandle,
       runtime: this,
-      unmount() {
-        self.unmount();
-      },
-      flush() {
-        self._scheduler.flush();
-      }
+      unmount: () => this.unmount(),
+      flush: () => this._scheduler.flush()
     };
   }
   /**

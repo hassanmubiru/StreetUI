@@ -5,7 +5,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "echo \"docs build skipped\"",
+    "build": "mkdir -p dist && touch dist/.keep && echo \"docs build skipped\"",
     "test": "echo \"no tests\" && exit 0",
     "typecheck": "echo \"no typecheck\" && exit 0"
   }

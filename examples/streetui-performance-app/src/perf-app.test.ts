@@ -11,24 +11,29 @@ const SMALL = { sizing: { rows: 40, controls: 16 } } as const;
 function countingAdapter() {
   const base = new BrowserDOMAdapter();
   const c = { createElement: 0, createTextNode: 0, setTextContent: 0, setAttribute: 0, appendChild: 0, insertBefore: 0, removeChild: 0 };
+  const baseMethods = base as unknown as Record<string, (...args: never[]) => unknown>;
   const adapter: Record<string, unknown> = {
     createElement(t: string) { c.createElement++; return base.createElement(t); },
     createTextNode(d: string) { c.createTextNode++; return base.createTextNode(d); },
     createComment(d: string) { return base.createComment(d); },
-    appendChild(p: unknown, ch: unknown) { c.appendChild++; return (base as any).appendChild(p, ch); },
-    insertBefore(p: unknown, ch: unknown, r: unknown) { c.insertBefore++; return (base as any).insertBefore(p, ch, r); },
-    removeChild(p: unknown, ch: unknown) { c.removeChild++; return (base as any).removeChild(p, ch); },
-    setAttribute(e: unknown, n: string, v: string) { c.setAttribute++; return (base as any).setAttribute(e, n, v); },
-    removeAttribute(e: unknown, n: string) { return (base as any).removeAttribute(e, n); },
-    setProperty(e: unknown, n: string, v: unknown) { return (base as any).setProperty(e, n, v); },
-    setTextContent(n: unknown, t: string) { c.setTextContent++; return (base as any).setTextContent(n, t); },
+    appendChild(p: unknown, ch: unknown) { c.appendChild++; return base.appendChild(p as Node, ch as Node); },
+    insertBefore(p: unknown, ch: unknown, r: unknown) { c.insertBefore++; return base.insertBefore(p as Node, ch as Node, r as Node | null); },
+    removeChild(p: unknown, ch: unknown) { c.removeChild++; return base.removeChild(p as Node, ch as Node); },
+    setAttribute(e: unknown, n: string, v: string) { c.setAttribute++; return base.setAttribute(e as Element, n, v); },
+    removeAttribute(e: unknown, n: string) { return base.removeAttribute(e as Element, n); },
+    setProperty(e: unknown, n: string, v: unknown) { return base.setProperty(e as Element, n, v); },
+    setTextContent(n: unknown, t: string) { c.setTextContent++; return base.setTextContent(n as Node, t); },
   };
   for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(base))) {
-    if (k !== 'constructor' && typeof (base as any)[k] === 'function' && !(k in adapter)) {
-      adapter[k] = (...a: unknown[]) => (base as any)[k](...a);
+    if (k !== 'constructor' && typeof baseMethods[k] === 'function' && !(k in adapter)) {
+      adapter[k] = (...a: unknown[]) => baseMethods[k]?.(...(a as never[]));
     }
   }
-  return { adapter, c, reset: () => Object.keys(c).forEach((k) => ((c as any)[k] = 0)) };
+  return {
+    adapter,
+    c,
+    reset: () => Object.keys(c).forEach((k) => { c[k as keyof typeof c] = 0; }),
+  };
 }
 
 describe('performance app — SSR + hydration', () => {

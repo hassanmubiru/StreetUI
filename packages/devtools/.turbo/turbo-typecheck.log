@@ -1,0 +1,4 @@
+
+> @streetui/devtools@3.0.2 typecheck /home/error51/Downloads/StreetUI/packages/devtools
+> tsc --noEmit
+

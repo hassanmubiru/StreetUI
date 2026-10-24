@@ -6,13 +6,13 @@
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/testing
 
  ✓ src/public-api.stability.test.ts  (1 test) 13ms
- ✓ src/testing.test.ts  (13 tests) 65ms
- ✓ src/component.test.ts  (7 tests) 93ms
- ✓ src/a11y-regression.test.ts  (16 tests) 121ms
- ✓ src/helpers.test.ts  (13 tests) 169ms
+ ✓ src/testing.test.ts  (13 tests) 85ms
+ ✓ src/a11y-regression.test.ts  (16 tests) 90ms
+ ✓ src/component.test.ts  (7 tests) 133ms
+ ✓ src/helpers.test.ts  (13 tests) 155ms
 
  Test Files  5 passed (5)
       Tests  50 passed (50)
-   Start at  18:23:49
-   Duration  3.88s (transform 2.46s, setup 0ms, collect 3.97s, tests 462ms, environment 6.96s, prepare 2.33s)
+   Start at  00:31:18
+   Duration  3.30s (transform 1.93s, setup 0ms, collect 4.31s, tests 477ms, environment 5.06s, prepare 1.62s)
 

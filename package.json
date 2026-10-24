@@ -7,7 +7,7 @@
     "build": "turbo run build",
     "test": "turbo run test",
     "typecheck": "turbo run typecheck",
-    "lint": "turbo run lint",
+    "lint": "eslint packages apps examples",
     "dev": "turbo run dev --parallel",
     "clean": "turbo run clean && rm -rf node_modules",
     "release:check": "node scripts/release-check.mjs",
