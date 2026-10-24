@@ -16,15 +16,15 @@ CJS dist/index.cjs          32.67 KB
 CJS dist/bin.cjs.map        75.87 KB
 CJS dist/create-bin.cjs.map 76.16 KB
 CJS dist/index.cjs.map      75.37 KB
-CJS ⚡️ Build success in 512ms
+CJS ⚡️ Build success in 184ms
 ESM dist/bin.js            29.72 KB
 ESM dist/create-bin.js     29.83 KB
 ESM dist/index.js          29.91 KB
 ESM dist/bin.js.map        76.15 KB
 ESM dist/create-bin.js.map 76.45 KB
 ESM dist/index.js.map      75.52 KB
-ESM ⚡️ Build success in 516ms
+ESM ⚡️ Build success in 217ms
 DTS Build start
-DTS ⚡️ Build success in 8789ms
+DTS ⚡️ Build success in 3344ms
 DTS dist/index.d.ts  14.57 KB
 DTS dist/index.d.cts 14.57 KB
