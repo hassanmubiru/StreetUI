@@ -5,6 +5,13 @@ on:
   schedule:
     - cron: '0 3 * * 1'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-validation-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   chromium:
     runs-on: ubuntu-latest
