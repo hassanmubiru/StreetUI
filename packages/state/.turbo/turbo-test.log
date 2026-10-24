@@ -1,0 +1,20 @@
+
+> @streetui/state@3.0.2 test /home/error51/Downloads/StreetUI/packages/state
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/state
+
+ ✓ src/state.test.ts  (25 tests) 115ms
+ ✓ src/auth.test.ts  (5 tests) 97ms
+ ✓ src/mutation.test.ts  (8 tests) 151ms
+ ✓ src/public-api.stability.test.ts  (8 tests) 63ms
+ ✓ src/client.test.ts  (5 tests) 123ms
+ ✓ src/resource.test.ts  (19 tests) 172ms
+ ✓ src/resource-memory.test.ts  (6 tests) 286ms
+
+ Test Files  7 passed (7)
+      Tests  76 passed (76)
+   Start at  00:33:56
+   Duration  4.85s (transform 3.80s, setup 0ms, collect 9.32s, tests 1.01s, environment 28ms, prepare 5.56s)
+

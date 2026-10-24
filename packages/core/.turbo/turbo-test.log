@@ -1,0 +1,20 @@
+
+> @streetui/core@3.0.2 test /home/error51/Downloads/StreetUI/packages/core
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/core
+
+ ✓ src/observability.test.ts  (14 tests) 71ms
+ ✓ src/a11y-ids.test.ts  (4 tests) 35ms
+ ✓ src/public-api.stability.test.ts  (3 tests) 70ms
+ ✓ src/styling/presets.test.ts  (14 tests) 88ms
+ ✓ src/styling/reactive.test.ts  (4 tests) 92ms
+ ✓ src/core.test.ts  (28 tests) 186ms
+ ✓ src/styling/styling.test.ts  (14 tests) 234ms
+
+ Test Files  7 passed (7)
+      Tests  81 passed (81)
+   Start at  00:33:56
+   Duration  4.44s (transform 3.19s, setup 0ms, collect 8.41s, tests 776ms, environment 3ms, prepare 6.03s)
+
