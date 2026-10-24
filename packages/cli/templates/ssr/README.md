@@ -22,6 +22,11 @@ Editing files under `src/` rebuilds the app and reloads the browser.
 | `npm run start` | Serve the production build                                |
 | `npm run typecheck` | Type-check the project with `tsc`                     |
 
+For a production smoke check, run `npm run build` and then `npm run start` in a
+second terminal. The generated SSR app is intentionally small: add your own test
+runner and lint policy after the first user flow is working rather than carrying
+a large toolchain into every starter project.
+
 ## Project structure
 
 ```

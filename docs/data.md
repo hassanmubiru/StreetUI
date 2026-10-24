@@ -167,7 +167,10 @@ try {
 `get` / `post` / `put` / `patch` / `del` cover the verbs; a non-2xx response
 throws a typed `HttpError` carrying `status`, `statusText`, `url`, and the parsed
 `body`. The client forwards a resource's abort `signal` to `fetch`, so route
-changes cancel in-flight requests exactly as with a hand-written loader.
+changes cancel in-flight requests exactly as with a hand-written loader. For
+mixed browser/Node test realms, `fetchWithSignal` preserves the abort race even
+when the underlying fetch implementation rejects a foreign-realm signal before
+the request starts.
 
 ## Authentication
 
@@ -199,4 +202,3 @@ router by reading `auth.status` in a route's setup and navigating to the login
 route when it is `unauthenticated`; a thrown guard is caught by `errorBoundary`.
 
 Next: [Application platform](./application-platform.md) · [SSR](./ssr.md).
-

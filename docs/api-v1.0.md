@@ -41,6 +41,21 @@ For 1.0.0 the surface is clean: **every one of the 339 public exports (168
 values, 171 types) is stable.** There are zero deprecated, experimental, or
 internal exports in any public barrel.
 
+### Recommended versus advanced APIs
+
+Stability answers whether an API can change; it does not answer where a new user
+should start. The documentation therefore uses this practical guidance:
+
+- **Recommended:** `signal`, `derived`, `effect`, `streetui`, `compile`,
+  `createRenderer`, `component`, `resource`, `createForm`, `createRouter`,
+  `mountRouter`, `renderToString`, `hydrate`, and `streetui/testing` queries.
+- **Advanced:** graph inspection, static SSR plans, DevTools inspectors, custom
+  DOM adapters, hydration diagnostics, transition internals, and direct compiler
+  or runtime integration.
+
+Advanced does not mean unstable. It means the API is most useful when building a
+framework integration, diagnostic tool, or custom rendering environment.
+
 ## Public API report — per package
 
 All 17 public packages publish at `1.0.0`, each with its `dist/index.d.ts` types

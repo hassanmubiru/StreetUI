@@ -76,7 +76,7 @@ function createAccountApi(initial = DEFAULT_PLANS) {
 }
 
 // src/account-app.ts
-import { derived, resource } from "streetui";
+import { derived, resource, fetchWithSignal } from "streetui";
 import { a11yIds } from "streetui";
 import {
   createForm,
@@ -147,8 +147,8 @@ var FormContext = createContext(
   null,
   "streetui.account.form"
 );
-async function fetchPlans(baseUrl, signal2) {
-  const response = await fetch(`${baseUrl}/api/plans`, { signal: signal2 });
+async function fetchPlans(baseUrl, signal) {
+  const response = await fetchWithSignal(fetch, `${baseUrl}/api/plans`, {}, signal);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return await response.json();
 }
@@ -236,7 +236,7 @@ function buildRoutes(opts, navigate) {
       });
       ctx.onCleanup(() => form.dispose());
       opts.onForm?.(form);
-      const plansRes = resource(({ signal: signal2 }) => fetchPlans(opts.baseUrl, signal2), {
+      const plansRes = resource(({ signal }) => fetchPlans(opts.baseUrl, signal), {
         onCleanup: ctx.onCleanup
       });
       opts.onPlansResource?.(plansRes);

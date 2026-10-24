@@ -20,6 +20,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: 2.1.4
         version: 2.1.4(vitest@2.1.4(@types/node@26.6.2)(happy-dom@20.14.5))
+      axe-core:
+        specifier: 4.14.0
+        version: 4.14.0
       eslint:
         specifier: 9.13.0
         version: 9.13.0
@@ -97,8 +100,8 @@ importers:
   examples/streetjs-website:
     dependencies:
       streetui:
-        specifier: 3.0.1
-        version: 3.0.1
+        specifier: 3.0.2
+        version: 3.0.2
     devDependencies:
       esbuild:
         specifier: 0.24.2
@@ -1649,6 +1652,10 @@ packages:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
 
+  axe-core@4.14.0:
+    resolution: {integrity: sha512-9WTZxEjsZ7b13TH8JPmbV2z8CHbl80/2hm3XPEG4JgNdQLK81IBRXmSxHfMAOkSqQeRxT/0dwNDz2GOm3zzpcQ==}
+    engines: {node: '>=4'}
+
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
 
@@ -2214,8 +2221,8 @@ packages:
   std-env@3.10.0:
     resolution: {integrity: sha512-5GS12FdOZNliM5mAOxFRg7Ir0pWz8MdpYm6AY6VPkGpbA7ZzmbzNcBJQ0GPvvyWgcY7QAhCgf9Uy89I03faLkg==}
 
-  streetui@3.0.1:
-    resolution: {integrity: sha512-eS3wdXcZOCQp5P4Y/isN1mrp2ErVW5rtjrzOI3J1T6IURMMuGxHtOSEIkauwiynaDJkch4APr3ZWVWp76XuKDw==}
+  streetui@3.0.2:
+    resolution: {integrity: sha512-5PVru1tCMbrZBgrKw1nvwbi/ue8do0SO9uwA4LO70enMVcrXjyQIOc62IAWtMEIctqMMHHfSopQvfXLsWIOB7w==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -3135,6 +3142,8 @@ snapshots:
 
   assertion-error@2.0.1: {}
 
+  axe-core@4.14.0: {}
+
   balanced-match@1.0.2: {}
 
   balanced-match@4.0.4: {}
@@ -3738,7 +3747,7 @@ snapshots:
 
   std-env@3.10.0: {}
 
-  streetui@3.0.1:
+  streetui@3.0.2:
     dependencies:
       esbuild: 0.24.2
 

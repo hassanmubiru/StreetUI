@@ -16,7 +16,7 @@
  *   *                404
  */
 
-import { signal, derived, resource, type Resource } from 'streetui';
+import { derived, resource, fetchWithSignal, type Resource } from 'streetui';
 import type { ContainerDSL } from 'streetui';
 import {
   createRouter,
@@ -32,7 +32,7 @@ import type { Product } from './api-server.js';
 // ── API client (transport-agnostic Promise-returning functions) ────────────────
 /** Fetch the full product list. Throws on a non-OK response (surfaced as error). */
 export async function fetchProducts(baseUrl: string, signal: AbortSignal): Promise<Product[]> {
-  const response = await fetch(`${baseUrl}/api/products`, { signal });
+  const response = await fetchWithSignal(fetch, `${baseUrl}/api/products`, {}, signal);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return (await response.json()) as Product[];
 }

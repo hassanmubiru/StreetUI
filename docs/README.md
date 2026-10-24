@@ -41,33 +41,36 @@ production build. Every page begins with `npm install streetui` and uses only
 real, shipped APIs.
 
 1. [Getting started](./getting-started.md) — the mental model and your first app.
-2. [Architecture](./architecture.md) — core concepts: DSL → compiler → semantic
+2. [Why StreetUI?](./why-streetui.md) — fit, differentiators, and honest tradeoffs.
+3. [Migration guide](./migration-react-vue-svelte.md) — map React/Vue/Svelte concepts
+   to StreetUI's native primitives.
+4. [Architecture](./architecture.md) — core concepts: DSL → compiler → semantic
    graph → runtime → renderer → DOM.
-3. [Components](./components.md) — the builder DSL, composition, `when`, `listOf`,
+5. [Components](./components.md) — the builder DSL, composition, `when`, `listOf`,
    the `component()` primitive, and native child composition.
-4. [Reactivity](./reactivity.md) — `signal`, `derived`, `effect`, `batch`, and
-   `get()` vs `peek()`.
-5. [Routing](./routing.md) — `createRouter` / `mountRouter`, params, history, and
-   cleanup.
-6. [Data](./data.md) — `resource` for async loading; `mutation`, the
-   form → mutation → invalidate write path, the optional `createClient` HTTP
-   client, and `createAuthSession`.
-7. [Forms](./forms.md) — `createForm`, validators, field state, and field isolation.
-8. [Async UI](./async-ui.md) — `asyncBoundary` and `errorBoundary` over the
-   `resource` state machine.
-9. [Overlays](./overlays.md) — `dialog` / `popover` / `tooltip` / `dropdown` /
-   `toast` and the `portal` beneath them.
-10. [Accessibility](./accessibility.md) — focus utilities, `createAnnouncer`,
-    `a11yIds`, and `rovingMenu`.
-11. [Transitions](./transitions.md) — the CSS class-based enter/leave engine.
-12. [SSR](./ssr.md) — `renderToString`, `renderHead`, and state serialization.
-13. [Hydration](./hydration.md) — adopting server DOM with the zero-node guarantee.
-14. [Testing](./testing.md) — `render`, role/text queries, `waitFor`, and the
+6. [Reactivity](./reactivity.md) — `signal`, `derived`, `effect`, `batch`, and
+    `get()` vs `peek()`.
+7. [Routing](./routing.md) — `createRouter` / `mountRouter`, params, history, and
+    cleanup.
+8. [Data](./data.md) — `resource` for async loading; `mutation`, the
+    form → mutation → invalidate write path, the optional `createClient` HTTP
+    client, and `createAuthSession`.
+9. [Forms](./forms.md) — `createForm`, validators, field state, and field isolation.
+10. [Async UI](./async-ui.md) — `asyncBoundary` and `errorBoundary` over the
+    `resource` state machine.
+11. [Overlays](./overlays.md) — `dialog` / `popover` / `tooltip` / `dropdown` /
+    `toast` and the `portal` beneath them.
+12. [Accessibility](./accessibility.md) — focus utilities, `createAnnouncer`,
+     `a11yIds`, and `rovingMenu`.
+13. [Transitions](./transitions.md) — the CSS class-based enter/leave engine.
+14. [SSR](./ssr.md) — `renderToString`, `renderHead`, and state serialization.
+15. [Hydration](./hydration.md) — adopting server DOM with the zero-node guarantee.
+16. [Testing](./testing.md) — `render`, role/text queries, `waitFor`, and the
     `renderServerThenHydrate` workflow.
-15. [DevTools](./devtools.md) — `createDevTools`, `renderDevToolsHTML`, the
+17. [DevTools](./devtools.md) — `createDevTools`, `renderDevToolsHTML`, the
     one-call `renderDevToolsReport`, and the reactive inspectors.
-16. [CLI](./cli.md) — `create` / `dev` / `build` / `start` and the programmatic API.
-17. [Deployment](./deployment.md) — building, serving, and the client/server boundary.
+18. [CLI](./cli.md) — `create` / `dev` / `build` / `start` and the programmatic API.
+19. [Deployment](./deployment.md) — building, serving, and the client/server boundary.
 
 The [Application platform](./application-platform.md) page ties overlays,
 transitions, async UI, metadata, and i18n together through the showcase app.
@@ -124,6 +127,9 @@ Beyond the ordered learning path above, these group the same docs by concern:
 - [Integration Boundaries](./integration.md) — where the app meets the DOM,
   HTTP/async data, the URL, forms, i18n, logging, testing, and the CLI, and the
   boundaries StreetUI deliberately does not cross.
+- [Renderer contracts](./renderer-contracts.md) — node identity, hydration,
+  cleanup, transitions, portals, and overlays.
+- [Test quality](./test-quality.md) — which layer proves which behavior.
 
 ## Performance
 

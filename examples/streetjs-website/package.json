@@ -12,7 +12,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "streetui": "3.0.1"
+    "streetui": "3.0.2"
   },
   "devDependencies": {
     "esbuild": "0.24.2",

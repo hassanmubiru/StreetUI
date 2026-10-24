@@ -131,3 +131,6 @@ application opts in. See [Observability](./observability.md).
 No virtual DOM. No second graph. No second reactive system. No second renderer.
 No JSX runtime. No React/Vue/Preact compatibility layer. No streaming SSR. No
 hosted telemetry. These are deliberate, enforced boundaries.
+
+The renderer behavior guarantees are documented separately in
+[Renderer contracts](./renderer-contracts.md).

@@ -1,0 +1,55 @@
+name: Browser validation
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run build
+      - run: node scripts/browser-harness.mjs
+      - run: node scripts/visual-a11y-axe.mjs --out=/tmp/streetui-visual-a11y.json
+      - run: >-
+          node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('/tmp/streetui-visual-a11y.json','utf8'));
+          if(r.status !== 'PASS') throw new Error('Visual accessibility gate: '+r.status+' '+(r.reason||''))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chromium-validation
+          path: |
+            benchmarks/results/v1.3/streetui-browser.json
+            /tmp/streetui-visual-a11y.json
+
+  firefox:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps firefox
+      - run: pnpm run build
+      - run: node scripts/browser-harness-firefox.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: firefox-validation
+          path: benchmarks/results/v2.5/streetui-firefox.json

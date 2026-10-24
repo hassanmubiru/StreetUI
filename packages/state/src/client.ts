@@ -26,6 +26,73 @@ import { mutation, type Mutation, type MutationOptions } from './mutation.js';
 /** A `fetch`-compatible function. Injectable for tests / non-browser runtimes. */
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
 
+/**
+ * Fetch with an abort signal, including across mixed DOM/Node realms.
+ *
+ * Some test DOMs expose a browser `AbortSignal` while the active fetch
+ * implementation is Node's fetch. Node rejects that signal before the request
+ * starts. In that narrow case we retry without passing the foreign signal and
+ * race the response against the caller's signal. Normal browser/Node requests
+ * keep native transport cancellation; the fallback still prevents a disposed
+ * resource from observing a late response.
+ */
+export async function fetchWithSignal(
+  fetcher: FetchLike,
+  input: string,
+  init: RequestInit = {},
+  signal?: AbortSignal,
+): Promise<Response> {
+  if (signal?.aborted === true) {
+    throw signal.reason ?? new DOMException('The operation was aborted.', 'AbortError');
+  }
+
+  const requestInit = signal === undefined ? init : { ...init, signal };
+  try {
+    return await fetcher(input, requestInit);
+  } catch (error) {
+    if (signal === undefined || !isForeignSignalError(error)) throw error;
+    // If the caller disposed the operation while the native request was
+    // settling, do not start an untracked fallback request after cancellation.
+    if (signal.aborted) {
+      throw signal.reason ?? new DOMException('The operation was aborted.', 'AbortError');
+    }
+    const { signal: _foreignSignal, ...retryInit } = requestInit;
+    const response = fetcher(input, retryInit);
+    return raceWithAbort(response, signal);
+  }
+}
+
+function isForeignSignalError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  const name = typeof error === 'object' && error !== null && 'name' in error
+    ? String((error as { name?: unknown }).name)
+    : '';
+  return (error instanceof TypeError || name === 'TypeError') && /signal|AbortSignal|AbortController/i.test(message);
+}
+
+function raceWithAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
+  if (signal.aborted) {
+    return Promise.reject(signal.reason ?? new DOMException('The operation was aborted.', 'AbortError'));
+  }
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = (): void => {
+      signal.removeEventListener('abort', onAbort);
+      reject(signal.reason ?? new DOMException('The operation was aborted.', 'AbortError'));
+    };
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise.then(
+      (value) => {
+        signal.removeEventListener('abort', onAbort);
+        resolve(value);
+      },
+      (error) => {
+        signal.removeEventListener('abort', onAbort);
+        reject(error);
+      },
+    );
+  });
+}
+
 export interface ClientConfig {
   /** Prefix joined to every request path (e.g. `/api` or `https://x/api`). */
   readonly baseUrl?: string;
@@ -137,7 +204,7 @@ export function createClient(config: ClientConfig = {}): Client {
       init.body = JSON.stringify(body);
     }
 
-    const response = await doFetch(url, init);
+    const response = await fetchWithSignal(doFetch, url, init, reqConfig.signal);
     const parsed = await parseBody(response);
     if (!response.ok) {
       throw new HttpError(response.status, response.statusText, url, parsed);

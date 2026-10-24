@@ -5,7 +5,7 @@
  * that the client composes with `resource`/`mutation`.
  */
 import { describe, it, expect, vi } from 'vitest';
-import { createClient, HttpError } from './client.js';
+import { createClient, fetchWithSignal, HttpError } from './client.js';
 
 function jsonResponse(body: unknown, init: { status?: number; statusText?: string } = {}): Response {
   const status = init.status ?? 200;
@@ -17,6 +17,28 @@ function jsonResponse(body: unknown, init: { status?: number; statusText?: strin
 }
 
 describe('createClient — requests', () => {
+  it('falls back across foreign AbortSignal realms and still rejects on abort', async () => {
+    const calls: Array<RequestInit | undefined> = [];
+    let fallbackStarted!: () => void;
+    const fallbackReady = new Promise<void>((resolve) => {
+      fallbackStarted = resolve;
+    });
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+      calls.push(init);
+      if (init?.signal !== undefined) throw new TypeError('RequestInit: Expected signal to be an instance of AbortSignal');
+      fallbackStarted();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      return jsonResponse({ ok: true });
+    });
+    const controller = new AbortController();
+    const request = fetchWithSignal(fetchMock, '/slow', {}, controller.signal);
+    await fallbackReady;
+    controller.abort();
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' });
+    expect(calls).toHaveLength(2);
+    expect(calls[1]?.signal).toBeUndefined();
+  });
+
   it('joins baseUrl + path, sets JSON headers on a body, and parses JSON back', async () => {
     const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => jsonResponse({ id: 1, name: 'Ada' }));
     const api = createClient({ baseUrl: '/api', headers: { Authorization: 'Bearer t' }, fetch: fetchMock });

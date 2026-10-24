@@ -15,7 +15,7 @@
  * the client, so translations and a11y ids must be deterministic — they are.
  */
 
-import { signal, derived, resource, type Resource } from 'streetui';
+import { derived, resource, fetchWithSignal, type Resource } from 'streetui';
 import type { ContainerDSL } from 'streetui';
 import { a11yIds } from 'streetui';
 import {
@@ -115,7 +115,7 @@ const FormContext: Context<FormScope | null> = createContext<FormScope | null>(
 
 // ── API client (real HTTP, no mocking) ──────────────────────────────────────────
 export async function fetchPlans(baseUrl: string, signal: AbortSignal): Promise<Plan[]> {
-  const response = await fetch(`${baseUrl}/api/plans`, { signal });
+  const response = await fetchWithSignal(fetch, `${baseUrl}/api/plans`, {}, signal);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return (await response.json()) as Plan[];
 }

@@ -17,10 +17,12 @@
     "release:publish": "node scripts/publish-packages.mjs",
     "release:publish:dry": "node scripts/publish-packages.mjs --dry-run",
     "release:browser": "node scripts/browser-harness.mjs",
+    "check:bundle": "node scripts/bundle-budget.mjs",
     "readmes": "node scripts/generate-readmes.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "axe-core": "4.14.0",
     "@typescript-eslint/eslint-plugin": "8.11.0",
     "@typescript-eslint/parser": "8.11.0",
     "@vitest/coverage-v8": "2.1.4",

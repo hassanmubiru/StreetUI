@@ -394,6 +394,50 @@ function mutation(mutator, options = {}) {
 }
 
 // src/client.ts
+async function fetchWithSignal(fetcher, input, init = {}, signal3) {
+  if (signal3?.aborted === true) {
+    throw signal3.reason ?? new DOMException("The operation was aborted.", "AbortError");
+  }
+  const requestInit = signal3 === void 0 ? init : { ...init, signal: signal3 };
+  try {
+    return await fetcher(input, requestInit);
+  } catch (error) {
+    if (signal3 === void 0 || !isForeignSignalError(error)) throw error;
+    if (signal3.aborted) {
+      throw signal3.reason ?? new DOMException("The operation was aborted.", "AbortError");
+    }
+    const { signal: _foreignSignal, ...retryInit } = requestInit;
+    const response = fetcher(input, retryInit);
+    return raceWithAbort(response, signal3);
+  }
+}
+function isForeignSignalError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  const name = typeof error === "object" && error !== null && "name" in error ? String(error.name) : "";
+  return (error instanceof TypeError || name === "TypeError") && /signal|AbortSignal|AbortController/i.test(message);
+}
+function raceWithAbort(promise, signal3) {
+  if (signal3.aborted) {
+    return Promise.reject(signal3.reason ?? new DOMException("The operation was aborted.", "AbortError"));
+  }
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      signal3.removeEventListener("abort", onAbort);
+      reject(signal3.reason ?? new DOMException("The operation was aborted.", "AbortError"));
+    };
+    signal3.addEventListener("abort", onAbort, { once: true });
+    promise.then(
+      (value) => {
+        signal3.removeEventListener("abort", onAbort);
+        resolve(value);
+      },
+      (error) => {
+        signal3.removeEventListener("abort", onAbort);
+        reject(error);
+      }
+    );
+  });
+}
 var HttpError = class extends Error {
   status;
   statusText;
@@ -438,7 +482,7 @@ function createClient(config = {}) {
       if (headers["Content-Type"] === void 0) headers["Content-Type"] = "application/json";
       init.body = JSON.stringify(body);
     }
-    const response = await doFetch(url, init);
+    const response = await fetchWithSignal(doFetch, url, init, reqConfig.signal);
     const parsed = await parseBody(response);
     if (!response.ok) {
       throw new HttpError(response.status, response.statusText, url, parsed);
@@ -538,6 +582,7 @@ export {
   createStore,
   derived,
   effect,
+  fetchWithSignal,
   isBatching,
   mutation,
   observerCount,

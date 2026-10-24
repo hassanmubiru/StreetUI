@@ -1,17 +1,17 @@
 // src/data-app.ts
-import { derived, resource } from "streetui";
+import { derived, resource, fetchWithSignal } from "streetui";
 import {
   createRouter,
   mountRouter,
   routerOutlet
 } from "streetui";
-async function fetchProducts(baseUrl, signal2) {
-  const response = await fetch(`${baseUrl}/api/products`, { signal: signal2 });
+async function fetchProducts(baseUrl, signal) {
+  const response = await fetchWithSignal(fetch, `${baseUrl}/api/products`, {}, signal);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return await response.json();
 }
-async function fetchProduct(baseUrl, id, signal2) {
-  const products = await fetchProducts(baseUrl, signal2);
+async function fetchProduct(baseUrl, id, signal) {
+  const products = await fetchProducts(baseUrl, signal);
   const found = products.find((p) => p.id === id);
   if (found === void 0) throw new Error(`Product ${id} not found`);
   return found;
@@ -34,7 +34,7 @@ function buildRoutes(opts) {
     path: "/products",
     builder: (page, ctx) => {
       const res = resource(
-        ({ signal: signal2 }) => fetchProducts(opts.baseUrl, signal2),
+        ({ signal }) => fetchProducts(opts.baseUrl, signal),
         { onCleanup: ctx.onCleanup }
       );
       opts.onProductsResource?.(res);
@@ -72,7 +72,7 @@ function buildRoutes(opts) {
     builder: (page, ctx) => {
       const id = Number(ctx.params.id ?? "0");
       const res = resource(
-        ({ signal: signal2 }) => fetchProduct(opts.baseUrl, id, signal2),
+        ({ signal }) => fetchProduct(opts.baseUrl, id, signal),
         { onCleanup: ctx.onCleanup }
       );
       opts.onProductResource?.(res);
