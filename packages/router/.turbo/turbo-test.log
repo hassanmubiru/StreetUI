@@ -1,0 +1,22 @@
+
+> @streetui/router@3.0.2 test /home/error51/Downloads/StreetUI/packages/router
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/router
+
+ ✓ src/router.test.ts  (11 tests) 62ms
+ ✓ src/matching.test.ts  (13 tests) 24ms
+ ✓ src/mount-router-transition.test.ts  (5 tests) 58ms
+ ✓ src/public-api.stability.test.ts  (7 tests) 40ms
+ ✓ src/outlet-key.hydration.test.ts  (3 tests) 65ms
+ ✓ src/hydrate-router.test.ts  (4 tests) 78ms
+ ✓ src/mount-router.test.ts  (7 tests) 199ms
+ ✓ src/router-memory.test.ts  (6 tests) 1021ms
+   ✓ router memory stress — 100 iterations > navigation churn keeps exactly one live binding for the shown route 323ms
+
+ Test Files  8 passed (8)
+      Tests  56 passed (56)
+   Start at  00:34:31
+   Duration  5.27s (transform 2.83s, setup 0ms, collect 6.45s, tests 1.55s, environment 14.09s, prepare 3.40s)
+

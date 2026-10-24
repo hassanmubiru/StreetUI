@@ -5,10 +5,10 @@
 
  RUN  v2.1.4 /home/error51/Downloads/StreetUI/examples/streetui-account
 
- ✓ src/account-app.test.ts  (10 tests) 594ms
+ ✓ src/account-app.test.ts  (10 tests) 664ms
 
  Test Files  1 passed (1)
       Tests  10 passed (10)
-   Start at  00:31:30
-   Duration  9.45s (transform 2.60s, setup 122ms, collect 2.41s, tests 594ms, environment 2.05s, prepare 2.27s)
+   Start at  00:34:45
+   Duration  9.31s (transform 2.23s, setup 247ms, collect 2.35s, tests 664ms, environment 2.21s, prepare 1.53s)
 

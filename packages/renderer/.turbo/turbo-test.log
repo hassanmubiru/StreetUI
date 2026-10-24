@@ -1,0 +1,45 @@
+
+> @streetui/renderer@3.0.2 test /home/error51/Downloads/StreetUI/packages/renderer
+> vitest run
+
+
+ RUN  v2.1.4 /home/error51/Downloads/StreetUI/packages/renderer
+
+ ✓ src/static-ssr-plan.test.ts  (15 tests) 66ms
+ ✓ src/transition.test.ts  (7 tests) 85ms
+ ✓ src/async-boundary.test.ts  (6 tests) 90ms
+ ✓ src/api-improvements.test.ts  (27 tests) 124ms
+ ✓ src/head.test.ts  (9 tests) 103ms
+ ✓ src/code.test.ts  (11 tests) 80ms
+ ✓ src/renderer.test.ts  (43 tests) 150ms
+ ✓ src/overlay.test.ts  (12 tests) 154ms
+ ✓ src/hydrate.test.ts  (20 tests) 153ms
+ ✓ src/component.test.ts  (11 tests) 184ms
+ ✓ src/memory.test.ts  (10 tests) 1161ms
+   ✓ memory / keyed-list mutation stress leaves no residue > grow → churn → return to start drains instances and handlers to baseline 456ms
+ ✓ src/portal.test.ts  (6 tests) 100ms
+ ✓ src/error-boundary.test.ts  (7 tests) 133ms
+ ✓ src/a11y.test.ts  (6 tests) 41ms
+ ✓ src/batch-render.test.ts  (3 tests) 51ms
+ ✓ src/ssr.test.ts  (13 tests) 81ms
+ ✓ src/data-flow.test.ts  (3 tests) 45ms
+ ✓ src/public-api.stability.test.ts  (4 tests) 73ms
+ ✓ src/reconcile-perf.test.ts  (7 tests) 760ms
+ ✓ src/theme.test.ts  (7 tests) 33ms
+ ✓ src/overlay-memory.test.ts  (3 tests) 851ms
+   ✓ overlay memory stress — 200 open/close cycles > open→close a dialog N times drains instances + overlay handlers to baseline 409ms
+ ✓ src/update-independence.test.ts  (4 tests) 1256ms
+   ✓ fine-grained update locality — independent of N (spec §9) > updating K distinct signals writes exactly K nodes, independent of N 778ms
+ ✓ src/styling-transitions.test.ts  (6 tests) 18ms
+ ✓ src/styles.test.ts  (6 tests) 24ms
+ ✓ src/reactive-style.test.ts  (3 tests) 23ms
+ ✓ src/component-memory.test.ts  (3 tests) 2773ms
+   ✓ component memory cycles — 50 iterations > disposes cleanly every cycle with a stable handler baseline 606ms
+   ✓ component memory cycles — 100 iterations > disposes cleanly every cycle with a stable handler baseline 704ms
+   ✓ component memory cycles — 200 iterations > disposes cleanly every cycle with a stable handler baseline 1459ms
+
+ Test Files  26 passed (26)
+      Tests  252 passed (252)
+   Start at  00:34:24
+   Duration  8.37s (transform 2.27s, setup 0ms, collect 9.08s, tests 8.61s, environment 23.48s, prepare 6.30s)
+
