@@ -10,10 +10,11 @@ small set of framework-agnostic focus and announcement utilities you can use to
 build accessible interactions yourself.
 
 > **Honest scope.** These utilities emit and manage the DOM structure and focus
-> state that assistive technology relies on. Whether a real screen reader
-> announces them correctly has **not** been verified in this environment — no
-> assistive technology is available here, so screen-reader validation is
-> reported as `assistive_technology = BLOCKED` rather than simulated.
+> state that assistive technology relies on. The current run captured a live
+> AT-SPI tree with Orca/pyatspi, but did not capture literal speech-dispatcher
+> utterances. Screen-reader evidence is therefore reported as AT-SPI tree
+> observation with spoken output still not measured; availability alone is not
+> treated as a pass.
 
 ## Focus utilities
 

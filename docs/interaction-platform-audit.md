@@ -149,9 +149,11 @@ responsibility stays with the application author.
   `open` signal. The framework does not attach global document listeners, which
   keeps it touch-, SSR-, and hydration-safe but means dismissal behaviour is the
   app's to define.
-- Real assistive-technology testing. The test suite runs against happy-dom, which
-  models the DOM but not a screen reader; the browser/AT gate is BLOCKED in this
-  environment (§24) and is **not** simulated or asserted as passing.
+- Real assistive-technology testing. The test suite still runs against happy-dom
+  for deterministic structural behavior, while the current run additionally
+  captured the live AT-SPI tree with Orca/pyatspi. Literal spoken output was not
+  captured, so the browser/AT evidence remains partial and is **not** asserted as
+  a complete screen-reader pass.
 
 ### §16 — the minimal focus-owner (containment stack)
 
@@ -170,5 +172,4 @@ is internal transient state confined to the focus module, torn down on cleanup,
 and never attached to graph nodes — consistent with §18. A global registry with
 richer bookkeeping was **not** added; the stack is sufficient and a nested-dialog
 regression test (`overlay.test.ts`) pins the behaviour.
-
 

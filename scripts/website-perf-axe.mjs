@@ -291,8 +291,8 @@ try {
     generatedAt: nowIso(),
     target: 'examples/streetui-website (served locally)',
     layers: {
-      STRUCTURAL: 'PASS — website.test.ts 58/58 (public-API gate)',
-      BEHAVIORAL: 'PASS — overlay/focus integration tests (public-API gate)',
+      STRUCTURAL: 'PASS — website suite 71/71 (public-API gate)',
+      BEHAVIORAL: 'PASS — website interaction/regression tests included in the 71-test suite',
       VISUAL: axeResult,
       ASSISTIVE_TECHNOLOGY: 'PARTIAL — AT-SPI tree captured; literal Orca speech pending',
     },

@@ -5,6 +5,10 @@ export default defineConfig({
   // never averaged, never bundled into one artifact.
   entry: ['src/index.ts', 'src/browser-entry.ts', 'src/server-entry.ts'],
   format: ['esm'],
+  // The browser entry is loaded directly by index.html, so the published
+  // framework must be bundled into the client artifact rather than left as a
+  // bare `streetui` import that only a Node/package-aware bundler can resolve.
+  noExternal: ['streetui'],
   dts: false,
   sourcemap: true,
   clean: true,

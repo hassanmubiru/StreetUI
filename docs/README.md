@@ -83,10 +83,10 @@ transitions, async UI, metadata, and i18n together through the showcase app.
 - [Migrating to 1.0](./migration-to-1.0.md) — there is nothing to migrate; the
   small version-alignment fixes, and what "stable" commits the project to.
 - [Release process](./release-process.md) — the release gates and the scripts
-  that enforce them, and the honest BLOCKED status of the browser and registry
-  gates.
-- [Browser & runtime support](./browser-support.md) — target environments, what
-  was validated (happy-dom, Node 22), and what was not (real browsers).
+  that enforce them, including recorded real-browser evidence and the remaining
+  registry-publication limitation.
+- [Browser & runtime support](./browser-support.md) — target environments and
+  the current Node, DOM, Chromium, and Firefox validation evidence.
 - [Changelog](../CHANGELOG.md).
 
 ## Getting started

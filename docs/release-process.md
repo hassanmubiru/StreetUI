@@ -83,19 +83,23 @@ below.
 
 ## Gate status in this environment
 
-Two gates cannot be executed in the sandbox this release was built in, and are
-reported honestly rather than assumed:
+The local release validation now has real-browser evidence:
 
-- **Real-browser validation — BLOCKED.** No browser or headless driver is
-  available; DOM behavior is validated against happy-dom. See
-  [`browser-support.md`](./browser-support.md).
-- **Registry publication — BLOCKED.** No reachable npm registry. Packaging is
-  proven up to locally-built tarballs and the offline consumer smoke test.
-  Nothing has been published from here, and no "available on npm" claim is made.
+- **Real-browser validation — PASS for the available runs.** The Chromium
+  performance harness completed successfully, and the website harness collected
+  separate Chrome and Firefox measurements with no console errors. The standalone
+  Playwright Firefox performance harness remains **BLOCKED** because its managed
+  Firefox binary is not installed; that limitation is recorded rather than
+  replaced with simulated numbers. See [`browser-support.md`](./browser-support.md).
+- **Registry publication — BLOCKED.** No reachable npm registry is available.
+  Packaging is proven up to locally-built tarballs and the offline consumer smoke
+  test. Nothing has been published from here, and no "available on npm" claim is
+  made.
 
 All other gates — version alignment, metadata presence, API inventory and
-contract tests, build/typecheck, full test suite, packing, and offline consumer
-install — pass with recorded evidence.
+contract tests, build/typecheck, full test suite, packing, offline consumer
+install, SSR byte identity, client leak checks, and bundle budgets — pass with
+recorded evidence.
 
 ## Related
 

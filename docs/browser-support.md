@@ -15,8 +15,8 @@ DOM and no JSX runtime; the renderer talks to `document` through the adapter, so
 any environment providing a spec-compliant DOM is a candidate host.
 
 For server-side rendering the runtime is Node. The repository declares
-`"engines": { "node": ">=18.0.0" }`, and the release was built and tested on
-Node 22. SSR uses a separate `ServerDOMAdapter` that builds markup as strings and
+`"engines": { "node": ">=18.0.0" }`, and the current validation run completed on
+Node 24. SSR uses a separate `ServerDOMAdapter` that builds markup as strings and
 does not require a DOM global, so `renderToString` runs in a plain Node process.
 
 ## What was validated in this release
@@ -24,8 +24,8 @@ does not require a DOM global, so `renderToString` runs in a plain Node process.
 DOM-dependent packages (`dom`, `renderer`, `router`, `testing`, and the
 DOM-exercising benchmarks) run their suites under **happy-dom**, a
 spec-compliant DOM implementation, in the vitest `happy-dom` environment. Every
-other package runs in the vitest `node` environment. The full suite — 619 tests
-— is green on Node 22.
+other package runs in the vitest `node` environment. The full suite is green on
+Node 24.
 
 Against that DOM, hydration is validated end to end: exact server-node adoption
 (object identity preserved, no recreation), event wiring, reactive updates on
@@ -39,26 +39,19 @@ SSR is validated by rendering real applications to HTML and asserting on the
 markup, including through the offline consumer smoke test that imports the
 packed tarballs and server-renders through both the ESM and CJS entry points.
 
-## What was NOT validated: real browsers
+## Real-browser evidence and remaining limits
 
-**Real-browser validation is BLOCKED in this build environment.** No
-Chromium/Chrome, Firefox, or headless-browser driver (Playwright/Puppeteer) is
-available in the sandbox where this release was produced. That means:
+The current validation run exercised real browser engines. The Chromium
+performance harness completed with measured mount, hydration, frame, memory, and
+long-task data. The website harness also collected separate Chrome and Firefox
+route/performance measurements, with no console errors, and the Chromium axe scan
+reported zero violations across the tested routes.
 
-- Behavior was validated against happy-dom, a DOM *implementation*, not a
-  shipped browser engine. happy-dom is spec-compliant and covers the APIs
-  StreetUI uses, but it is not a substitute for running in Chrome, Firefox, or
-  Safari.
-- No claim is made in this release that StreetUI has been exercised in a real
-  browser, on real browser layout, or across a browser support matrix. Such a
-  claim would require running the suites in actual browsers, which this
-  environment cannot do.
-
-This is a known, reported gate — not a defect in the framework, and not
-something to be papered over with an assumed result. Running the DOM suites in
-real browsers (for example via a browser-mode test runner in CI) is the
-follow-up needed to close it, and is listed on the post-1.0 roadmap in
-[`api-v1.0.md`](./api-v1.0.md).
+This is not a complete browser support matrix: Safari was not exercised, and the
+standalone Playwright Firefox performance harness remains BLOCKED because its
+managed Firefox binary is not installed in this environment. The website
+Firefox measurements came from the available browser path and are kept separate
+from the Chromium results. No result is substituted or averaged across engines.
 
 ## Compatibility policy
 

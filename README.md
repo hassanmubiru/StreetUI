@@ -112,15 +112,14 @@ A first-class, unified styling system — build polished, responsive, themeable
 interfaces using StreetUI itself, with no external CSS framework required.
 
 ```ts
-import { style, cx, createThemeTokens, tokens, layout, text } from 'streetui';
-
-const t = tokens.ref;
+import { streetui, style, cx, createThemeTokens, layout, text } from 'streetui';
 
 // Design tokens — light + dark in one call
 const brand = createThemeTokens({
   light: { surface: { background: '#f8fafc' }, accent: { primary: '#2563eb' } },
   dark:  { surface: { background: '#0b1020' }, accent: { primary: '#60a5fa' } },
 });
+const t = brand.ref;
 
 // Deduped, atomic class tokens
 const card = style({
@@ -135,6 +134,19 @@ const grid = layout.grid({ cols: { base: 1, md: 2, lg: 3 }, gap: '6' });
 
 // Typography presets
 const heading = cx(text.heading({ level: 2 }), style({ color: t.content.primary }));
+
+const app = streetui.app({ name: 'StyledApp' });
+
+// Attach the returned class tokens to DSL nodes through `class`.
+// `style()` returns a plain string, so `cx()` can compose it with presets or
+// conditional classes before passing it to any node that accepts options.
+app.page('home', (page) => {
+  page.section('hero', (hero) => {
+    hero.heading('Welcome to StreetUI', { class: heading });
+    hero.text('A semantic node with generated, token-driven CSS.', { class: card });
+    hero.button('Get started', { class: cx(card, style({ cursor: 'pointer' })) });
+  }, { class: cx(card, grid) });
+});
 ```
 
 - `style()` — deduped, atomic class tokens (computed at module load, SSR-safe)

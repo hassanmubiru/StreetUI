@@ -66,9 +66,10 @@ in tests without a real browser: use a small `duration` (or `0` → next
 macrotask) in unit tests.
 
 > **Honest scope.** The engine emits and removes the correct classes and defers
-> removal until completion; this is verified in the test DOM. Whether the
-> resulting animation is visually smooth at 60fps has **not** been verified here
-> — real-browser rendering is reported as `browser = BLOCKED`, not simulated.
+> removal until completion; this is verified in the test DOM. Real-browser
+> performance harnesses are available and have been run for the benchmark app,
+> but they do not constitute a transition-specific visual-smoothness guarantee;
+> no such guarantee is claimed here.
 
 ## `appear` and hydration
 

@@ -88,6 +88,31 @@ const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
 renderer.mount(compiled, document.getElementById('app')!);
 ```
 
+## Styling nodes
+
+`style()` returns a plain class token. Pass it through a node's `class` option,
+and use `cx()` to compose tokens or presets:
+
+```ts
+import { streetui, style, cx, tokens, text } from 'streetui';
+
+const t = tokens.ref;
+const card = style({
+  background: t.surface.raised,
+  borderRadius: t.radius.lg,
+  padding: t.space['5'],
+});
+const heading = cx(text.heading({ level: 2 }), style({ color: t.content.primary }));
+
+const app = streetui.app({ name: 'styled-app' });
+app.page('home', (page) => {
+  page.section('hero', (hero) => {
+    hero.heading('Welcome', { class: heading });
+    hero.text('Token-driven CSS attached directly to semantic nodes.', { class: card });
+  }, { class: card });
+});
+```
+
 ## Server-side rendering & hydration
 
 Render on the server and hydrate on the client using the same framework:

@@ -79,8 +79,8 @@ help track these down.
 
 Hydration duration and time-to-first-interaction are the figures that matter on
 the client. Real-browser numbers are gated through
-`scripts/browser-harness.mjs`; where no Chromium is available they are recorded
-BLOCKED rather than substituted with Node timings — see
+`scripts/browser-harness.mjs`; the current Chromium run recorded hydration and
+frame measurements in
 [`streetui-browser.json`](../benchmarks/results/v1.3/streetui-browser.json).
 
 This is the last guide; return to [Getting started](./getting-started.md) for the

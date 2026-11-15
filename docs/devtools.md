@@ -203,8 +203,8 @@ never pushed to), and zero production cost (nothing in the runtime imports it â€
 the interface exists only once dev code opts in by calling it). Call it again to
 reflect new state.
 
-> **Honest scope.** This produces markup. Whether it renders pixel-correctly, is
-> screen-reader accessible, or hits 60fps in a real browser is **not** claimed
-> and has **not** been verified here â€” the browser/AT gates are `BLOCKED` in
-> this environment. What is verified is that the emitted document faithfully and
-> safely (HTML-escaped) reflects the snapshot.
+> **Honest scope.** This produces markup. What is verified is that the emitted
+> document faithfully and safely (HTML-escaped) reflects the snapshot. The
+> general browser and AT harnesses now provide partial real-engine evidence, but
+> they do not establish pixel-perfect DevTools rendering, literal screen-reader
+> speech, or a 60fps guarantee for this report.
