@@ -1,6 +1,6 @@
 {
   "name": "@streetui/cli",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "StreetUI CLI \u2014 create, develop, build and run StreetUI applications. Orchestrates the existing DSL \u2192 Compiler \u2192 Graph \u2192 Runtime \u2192 Renderer pipeline; it is not a new framework layer.",
   "type": "module",
   "main": "./dist/index.cjs",
