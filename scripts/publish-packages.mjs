@@ -117,7 +117,7 @@ console.log('🔍 Running release check...');
 try {
   execFileSync(
     'node',
-    ['scripts/release-check.mjs', '--release-version', '3.0.2', '--channel', 'stable', '--manifest'],
+    ['scripts/release-check.mjs', '--release-version', '3.1.0', '--channel', 'stable', '--manifest'],
     { cwd: ROOT, stdio: 'inherit' },
   );
   console.log('');
@@ -147,7 +147,7 @@ for (const pkgName of PUBLISH_ORDER) {
     continue;
   }
 
-  process.stdout.write(`  publishing ${pkgName}@3.0.2 ... `);
+  process.stdout.write(`  publishing ${pkgName}@3.1.0 ... `);
   try {
     execFileSync(
       'npm',
