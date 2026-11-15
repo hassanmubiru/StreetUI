@@ -1,14 +1,14 @@
 {
   "name": "streetui",
   "version": "3.1.0",
-  "description": "StreetUI \u2014 a complete TypeScript UI framework with its own compiler, semantic application graph, reactivity, DOM renderer, router, resources, forms, context, i18n, SSR, hydration, testing, devtools and CLI. One install, one import.",
+  "description": "StreetUI — a complete TypeScript UI framework with its own compiler, semantic application graph, reactivity, DOM renderer, router, resources, forms, context, i18n, SSR, hydration, testing, devtools and CLI. One install, one import.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "streetui": "./dist/bin.js",
-    "create-streetui": "./dist/create-bin.js"
+    "streetui": "dist/bin.js",
+    "create-streetui": "dist/create-bin.js"
   },
   "exports": {
     ".": {
@@ -82,7 +82,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hassanmubiru/StreetUI.git",
+    "url": "git+https://github.com/hassanmubiru/StreetUI.git",
     "directory": "packages/streetui"
   },
   "homepage": "https://github.com/hassanmubiru/StreetUI#readme",
