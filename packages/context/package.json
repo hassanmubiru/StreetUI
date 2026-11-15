@@ -1,6 +1,6 @@
 {
   "name": "@streetui/context",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "StreetUI context \u2014 build-time provider/consumer scoping with nearest-provider resolution",
   "type": "module",
   "main": "./dist/index.cjs",

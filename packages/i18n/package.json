@@ -1,6 +1,6 @@
 {
   "name": "@streetui/i18n",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "StreetUI internationalization \u2014 reactive locale, typed translation, interpolation and pluralization",
   "type": "module",
   "main": "./dist/index.cjs",
