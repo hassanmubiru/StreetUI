@@ -1,6 +1,6 @@
 {
   "name": "create-streetui",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "The `npm create streetui@latest` initializer for StreetUI projects.",
   "license": "Apache-2.0",
   "bin": {

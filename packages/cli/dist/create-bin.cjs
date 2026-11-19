@@ -3562,8 +3562,8 @@ function emitDoctorReport(report, events, sessionId) {
 }
 
 // src/index.ts
-var CLI_VERSION = "3.2.0";
-var FRAMEWORK_VERSION = "3.2.0";
+var CLI_VERSION = "3.2.1";
+var FRAMEWORK_VERSION = "3.2.1";
 var HELP = `streetui \u2014 the StreetUI application CLI
 
 Usage:
