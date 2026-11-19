@@ -256,3 +256,23 @@ tarballs. No feature changes. Do not republish 3.2.0 or edit dist-tags.
    settings for `streetjs-website` need owner review (or disable that
    integration for this repo).
 
+## 13. Completion (2026-11-19, approved actions)
+
+- **PR #1 is MERGED** at merge commit
+  `ea0407d01783d61705a59acc307d8ca844169d7d`. `origin/main` now contains the
+  M8–M11 implementation, `AGENTS.md`, README/changelog updates, and the release
+  reports. GitHub `main` and the npm release now share the same source history.
+- **3.2.1 corrective release is published**: all 18 packages report
+  `latest: 3.2.1`. Consumer re-verification: `npm install @streetui/core@3.2.1`
+  then `tsc --noEmit --strict` on `import { style } from '@streetui/core'`
+  **passes** — declarations (`index.d.ts` + `index.d.cts`) are present in the
+  published artifact. Defect D-1 is resolved in the published packages, not
+  just locally.
+- **PR #2** for the corrective release:
+  https://github.com/hassanmubiru/StreetUI/pull/2 — open for review/merge
+  (merging it was not part of the granted approvals).
+- CHANGELOG updated in both checkouts: `3.2.1 — TypeScript declaration
+  packaging fix`. `@streetui/playground` remains intentionally unpublished.
+- Outstanding non-code items: GitHub billing lock (CI cannot start), Vercel
+  `streetjs-website` deployment configuration, and the PR #2 merge decision.
+
