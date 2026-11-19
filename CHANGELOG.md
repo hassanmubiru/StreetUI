@@ -5,6 +5,95 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## Unreleased — M11 Visual Browser Verification and Agent Automation (2026-11-19)
+
+**Toolchain milestone — code complete, verified locally; no packages published.**
+An AI agent can now open a StreetUI app in a real browser, see what rendered,
+interact with it, capture real screenshots, detect problems, fix them, and
+verify the result — all through StreetUI's own tooling.
+
+### Added
+
+- Optional Playwright browser automation provider in the Playground (lazy,
+  development-only, never a runtime dependency): real browser sessions with
+  engine/viewport selection and a real-binary cache fallback.
+- Real PNG screenshots: viewport/full-page, custom viewport sizes, IHDR-derived
+  dimensions, id-based binary retrieval, capped per-session storage, and cleanup
+  on shutdown. No screenshot is ever fabricated; unavailable providers return
+  `E_AUTOMATION_UNAVAILABLE`.
+- Browser interaction API (`/api/browser/interact`): click, type, fill, select,
+  press, submit, scroll, navigate, reload, resize, waitForSelector,
+  waitForNavigation, waitForStable, and `evaluate`, with structured results and
+  error codes (`E_ELEMENT_NOT_FOUND`, `E_NAVIGATION_FAILED`, …).
+- Structured visual inspection (`/api/browser/inspect`): URL/title/route,
+  viewport and document dimensions, bounded visible text and element geometry,
+  console/runtime/failed-request counts, broken images, empty-app-root and
+  off-viewport warnings, and screenshot references.
+- Multi-client browser sessions: client listing, explicit `clientId` targeting
+  (`E_CLIENT_REQUIRED`, `E_CLIENT_NOT_FOUND`), per-client console/errors, and
+  safe client disconnect/expire.
+- Lifecycle events: `session_ready` (once), `browser_connected` /
+  `browser_disconnected` (HMR and automation clients, with `clientId`), and
+  `preview_inspected` after real inspections.
+- `scripts/toolchain-agent-visual-e2e.mjs` acceptance harness and
+  `docs/toolchain/m11-*.md` documentation set.
+
+### Changed
+
+- Every JSONL event now has a **non-empty `sessionId`**, resolved at the session
+  boundary (the old `sessionId ?? ''` fallbacks are gone), plus unique `eventId`.
+- Browser operations no longer silently target the first connected client when
+  several are connected.
+
+### Fixed
+
+- Control API robustness: JSON responses are serialized before headers are
+  written and error paths no longer double-send (previously a non-serializable
+  `evaluate` result could crash the dev server with `ERR_HTTP_HEADERS_SENT`).
+- Playground argv parsing for `--session-id`; stale playground verification
+  harnesses now wait for `session_attached` instead of a removed event, and the
+  security harness no longer passes vacuously on timeout.
+
+### Security
+
+- Screenshots are confined to `<project>/.streetui-cache/screenshots/<sessionId>/`
+  and retrieved only by generated id (no path input); capped and deleted on
+  shutdown. Automation is serialized, time-limited, isolated per session, and
+  terminated on disconnect/stop. Existing localhost/auth/path/buffer rules are
+  preserved.
+
+### Verified (this environment)
+
+- M11 acceptance E2E: **VERIFIED on Chromium and Firefox** (22 steps each:
+  inspection, real PNG signature + dimensions, interactions, `hmr_applied` with
+  visible CSS and preserved state, `hmr_failed` reload, SSR reload semantics,
+  runtime error capture and recovery, multi-client targeting, build, shutdown,
+  revocation, cleanup).
+- 108 CLI unit tests passing; typecheck/lint/build clean for CLI + Playground;
+  M10 agent E2E, M8.4 workflow, HMR hardening, playground security, and
+  playground browser harnesses (Chromium + Firefox) all pass. WebKit not run.
+
+## Unreleased — M10 AI Agent-Native Development Workflow (2026-11-19)
+
+**Toolchain milestone — code complete, verified locally; no packages published.**
+
+### Added
+
+- Versioned JSONL protocol: `eventId` + `sessionId` on every event, new event
+  types for sessions, HMR outcomes, diagnostics, and browser capture.
+- Browser-confirmed HMR (`hmr_applied` / `hmr_failed`) instead of
+  broadcast-only `module_updated`; SSR-module edits intentionally full-reload.
+- Authenticated Playground control API: file editing, builds, diagnostics,
+  DOM/element inspection over the HMR socket, console/error capture, and
+  `session/shutdown` with token revocation and bounded buffers.
+- `scripts/toolchain-agent-e2e.mjs` and the `docs/toolchain/m10-*.md` set.
+
+### Verified (this environment)
+
+- M10 E2E passing against real Chromium; 104 unit tests at the time (108 with
+  M11 additions); playground security and Chromium + Firefox playground browser
+  harnesses passing. Details in `docs/toolchain/m10-report.md`.
+
 ## 2.7.0 — Unified Styling System (2026-10-02)
 
 **Major capability — code complete, publish deferred to the authoritative environment.**
