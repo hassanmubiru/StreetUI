@@ -2,6 +2,10 @@
  * Browser entry. Runs after the server HTML has painted: it reads the embedded
  * state snapshot, rebuilds the identical reactive state, and HYDRATES the
  * existing markup — adopting the server DOM instead of re-rendering it.
+ *
+ * HMR: editing `src/app.ts` re-runs the accepted update boundary below and
+ * re-renders with the *same* state signals. Editing this file, or state that
+ * cannot be safely preserved, falls back to a full reload.
  */
 
 import { createRenderer, readState } from '@streetui/renderer';
@@ -12,6 +16,9 @@ export interface HydrateResult {
   readonly state: AppState;
   unmount(): void;
 }
+
+let activeState: AppState | undefined;
+let activeHandle: { unmount(): void } | undefined;
 
 /** Hydrate the app inside `appContainer`, seeded from the SSR state island. */
 export function hydrateApp(appContainer: Element, stateRoot?: Element | Document): HydrateResult {
@@ -25,17 +32,33 @@ export function hydrateApp(appContainer: Element, stateRoot?: Element | Document
   const renderer = createRenderer({ domAdapter: dom });
   const handle = renderer.hydrate(compiled, appContainer);
 
-  // Keep the view in sync with browser back/forward navigation.
   const onPop = (): void => state.view.set(viewForPath(location.pathname));
   window.addEventListener('popstate', onPop);
+
+  activeState = state;
+  activeHandle = handle;
 
   return {
     state,
     unmount: () => {
       window.removeEventListener('popstate', onPop);
       handle.unmount();
+      if (activeHandle === handle) activeHandle = undefined;
     },
   };
+}
+
+/** Re-render with the existing state after an accepted app update. */
+function rerender(): void {
+  const app = document.getElementById('app');
+  if (app === null || activeState === undefined) {
+    location.reload();
+    return;
+  }
+  activeHandle?.unmount();
+  app.replaceChildren();
+  const renderer = createRenderer({ domAdapter: new BrowserDOMAdapter() });
+  activeHandle = renderer.mount(compileApp(activeState), app);
 }
 
 // Auto-boot in a real browser; guarded so importing in a non-DOM environment
@@ -50,4 +73,7 @@ if (typeof document !== 'undefined') {
   } else {
     boot();
   }
+
+  // Accept app.ts updates without losing the current signals.
+  if (import.meta.hot) import.meta.hot.accept('./app.js', rerender);
 }

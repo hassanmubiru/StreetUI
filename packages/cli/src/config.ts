@@ -1,36 +1,37 @@
 /**
- * StreetUI project configuration (Phase 9). The config is intentionally tiny:
- * every field has a sensible default so `streetui.config.ts` is optional. A
- * project with no config file still builds and runs.
+ * StreetUI project configuration.
  *
- * The file is authored as TypeScript (`streetui.config.ts`) and compiled with
- * esbuild to a temporary ESM module before import, so we never depend on the
- * host having a TS loader registered.
+ * The config is intentionally tiny: every field has a sensible default, so
+ * `streetui.config.ts` is optional. TypeScript configs are transpiled with the
+ * TypeScript compiler API to a temporary ESM module next to the config file
+ * before import, so no host loader is required and there is no bundler.
  */
 
-import { build as esbuildBuild } from 'esbuild';
 import { rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
-import { dirname, join, resolve, isAbsolute } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import * as ts from 'typescript';
 
-/** User-facing configuration shape (all fields optional). */
 export interface StreetUIConfig {
-  /** Dev server / preview port. Default 3000. */
   readonly port?: number;
-  /** Host to bind. Default 'localhost'. */
   readonly host?: string;
-  /** Client/browser entry, relative to project root. Default 'src/main.ts'. */
   readonly clientEntry?: string;
-  /** Server entry used for SSR, relative to project root. Default 'src/server.ts'. */
   readonly serverEntry?: string;
-  /** Output directory for `build`. Default 'dist'. */
   readonly outDir?: string;
-  /** Static assets directory copied verbatim. Default 'public'. */
   readonly publicDir?: string;
+  /** Exact or wildcard aliases, e.g. `{ "@/*": "src/*" }`. */
+  readonly alias?: Record<string, string>;
+  /** Extra extensionless-import candidates. */
+  readonly extensions?: readonly string[];
+  /** Emit source maps for production output. Default true. */
+  readonly sourcemap?: boolean;
+  /** SPA fallback for client-only `preview`. Default true when index.html exists. */
+  readonly spaFallback?: boolean;
+  /** Enable HMR. Default true. */
+  readonly hmr?: boolean;
 }
 
-/** Fully-resolved config: every field present, all paths absolute. */
 export interface ResolvedConfig {
   readonly root: string;
   readonly port: number;
@@ -39,12 +40,13 @@ export interface ResolvedConfig {
   readonly serverEntry: string;
   readonly outDir: string;
   readonly publicDir: string;
+  readonly aliases: Readonly<Record<string, string>>;
+  readonly extensions: readonly string[];
+  readonly sourcemap: boolean;
+  readonly spaFallback: boolean;
+  readonly hmr: boolean;
 }
 
-/**
- * Identity helper that gives config authors type-checking and autocomplete.
- * It returns its argument unchanged — the value matters, not the call.
- */
 export function defineConfig(config: StreetUIConfig): StreetUIConfig {
   return config;
 }
@@ -56,12 +58,15 @@ const DEFAULTS = {
   serverEntry: 'src/server.ts',
   outDir: 'dist',
   publicDir: 'public',
+  sourcemap: true,
+  spaFallback: true,
+  hmr: true,
 } as const;
 
-/** Config file names we look for, in priority order. */
+const DEFAULT_EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json'] as const;
+
 const CONFIG_FILENAMES = ['streetui.config.ts', 'streetui.config.mjs', 'streetui.config.js'];
 
-/** Absolute path of the first config file present in `root`, or undefined. */
 export function findConfigFile(root: string): string | undefined {
   for (const name of CONFIG_FILENAMES) {
     const candidate = join(root, name);
@@ -70,36 +75,34 @@ export function findConfigFile(root: string): string | undefined {
   return undefined;
 }
 
-/** Compile + import a `streetui.config.*` file and return its default export. */
+function transpileConfig(source: string, file: string): string {
+  const result = ts.transpileModule(source, {
+    fileName: file,
+    compilerOptions: {
+      target: ts.ScriptTarget.ES2022,
+      module: ts.ModuleKind.ESNext,
+      verbatimModuleSyntax: false,
+      esModuleInterop: true,
+      isolatedModules: true,
+    },
+  });
+  return result.outputText;
+}
+
 async function importConfigFile(file: string): Promise<StreetUIConfig> {
-  // `.js`/`.mjs` can be imported directly; `.ts` is compiled first.
   if (!file.endsWith('.ts')) {
     const mod = (await import(pathToFileURL(file).href)) as { default?: StreetUIConfig };
     return mod.default ?? {};
   }
 
-  const result = await esbuildBuild({
-    entryPoints: [file],
-    bundle: true,
-    write: false,
-    format: 'esm',
-    platform: 'node',
-    // Keep node builtins and any deps external — we only want the config value.
-    packages: 'external',
-    logLevel: 'silent',
-  });
-  const code = result.outputFiles[0]?.text ?? '';
-
-  // Write the compiled module *next to the config file* (not the OS temp dir)
-  // so that any bare imports it kept external — e.g. `@streetui/cli` for
-  // `defineConfig` — resolve against the project's own `node_modules`. A temp
-  // file in the system temp directory would have no node_modules to walk up to.
+  const source = await (await import('node:fs/promises')).readFile(file, 'utf8');
+  const code = transpileConfig(source, file);
+  // Write the compiled module next to the config so bare imports (e.g.
+  // `@streetui/cli` for `defineConfig`) resolve against the project.
   const outFile = join(dirname(file), `.streetui.config.${Date.now()}.mjs`);
   try {
     await writeFile(outFile, code, 'utf8');
-    const mod = (await import(pathToFileURL(outFile).href)) as {
-      default?: StreetUIConfig;
-    };
+    const mod = (await import(pathToFileURL(outFile).href)) as { default?: StreetUIConfig };
     return mod.default ?? {};
   } finally {
     await rm(outFile, { force: true });
@@ -110,10 +113,15 @@ function toAbsolute(root: string, p: string): string {
   return isAbsolute(p) ? p : resolve(root, p);
 }
 
-/**
- * Load and fully resolve configuration for the project rooted at `root`.
- * Missing config file → all defaults. Every returned path is absolute.
- */
+function resolveAliases(root: string, alias: Record<string, string> | undefined): Record<string, string> {
+  if (alias === undefined) return {};
+  const result: Record<string, string> = {};
+  for (const [key, target] of Object.entries(alias)) {
+    result[key] = isAbsolute(target) ? target : resolve(root, target);
+  }
+  return result;
+}
+
 export async function loadConfig(root: string): Promise<ResolvedConfig> {
   const absRoot = resolve(root);
   const file = findConfigFile(absRoot);
@@ -127,5 +135,10 @@ export async function loadConfig(root: string): Promise<ResolvedConfig> {
     serverEntry: toAbsolute(absRoot, user.serverEntry ?? DEFAULTS.serverEntry),
     outDir: toAbsolute(absRoot, user.outDir ?? DEFAULTS.outDir),
     publicDir: toAbsolute(absRoot, user.publicDir ?? DEFAULTS.publicDir),
+    aliases: resolveAliases(absRoot, user.alias),
+    extensions: user.extensions ?? DEFAULT_EXTENSIONS,
+    sourcemap: user.sourcemap ?? DEFAULTS.sourcemap,
+    spaFallback: user.spaFallback ?? DEFAULTS.spaFallback,
+    hmr: user.hmr ?? DEFAULTS.hmr,
   };
 }

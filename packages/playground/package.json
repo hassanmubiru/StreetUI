@@ -1,0 +1,40 @@
+{
+  "name": "@streetui/playground",
+  "version": "0.1.0",
+  "description": "Official StreetUI Playground — a StreetUI-built IDE that orchestrates the independent StreetUI toolchain.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "bin": {
+    "streetui-playground": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "templates",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsup --config tsup.config.ts && node scripts/build-static.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "echo \"playground: covered by toolchain browser harness\" && exit 0"
+  },
+  "dependencies": {
+    "@streetui/cli": "workspace:*",
+    "fflate": "^0.8.2"
+  },
+  "devDependencies": {
+    "typescript": "*",
+    "tsup": "*",
+    "codemirror": "^6.0.1",
+    "@codemirror/state": "^6.4.1",
+    "@codemirror/view": "^6.26.3",
+    "@codemirror/language": "^6.10.1",
+    "@codemirror/commands": "^6.6.0",
+    "@codemirror/lang-typescript": "^6.0.2",
+    "@codemirror/autocomplete": "^6.16.0",
+    "@codemirror/lang-css": "^6.2.1"
+  }
+}

@@ -28,6 +28,8 @@ const PUBLIC = new Set([
   'cli',
   // Unified single-package consumer entry.
   'streetui',
+  // `npm create streetui@latest` initializer wrapper.
+  'create-streetui',
 ]);
 
 // 1. Build the name → version map from the source packages.
@@ -72,7 +74,10 @@ for (const dir of readdirSync(PKGS)) {
   const pkg = JSON.parse(readFileSync(join(srcDir, 'package.json'), 'utf8'));
 
   const distDir = join(srcDir, 'dist');
-  if (!existsSync(distDir)) throw new Error(`${pkg.name} is not built (no dist/). Build first.`);
+  const needsDist = !Array.isArray(pkg.files) || pkg.files.includes('dist');
+  if (needsDist && !existsSync(distDir)) {
+    throw new Error(`${pkg.name} is not built (no dist/). Build first.`);
+  }
 
   // Rewrite workspace deps → concrete versions.
   pkg.dependencies = rewriteDeps(pkg.dependencies);

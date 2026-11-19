@@ -1,232 +1,112 @@
 # @streetui/cli
 
 The StreetUI command-line tool. It scaffolds new projects and drives the full
-application lifecycle — development, production build, and serving — on top of
-the existing StreetUI pipeline (`DSL → Compiler → Graph → Runtime → Renderer`).
-The CLI only *orchestrates* that pipeline; it is not a framework layer of its
-own.
+application lifecycle — development, production build, preview, and serving —
+on top of the existing StreetUI pipeline (`DSL → Compiler → Graph → Runtime →
+Renderer`). The CLI orchestrates that pipeline; it is not a framework layer of
+its own.
 
 ```
 streetui create <dir>   Scaffold a new StreetUI project
-streetui dev            Start the dev server with live reload
+streetui dev            Start StreetUI's own development server
 streetui build          Produce a production build (dist/client, dist/server)
-streetui start          Serve the production build
+streetui start          Serve the production build (SSR)
+streetui preview        Serve dist/client statically
+streetui doctor         Diagnose the project and toolchain
 ```
 
----
-
-## Installation
-
-The CLI ships two binaries:
-
-- `streetui` — the project command (`dev` / `build` / `start` / `create`)
-- `create-streetui` — the `npm create` entry point
-
-```bash
-# scaffold a new app
-npm create streetui@latest my-app
-
-# …or, if the CLI is installed in a project, run commands directly
-npx streetui dev
-```
-
-> **Note on this monorepo.** The `@streetui/*` packages are not yet published to
-> npm. Inside this repository the generated app resolves them through the
-> workspace (see *Project structure* below). `npm create streetui@latest` is the
-> intended public entry point once the packages are published.
-
----
-
-## Creating an app
-
-```bash
-npm create streetui@latest my-app
-cd my-app
-npm install
-npm run dev
-```
-
-`create` scaffolds a real, working StreetUI application — no placeholder code,
-no fake APIs, no React, no JSX. Two templates are available:
-
-| Template | `--template` | What you get |
-| -------- | ------------ | ------------ |
-| SSR (default) | `ssr` | Server-rendered app with two views (Home / About), a counter signal, conditional rendering, a form, and client hydration. |
-| Basic | `basic` | A single server-rendered page with a counter and a toggle — the smallest complete app. |
-
-```bash
-npm create streetui@latest my-app -- --template basic
-```
-
-Both templates are server-rendered and hydrate on the client, so `dev`,
-`build`, and `start` all follow one uniform pipeline.
-
-<!-- APPEND-HERE -->
+The toolchain is independent: no Vite, Rollup, Webpack, Parcel, Rspack, or
+Turbopack. `typescript` is the only runtime dependency.
 
 ---
 
 ## Development — `streetui dev`
 
 ```bash
-npm run dev            # → streetui dev
 streetui dev --port 4000 --host 0.0.0.0
 ```
 
-`dev` builds the project once, then watches your source with esbuild's
-incremental rebuild — only what changed is recompiled, not the whole project on
-every keystroke. On each successful rebuild, connected browsers reload
-automatically (a small live-reload script is injected into the served HTML).
-Build errors are printed with real source positions and never crash the server:
+Starts StreetUI's own dev server. It serves real SSR HTML, transforms
+TypeScript/JavaScript on demand through StreetUI's resolver, and speaks
+StreetUI's own HMR protocol over a WebSocket. CSS edits hot-update in place;
+modules that call `import.meta.hot.accept()` preserve state; everything else
+falls back to a full reload. Build errors are printed with real source positions
+(and shown as an overlay in the browser) and never crash the server.
 
-```
-streetui Client rebuild failed:
-StreetUI build error (1 error)
-
-src/app.ts:42:17
-Expected ";" but found "const"
-  | const total = count()
+```bash
+streetui dev --json   # JSONL events for AI/coding agents
 ```
 
-The dev server prints the URL it is listening on once it is actually ready.
+Every event carries `schemaVersion`, `eventId`, `sessionId`, `framework`, and
+`timestamp`. Emits `project_detected`, `environment_checked`,
+`compilation_started`, `server_started`, `preview_ready`, `file_changed`,
+`module_updated`, `hmr_applied` / `hmr_failed` (browser-confirmed HMR),
+`browser_console`, `browser_error`, `browser_connected` /
+`browser_disconnected`, `runtime_error`, `server_stopped`. `sessionId` is always
+non-empty and shared by one session.
 
 ## Production build — `streetui build`
 
 ```bash
-npm run build          # → streetui build
+streetui build
 ```
 
-`build` runs two esbuild passes over your real entries and writes to the output
-directory (default `dist/`):
+Builds the client graph from the entry and emits module-preserving ESM with
+hashed filenames, extracted CSS, assets, source maps, and `manifest.json`:
 
 ```
 dist/
-  client/     Browser bundle (main.js) + your public assets
-  server/     Node SSR bundle (server.js)
+  client/
+    assets/
+      app-<hash>.js
+      styles-<hash>.css
+      logo-<hash>.svg
+    manifest.json
+  server/
+    server.js
+    src/app.js
 ```
 
-The client bundle is what the browser downloads to hydrate; the server bundle
-exports the `render(request)` function used for SSR. A build fails (non-zero
-exit) only on real errors — third-party warnings never break the build. When
-the project has no server entry, the server pass is skipped and you get a
-client-only build.
+The server build keeps bare `@streetui/*` imports external (resolved by Node
+from the installed dependencies). When the project has no server entry, a
+client-only `dist/client/index.html` is emitted.
 
-## Production server — `streetui start`
+## Production server — `streetui start` / `streetui preview`
 
-```bash
-npm run start          # → streetui start
-streetui start --port 8080
-```
+- `start` serves the production build with SSR via `dist/server/server.js`.
+- `preview` serves `dist/client` statically (no compiler, no HMR) with SPA
+  fallback when `index.html` is present.
 
-`start` serves the production build using Node's standard `node:http` server —
-no Express, no third-party server. Static assets under `dist/client/` are served
-directly; every other request is server-rendered through your `server.js`
-bundle and returned as full HTML, ready to hydrate. If no build exists yet,
-`start` builds first.
+## `streetui doctor`
 
----
+Checks Node version, project/package detection, config, entries, TypeScript
+resolution, port availability, and optional browser binaries. Use
+`streetui doctor --json` for the structured report.
 
 ## Configuration — `streetui.config.ts`
-
-Configuration is optional: every field has a sensible default, so an app with no
-config file still builds and runs. When you need to override something, author a
-`streetui.config.ts`:
 
 ```ts
 import { defineConfig } from '@streetui/cli';
 
 export default defineConfig({
-  port: 3000,               // dev/start port
-  host: 'localhost',        // host to bind
-  clientEntry: 'src/main.ts',   // browser entry (hydration)
-  serverEntry: 'src/server.ts', // SSR entry (exports render())
-  outDir: 'dist',           // build output directory
-  publicDir: 'public',      // static assets copied verbatim
+  port: 3000,
+  host: 'localhost',
+  clientEntry: 'src/main.ts',
+  serverEntry: 'src/server.ts',
+  outDir: 'dist',
+  publicDir: 'public',
+  alias: { '@/*': 'src/*' },   // optional tsconfig-style aliases
+  extensions: ['.ts', '.tsx', '.js'], // optional
 });
 ```
 
-The config is TypeScript and is compiled on the fly with esbuild, so you do not
-need a TypeScript loader registered in Node. All defaults:
-
-| Field | Default | Purpose |
-| ----- | ------- | ------- |
-| `port` | `3000` | Port for `dev` / `start` |
-| `host` | `localhost` | Host to bind |
-| `clientEntry` | `src/main.ts` | Browser/hydration entry |
-| `serverEntry` | `src/server.ts` | SSR entry exporting `render(request)` |
-| `outDir` | `dist` | Build output directory |
-| `publicDir` | `public` | Static assets directory |
-
-Command-line `--port` and `--host` override the config for a single run.
-
----
+All fields are optional; every field has a sensible default. Config files are
+transpiled with the TypeScript compiler API (no host loader needed).
 
 ## Environment variables
 
-StreetUI is safe by default: **only variables whose names begin with
-`STREETUI_PUBLIC_` are exposed to the browser bundle.** Everything else stays on
-the server, so secrets in the process environment cannot leak into client-side
-JavaScript.
-
-```bash
-# Reaches the browser (inlined at build time):
-STREETUI_PUBLIC_API_URL=https://api.example.com
-
-# Server-only — never inlined into the client bundle:
-DATABASE_URL=postgres://…
-SESSION_SECRET=…
-```
-
-In code, read them as compile-time constants:
-
-```ts
-const apiUrl = process.env.STREETUI_PUBLIC_API_URL;
-```
-
-`NODE_ENV` is always defined as the build mode (`development` or `production`),
-so you can branch on it.
-
----
-
-## SSR & hydration
-
-Both templates render on the server and hydrate on the client:
-
-1. **Server** — `server.ts` exports `render(request)`. It compiles the app,
-   calls `renderToString(compiled)` (pure — no DOM globals), serializes the
-   initial signal state into a `<script data-streetui-state>` island, and
-   returns a full HTML document that links `/main.js`.
-2. **Browser** — `main.ts` reads the state island, seeds the signals with the
-   exact server values, recompiles the same app, and calls
-   `renderer.hydrate(compiled, appContainer)`. Because the client starts from
-   the same state, the server markup is adopted rather than thrown away, and
-   events + signals become live.
-
-The starter templates switch views with a signal (`when(...)`) rather than the
-router, which keeps SSR + hydration identity robust for the common case. The
-router remains available for apps that need URL-driven routing.
-
----
-
-## Project structure
-
-A generated project looks like this:
-
-```
-my-app/
-  package.json          scripts: dev / build / start / typecheck
-  tsconfig.json         strict TypeScript, bundler resolution
-  streetui.config.ts    optional configuration
-  public/               static assets (styles.css, favicon.svg)
-  src/
-    app.ts              the StreetUI app: signals + DSL + views
-    server.ts           SSR entry — exports render(request)
-    main.ts             browser entry — hydrates the app
-  README.md
-```
-
-Inside this monorepo the generated `node_modules/@streetui/*` are linked to the
-workspace packages; once the framework is published, `npm install` resolves them
-from the registry.
+Only `STREETUI_PUBLIC_*` variables (plus `NODE_ENV`) reach the browser. All
+other env vars stay server-side. Server secrets never leak into client code.
 
 ---
 
@@ -237,26 +117,56 @@ streetui <command> [options]
 
 Commands:
   create <dir>   Scaffold a new StreetUI project
-  dev            Start the development server with live reload
+  dev            Start StreetUI's own development server
   build          Produce a production build (dist/client, dist/server)
-  start          Serve the production build
+  start          Serve the production build (SSR)
+  preview        Serve dist/client statically
+  doctor         Diagnose the project and toolchain environment
+  playground     Local IDE + authenticated agent control API
 
 Options:
   -h, --help          Show help
   -v, --version       Show the CLI version
-  -p, --port <n>      Port for dev/start (default 3000)
-      --host <host>   Host for dev/start (default localhost)
+  -p, --port <n>      Port for dev/start/preview (default 3000)
+      --host <host>   Host for dev/start/preview (default localhost)
       --template <t>  Template for create (basic | ssr)
       --dir <path>    Project directory (default current directory)
+      --json          Machine-readable JSONL events
 ```
 
-Unknown options are rejected with a message rather than silently ignored, so a
-typo never changes behaviour quietly.
+Unknown options are rejected rather than silently ignored. The CLI fails with a
+clear, stack-trace-free message when run outside a StreetUI project.
 
-### Project validation
+## Playground and AI agent automation
 
-The CLI fails with a clear, stack-trace-free message when it is run outside a
-StreetUI project — for example, a missing `package.json`, a `package.json` with
-no `@streetui/*` dependency, an invalid config file, or a missing build entry.
+`streetui playground --json` starts the local IDE plus an authenticated control
+API. After `session_attached` (bearer `token`, `sessionId`), agents can:
 
+- list/read/write project files, run builds, and read the diagnostics buffer;
+- inspect DOM/elements over the HMR socket and read per-client console errors;
+- get browser-confirmed HMR outcomes (`hmr_applied` / `hmr_failed`) — SSR-graph
+  edits intentionally reload instead;
+- use the optional Playwright provider for real visual work:
+  `POST /__playground/api/browser/automation/connect` (engine, viewport), real
+  PNG screenshots with metadata and id-based retrieval
+  (`POST /api/browser/screenshot`, `GET /api/browser/screenshot/<id>`),
+  interactions (`POST /api/browser/interact`: click, type, fill, select, press,
+  submit, scroll, navigate, reload, resize, waits, `evaluate`), and structured
+  visual inspection (`GET /api/browser/inspect`) with viewport/document
+  dimensions, positioned elements, and coded diagnostics;
+- target a specific browser with `GET /api/browser/clients` + `clientId`
+  (ambiguous calls fail with `E_CLIENT_REQUIRED`), and shut everything down with
+  `POST /api/session/shutdown` (token revoked, browser closed, screenshots
+  cleaned up).
 
+Playwright is optional and development-only — never a runtime dependency of the
+CLI or of applications. Without it, automation returns
+`E_AUTOMATION_UNAVAILABLE`; everything else keeps working.
+
+Full protocol/API references (GitHub):
+[agent protocol](https://github.com/hassanmubiru/StreetUI/blob/main/docs/toolchain/m10-agent-protocol.md) ·
+[control API](https://github.com/hassanmubiru/StreetUI/blob/main/docs/toolchain/m10-control-api.md) ·
+[browser automation](https://github.com/hassanmubiru/StreetUI/blob/main/docs/toolchain/m11-browser-automation.md) ·
+[visual QA workflow](https://github.com/hassanmubiru/StreetUI/blob/main/docs/toolchain/m11-visual-qa-workflow.md)
+
+See `docs/toolchain/architecture.md` and `docs/toolchain/adr-0001-independent-toolchain.md`.

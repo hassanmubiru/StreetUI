@@ -7,7 +7,10 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   splitting: false,
-  // esbuild is the only runtime dependency and stays external (resolved from
-  // node_modules at run time); Node builtins are external by default.
-  external: ['esbuild'],
+  // TypeScript is the only required runtime dependency and stays external
+// (resolved from the project or this package's node_modules at run time). The
+// framework's own package build still uses tsup's internal esbuild, but the
+// application toolchain does not. Playwright is an optional dev-only tool used
+// by `streetui doctor`; it is never a runtime dependency and stays external.
+  external: ['typescript', 'playwright', 'playwright-core'],
 });

@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await b.newPage();
+const errs = [];
+p.on('pageerror', e => errs.push('pageerror: '+e));
+p.on('console', m => { if (m.type()==='error') errs.push('console: '+m.text()); });
+await p.goto('http://localhost:6499/', { waitUntil: 'load' });
+await p.waitForSelector('#app', { timeout: 15000 });
+await new Promise(r => setTimeout(r, 500));
+console.log('__compatOut=', await p.evaluate(() => globalThis.__compatOut));
+console.log('errors=', JSON.stringify(errs));
+await b.close();

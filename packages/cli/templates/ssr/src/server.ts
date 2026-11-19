@@ -38,7 +38,6 @@ export function render(request: RenderRequest): RenderResult {
     '<body>',
     `<div id="app">${body}</div>`,
     island,
-    '<script type="module" src="/main.js"></script>',
     '</body>',
     '</html>',
   ].join('\n');

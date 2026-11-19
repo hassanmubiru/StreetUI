@@ -37,6 +37,9 @@ Thumbs.db
 benchmarks/results/
 /tmp/
 
+# ── StreetUI toolchain cache ──────────────────────────────────────────────
+.streetui-cache/
+
 # ── Root-level milestone / release report markdown ────────────────────────
 # README.md and CHANGELOG.md are intentionally NOT listed here — they stay tracked.
 # All V*.md report files (any version) are ignored by the glob below.

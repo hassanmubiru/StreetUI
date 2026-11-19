@@ -78,19 +78,22 @@ describe('developer journey (create → build → start → request)', () => {
     // 3. resolve + build
     const project = await resolveProject(projectRoot, { requireEntry: true });
     const out = await buildProject(project, 'production');
-    expect(existsSync(out.clientBundle), 'client bundle produced').toBe(true);
-    expect(existsSync(out.serverBundle), 'server bundle produced').toBe(true);
-    // static assets copied alongside the client bundle
-    expect(existsSync(join(out.clientDir, 'styles.css'))).toBe(true);
+    expect(existsSync(out.entryJs), 'client entry produced').toBe(true);
+    expect(existsSync(out.serverEntry ?? ''), 'server entry produced').toBe(true);
+    if (out.manifest.entry.css !== undefined) {
+      expect(existsSync(join(out.clientDir, `.${out.manifest.entry.css}`)), 'css produced').toBe(true);
+    }
+    expect(existsSync(join(out.clientDir, 'styles.css')), 'public styles copied').toBe(true);
 
     // 4. start the production server
     const port = await freePort();
     const server = await startServer({
       clientDir: out.clientDir,
-      serverBundle: out.serverBundle,
+      serverBundle: out.serverEntry ?? '',
       host: '127.0.0.1',
       port,
       devMode: false,
+      manifest: { entry: out.manifest.entry },
     });
     cleanups.push(() => server.close());
 
@@ -102,10 +105,10 @@ describe('developer journey (create → build → start → request)', () => {
     expect(html).toContain('id="app"');
     expect(html).toContain('journey-app'); // brand heading / title
     expect(html).toContain('data-streetui-state'); // hydration state island
-    expect(html).toContain('src="/main.js"'); // client entry for hydration
+    expect(html).toContain(`src="${out.manifest.entry.js}"`); // injected client entry
 
     // 6. the client bundle is served as real JavaScript
-    const jsRes = await fetch(`http://127.0.0.1:${port}/main.js`);
+    const jsRes = await fetch(`http://127.0.0.1:${port}${out.manifest.entry.js}`);
     expect(jsRes.status).toBe(200);
     expect(jsRes.headers.get('content-type')).toContain('javascript');
     expect((await jsRes.text()).length).toBeGreaterThan(0);

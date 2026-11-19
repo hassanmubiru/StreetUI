@@ -30,15 +30,17 @@ export class CliError extends Error {
 export interface BuildProblem {
   readonly message: string;
   /** File path, when the tool reported one. */
-  readonly file?: string;
+  readonly file?: string | undefined;
   /** 1-based line, when known. */
-  readonly line?: number;
+  readonly line?: number | undefined;
   /** 1-based column, when known. */
-  readonly column?: number;
+  readonly column?: number | undefined;
   /** The offending source line, when the tool provided it. */
-  readonly lineText?: string;
+  readonly lineText?: string | undefined;
   /** A concrete suggestion, when we can infer one honestly. */
-  readonly suggestion?: string;
+  readonly suggestion?: string | undefined;
+  /** Importing module, when known (used for dependency diagnostics). */
+  readonly importer?: string | undefined;
 }
 
 /** Known StreetUI API names, used only to suggest fixes for obvious typos. */
