@@ -38,6 +38,10 @@ export interface ServeOptions {
    * up without restarting. In production the bundle is loaded once.
    */
   readonly devMode?: boolean;
+  /** Production client entry from the build manifest, injected into SSR HTML. */
+  readonly manifest?: {
+    readonly entry: { readonly js: string; readonly css?: string };
+  };
 }
 
 /** A running server plus the resolved address and a stop handle. */
@@ -169,6 +173,24 @@ function injectReload(html: string): string {
   return html + ReloadHub.snippet;
 }
 
+function injectBuildTags(
+  html: string,
+  manifest: ServeOptions['manifest'],
+  reload: ReloadHub | undefined,
+): string {
+  const tags: string[] = [];
+  if (manifest?.entry.css !== undefined) {
+    tags.push(`<link rel="stylesheet" href="${manifest.entry.css}" />`);
+  }
+  if (manifest?.entry.js !== undefined) {
+    tags.push(`<script type="module" src="${manifest.entry.js}"></script>`);
+  }
+  if (reload !== undefined) tags.push(ReloadHub.snippet);
+  const block = tags.join('');
+  if (html.includes('</body>')) return html.replace('</body>', `${block}</body>`);
+  return `${html}${block}`;
+}
+
 /** Start the HTTP server and resolve once it is actually listening. */
 export async function startServer(options: ServeOptions): Promise<RunningServer> {
   // In production, load the render function once. In dev, load per request so
@@ -235,7 +257,7 @@ async function handleRequest(
       headers: req.headers,
     });
     const status = result.status ?? 200;
-    const html = options.reload ? injectReload(result.html) : result.html;
+    const html = injectBuildTags(result.html, options.manifest, options.reload);
     res.writeHead(status, { 'Content-Type': 'text/html; charset=utf-8', ...result.headers });
     res.end(html);
   } catch (err) {

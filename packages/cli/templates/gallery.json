@@ -1,0 +1,72 @@
+[
+  {
+    "id": "hello-world",
+    "name": "Hello World",
+    "description": "A minimal StreetUI application (basic client+SSR starter).",
+    "preview": "A single Hello World page with a reactive counter and input.",
+    "template": "basic"
+  },
+  {
+    "id": "complete-app",
+    "name": "Complete App",
+    "description": "A small full application with routing, forms, and hydration (SSR starter).",
+    "preview": "Home and About routes, a greeting form, and a counter.",
+    "template": "ssr"
+  },
+  {
+    "id": "counter",
+    "name": "Counter",
+    "description": "A counter demo with increment, decrement, reset, and step size.",
+    "preview": "Interactive counter with step control and derived state display.",
+    "template": "counter"
+  },
+  {
+    "id": "todo",
+    "name": "Todo List",
+    "description": "A todo list application with add, remove, and toggle functionality.",
+    "preview": "Manage tasks with add, complete, and delete actions.",
+    "template": "todo"
+  },
+  {
+    "id": "form",
+    "name": "Form Validation",
+    "description": "A form with input validation, error messages, and submission handling.",
+    "preview": "Validated form with name and email fields and success state.",
+    "template": "form"
+  },
+  {
+    "id": "routing",
+    "name": "Routing",
+    "description": "A routing demo with page navigation between home, about, and contact.",
+    "preview": "Navigate between multiple pages using signal-based routing.",
+    "template": "routing"
+  },
+  {
+    "id": "signals",
+    "name": "Signals Demo",
+    "description": "A signals and derived state demo showcasing reactive computations.",
+    "preview": "First/last name inputs with full name and birth year derived values.",
+    "template": "signals"
+  },
+  {
+    "id": "components",
+    "name": "Components",
+    "description": "A reusable components demo with composable UI elements.",
+    "preview": "Three cards with independent counters demonstrating component reuse.",
+    "template": "components"
+  },
+  {
+    "id": "data-fetching",
+    "name": "Data Fetching",
+    "description": "An async data fetching demo with loading states and filtering.",
+    "preview": "Load users from API with filter functionality and error handling.",
+    "template": "data-fetching"
+  },
+  {
+    "id": "interactive",
+    "name": "Interactive Widgets",
+    "description": "An interactive widgets demo featuring sliders, toggles, and color pickers.",
+    "preview": "Slider, toggle, color picker, and search input widgets.",
+    "template": "interactive"
+  }
+]

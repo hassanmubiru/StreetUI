@@ -8,31 +8,44 @@
  */
 
 import { existsSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { dirname, join, resolve } from 'node:path';
-
-const packageRequire = createRequire(join(process.cwd(), 'package.json'));
-
-function packageModuleDirectory(): string | undefined {
-  try {
-    return dirname(packageRequire.resolve('@streetui/cli'));
-  } catch {
-    // The package self-reference is unavailable when this module is run from
-    // an unpacked source tree without its workspace link.
-    return undefined;
-  }
-}
+import { fileURLToPath } from 'node:url';
 
 /** Available starter templates. */
-export type TemplateName = 'basic' | 'ssr';
+export type TemplateName =
+  | 'basic'
+  | 'ssr'
+  | 'counter'
+  | 'todo'
+  | 'form'
+  | 'routing'
+  | 'signals'
+  | 'components'
+  | 'data-fetching'
+  | 'interactive';
 
-export const TEMPLATES: readonly TemplateName[] = ['basic', 'ssr'];
+export const TEMPLATES: readonly TemplateName[] = [
+  'basic',
+  'ssr',
+  'counter',
+  'todo',
+  'form',
+  'routing',
+  'signals',
+  'components',
+  'data-fetching',
+  'interactive',
+];
 export const DEFAULT_TEMPLATE: TemplateName = 'ssr';
 
 /** Tokens replaced in every text file of a template. */
 export interface TemplateTokens {
+  /** Normalised directory name of the project. */
   readonly projectName: string;
+  /** StreetUI framework version the generated app depends on. */
   readonly frameworkVersion: string;
+  /** StreetUI CLI version for the devDependency (defaults to frameworkVersion). */
+  readonly cliVersion?: string;
 }
 
 /**
@@ -48,14 +61,22 @@ const NAME_MAP: Record<string, string> = {
 
 /** Absolute path to the shipped `templates/` directory. */
 export function templatesRoot(): string {
-  // In a built CommonJS bundle `import.meta.url` is unavailable. Resolve from
-  // the package self-reference when possible, with source-tree and cwd fallbacks
-  // for tests and unpacked development checkouts.
-  const hereCandidates = [
-    typeof __dirname === 'string' ? __dirname : undefined,
-    packageModuleDirectory(),
-    process.cwd(),
-  ].filter((value): value is string => value !== undefined);
+  // Resolve from the location of THIS module (ESM import.meta.url / CJS
+  // __dirname), so the CLI finds its own shipped templates regardless of the
+  // current working directory (e.g. when run via `npx @streetui/cli`). The
+  // source-tree and cwd entries remain as fallbacks for unpacked development.
+  function moduleDirectory(): string | undefined {
+    if (typeof __dirname === 'string') return __dirname;
+    try {
+      return dirname(fileURLToPath(import.meta.url));
+    } catch {
+      return undefined;
+    }
+  }
+
+  const hereCandidates = [moduleDirectory(), process.cwd()].filter(
+    (value): value is string => value !== undefined,
+  );
   const candidates = hereCandidates.flatMap((here) => [
     resolve(here, 'templates'),
     resolve(here, '..', 'templates'),
@@ -89,7 +110,8 @@ export function materialisedName(fileName: string): string {
 export function applyTokens(contents: string, tokens: TemplateTokens): string {
   return contents
     .replaceAll('__PROJECT_NAME__', tokens.projectName)
-    .replaceAll('__FRAMEWORK_VERSION__', tokens.frameworkVersion);
+    .replaceAll('__FRAMEWORK_VERSION__', tokens.frameworkVersion)
+    .replaceAll('__CLI_VERSION__', tokens.cliVersion ?? tokens.frameworkVersion);
 }
 
 /** File extensions treated as text (token substitution applies). */

@@ -14,7 +14,7 @@ No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
 
-Current version: **3.0.2** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
+Current version: **3.2.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
 
 ---
 
@@ -53,7 +53,26 @@ cd my-app && npm install
 npm run dev
 ```
 
-CLI commands: `streetui create | dev | build | start` (flags `--port`, `--host`, `--help`, `--version`).
+CLI commands: `streetui create | dev | build | start | preview | doctor | playground`
+(flags `--port`, `--host`, `--json`, `--help`, `--version`).
+
+### For AI agents: browser-verified development
+
+`streetui playground --json` exposes an authenticated local control API plus a
+JSONL event stream (every event has `eventId` + `sessionId`). Agents can edit
+files, get browser-confirmed HMR outcomes (`hmr_applied` / `hmr_failed`), and —
+through an optional Playwright provider — open the app in a real browser to
+inspect it visually, capture real PNG screenshots, click and fill elements,
+evaluate expressions, and read console/runtime/network diagnostics. Sessions
+end with `session_stopped` and token revocation; browser processes and
+screenshot files are cleaned up.
+
+Docs: [`docs/toolchain/ai-agents.md`](docs/toolchain/ai-agents.md) ·
+[`m10-agent-protocol.md`](docs/toolchain/m10-agent-protocol.md) ·
+[`m10-control-api.md`](docs/toolchain/m10-control-api.md) ·
+[`m11-browser-automation.md`](docs/toolchain/m11-browser-automation.md) ·
+[`m11-visual-qa-workflow.md`](docs/toolchain/m11-visual-qa-workflow.md) ·
+[`m11-report.md`](docs/toolchain/m11-report.md)
 
 ---
 
@@ -405,12 +424,17 @@ pnpm typecheck    # strict TypeScript across all packages
 ## Versioning & release
 
 Every public package shares one coordinated version. The v1.0 public surface is
-frozen; every addition since then is purely additive.
+frozen; every addition since then is purely additive. This checkout is currently
+at **3.2.0** across the public packages (`streetui`, `@streetui/cli`, …).
 
 ```bash
-npm install streetui            # latest (3.0.2)
-npm install streetui@3.0.2
+npm install streetui            # latest published release on npm
+npm install streetui@3.0.2      # pin a specific published release
 ```
+
+The version installed from npm can be older than this repository. The M10/M11
+agent-workflow changes are **unreleased** — see `CHANGELOG.md`; nothing from
+those milestones has been published and no new release is claimed here.
 
 - [Changelog](CHANGELOG.md)
 - [Public API statement](docs/api-v1.0.md)

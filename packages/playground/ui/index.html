@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StreetUI Playground</title>
+    <style>
+      :root {
+        --bg: #0d1117;
+        --panel: #161b22;
+        --panel2: #1c2330;
+        --border: #2a303c;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --accent: #2f81f7;
+        --ok: #3fb950;
+        --err: #f85149;
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+      }
+      #app { display: flex; flex-direction: column; height: 100vh; }
+      .pg-header {
+        display: flex; align-items: center; gap: 12px;
+        padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--border);
+      }
+      .pg-brand { font-weight: 700; color: var(--accent); }
+      .pg-project { color: var(--muted); font-family: ui-monospace, monospace; }
+      .pg-spacer { flex: 1; }
+      .pg-btn {
+        background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+        border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 13px;
+      }
+      .pg-btn:hover { border-color: var(--accent); }
+      .pg-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+      .pg-body { display: flex; flex: 1; min-height: 0; }
+      .pg-explorer {
+        width: 240px; min-width: 180px; background: var(--panel); border-right: 1px solid var(--border);
+        display: flex; flex-direction: column; overflow: auto;
+      }
+      .pg-explorer-title { padding: 8px 12px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+      .pg-center { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+      .pg-tabs { display: flex; gap: 4px; padding: 6px 8px; background: var(--panel); border-bottom: 1px solid var(--border); overflow-x: auto; }
+      .pg-tab {
+        padding: 4px 10px; border-radius: 6px; background: var(--panel2); font-size: 12px;
+        cursor: pointer; white-space: nowrap; color: var(--muted);
+      }
+      .pg-tab.active { color: var(--text); background: var(--bg); }
+      .pg-tab.dirty::after { content: " ●"; color: var(--accent); }
+      .pg-editor { flex: 1; min-height: 0; position: relative; }
+      .pg-editor .cm-editor { height: 100%; font-size: 13px; }
+      .pg-preview { width: 42%; min-width: 320px; border-left: 1px solid var(--border); display: flex; flex-direction: column; background: var(--bg); }
+      .pg-preview-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--panel); border-bottom: 1px solid var(--border); }
+      .pg-preview-device { display: flex; gap: 4px; }
+      .pg-preview-frame-wrap { flex: 1; display: flex; justify-content: center; padding: 12px; background: #05070a; overflow: auto; }
+      .pg-preview-frame { width: 100%; height: 100%; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
+      .pg-preview-frame.mobile { width: 390px; }
+      .pg-preview-frame.tablet { width: 768px; }
+      .pg-preview-status { padding: 4px 10px; font-size: 12px; color: var(--muted); }
+      .pg-preview-status.ready { color: var(--ok); }
+      .pg-preview-status.error { color: var(--err); }
+      .pg-bottom { height: 200px; border-top: 1px solid var(--border); background: var(--panel); display: flex; flex-direction: column; }
+      .pg-bottom-tabs { display: flex; gap: 2px; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+      .pg-bottom-body { flex: 1; overflow: auto; padding: 8px 12px; font-family: ui-monospace, monospace; font-size: 12px; white-space: pre-wrap; }
+      .pg-console-line.error { color: var(--err); }
+      .pg-diagnostics-line.error { color: var(--err); }
+      .pg-diagnostics-line { padding: 2px 0; }
+      .pg-empty { color: var(--muted); padding: 8px 12px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // The server injects the session token here before serving this page.
+      window.__PLAYGROUND_TOKEN__ = "__PG_TOKEN__";
+    </script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
