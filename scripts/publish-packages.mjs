@@ -147,7 +147,7 @@ for (const pkgName of PUBLISH_ORDER) {
     continue;
   }
 
-  process.stdout.write(`  publishing ${pkgName}@3.0.2 ... `);
+  process.stdout.write(`  publishing ${pkgName}@3.1.0 ... `);
   try {
     execFileSync(
       'npm',

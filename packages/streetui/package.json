@@ -7,8 +7,8 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "streetui": "./dist/bin.js",
-    "create-streetui": "./dist/create-bin.js"
+    "streetui": "dist/bin.js",
+    "create-streetui": "dist/create-bin.js"
   },
   "exports": {
     ".": {
@@ -82,7 +82,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hassanmubiru/StreetUI.git",
+    "url": "git+https://github.com/hassanmubiru/StreetUI.git",
     "directory": "packages/streetui"
   },
   "homepage": "https://github.com/hassanmubiru/StreetUI#readme",
