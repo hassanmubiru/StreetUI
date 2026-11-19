@@ -200,3 +200,59 @@ cd <worktree> && node scripts/release-check.mjs   # currently 1 version-skew err
 - Registry propagation of the new dist-tag was in progress at report time;
   `npm view streetui dist-tags` initially still read 3.1.6 immediately after
   publish (npm's "being processed" notice).
+
+## 12. 3.2.0 Release Closure — final acceptance (2026-11-19)
+
+### Acceptance classifications
+
+| # | Item | Status |
+|---|------|--------|
+| 1 | npm publication status (all 18 at 3.2.0) | **VERIFIED** — every package exists at 3.2.0 with `latest` dist-tag = 3.2.0 (timestamps 2026-11-19T08:1x). Propagation complete; no republish needed. |
+| 2 | `latest` dist-tags for all 18 | **VERIFIED** (full-set re-check passed). |
+| 3 | Published tarball verification | **PARTIAL** — all 18 tarballs valid in structure, entry points, README, no secrets; **but 11 sub-packages ship without the `.d.ts`/`.d.cts` files their manifests reference** (defect D-1 below). |
+| 4 | Independent consumer installs | **VERIFIED** — `streetui@3.2.0` (255 ESM exports, SSR, 25 testing exports, CJS), `@streetui/cli@3.2.0` (`--version`, `playground` command present, counter template, coordinated 3.2.0 deps, dev + HMR events with `eventId`/`sessionId`, build, doctor, `start`). Defect D-1 reproduced as `TS7016` for `@streetui/core@3.2.0`. |
+| 5 | GitHub PR #1 | **OPEN, MERGEABLE** after conflict reconciliation merge `2c8a8ded2dd0beccccb63f5f9e94aacb45bf06e3` (pushed); state `UNSTABLE` only because of failing checks (items 6–7). **Not merged — awaiting explicit merge authorization.** |
+| 6 | Required checks / CI | **FAILED (infrastructure, not code)** — all four Node matrix jobs and the dependent build job: *"The job was not started because your account is locked due to a billing issue."* Zero steps executed. Workflow itself is valid (checkout → pnpm → setup-node → typecheck/lint/test). |
+| 7 | Vercel deployment | **FAILED (unrelated integration)** — deployment of the separate `streetjs-website` docs project fails (`dpl_7Y1C3Z…`, later `dpl_DM1zsi…`). Vercel logs are not accessible without Vercel auth, so the precise build cause is **BLOCKED**; it is not a StreetUI-framework check and does not block the npm release. |
+| 8 | Review status | **PARTIAL** — Copilot review was quota-blocked (not a review). A targeted manual review of the critical diffs was performed instead (toolchain resolver/transform, dev server, HMR client/protocol, builder, control API auth/path rules, automation provider storage/cleanup, publish scripts, version coordination); no additional defects found beyond D-1. |
+| 9 | Main branch synchronization | **PARTIAL** — branch now contains the full implementation plus merge commit `2c8a8ded`; `main` itself gets it only when PR #1 merges (authorization pending). |
+| 10 | README consistency | **VERIFIED** — root + framework README badges 3.2.0 (worktree), 3.1.1 (main checkout); published README shows 3.2.0 and the CLI `playground` command. |
+| 11 | Changelog consistency | **VERIFIED** — M11 = `3.2.0`, M10 included in 3.2.0, both checkouts. |
+| 12 | Remaining release risks | D-1 declaration defect (needs corrective release), GitHub billing lock (blocks CI), Vercel docs-site deployment (needs owner config), PR merge authorization pending. |
+
+### Defect D-1 — missing TypeScript declarations in 11 published sub-packages
+
+Published 3.2.0 tarballs for `core, events, scheduler, state, runtime, renderer,
+dom, forms, context, devtools, testing` contain only JS + sourcemaps; their
+`types`/`exports.*.types` fields point at non-existent `dist/index.d.ts` /
+`index.d.cts`. Consumer evidence: `tsc` reports **TS7016** on
+`import { style } from '@streetui/core'`.
+
+**Cause:** packing used stale `dist/` outputs from before DTS generation ran;
+it is not a source-code bug. Rebuilding all 11 packages with `tsup` produces
+`index.d.ts` + `index.d.cts` correctly (two transient worker errors disappeared
+on rerun), and a fresh `node scripts/pack-tarballs.mjs` run produces **all 18
+tarballs with declarations present** (verified by extracting each one).
+
+**Proposed corrective release (requires approval):** coordinated **3.2.1**
+across the 18 packages, published from the freshly built, declaration-complete
+tarballs. No feature changes. Do not republish 3.2.0 or edit dist-tags.
+
+### Post-merge verification (on merge commit `2c8a8ded`)
+
+- Versions: all 18 manifests + `VERSION` + `CLI_VERSION` + `FRAMEWORK_VERSION`
+  = 3.2.0. `release-check.mjs`: OK (0 warnings).
+- Tests: 108 CLI + 21 streetui passing.
+- M11 visual acceptance E2E (Chromium): **ok: true** on the merged branch.
+- Branch pushed: `2c8a8ded` is the PR head; PR #1 is MERGEABLE.
+
+### What remains (owner actions / approvals)
+
+1. **Authorize PR #1 merge** to put M8–M11 source on `main` (recommended:
+   standard merge commit, no squash/rebase required).
+2. **Approve corrective 3.2.1 publish** for D-1 (declaration-complete tarballs
+   are ready locally; no code changes needed beyond version bump).
+3. **Resolve the GitHub billing lock** so CI can actually run; Vercel project
+   settings for `streetjs-website` need owner review (or disable that
+   integration for this repo).
+
