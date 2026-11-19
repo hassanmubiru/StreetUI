@@ -53,7 +53,26 @@ cd my-app && npm install
 npm run dev
 ```
 
-CLI commands: `streetui create | dev | build | start` (flags `--port`, `--host`, `--help`, `--version`).
+CLI commands: `streetui create | dev | build | start | preview | doctor | playground`
+(flags `--port`, `--host`, `--json`, `--help`, `--version`).
+
+### For AI agents: browser-verified development
+
+`streetui playground --json` exposes an authenticated local control API plus a
+JSONL event stream (every event has `eventId` + `sessionId`). Agents can edit
+files, get browser-confirmed HMR outcomes (`hmr_applied` / `hmr_failed`), and —
+through an optional Playwright provider — open the app in a real browser to
+inspect it visually, capture real PNG screenshots, click and fill elements,
+evaluate expressions, and read console/runtime/network diagnostics. Sessions
+end with `session_stopped` and token revocation; browser processes and
+screenshot files are cleaned up.
+
+Docs: [`docs/toolchain/ai-agents.md`](docs/toolchain/ai-agents.md) ·
+[`m10-agent-protocol.md`](docs/toolchain/m10-agent-protocol.md) ·
+[`m10-control-api.md`](docs/toolchain/m10-control-api.md) ·
+[`m11-browser-automation.md`](docs/toolchain/m11-browser-automation.md) ·
+[`m11-visual-qa-workflow.md`](docs/toolchain/m11-visual-qa-workflow.md) ·
+[`m11-report.md`](docs/toolchain/m11-report.md)
 
 ---
 
