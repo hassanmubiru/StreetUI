@@ -5,9 +5,9 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
-## Unreleased — M11 Visual Browser Verification and Agent Automation (2026-11-19)
+## 3.2.0 — Visual Browser Verification and Agent Automation (M11, 2026-11-19)
 
-**Toolchain milestone — code complete, verified locally; no packages published.**
+**Toolchain milestone — all 18 public packages published to npm at 3.2.0 on 2026-11-19.**
 An AI agent can now open a StreetUI app in a real browser, see what rendered,
 interact with it, capture real screenshots, detect problems, fix them, and
 verify the result — all through StreetUI's own tooling.
