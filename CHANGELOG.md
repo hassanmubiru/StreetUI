@@ -73,9 +73,9 @@ verify the result — all through StreetUI's own tooling.
   M10 agent E2E, M8.4 workflow, HMR hardening, playground security, and
   playground browser harnesses (Chromium + Firefox) all pass. WebKit not run.
 
-## Unreleased — M10 AI Agent-Native Development Workflow (2026-11-19)
+### M10 — AI Agent-Native Development Workflow (included in 3.2.0)
 
-**Toolchain milestone — code complete, verified locally; no packages published.**
+**Toolchain milestone — published to npm at 3.2.0 on 2026-11-19.**
 
 ### Added
 
