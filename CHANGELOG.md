@@ -5,6 +5,22 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## 3.2.1 — TypeScript declaration packaging fix (2026-11-19)
+
+**Corrective release — no feature changes.** All 18 public packages published
+to npm at 3.2.1.
+
+### Fixed
+
+- The 3.2.0 tarballs for `@streetui/{core,events,scheduler,state,runtime,
+  renderer,dom,forms,context,devtools,testing}` were packed from stale `dist/`
+  outputs and shipped **without the `index.d.ts` / `index.d.cts` declaration
+  files their manifests referenced**, so TypeScript consumers saw `TS7016`
+  (implicit `any`). All 11 packages are rebuilt and repacked with complete
+  declarations; every 3.2.1 tarball is verified to contain both declaration
+  files. `streetui` and `@streetui/cli` are republished at the same coordinated
+  version to keep the release set consistent.
+
 ## 3.2.0 — Visual Browser Verification and Agent Automation (M11, 2026-11-19)
 
 **Toolchain milestone — all 18 public packages published to npm at 3.2.0 on 2026-11-19.**
