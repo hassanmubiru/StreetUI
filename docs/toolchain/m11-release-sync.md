@@ -276,3 +276,35 @@ tarballs. No feature changes. Do not republish 3.2.0 or edit dist-tags.
 - Outstanding non-code items: GitHub billing lock (CI cannot start), Vercel
   `streetjs-website` deployment configuration, and the PR #2 merge decision.
 
+## 14. M11.13 final 3.2.1 closure verification (2026-11-19)
+
+- **PR #2**: OPEN, MERGEABLE (UNSTABLE) at head `187dadde`, target `main`.
+  Copilot review quota-blocked again (not a real review). **Not merged —
+  explicit approval required.**
+- **CI**: Node 18/20/22/24 all fail in ~3 s with *"The job was not started
+  because your account is locked due to a billing issue"* (verified on run
+  44594657006). Build/release gates skipped as a consequence. **BLOCKED** —
+  owner must resolve GitHub billing; no CI pass is claimed.
+- **Vercel**: `streetjs-website` deployment fails again
+  (`dpl_AtEbVQfLArqwBbkTzTvDBiSSfhr1`). Unrelated docs-site integration;
+  Vercel logs require Vercel auth. **FAILED** (not a framework check).
+- **npm 3.2.1**: **VERIFIED** — all 18 packages at `latest: 3.2.1`; all 18
+  published tarballs re-downloaded and validated (manifest, README inclusion,
+  exports, declarations, dependencies, integrity); independent TypeScript
+  consumer checks pass for **all 11** packages affected by D-1
+  (`@streetui/core, events, scheduler, state, runtime, renderer, dom, forms,
+  context, devtools, testing`). D-1 fully resolved in published artifacts.
+- **Docs**: `main`'s root README still says **3.2.0** while the changelog says
+  **3.2.1** (PR #1 merged before the corrective work). **PARTIAL** until PR #2
+  merges — do not edit `main` directly. CLI docs already include the
+  `playground` command and the AI-agent workflow in the published 3.2.1 README.
+- **Metadata recommendations (not applied)**: description — "An independent
+  TypeScript UI framework with its own semantic DSL, compiler, reactive
+  runtime, direct DOM renderer, SSR and AI-agent-native development toolchain."
+  Topics — `typescript, frontend-framework, ui-framework, compiler, reactive,
+  dom-renderer, server-side-rendering, developer-tools, ai-agents`. Repository
+  settings changes need owner approval.
+- **Remaining risks**: GitHub billing lock (CI), Vercel docs-site deployment,
+  PR #2 merge decision. `@streetui/playground` remains intentionally
+  unpublished. No republish, dist-tag edit, or settings change was performed.
+
