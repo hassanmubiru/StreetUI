@@ -424,12 +424,17 @@ pnpm typecheck    # strict TypeScript across all packages
 ## Versioning & release
 
 Every public package shares one coordinated version. The v1.0 public surface is
-frozen; every addition since then is purely additive.
+frozen; every addition since then is purely additive. This checkout is currently
+at **3.1.1** across the public packages (`streetui`, `@streetui/cli`, …).
 
 ```bash
-npm install streetui            # latest (3.0.2)
-npm install streetui@3.0.2
+npm install streetui            # latest published release on npm
+npm install streetui@3.0.2      # pin a specific published release
 ```
+
+The version installed from npm can be older than this repository. The M10/M11
+agent-workflow changes are **unreleased** — see `CHANGELOG.md`; nothing from
+those milestones has been published and no new release is claimed here.
 
 - [Changelog](CHANGELOG.md)
 - [Public API statement](docs/api-v1.0.md)
