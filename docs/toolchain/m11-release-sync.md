@@ -2,8 +2,9 @@
 
 Date: 2026-11-19
 Scope: local worktree vs public GitHub `main` vs the live npm registry.
-**Nothing was pushed, published, or version-bumped. Those steps await explicit
-approval (see §9).**
+**Final outcome: coordinated 3.2.0 committed, PR #1 opened, and all 18 public
+packages published to npm at 3.2.0 (playground intentionally unpublished).**
+The analysis below records the state before that release; §11 has the outcome.
 
 ## 1. Local git status
 
@@ -181,3 +182,21 @@ cd app && npm install
 # Release gate
 cd <worktree> && node scripts/release-check.mjs   # currently 1 version-skew error
 ```
+
+## 11. Final outcome (2026-11-19)
+
+- All 18 public packages coordinated to **3.2.0**: manifests,
+  `packages/streetui/src/version.ts` `VERSION`, `CLI_VERSION`,
+  `FRAMEWORK_VERSION`, stability-test assertions, and README badges updated;
+  `scripts/publish-packages.mjs` release-version pin moved to 3.2.0.
+- `release-check.mjs`: **OK (0 warnings)**. 108 CLI tests + 21 streetui tests
+  passing; external-install verification with the 3.2.0 tarballs: PASS.
+- Branch `build-streetui-toolchain` committed and pushed.
+  **PR #1: https://github.com/hassanmubiru/StreetUI/pull/1**
+- `node scripts/publish-packages.mjs`: **all 18 packages published to npm at
+  3.2.0**. `@streetui/playground` remains intentionally unpublished.
+- `CHANGELOG.md` in both checkouts now records M11 as `3.2.0` and M10 as
+  included in 3.2.0; no `Unreleased` feature claims remain for these milestones.
+- Registry propagation of the new dist-tag was in progress at report time;
+  `npm view streetui dist-tags` initially still read 3.1.6 immediately after
+  publish (npm's "being processed" notice).
