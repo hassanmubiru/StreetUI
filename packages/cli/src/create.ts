@@ -24,8 +24,10 @@ export interface CreateOptions {
   readonly targetDir: string;
   /** Template to use; defaults to the SSR starter. */
   readonly template?: string;
-  /** StreetUI package version the generated project should depend on. */
+  /** StreetUI framework version the generated project should depend on. */
   readonly frameworkVersion: string;
+  /** StreetUI CLI version for the generated project's devDependency. */
+  readonly cliVersion?: string;
   readonly logger: Logger;
 }
 
@@ -101,7 +103,11 @@ export async function createProject(options: CreateOptions): Promise<CreateResul
     });
   }
 
-  const tokens: TemplateTokens = { projectName, frameworkVersion: options.frameworkVersion };
+  const tokens: TemplateTokens = {
+    projectName,
+    frameworkVersion: options.frameworkVersion,
+    ...(options.cliVersion !== undefined ? { cliVersion: options.cliVersion } : {}),
+  };
   const files: string[] = [];
   await copyTree(src, root, tokens, files);
 

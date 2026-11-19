@@ -1,0 +1,28 @@
+{
+  "name": "create-streetui",
+  "version": "3.2.0",
+  "description": "The `npm create streetui@latest` initializer for StreetUI projects.",
+  "license": "Apache-2.0",
+  "bin": {
+    "create-streetui": "index.js"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@streetui/cli": "^3.1.0"
+  },
+  "keywords": [
+    "streetui",
+    "create",
+    "scaffold"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

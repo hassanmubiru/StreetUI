@@ -6,7 +6,7 @@ import * as API from './index.js';
 import { CLI_VERSION, parseArgs } from './index.js';
 
 const FROZEN_VALUE_EXPORTS = [
-  'buildProject', 'CLI_VERSION', 'clientEnvDefine', 'CliError', 'createLogger',
+  'buildProject', 'CLI_VERSION', 'FRAMEWORK_VERSION', 'clientEnvDefine', 'CliError', 'createLogger',
   'createProject', 'defineConfig', 'findConfigFile', 'loadConfig', 'parseArgs',
   'PUBLIC_ENV_PREFIX', 'publicEnvNames', 'ReloadHub', 'resolveProject',
   'runCli', 'runDev', 'runStart', 'startServer',
@@ -21,7 +21,7 @@ describe('@streetui/cli — public API contract (v1.0 frozen surface)', () => {
   });
 
   it('CLI_VERSION is aligned to the coordinated release version', () => {
-    expect(CLI_VERSION).toBe('3.0.2');
+    expect(CLI_VERSION).toBe('3.2.0');
   });
 
   it('parseArgs recognizes commands and flags', () => {

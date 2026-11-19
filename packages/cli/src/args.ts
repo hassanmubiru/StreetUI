@@ -25,12 +25,14 @@ export interface ParsedArgs {
   readonly template: string | undefined;
   /** `--dir <path>` project directory override. */
   readonly dir: string | undefined;
+  /** `--json` machine-readable event stream. */
+  readonly json: boolean;
   /** Any flags we do not recognise, reported verbatim (without leading `--`). */
   readonly unknown: readonly string[];
 }
 
 const VALUE_FLAGS = new Set(['port', 'host', 'template', 'dir']);
-const BOOLEAN_FLAGS = new Set(['help', 'version']);
+const BOOLEAN_FLAGS = new Set(['help', 'version', 'json']);
 const SHORT: Record<string, string> = { h: 'help', v: 'version', p: 'port' };
 
 /** Parse `process.argv.slice(2)`-style tokens into a `ParsedArgs`. */
@@ -40,6 +42,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
   const unknown: string[] = [];
   let help = false;
   let version = false;
+  let json = false;
   let port: number | undefined;
   let host: string | undefined;
   let template: string | undefined;
@@ -55,12 +58,13 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
       const raw = isLong ? token.slice(2) : token.slice(1);
       const eq = raw.indexOf('=');
       let name = eq >= 0 ? raw.slice(0, eq) : raw;
-      let inlineValue: string | undefined = eq >= 0 ? raw.slice(eq + 1) : undefined;
+      const inlineValue: string | undefined = eq >= 0 ? raw.slice(eq + 1) : undefined;
       if (!isLong) name = SHORT[name] ?? name;
 
       if (BOOLEAN_FLAGS.has(name)) {
         if (name === 'help') help = true;
         else if (name === 'version') version = true;
+        else if (name === 'json') json = true;
         continue;
       }
 
@@ -83,7 +87,6 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
       unknown.push(name);
       // A stray `--flag value` shouldn't swallow the value as a positional
       // silently; but we also don't know it takes a value, so leave `value`.
-      inlineValue = undefined;
       continue;
     }
 
@@ -91,5 +94,5 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     else positionals.push(token);
   }
 
-  return { command, positionals, help, version, port, host, template, dir, unknown };
+  return { command, positionals, help, version, port, host, template, dir, json, unknown };
 }

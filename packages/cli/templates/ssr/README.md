@@ -17,15 +17,16 @@ Editing files under `src/` rebuilds the app and reloads the browser.
 
 | Command         | What it does                                              |
 | --------------- | --------------------------------------------------------- |
-| `npm run dev`   | Start the dev server with live reload                     |
+| `npm run dev`   | Start StreetUI's own dev server with HMR                  |
 | `npm run build` | Produce a production build in `dist/`                     |
-| `npm run start` | Serve the production build                                |
+| `npm run start` | Serve the production build (SSR)                          |
+| `npm run preview` | Serve `dist/client` statically (no SSR, no HMR)          |
+| `npm run doctor` | Diagnose the project and toolchain                        |
 | `npm run typecheck` | Type-check the project with `tsc`                     |
 
-For a production smoke check, run `npm run build` and then `npm run start` in a
-second terminal. The generated SSR app is intentionally small: add your own test
-runner and lint policy after the first user flow is working rather than carrying
-a large toolchain into every starter project.
+The dev server transforms TypeScript on demand and hot-updates CSS and accepted
+modules. Other source changes fall back to a full reload. For a production smoke
+check, run `npm run build` and then `npm run start` (or `npm run preview`).
 
 ## Project structure
 

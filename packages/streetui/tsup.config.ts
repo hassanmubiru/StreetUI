@@ -15,8 +15,10 @@ import { defineConfig } from 'tsup';
  *   rewrites any remaining `@streetui/*` mentions that survive inside JSDoc
  *   comments so the shipped declarations reference only `streetui`.
  *
- * `esbuild` is the sole runtime dependency (used by the bundled CLI's build
- * command) and stays external. Node builtins are external by default.
+ * `typescript` is the only runtime dependency (used by the bundled CLI's dev,
+ * build, preview, and doctor commands) and stays external. Node builtins are
+ * external by default. esbuild is used only by tsup itself to build this
+ * package; it is not part of the application toolchain.
  */
 export default defineConfig({
   entry: {
@@ -33,5 +35,5 @@ export default defineConfig({
   clean: true,
   splitting: false,
   noExternal: [/^@streetui\//],
-  external: ['esbuild'],
+  external: ['typescript', 'playwright', 'playwright-core'],
 });

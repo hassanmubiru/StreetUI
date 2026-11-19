@@ -17,9 +17,11 @@ files under `src/` rebuilds the app and reloads the browser.
 
 | Command             | What it does                          |
 | ------------------- | ------------------------------------- |
-| `npm run dev`       | Dev server with live reload           |
+| `npm run dev`       | StreetUI dev server with HMR          |
 | `npm run build`     | Production build in `dist/`           |
 | `npm run start`     | Serve the production build            |
+| `npm run preview`   | Serve `dist/client` statically        |
+| `npm run doctor`    | Diagnose the project and toolchain    |
 | `npm run typecheck` | Type-check with `tsc`                 |
 
 ## Project structure
