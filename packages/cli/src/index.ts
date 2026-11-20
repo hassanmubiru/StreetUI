@@ -54,14 +54,14 @@ export { createEventLogger, silentEventLogger, STREETUI_EVENT_SCHEMA_VERSION, ma
 export type { EventLogger, StreetUIEvent, StreetUIEventType } from './toolchain/json/events.js';
 
 /** The CLI version, read from the compiled package. Kept in one place. */
-export const CLI_VERSION = '3.2.0';
+export const CLI_VERSION = '3.2.1';
 
 /**
  * The coordinated framework release the generated projects depend on. During a
  * corrective release the CLI and the framework may move independently; apps
  * should depend on the framework line, not the CLI version.
  */
-export const FRAMEWORK_VERSION = '3.2.0';
+export const FRAMEWORK_VERSION = '3.2.1';
 
 export interface RunCliOptions {
   readonly cwd?: string;

@@ -14,7 +14,7 @@ No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
 
-Current version: **3.2.0** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
+Current version: **3.2.1** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
 
 ---
 
@@ -425,7 +425,7 @@ pnpm typecheck    # strict TypeScript across all packages
 
 Every public package shares one coordinated version. The v1.0 public surface is
 frozen; every addition since then is purely additive. This checkout is currently
-at **3.2.0** across the public packages (`streetui`, `@streetui/cli`, …).
+at **3.2.1** across the public packages (`streetui`, `@streetui/cli`, …).
 
 ```bash
 npm install streetui            # latest published release on npm
