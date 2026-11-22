@@ -52,10 +52,8 @@ export function buildApp(page: PageDSL, state: AppState): void {
       w.input({
         id: 'slider-input',
         type: 'number',
-        min: 0,
-        max: 100,
         value: derived(() => String(state.sliderVal.get())),
-        onChange: (v) => state.sliderVal.set(Number(v) || 0),
+        onChange: (v) => state.sliderVal.set(Math.max(0, Math.min(100, Number(v) || 0))),
       });
     }, { id: 'slider-widget' });
 

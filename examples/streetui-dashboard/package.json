@@ -1,0 +1,25 @@
+{
+  "name": "@streetui/example-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Production-oriented StreetUI SaaS admin dashboard (users, projects, settings) built entirely with StreetUI's public APIs — no external renderer or styling framework.",
+  "scripts": {
+    "dev": "streetui dev",
+    "build": "streetui build",
+    "start": "streetui start",
+    "preview": "streetui preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "streetui": "workspace:*"
+  },
+  "devDependencies": {
+    "@streetui/cli": "workspace:*",
+    "@types/node": "*",
+    "typescript": "*",
+    "vitest": "*",
+    "happy-dom": "*"
+  }
+}
