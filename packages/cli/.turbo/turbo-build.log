@@ -1,5 +1,5 @@
 
-> @streetui/cli@3.0.2 build /home/error51/Downloads/StreetUI/packages/cli
+> @streetui/cli@3.2.0 build /home/error51/Downloads/StreetUI/packages/cli
 > tsup
 
 CLI Building entry: src/bin.ts, src/create-bin.ts, src/index.ts
@@ -10,21 +10,32 @@ CLI Target: es2022
 CLI Cleaning output folder
 ESM Build start
 CJS Build start
-ESM dist/bin.js            29.72 KB
-ESM dist/create-bin.js     29.83 KB
-ESM dist/index.js          29.91 KB
-ESM dist/bin.js.map        76.15 KB
-ESM dist/create-bin.js.map 76.45 KB
-ESM dist/index.js.map      75.52 KB
-ESM ⚡️ Build success in 437ms
-CJS dist/bin.cjs            30.92 KB
-CJS dist/create-bin.cjs     31.03 KB
-CJS dist/index.cjs          32.67 KB
-CJS dist/bin.cjs.map        75.87 KB
-CJS dist/create-bin.cjs.map 76.16 KB
-CJS dist/index.cjs.map      75.37 KB
-CJS ⚡️ Build success in 438ms
+
+ WARN  [33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m"import.meta" is not available with the "cjs" output format and will be empty[0m [empty-import-meta]
+
+    src/playground.ts:40:39:
+[37m      40 │ ...ere = dirname(fileURLToPath([32mimport.meta[37m.url)); // packages/cli/src
+         ╵                                [32m~~~~~~~~~~~[0m
+
+  You need to set the output format to "esm" for "import.meta" to work correctly.
+
+
+
+CJS dist/bin.cjs            138.91 KB
+CJS dist/create-bin.cjs     139.02 KB
+CJS dist/index.cjs          141.17 KB
+CJS dist/bin.cjs.map        294.25 KB
+CJS dist/create-bin.cjs.map 294.54 KB
+CJS dist/index.cjs.map      295.62 KB
+CJS ⚡️ Build success in 242ms
+ESM dist/index.js          135.07 KB
+ESM dist/bin.js            134.22 KB
+ESM dist/create-bin.js     134.33 KB
+ESM dist/index.js.map      296.77 KB
+ESM dist/bin.js.map        295.58 KB
+ESM dist/create-bin.js.map 295.87 KB
+ESM ⚡️ Build success in 244ms
 DTS Build start
-DTS ⚡️ Build success in 14572ms
-DTS dist/index.d.ts  14.57 KB
-DTS dist/index.d.cts 14.57 KB
+DTS ⚡️ Build success in 4278ms
+DTS dist/index.d.ts  27.89 KB
+DTS dist/index.d.cts 27.89 KB
