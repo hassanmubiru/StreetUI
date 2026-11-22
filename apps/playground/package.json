@@ -1,5 +1,5 @@
 {
-  "name": "@streetui/playground",
+  "name": "@streetui/playground-app",
   "version": "0.1.0",
   "description": "StreetUI browser playground",
   "type": "module",
