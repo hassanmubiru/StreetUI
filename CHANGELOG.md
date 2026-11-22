@@ -5,6 +5,46 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## Unreleased — M12 Developer Adoption, Ecosystem and Production Readiness (2026-11-22)
+
+**Milestone — code complete, verified locally; no packages published by this milestone.**
+
+### Added
+
+- `examples/streetui-dashboard` — production-oriented SaaS admin dashboard
+  (routes, typed components, resources, validated forms, theming, populated
+  SSR, 13 tests, Dockerfile) with documented demo-data and auth integration
+  points.
+- `scripts/toolchain-external-developer-e2e.mjs` — full external developer
+  acceptance test (install published packages → build → SSR → real browser
+  interactions → screenshots → console/error checks) verified on Chromium and
+  Firefox.
+- `scripts/toolchain-template-audit.mjs` — create/typecheck/build audit for all
+  10 starter templates.
+- `packages/streetui/src/api-experience.test.ts` — representative public API
+  tests for external TypeScript developers.
+- Documentation: `docs/README.md` task-oriented index,
+  `m12-onboarding-audit.md`, `m12-deployment.md`, `m12-compatibility.md`, and
+  `m12-report.md`.
+- Community readiness: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`,
+  issue/PR templates, and `docs/ROADMAP.md`.
+
+### Fixed
+
+- `todo` template: missing `derived` import in `src/app.ts`.
+- `interactive` template: unsupported `min`/`max` input options replaced with
+  range clamping in `onChange`.
+
+### Verified
+
+- All 10 starter templates pass create → typecheck → build.
+- Dashboard: 13 unit/SSR tests, strict typecheck, production build, populated
+  SSR (`of 24 users`).
+- External developer acceptance test: all steps pass on Chromium and Firefox
+  with zero console/runtime errors.
+- M10/M11 agent suites and external-install verification still pass; npm
+  3.2.1 verified with declarations for all 11 D-1-affected packages.
+
 ## 3.2.1 — TypeScript declaration packaging fix (2026-11-19)
 
 **Corrective release — no feature changes.** All 18 public packages published
