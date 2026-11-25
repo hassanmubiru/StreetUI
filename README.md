@@ -14,7 +14,7 @@ No React. No Vue. No virtual DOM. No JSX. No second reactive system.
 DSL → Compiler → Semantic Application Graph → Runtime → Renderer → DOM
 ```
 
-Current version: **3.2.1** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
+Current version: **3.2.2** · [Changelog](CHANGELOG.md) · [npm](https://www.npmjs.com/package/streetui) · [GitHub](https://github.com/hassanmubiru/StreetUI)
 
 ---
 
@@ -38,10 +38,11 @@ import {
 } from 'streetui';
 ```
 
-Two curated subpaths (still just `npm install streetui`):
+Curated subpaths (still just `npm install streetui`):
 
 - `streetui/server` — `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`, `renderDevToolsReport`
 - `streetui/testing` — `render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `renderComponent`, `findComponent`, `trigger`
+- `streetui/diagnostics` — opt-in compiler diagnostics: `analyzeGraph`, `inspectCompilation`, `formatInspection` (kept out of the runtime barrel)
 
 ---
 
@@ -394,16 +395,20 @@ packages/
   forms/       Reactive form model + synchronous validators
   context/     Build-time provider/consumer scoping (no prop drilling)
   i18n/        Reactive, typed internationalization
-  cli/         Developer CLI — create/dev/build/start + project tooling
+  cli/         Developer CLI + independent toolchain (dev server, HMR, builder, preview)
+  create-streetui/  `npm create streetui` initializer (bin-only)
+  playground/  Local IDE + agent control API (private, never published)
   streetui/    Public barrel — one install, one import
 
 examples/
   basic-app/                Counter app — full end-to-end
   streetui-account/         Full platform: router + resources + forms + context + i18n + a11y + SSR
   streetui-data/            Resources + error boundaries against a real HTTP API
+  streetui-dashboard/       Production reference: routes, resources, real HTTP, forms, theming, SSR, Dockerfile
   streetui-ssr/             SSR + hydration
   streetui-showcase/        Overlays, transitions, components, a11y, all together
   streetui-stress-app/      10k-row keyed list, fine-grained reactivity, router
+  streetui-performance-app/ Sampled performance scenarios
   streetui-website/         Framework documentation site built entirely with StreetUI
   streetjs-website/         StreetJS docs site — live at streetjs-website.netlify.app
 ```
@@ -414,10 +419,32 @@ examples/
 
 ```bash
 pnpm install
-pnpm build        # build all 18 packages
-pnpm test         # 1,148+ tests across all packages
+pnpm build        # build all 19 packages (18 coordinated + create-streetui)
+pnpm test         # package test suites
 pnpm typecheck    # strict TypeScript across all packages
 ```
+
+`@streetui/playground` is private and never published; `create-streetui` is
+bin-only (verify it through its bin, not a library import).
+
+### Verification
+
+```bash
+node --test scripts/lib/*.test.mjs      # shared helper unit tests
+node scripts/ci-workflow-audit.mjs      # asserts the CI workflows stay wired
+node scripts/dependency-audit.mjs       # dependency / supply-chain policy
+node scripts/api-inventory.mjs          # every package + declared subpath
+node scripts/toolchain-browser-tests.mjs --engines chromium,firefox,webkit --mode both
+node scripts/toolchain-ssr-hydration.mjs
+node scripts/toolchain-hmr.mjs
+node scripts/consumer-smoke.mjs
+```
+
+Every harness decides its exit code through `scripts/lib/harness-status.mjs`: a
+requested engine/mode with no record fails, and `BLOCKED`-only coverage exits 0
+locally but 1 under `CI` or `--require`. Evidence is labelled by target —
+`local-workspace`, `local-packed`, `npm-registry`, `github-actions` — and local
+results are never reported as GitHub CI.
 
 ---
 
@@ -425,16 +452,25 @@ pnpm typecheck    # strict TypeScript across all packages
 
 Every public package shares one coordinated version. The v1.0 public surface is
 frozen; every addition since then is purely additive. This checkout is currently
-at **3.2.1** across the public packages (`streetui`, `@streetui/cli`, …).
+at **3.2.2** across the public packages (`streetui`, `@streetui/cli`, …).
 
 ```bash
 npm install streetui            # latest published release on npm
-npm install streetui@3.0.2      # pin a specific published release
+npm install streetui@3.2.2      # pin a specific published release
 ```
 
-The version installed from npm can be older than this repository. The M10/M11
-agent-workflow changes are **unreleased** — see `CHANGELOG.md`; nothing from
-those milestones has been published and no new release is claimed here.
+`3.2.2` is published on npm and verified from the real registry on Node 18, 20,
+22 and 24. It fixes the Node 18 SSR defect that `3.2.1` shipped
+(`docs/toolchain/m13-report.md`) and the release-pipeline defects that let it ship
+(`docs/toolchain/m14-report.md`). Changes after this release are **unreleased** —
+see `CHANGELOG.md`.
+
+Unreleased work since `3.2.2` is verification and hardening, not a new release:
+one real declaration defect (`streetui/diagnostics` was referenced but not
+declared), the `mutation` cancellation contract, real HTTP integration in the
+dashboard reference app, shared exit semantics for every harness, dependency and
+public-API audits, and sampled performance measurement. Details:
+`docs/toolchain/m15-report.md`.
 
 - [Changelog](CHANGELOG.md)
 - [Public API statement](docs/api-v1.0.md)

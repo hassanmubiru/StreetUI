@@ -163,6 +163,8 @@ interface PwContext {
 }
 interface PwBrowser {
   newContext(options: { viewport: Viewport }): Promise<PwContext>;
+  /** Playwright exposes this on real browsers; test doubles may omit it. */
+  browserType?(): { name(): string };
   close(): Promise<void>;
 }
 interface PwBrowserType {
@@ -243,7 +245,7 @@ function cachedEngineExecutable(engine: AutomationEngine): string | undefined {
         ? [join(cacheRoot, dir, 'firefox', 'firefox')]
         : engine === 'chromium'
           ? [join(cacheRoot, dir, 'chrome-linux', 'chrome'), join(cacheRoot, dir, 'chrome-linux64', 'chrome')]
-          : [];
+          : [join(cacheRoot, dir, 'pw_run.sh')];
     for (const candidate of candidates) {
       if (existsSync(candidate)) return candidate;
     }
@@ -336,9 +338,13 @@ export class AutomationManager {
         height: clampDimension(input?.viewport?.height, 720),
       };
       const playwright = await this.loadPlaywright();
+      // `--no-sandbox` is a Chromium flag. Passing it to WebKit makes the
+      // browser exit during startup ("Target page, context or browser has been
+      // closed"), which previously made every WebKit agent session BLOCKED.
+      const launchArgs = engine === 'chromium' ? ['--no-sandbox'] : [];
       let browser: PwBrowser;
       try {
-        browser = await playwright[engine].launch({ headless: true, args: ['--no-sandbox'] });
+        browser = await playwright[engine].launch({ headless: true, args: launchArgs });
       } catch (error) {
         const fallback = cachedEngineExecutable(engine);
         if (fallback === undefined) {
@@ -348,13 +354,18 @@ export class AutomationManager {
           );
         }
         try {
-          browser = await playwright[engine].launch({ headless: true, args: ['--no-sandbox'], executablePath: fallback });
+          browser = await playwright[engine].launch({ headless: true, args: launchArgs, executablePath: fallback });
         } catch (fallbackError) {
           throw new AutomationError(
             'E_AUTOMATION_UNAVAILABLE',
             `Failed to launch ${engine}: ${fallbackError instanceof Error ? fallbackError.message.split('\n')[0] : String(fallbackError)}`,
           );
         }
+      }
+      const actualEngine = browser.browserType?.().name();
+      if (actualEngine !== undefined && actualEngine !== engine) {
+        await browser.close().catch(() => undefined);
+        throw new AutomationError('E_UNSUPPORTED', `Requested ${engine} but Playwright launched ${actualEngine}`);
       }
       this.browser = browser;
       this.context = await browser.newContext({ viewport });

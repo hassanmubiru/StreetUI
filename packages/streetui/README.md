@@ -8,7 +8,7 @@ transitions, accessibility platform, forms, context, i18n, SSR with static-plan
 acceleration, hydration, testing utilities, DevTools, and a CLI —
 as **one package, one import**.
 
-Current version: **3.2.1** · [Changelog](https://github.com/hassanmubiru/StreetUI/blob/main/CHANGELOG.md)
+Current version: **3.2.2** · [Changelog](https://github.com/hassanmubiru/StreetUI/blob/main/CHANGELOG.md)
 
 You install one thing:
 
@@ -57,9 +57,12 @@ The CLI is part of the same package:
 
 ```bash
 streetui create <dir>     # scaffold a new app (choose --template basic | ssr)
-streetui dev              # start the dev server (--port, --host)
+streetui dev              # start the dev server (--port, --host, --json)
 streetui build            # production build
 streetui start            # run the production server (--port, --host)
+streetui preview          # serve a client-only build
+streetui doctor           # environment / project diagnostics
+streetui playground       # local IDE + agent control API
 streetui --help
 streetui --version
 ```
@@ -140,6 +143,8 @@ renderer.hydrate(compiled, document.getElementById('app')!); // reuses server DO
 | `streetui` | The full framework: reactivity, DSL, compiler, graph, runtime, renderer, router, forms, context, i18n, components, overlays, transitions, a11y, data, devtools, SSR + hydration. |
 | `streetui/server` | Server-rendering subset: `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`, `renderDevToolsReport`. |
 | `streetui/testing` | Testing utilities: `render`, `findByRole`, `waitFor`, `renderComponent`, `findComponent`, `trigger`, `openOverlay`, `waitForTransition`. |
+| `streetui/diagnostics` | Opt-in compiler diagnostics: `analyzeGraph`, `inspectCompilation`, `formatInspection`. Deliberately kept out of the runtime barrel so it never enters a production client bundle. |
+| `streetui/package.json` | Package metadata, for tools that need to read the installed version. |
 
 ## What's inside (and why you don't have to think about it)
 

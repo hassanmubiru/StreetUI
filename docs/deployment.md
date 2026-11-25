@@ -48,9 +48,10 @@ import { createRenderer, BrowserDOMAdapter, compile } from 'streetui';
 // hydrate the server-rendered markup instead of re-creating it
 ```
 
-The three public subpaths are `streetui` (client + shared), `streetui/server`
-(SSR: `renderToString`, `renderHead`, `serializeState`, `ServerDOMAdapter`), and
-`streetui/testing`. Nothing else is public.
+The public subpaths are `streetui` (client + shared), `streetui/server`
+(SSR: `renderToString`, `renderHead`, `serializeState`, `ServerDOMAdapter`),
+`streetui/testing`, and `streetui/diagnostics` (opt-in compiler diagnostics,
+kept off the runtime barrel on purpose). Nothing else is public.
 
 ## What must not reach the browser
 
@@ -69,11 +70,19 @@ renders your app but does not impose an access-control policy. See
 [Production server](production-server.md) for the hardening notes that ship with
 the CLI server.
 
+Only `STREETUI_PUBLIC_*` environment variables are inlined into the client
+bundle; any other `process.env.X` read in code reachable from the browser graph
+compiles to `undefined`. Keep tokens and other credentials in server-only modules
+and inject them on the server (see
+[`toolchain/http-integration.md`](toolchain/http-integration.md)).
+
 ## Verifying a release consumer
 
 Before deploying, you can verify the packaged framework installs and renders
 outside the monorepo: pack the tarballs, install them in a throwaway directory,
 and confirm `renderToString(compile(app))` emits your heading and signal values
-over both ESM and CJS. See [Publishing](publishing.md).
+over both ESM and CJS. The full check is `node scripts/consumer-smoke.mjs`, which
+also compiles a strict NodeNext TypeScript consumer against every declared
+subpath. See [Publishing](publishing.md).
 
 See also: [SSR](ssr.md), [Hydration](hydration.md), [CLI](cli.md).

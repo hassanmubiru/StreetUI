@@ -14,10 +14,11 @@
  * No cross-framework comparison. No ranking.
  */
 import fs from 'node:fs';
-import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { startDevFixture } from './lib/dev-server-fixture.mjs';
+import { cachedEngineExecutable } from './lib/browser-engines.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -33,17 +34,22 @@ const axeOut = args.find(a => a.startsWith('--out-axe='))?.slice('--out-axe='.le
 
 const require = createRequire(import.meta.url);
 const nowIso = () => new Date().toISOString();
-const MIME = { '.js': 'application/javascript', '.html': 'text/html', '.css': 'text/css',
-               '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
 // ── Detect environment ──────────────────────────────────────────────────────
-const chromePath = process.env.CHROMIUM_PATH || process.env.CHROME_PATH || '/usr/bin/google-chrome';
-const chromeExists = fs.existsSync(chromePath);
+let chromePath = process.env.CHROMIUM_PATH || process.env.CHROME_PATH;
 const playwrightBrowsers = process.env.PLAYWRIGHT_BROWSERS_PATH
-  ?? path.join(repo, 'node_modules', '.cache', 'playwright');
+  ?? path.join(process.env.HOME ?? '', '.cache', 'ms-playwright');
 
 let pw;
 try { pw = require('playwright'); } catch { pw = null; }
+if (pw && !chromePath) {
+  try {
+    const candidate = pw.chromium.executablePath();
+    if (fs.existsSync(candidate)) chromePath = candidate;
+  } catch { /* use the same-engine cache below */ }
+  chromePath ??= cachedEngineExecutable('chromium');
+}
+const chromeExists = typeof chromePath === 'string' && fs.existsSync(chromePath);
 
 if (!pw || !chromeExists) {
   const reason = [
@@ -69,62 +75,14 @@ function resolveAxe() {
 }
 const axeSource = resolveAxe();
 
-// ── Static file server — bundles browser-entry.js with streetui inlined ──────
-async function buildBundledEntry() {
-  // Find esbuild
-  const esbuildCandidates = [
-    path.join(repo, 'benchmarks', 'node_modules', 'esbuild', 'lib', 'main.js'),
-    path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'),
-  ];
-  let esbuild = null;
-  for (const c of esbuildCandidates) {
-    try { esbuild = await import(c); if (esbuild?.build) break; } catch {}
-  }
-  if (!esbuild) throw new Error('esbuild not found');
-
-  const result = await esbuild.build({
-    entryPoints: [path.join(siteDir, 'dist', 'browser-entry.js')],
-    bundle: true,
-    format: 'esm',
-    write: false,
-    target: 'es2020',
-    absWorkingDir: siteDir,
-    logLevel: 'silent',
-  });
-  return result.outputFiles[0].text;
-}
-
-let bundledJs = null;
-try {
-  bundledJs = await buildBundledEntry();
-  console.log('bundled browser-entry with streetui inlined, size:', bundledJs.length);
-} catch (e) {
-  console.error('bundle failed, falling back to external streetui:', e.message);
-}
-
-function createServer() {
-  const server = http.createServer((req, res) => {
-    let urlPath = req.url?.split('?')[0] ?? '/';
-    // Serve the bundled entry that has streetui inlined
-    if (urlPath === '/dist/browser-entry.js' && bundledJs) {
-      res.writeHead(200, { 'Content-Type': 'application/javascript' });
-      res.end(bundledJs);
-      return;
-    }
-    if (urlPath === '/' || !path.extname(urlPath)) urlPath = '/index.html';
-    const filePath = path.join(siteDir, urlPath);
-    const ext = path.extname(filePath);
-    try {
-      const data = fs.readFileSync(filePath);
-      res.writeHead(200, { 'Content-Type': MIME[ext] ?? 'application/octet-stream' });
-      res.end(data);
-    } catch {
-      const idx = fs.readFileSync(path.join(siteDir, 'index.html'));
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(idx);
-    }
-  });
-  return new Promise(r => server.listen(0, '127.0.0.1', () => r({ server, port: server.address().port })));
+async function suppressLegacyStaticBundle(page) {
+  // index.html predates the dev-server config and still names dist/browser-entry.js.
+  // The dev server injects src/browser-entry.ts; running both would duplicate setup.
+  await page.route('**/dist/browser-entry.js', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/javascript',
+    body: '// superseded by the StreetUI dev-server entry',
+  }));
 }
 
 // ── Web Vitals measurement ──────────────────────────────────────────────────
@@ -170,6 +128,7 @@ async function measureEngine(browserType, executablePath, label, { port }) {
 
   for (const route of ROUTES) {
     const page = await browser.newPage();
+    await suppressLegacyStaticBundle(page);
     page.on('pageerror', e => errors.push(`[${route}] ${e.message.slice(0, 100)}`));
     try {
       await page.goto(`http://127.0.0.1:${port}${route}`, { waitUntil: 'networkidle', timeout: 15000 });
@@ -187,6 +146,7 @@ async function measureEngine(browserType, executablePath, label, { port }) {
   let navMs = null;
   try {
     const page = await browser.newPage();
+    await suppressLegacyStaticBundle(page);
     await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'networkidle', timeout: 15000 });
     const t0 = Date.now();
     await page.evaluate(() => window.history.pushState({}, '', '/docs/routing'));
@@ -208,6 +168,7 @@ async function runAxe(browserType, executablePath, { port }) {
 
   for (const route of ROUTES) {
     const page = await browser.newPage();
+    await suppressLegacyStaticBundle(page);
     try {
       await page.goto(`http://127.0.0.1:${port}${route}`, { waitUntil: 'networkidle', timeout: 15000 });
       await page.addScriptTag({ content: axeSource });
@@ -234,26 +195,18 @@ async function runAxe(browserType, executablePath, { port }) {
 
 // ── Firefox binary ──────────────────────────────────────────────────────────
 function findFirefox() {
-  const candidates = [
-    process.env.FIREFOX_PATH,
-    // Playwright-managed Firefox
-    (() => {
-      try {
-        const dir = fs.readdirSync(playwrightBrowsers).find(d => d.startsWith('firefox'));
-        if (dir) {
-          const bin = path.join(playwrightBrowsers, dir, 'firefox', 'firefox');
-          if (fs.existsSync(bin)) return bin;
-        }
-      } catch {}
-      return null;
-    })(),
-  ].filter(Boolean);
-  return candidates.find(p => p && fs.existsSync(p)) ?? null;
+  if (process.env.FIREFOX_PATH && fs.existsSync(process.env.FIREFOX_PATH)) return process.env.FIREFOX_PATH;
+  try {
+    const candidate = pw.firefox.executablePath();
+    if (fs.existsSync(candidate)) return candidate;
+  } catch { /* use the same-engine cache below */ }
+  return cachedEngineExecutable('firefox') ?? null;
 }
 
 // ── Main ────────────────────────────────────────────────────────────────────
-const { server, port } = await createServer();
-console.log(`serving website on port ${port} (bundled=${!!bundledJs})`);
+const fixture = await startDevFixture(repo, siteDir);
+const port = Number(new URL(fixture.url).port);
+console.log(`serving website with the StreetUI dev server on port ${port}`);
 process.env.PLAYWRIGHT_BROWSERS_PATH = playwrightBrowsers;
 
 try {
@@ -302,5 +255,5 @@ try {
   console.log('axe written:', axeOut);
 
 } finally {
-  server.close();
+  await fixture.stop();
 }

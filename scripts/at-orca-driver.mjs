@@ -28,6 +28,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { startDevFixture } from './lib/dev-server-fixture.mjs';
 import { spawnSync } from 'node:child_process';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -179,35 +180,18 @@ for i in range(_childCount(desktop)):
 json.dump({'apps': apps}, sys.stdout)
 `;
 
-let server = null, browser = null;
+let fixture = null, browser = null;
 try {
   const appDirAt = path.join(repo, 'examples', 'streetui-performance-app');
-  const prebuiltAt = path.join(appDirAt, 'dist', 'bench-browser.js');
-  let jsAt;
-  if (fs.existsSync(prebuiltAt)) {
-    jsAt = fs.readFileSync(prebuiltAt, 'utf8');
-  } else {
-    const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
-    const build = await esbuild.build({
-      entryPoints: [path.join(appDirAt, 'src', 'bench-browser.ts')],
-      bundle: true, format: 'esm', write: false, target: 'es2020', absWorkingDir: appDirAt,
-      define: { 'Buffer.byteLength': '__bufferByteLength' },
-      banner: { js: 'const __bufferByteLength=(s)=>new TextEncoder().encode(s).length;' },
-    });
-    jsAt = build.outputFiles[0].text;
-  }
-  const js = jsAt;
-  const html = '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>streetui at</title></head><body><div id="app"></div><script type="module">' + js + '\ntry{ (window.__mount||window.__bench)?.(document.getElementById("app")); }catch(e){}</script></body></html>';
-  const http = await import('node:http');
-  server = http.createServer((_q, res) => { res.setHeader('content-type', 'text/html; charset=utf-8'); res.end(html); });
-  await new Promise((r) => server.listen(0, '127.0.0.1', r));
-  const { port } = server.address();
+  fixture = await startDevFixture(repo, appDirAt);
 
   // NON-headless so AT-SPI can attach to a real window.
   const chromeBinAt = process.env.CHROMIUM_PATH || process.env.CHROME_PATH || '/usr/bin/google-chrome';
   browser = await playwright.chromium.launch({ executablePath: chromeBinAt, headless: false, args: ['--force-renderer-accessibility'] });
   const page = await browser.newPage();
-  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: 'load' });
+  await page.goto(`${fixture.url}/`, { waitUntil: 'load' });
+  await page.waitForFunction(() => typeof window.__bench === 'function', null, { timeout: 30000 });
+  await page.evaluate(async () => { await window.__bench(); });
   await page.waitForTimeout(800);
 
   const treeRun = spawnSync('python3', ['-c', PYATSPI_WALK], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
@@ -249,6 +233,6 @@ try {
   process.stdout.write('at-orca-driver: ERROR — recorded, nothing simulated.\n');
 } finally {
   try { await browser?.close(); } catch { /* ignore */ }
-  try { server?.close(); } catch { /* ignore */ }
+  try { await fixture?.stop(); } catch { /* ignore */ }
 }
 process.exit(0);

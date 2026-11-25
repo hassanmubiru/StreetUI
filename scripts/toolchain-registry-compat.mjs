@@ -9,7 +9,7 @@
  *     app importing all supported packages.
  *   - unsupported probes: slugify (CJS-only) and node-fetch v2 (CJS + Node).
  *
- * Usage:  node scripts/toolchain-registry-compat.mjs [--engines chromium,firefox]
+ * Usage:  node scripts/toolchain-registry-compat.mjs [--engines chromium,firefox,webkit] [--only <pkgs>] [--local]
  */
 
 import fs from 'node:fs';
@@ -17,15 +17,19 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { assertNoUnknownSelectionFlags, enginesFromArgv, launchBrowser } from './lib/browser-engines.mjs';
+import { applyExitCode, summarizeReports, summaryForArtifact } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
-const CLI_SPEC = '@streetui/cli@3.1.5';
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
+const CLI_SPEC = `@streetui/cli@${WORKSPACE_VERSION}`;
 const REGISTRY = 'https://registry.npmjs.org/';
 
-const enginesArg = process.argv.includes('--engines')
-  ? process.argv[process.argv.indexOf('--engines') + 1].split(',')
-  : ['chromium', 'firefox'];
+assertNoUnknownSelectionFlags();
+const enginesArg = enginesFromArgv();
 
 const onlyArg = process.argv.includes('--only')
   ? process.argv[process.argv.indexOf('--only') + 1].split(',').map((s) => s.trim())
@@ -33,7 +37,7 @@ const onlyArg = process.argv.includes('--only')
 
 const LOCAL_BUILD = process.argv.includes('--local');
 const LOCAL_BIN = path.join(repo, 'packages', 'cli', 'dist', 'bin.js');
-const LOCAL_CLI_TGZ = path.join(repo, 'dist-tarballs', 'streetui-cli-3.1.6.tgz');
+const LOCAL_CLI_TGZ = path.join(repo, 'dist-tarballs', `streetui-cli-${WORKSPACE_VERSION}.tgz`);
 
 const SUPPORTED = {
   nanoid: {
@@ -130,7 +134,11 @@ async function waitForHttp(url, ms = 45000) {
 }
 
 function spawnCli(cwd, args) {
-  return spawn(path.join(cwd, 'node_modules', '.bin', 'streetui'), args, { cwd, env, stdio: ['ignore','pipe','pipe'] });
+  // `.bin/streetui` is ambiguous: the unified `streetui` package ships a bin of
+  // the same name, so it can resolve to the framework instead of the CLI.
+  // Invoke the CLI entry point directly.
+  const bin = path.join(cwd, 'node_modules', '@streetui', 'cli', 'dist', 'bin.js');
+  return spawn(process.execPath, [bin, ...args], { cwd, env, stdio: ['ignore','pipe','pipe'] });
 }
 
 function browserHelpers(page) {
@@ -140,19 +148,22 @@ function browserHelpers(page) {
   return errors;
 }
 
-async function checkBrowser(engine, url, expectText) {
+async function checkBrowser(engine, url, expectText, mode) {
   const pw = await import('playwright');
   let browser;
-  try { browser = await pw[engine].launch(); }
-  catch (error) {
-    const cacheRoot = path.join(os.homedir(), '.cache', 'ms-playwright');
-    const prefix = engine === 'firefox' ? 'firefox-' : 'chromium-';
-    const dirs = fs.existsSync(cacheRoot) ? fs.readdirSync(cacheRoot).filter((d)=>d.startsWith(prefix)).sort().reverse() : [];
-    for (const d of dirs) {
-      const bin = engine === 'firefox' ? path.join(cacheRoot,d,'firefox','firefox') : path.join(cacheRoot,d,'chrome-linux','chrome');
-      if (fs.existsSync(bin)) { browser = await pw[engine].launch({ executablePath: bin }); break; }
-    }
-    if (!browser) return { ok: false, fatal: String(error.message).split('\n')[0] };
+  try {
+    browser = await launchBrowser(pw, engine);
+  } catch (error) {
+    return {
+      ok: false,
+      status: 'BLOCKED',
+      requestedEngine: engine,
+      actualEngine: null,
+      browserVersion: null,
+      requestedMode: mode,
+      actualMode: null,
+      reason: String(error.message).split('\n')[0],
+    };
   }
   try {
     const page = await browser.newPage();
@@ -168,9 +179,31 @@ async function checkBrowser(engine, url, expectText) {
     await new Promise((r) => setTimeout(r, 300));
     const out = await page.evaluate(() => globalThis.__compatOut).catch(() => undefined);
     const ok = expectText ? out === expectText : out !== undefined && out !== '';
-    return { ok: ok && errors.length === 0, out: String(out).slice(0,120), errors };
+    const passed = ok && errors.length === 0;
+    return {
+      ok: passed,
+      status: passed ? 'PASS' : 'FAIL',
+      requestedEngine: engine,
+      actualEngine: browser.browserType().name(),
+      browserVersion: browser.version(),
+      requestedMode: mode,
+      actualMode: mode,
+      out: String(out).slice(0,120),
+      errors,
+      ...(passed ? {} : { reason: errors.length > 0 ? errors.join(' | ') : `output ${String(out).slice(0, 60)} !== ${expectText}` }),
+    };
   } catch (error) {
-    return { ok: false, error: String(error.message), errors: [] };
+    return {
+      ok: false,
+      status: 'FAIL',
+      requestedEngine: engine,
+      actualEngine: browser.browserType().name(),
+      browserVersion: browser.version(),
+      requestedMode: mode,
+      actualMode: mode,
+      reason: String(error.message).split('\n')[0],
+      errors: [],
+    };
   } finally {
     await browser.close();
   }
@@ -179,10 +212,10 @@ async function checkBrowser(engine, url, expectText) {
 async function scaffoldApp(name) {
   const app = path.join(base, name);
   if (LOCAL_BUILD) {
-    // Candidate build: scaffold with the local 3.1.6 CLI.
+    // Candidate build: scaffold with the local CLI.
     run(['node', LOCAL_BIN, 'create', name, '--template', 'ssr'], base);
     // Point the app's CLI devDependency at the candidate tarball so the test
-    // runs the candidate (not the published 3.1.5).
+    // runs the candidate (not the published release).
     const pkgPath = path.join(app, 'package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
     pkg.devDependencies = pkg.devDependencies ?? {};
@@ -228,7 +261,8 @@ async function runDev(app, port) {
 }
 
 async function runProd(app, port) {
-  const out = run([path.join(app,'node_modules','.bin','streetui'),'build','--json'], app, { silent: true });
+  const bin = path.join(app, 'node_modules', '@streetui', 'cli', 'dist', 'bin.js');
+  const out = run([process.execPath, bin, 'build', '--json'], app, { silent: true });
   const completed = out.split('\n').some((l) => { try { return JSON.parse(l).event === 'build_completed'; } catch { return false; } });
   if (!completed) return { ok: false, reason: 'build_completed missing' };
   const manifest = JSON.parse(fs.readFileSync(path.join(app,'dist','client','manifest.json'),'utf8'));
@@ -255,7 +289,7 @@ async function testSupported(name, cfg, index) {
     console.error(`[compat] ${name} dev up ${url}`);
     const expectText = cfg.expect;
     for (const engine of enginesArg) {
-      result.dev[engine] = await checkBrowser(engine, url, expectText);
+      result.dev[engine] = await checkBrowser(engine, url, expectText, 'dev');
       console.error(`[compat] ${name} dev ${engine} ok=${result.dev[engine].ok}`);
     }
     if (cfg.css) {
@@ -271,7 +305,7 @@ async function testSupported(name, cfg, index) {
     result.prod.build = prod.ok;
     result.prod.assets = prod.assets;
     for (const engine of enginesArg) {
-      if (prod.url) result.prod[engine] = await checkBrowser(engine, prod.url, expectText);
+      if (prod.url) result.prod[engine] = await checkBrowser(engine, prod.url, expectText, 'prod');
       if (prod.url) console.error(`[compat] ${name} prod ${engine} ok=${result.prod?.[engine]?.ok}`);
     }
     if (prod.child) prod.child.kill('SIGTERM');
@@ -323,7 +357,10 @@ async function testUnsupported(name, cfg, index) {
 const report = {
   schema: 'streetui-toolchain-registry-compat/v1',
   created: new Date().toISOString(),
-  cli: LOCAL_BUILD ? `local-3.1.6 (${LOCAL_CLI_TGZ})` : CLI_SPEC,
+  // Evidence target: the published CLI and the third-party packages come from
+  // the real registry; `--local` swaps only the CLI for the workspace build.
+  target: LOCAL_BUILD ? 'local-workspace' : 'npm-registry',
+  cli: LOCAL_BUILD ? `local-workspace@${WORKSPACE_VERSION} (${LOCAL_CLI_TGZ})` : CLI_SPEC,
   local: LOCAL_BUILD,
   supported: {},
   unsupported: {},
@@ -341,15 +378,60 @@ try {
     if (onlyArg && !onlyArg.includes(name)) continue;
     report.unsupported[name] = await testUnsupported(name, cfg, j++);
   }
-  const failSupported = Object.values(report.supported).some((r) => Object.values(r.dev).some((d) => !d.ok) || Object.values(r.prod).some((d) => typeof d === 'object' && d.ok === false));
-  // Unsupported probes must yield a documented diagnostic (CommonJS, or a
-  // Node-builtin incompatibility) — never raw source served as a 200.
-  const diagOk = Object.values(report.unsupported).every((r) => r.diagnostic && (r.diagnostic.includes('CommonJS') || r.diagnostic.includes('Node-builtin')));
-  if (failSupported || !diagOk) report.status = 'PARTIAL';
 } catch (error) {
   report.status = 'BLOCKED';
   report.fatal = String(error.stack || error);
 }
+
+// Per engine/mode records for every supported package, plus one record per
+// unsupported probe (its contract is a documented diagnostic, not a render).
+const rows = [];
+for (const [name, result] of Object.entries(report.supported)) {
+  for (const mode of ['dev', 'prod']) {
+    for (const engine of enginesArg) {
+      const record = result[mode]?.[engine];
+      if (record === undefined) {
+        rows.push({
+          package: name,
+          requestedEngine: engine,
+          requestedMode: mode,
+          status: result.error ? 'FAIL' : 'BLOCKED',
+          reason: result.error ?? `${mode} result missing`,
+        });
+        continue;
+      }
+      rows.push({ package: name, ...record, status: record.status ?? (record.ok ? 'PASS' : 'FAIL') });
+    }
+  }
+  if (result.error) {
+    rows.push({ package: name, requestedEngine: enginesArg[0], requestedMode: 'dev', status: 'FAIL', reason: result.error });
+  }
+}
+for (const [name, result] of Object.entries(report.unsupported)) {
+  const diagOk =
+    typeof result.diagnostic === 'string' &&
+    (result.diagnostic.includes('CommonJS') || result.diagnostic.includes('Node-builtin'));
+  rows.push({
+    package: name,
+    requestedEngine: enginesArg[0],
+    requestedMode: 'dev',
+    status: diagOk ? 'PASS' : 'FAIL',
+    reason: result.error ?? `diagnostic: ${result.diagnostic ?? 'missing'}`,
+  });
+}
+
+const summary = summarizeReports(rows, {
+  requestedEngines: enginesArg,
+  requestedModes: ['dev', 'prod'],
+});
+report.status = report.fatal
+  ? 'BLOCKED'
+  : summary.exitCode === 0
+    ? 'PASS'
+    : summary.counts.blocked > 0 && summary.counts.failed === 0 && summary.counts.unknown === 0
+      ? 'PARTIAL'
+      : 'FAIL';
+report.summary = summaryForArtifact(summary);
 
 const resultsDir = path.join(repo, 'benchmarks', 'results', 'toolchain');
 fs.mkdirSync(resultsDir, { recursive: true });
@@ -358,4 +440,5 @@ console.log('StreetUI Registry Compat');
 console.log('Supported: ' + Object.keys(report.supported).join(', '));
 console.log('Unsupported diagnostics: ' + Object.values(report.unsupported).map((r) => r.diagnostic).join(' | '));
 console.log('Final: ' + report.status);
+process.exitCode = applyExitCode(summary, process.stdout);
 fs.rmSync(base, { recursive: true, force: true });

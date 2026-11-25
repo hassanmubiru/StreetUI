@@ -1,6 +1,6 @@
 {
   "name": "streetui",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "StreetUI — a complete TypeScript UI framework with its own compiler, semantic application graph, reactivity, DOM renderer, router, resources, forms, context, i18n, SSR, hydration, testing, devtools and CLI. One install, one import.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -39,6 +39,16 @@
       "require": {
         "types": "./dist/testing.d.cts",
         "default": "./dist/testing.cjs"
+      }
+    },
+    "./diagnostics": {
+      "import": {
+        "types": "./dist/diagnostics.d.ts",
+        "default": "./dist/diagnostics.js"
+      },
+      "require": {
+        "types": "./dist/diagnostics.d.cts",
+        "default": "./dist/diagnostics.cjs"
       }
     },
     "./package.json": "./package.json"

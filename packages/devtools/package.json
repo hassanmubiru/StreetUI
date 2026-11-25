@@ -1,6 +1,6 @@
 {
   "name": "@streetui/devtools",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "StreetUI devtools — graph inspection, serialization, debug helpers",
   "type": "module",
   "main": "./dist/index.cjs",

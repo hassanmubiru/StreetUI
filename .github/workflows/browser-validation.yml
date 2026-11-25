@@ -1,19 +1,23 @@
 name: Browser validation
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 3 * * 1'
+    - cron: '0 3 * * 0'
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: browser-validation-${{ github.workflow }}
+  group: browser-validation-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   chromium:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,20 +31,25 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run build
+      - run: node scripts/toolchain-browser-tests.mjs --engine chromium --mode both
+      - run: node scripts/toolchain-ssr-hydration.mjs --engines chromium
+      - run: node scripts/toolchain-a11y-axe.mjs --engines chromium
       - run: node scripts/browser-harness.mjs
-      - run: node scripts/visual-a11y-axe.mjs --out=/tmp/streetui-visual-a11y.json
-      - run: >-
-          node -e "const fs=require('fs'); const r=JSON.parse(fs.readFileSync('/tmp/streetui-visual-a11y.json','utf8'));
-          if(r.status !== 'PASS') throw new Error('Visual accessibility gate: '+r.status+' '+(r.reason||''))"
+      - run: node scripts/visual-a11y-axe.mjs --engine chromium --mode dev
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: chromium-validation
           path: |
+            benchmarks/results/toolchain/chromium-dev.json
+            benchmarks/results/toolchain/chromium-prod.json
+            benchmarks/results/toolchain/a11y-axe.json
+            benchmarks/results/toolchain/ssr-hydration.json
             benchmarks/results/v1.3/streetui-browser.json
-            /tmp/streetui-visual-a11y.json
+            benchmarks/results/v2.5/visual-a11y.json
 
   firefox:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,9 +63,123 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps firefox
       - run: pnpm run build
+      - run: node scripts/toolchain-browser-tests.mjs --engine firefox --mode both
+      - run: node scripts/toolchain-ssr-hydration.mjs --engines firefox
+      - run: node scripts/toolchain-a11y-axe.mjs --engines firefox
       - run: node scripts/browser-harness-firefox.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: firefox-validation
-          path: benchmarks/results/v2.5/streetui-firefox.json
+          path: |
+            benchmarks/results/toolchain/firefox-dev.json
+            benchmarks/results/toolchain/firefox-prod.json
+            benchmarks/results/toolchain/a11y-axe.json
+            benchmarks/results/toolchain/ssr-hydration.json
+            benchmarks/results/v2.5/streetui-firefox.json
+
+  webkit:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps webkit
+      - run: pnpm run build
+      - run: node scripts/toolchain-browser-tests.mjs --engine webkit --mode both
+      - run: node scripts/toolchain-ssr-hydration.mjs --engines webkit
+      - run: node scripts/toolchain-a11y-axe.mjs --engines webkit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: webkit-validation
+          path: |
+            benchmarks/results/toolchain/webkit-dev.json
+            benchmarks/results/toolchain/webkit-prod.json
+            benchmarks/results/toolchain/a11y-axe.json
+            benchmarks/results/toolchain/ssr-hydration.json
+
+  agent-api:
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run build
+      - run: node scripts/toolchain-agent-e2e.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-api-e2e
+          path: benchmarks/results/toolchain/agent-e2e.json
+          if-no-files-found: warn
+
+  agent-visual:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps ${{ matrix.engine }}
+      - run: pnpm run build
+      - run: node scripts/toolchain-agent-visual-e2e.mjs --engines ${{ matrix.engine }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: agent-visual-${{ matrix.engine }}
+          path: benchmarks/results/toolchain/agent-visual-e2e.json
+          if-no-files-found: warn
+
+  external-developer:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps ${{ matrix.engine }}
+      - run: pnpm run build
+      - run: pnpm run release:pack
+      - run: node scripts/toolchain-external-developer-e2e.mjs --engines ${{ matrix.engine }} --tarballs dist-tarballs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: external-developer-${{ matrix.engine }}
+          path: benchmarks/results/toolchain/external-developer-e2e.json
+          if-no-files-found: warn

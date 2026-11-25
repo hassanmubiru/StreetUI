@@ -37,7 +37,7 @@ export function renderIsland(options: RenderOptions = {}): RenderResult {
     html: island,
     body,
     stateScript,
-    bytes: Buffer.byteLength(island, 'utf8'),
+    bytes: new TextEncoder().encode(island).byteLength,
   };
 }
 

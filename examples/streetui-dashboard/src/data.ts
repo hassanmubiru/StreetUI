@@ -1,13 +1,21 @@
 /**
- * Demo data + data access for the dashboard example.
+ * Demo data + the data-source contract for the dashboard example.
  *
- * Everything in this file is **demonstration data**, not a real service. The
- * async functions deliberately mimic an HTTP API (latency, filtering,
- * pagination) so the UI exercises realistic loading and error states.
+ * The three mock functions below are **demonstration data**, not a real
+ * service. The async functions deliberately mimic an HTTP API (latency,
+ * filtering, pagination) so the UI exercises realistic loading and error
+ * states, and they honour the abort signal exactly like a real request.
  *
- * PRODUCTION INTEGRATION POINT: replace these three functions with calls
- * through `createClient({ baseUrl })` against your real backend — the UI
- * consumes only the returned shapes and does not care where they come from.
+ * PRODUCTION INTEGRATION POINT: `./http-data.ts` implements the same
+ * `DataSource` contract against a real HTTP/JSON API through
+ * `createClient({ baseUrl })`. Set `STREETUI_PUBLIC_DASHBOARD_API_URL` to switch
+ * the app from the mock source to the HTTP source — the UI consumes only the
+ * returned shapes and does not care where they come from.
+ *
+ * `STREETUI_PUBLIC_DASHBOARD_API_URL` is a *public* base URL (not a secret): the
+ * browser needs it too. Server-only credentials (a Bearer token) are never read
+ * here; `./http-patterns.ts` exposes a server client for that, and `./server.ts`
+ * injects it into `createState`.
  */
 
 export type UserStatus = 'active' | 'invited' | 'suspended';
@@ -49,6 +57,18 @@ export interface UserQuery {
   readonly role: string;
   readonly page: number;
   readonly pageSize: number;
+}
+
+/** Per-request options; `signal` cancels the work like a real HTTP request. */
+export interface DataRequestOptions {
+  readonly signal?: AbortSignal;
+}
+
+/** The data contract the UI depends on. Both the mock and HTTP sources implement it. */
+export interface DataSource {
+  fetchOverview(options?: DataRequestOptions): Promise<OverviewData>;
+  fetchUsers(query: UserQuery, options?: DataRequestOptions): Promise<Page<User>>;
+  fetchProjects(status: string, options?: DataRequestOptions): Promise<readonly Project[]>;
 }
 
 const FIRST = ['Ava', 'Liam', 'Maya', 'Noah', 'Ivy', 'Owen', 'Ella', 'Lucas', 'Nora', 'Felix', 'Zoe', 'Hugo'];
@@ -94,10 +114,31 @@ export const ACTIVITY: readonly ActivityItem[] = [
   { id: 'a-8', text: 'Lucas Diaz archived 9 stale projects', at: '3 days ago' },
 ];
 
-const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+function abortReason(signal: AbortSignal): unknown {
+  return signal.reason ?? new DOMException('The operation was aborted.', 'AbortError');
+}
 
-export async function fetchOverview(): Promise<OverviewData> {
-  await wait(120);
+/** Latency that rejects with an AbortError when the signal fires (real-request semantics). */
+function wait(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted === true) {
+      reject(abortReason(signal));
+      return;
+    }
+    const onAbort = (): void => {
+      clearTimeout(timer);
+      reject(abortReason(signal!));
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
+}
+
+export async function fetchOverview(options: DataRequestOptions = {}): Promise<OverviewData> {
+  await wait(120, options.signal);
   return {
     metrics: [
       { id: 'm-users', label: 'Total users', value: USERS.length, delta: '+3 this week' },
@@ -109,8 +150,8 @@ export async function fetchOverview(): Promise<OverviewData> {
   };
 }
 
-export async function fetchUsers(query: UserQuery): Promise<Page<User>> {
-  await wait(150);
+export async function fetchUsers(query: UserQuery, options: DataRequestOptions = {}): Promise<Page<User>> {
+  await wait(150, options.signal);
   const q = query.query.trim().toLowerCase();
   const filtered = USERS.filter((u) => {
     const matchesQuery = q.length === 0 || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
@@ -129,7 +170,12 @@ export async function fetchUsers(query: UserQuery): Promise<Page<User>> {
   };
 }
 
-export async function fetchProjects(status: string): Promise<readonly Project[]> {
-  await wait(150);
+export async function fetchProjects(status: string, options: DataRequestOptions = {}): Promise<readonly Project[]> {
+  await wait(150, options.signal);
   return status === 'all' ? PROJECTS : PROJECTS.filter((p) => p.status === status);
+}
+
+/** The in-process mock data source used when no API base URL is configured. */
+export function createMockDataSource(): DataSource {
+  return { fetchOverview, fetchUsers, fetchProjects };
 }

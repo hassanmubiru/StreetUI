@@ -66,7 +66,6 @@ production with clean consoles. Dynamic imports, CSS, fonts, and assets work.
 
 - Additional real-registry packages beyond the six above (matrix is
   representative, not exhaustive).
-- WebKit (Safari) in this environment (missing library) — recorded, not passed.
 
 ## How to verify
 
@@ -76,3 +75,8 @@ cd packages/cli
 cd <repo>
 node scripts/toolchain-registry-compat.mjs --engines chromium,firefox
 ```
+
+WebKit is now exercised by a dedicated CI job (`browser-validation.yml`), which
+installs its system dependencies with `pnpm exec playwright install --with-deps
+webkit`. On a host without those libraries the engine is recorded BLOCKED, never
+passed.

@@ -23,6 +23,9 @@ process.chdir(path.join(repo, 'packages', 'cli'));
 const cli = await import(path.join(repo, 'packages', 'cli', 'dist', 'index.js'));
 const BIN = path.join(repo, 'packages', 'cli', 'dist', 'bin.js');
 const logger = { info() {}, success() {}, warn() {}, error() {}, plain() {} };
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-agent-'));
 const app = path.join(base, 'agent-app');
@@ -80,7 +83,7 @@ function spawnCli(args) {
 }
 
 try {
-  await cli.createProject({ targetDir: app, template: 'ssr', frameworkVersion: '3.1.0', logger });
+  await cli.createProject({ targetDir: app, template: 'ssr', frameworkVersion: WORKSPACE_VERSION, logger });
   await wireDependencies(app);
 
   const report = { schema: 'streetui-toolchain-agent/v1', created: new Date().toISOString(), steps: {} };

@@ -10,7 +10,7 @@
  *   - Build → build ok
  *   - Run → preview iframe to the real dev server; actual app has #app
  *
- * Usage:  node scripts/toolchain-playground-browser-tests.mjs [--engines chromium,firefox]
+ * Usage:  node scripts/toolchain-playground-browser-tests.mjs [--engines chromium,firefox,webkit]
  */
 
 import fs from 'node:fs';
@@ -18,14 +18,15 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { assertNoUnknownSelectionFlags, enginesFromArgv, launchBrowser } from './lib/browser-engines.mjs';
+import { applyExitCode, summarizeReports, summaryForArtifact } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const CLI_BIN = path.join(repo, 'packages', 'cli', 'dist', 'bin.js');
 
-const enginesArg = process.argv.includes('--engines')
-  ? process.argv[process.argv.indexOf('--engines') + 1].split(',')
-  : ['chromium', 'firefox'];
+assertNoUnknownSelectionFlags();
+const enginesArg = enginesFromArgv();
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-pg-'));
 const app = path.join(base, 'app');
@@ -65,18 +66,35 @@ function waitForEvent(child, predicate, ms = 60000) {
 }
 
 async function runBrowser(engine, script) {
-  const pw = await import('playwright');
+  let pw;
+  try {
+    pw = await import('playwright');
+  } catch (error) {
+    return {
+      ok: false,
+      status: 'BLOCKED',
+      requestedEngine: engine,
+      actualEngine: null,
+      browserVersion: null,
+      requestedMode: 'dev',
+      actualMode: null,
+      reason: `Playwright is not installed: ${String(error.message).split('\n')[0]}`,
+    };
+  }
   let browser;
-  try { browser = await pw[engine].launch(); }
-  catch (error) {
-    const cacheRoot = path.join(os.homedir(), '.cache', 'ms-playwright');
-    const prefix = engine === 'firefox' ? 'firefox-' : 'chromium-';
-    const dirs = fs.existsSync(cacheRoot) ? fs.readdirSync(cacheRoot).filter((d) => d.startsWith(prefix)).sort().reverse() : [];
-    for (const d of dirs) {
-      const bin = engine === 'firefox' ? path.join(cacheRoot, d, 'firefox', 'firefox') : path.join(cacheRoot, d, 'chrome-linux', 'chrome');
-      if (fs.existsSync(bin)) { browser = await pw[engine].launch({ executablePath: bin }); break; }
-    }
-    if (!browser) return { ok: false, fatal: String(error.message).split('\n')[0] };
+  try {
+    browser = await launchBrowser(pw, engine);
+  } catch (error) {
+    return {
+      ok: false,
+      status: 'BLOCKED',
+      requestedEngine: engine,
+      actualEngine: null,
+      browserVersion: null,
+      requestedMode: 'dev',
+      actualMode: null,
+      reason: String(error.message).split('\n')[0],
+    };
   }
   try {
     const page = await browser.newPage();
@@ -84,16 +102,35 @@ async function runBrowser(engine, script) {
     page.on('pageerror', (e) => errors.push(String(e)));
     page.on('console', (m) => { if (m.type() === 'error') errors.push(`console: ${m.text()}`); });
     const result = await script(page);
+    result.requestedEngine = engine;
+    result.actualEngine = browser.browserType().name();
+    result.browserVersion = browser.version();
+    result.requestedMode = 'dev';
+    result.actualMode = 'dev';
+    result.status = result.ok ? 'PASS' : 'FAIL';
     result.errors = errors;
+    if (!result.ok && result.reason === undefined) {
+      result.reason = errors.length > 0 ? errors.join(' | ') : 'playground scenario failed';
+    }
     return result;
   } catch (error) {
-    return { ok: false, error: String(error.message), errors: [] };
+    return {
+      ok: false,
+      status: 'FAIL',
+      requestedEngine: engine,
+      actualEngine: browser.browserType().name(),
+      browserVersion: browser.version(),
+      requestedMode: 'dev',
+      actualMode: 'dev',
+      reason: String(error.message).split('\n')[0],
+      errors: [],
+    };
   } finally {
     await browser.close();
   }
 }
 
-const report = { schema: 'streetui-playground-browser/v1', created: new Date().toISOString(), engines: {}, status: 'PASS' };
+const report = { schema: 'streetui-playground-browser/v1', created: new Date().toISOString(), target: 'local-workspace', engines: {}, status: 'PASS' };
 
 try {
   run(['node', CLI_BIN, 'create', 'app', '--template', 'basic'], base);
@@ -157,17 +194,36 @@ try {
     });
   }
   child.kill('SIGTERM');
-
-  const anyFail = Object.values(report.engines).some((r) => r.ok === false);
-  if (anyFail) report.status = 'PARTIAL';
 } catch (error) {
-  report.status = 'BLOCKED';
   report.fatal = String(error.stack || error);
+  const reason = `fixture unavailable: ${String(error.message).split('\n')[0]}`;
+  for (const engine of enginesArg) {
+    report.engines[engine] = {
+      ok: false,
+      status: 'BLOCKED',
+      requestedEngine: engine,
+      actualEngine: null,
+      browserVersion: null,
+      requestedMode: 'dev',
+      actualMode: null,
+      reason,
+    };
+  }
 }
+
+const summary = summarizeReports(Object.values(report.engines), {
+  requestedEngines: enginesArg,
+  requestedModes: ['dev'],
+});
+report.status = summary.exitCode === 0
+  ? (Object.values(report.engines).every((r) => r.ok === true) ? 'PASS' : 'PARTIAL')
+  : 'FAIL';
+report.summary = summaryForArtifact(summary);
 
 const outDir = path.join(repo, 'benchmarks', 'results', 'toolchain');
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'playground-browser.json'), `${JSON.stringify(report, null, 2)}\n`);
 console.log('Playground Browser: ' + report.status);
 console.log(JSON.stringify(report.engines, null, 2));
+process.exitCode = applyExitCode(summary, process.stdout);
 fs.rmSync(base, { recursive: true, force: true });

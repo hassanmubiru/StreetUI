@@ -18,16 +18,26 @@ import os from 'node:os';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { applyExitCode, summarizeReports, summaryForArtifact } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 const cli = await import(path.join(repo, 'packages', 'cli', 'dist', 'index.js'));
 const BIN = path.join(repo, 'packages', 'cli', 'dist', 'bin.js');
 const logger = { info() {}, success() {}, warn() {}, error() {}, plain() {} };
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-agent-e2e-'));
 const app = path.join(base, 'agent-app');
-const report = { schema: 'streetui-toolchain-agent-e2e/v1', created: new Date().toISOString(), steps: {}, browser: 'BLOCKED' };
+const report = {
+  schema: 'streetui-toolchain-agent-e2e/v1',
+  created: new Date().toISOString(),
+  target: 'local-workspace',
+  steps: {},
+  browser: { requestedEngine: 'chromium', actualEngine: null, browserVersion: null, status: 'BLOCKED', reason: 'not attempted' },
+};
 let child;
 let success = false;
 
@@ -100,7 +110,7 @@ function assert(condition, message) {
 }
 
 try {
-  await cli.createProject({ targetDir: app, template: 'ssr', frameworkVersion: '3.1.0', logger });
+  await cli.createProject({ targetDir: app, template: 'ssr', frameworkVersion: WORKSPACE_VERSION, logger });
   await wireDependencies(app);
   const port = await freePort();
   const origin = `http://localhost:${port}`;
@@ -194,8 +204,16 @@ try {
       return events.some((e) => e.event === 'hmr_applied') || events.some((e) => e.event === 'hmr_failed') ? events : false;
     }, 20000);
     report.steps.hmrConfirmation = hmr.filter((e) => ['hmr_applied', 'hmr_failed'].includes(e.event)).map((e) => e.event);
+    // Record *why* so a `hmr_failed` is not read as an unexplained failure: a
+    // client entry has no self-accept handler, so a full reload is the correct
+    // outcome and is reported as such instead of being silently dropped.
+    report.steps.hmrOutcomes = hmr
+      .filter((e) => ['hmr_applied', 'hmr_failed'].includes(e.event))
+      .map((e) => ({ event: e.event, updateId: e.updateId ?? null, reason: e.error ?? null }));
 
-    // Runtime error capture from the real page.
+    // Runtime error capture from the real page. `agent-e2e-boom` is dispatched
+    // deliberately, so an error count of 2 (dispatch + capture) is the expected
+    // observation, not a page defect.
     await page.evaluate(() => {
       window.dispatchEvent(new ErrorEvent('error', { message: 'agent-e2e-boom', error: new Error('agent-e2e-boom') }));
     });
@@ -204,11 +222,29 @@ try {
       return (r.json.errors ?? []).some((e) => String(e.message).includes('agent-e2e-boom')) ? r.json.errors : false;
     }, 15000);
     report.steps.browserErrors = errors.length;
+    report.steps.errorCapture = {
+      injected: 'agent-e2e-boom',
+      captured: errors.some((e) => String(e.message).includes('agent-e2e-boom')),
+      capturedMessages: errors.map((e) => String(e.message)),
+    };
     report.steps.consoleEndpoint = (await api('GET', '/api/browser/console')).status === 200;
-    report.browser = 'passed';
+    report.browser = {
+      requestedEngine: 'chromium',
+      actualEngine: browser.browserType().name(),
+      browserVersion: browser.version(),
+      status: 'PASS',
+      reason: null,
+    };
   } catch (error) {
-    report.browser = 'BLOCKED';
-    report.browserDetail = error instanceof Error ? error.message.split('\n')[0] : String(error);
+    const message = error instanceof Error ? error.message : String(error);
+    const blocked = /Executable doesn't exist|Failed to launch|browserType\.launch|Cannot find package 'playwright'/i.test(message);
+    report.browser = {
+      requestedEngine: 'chromium',
+      actualEngine: browser ? browser.browserType().name() : null,
+      browserVersion: browser ? browser.version() : null,
+      status: blocked ? 'BLOCKED' : 'FAIL',
+      reason: message.split('\n')[0],
+    };
   } finally {
     if (browser) await browser.close().catch(() => undefined);
   }
@@ -234,12 +270,23 @@ try {
   report.steps.shutdown = { ok: true, sessionStoppedEvent: stopped !== null, revokedStatus };
 
   success = true;
-  console.log(JSON.stringify({ ...report, ok: true }, null, 2));
 } catch (error) {
-  console.error(JSON.stringify({ ...report, ok: false, error: error instanceof Error ? error.message : String(error) }, null, 2));
-  process.exitCode = 1;
+  report.error = error instanceof Error ? error.message : String(error);
 } finally {
   if (child && !child.killed) child.kill('SIGTERM');
-  if (success) fs.rmSync(base, { recursive: true, force: true });
-  else console.error(`artifacts kept at ${base}`);
+  if (success && report.browser.status === 'PASS') fs.rmSync(base, { recursive: true, force: true });
+  else if (!success) console.error(`artifacts kept at ${base}`);
 }
+
+const rows = report.browser.status === 'PASS' ? [report.browser] : [{ ...report.browser }];
+if (report.error !== undefined) rows.push({ requestedEngine: 'chromium', status: 'FAIL', reason: report.error });
+const summary = summarizeReports(rows, { requestedEngines: ['chromium'] });
+const ok = summary.exitCode === 0;
+report.summary = summaryForArtifact(summary);
+report.ok = ok;
+
+const outDir = path.join(repo, 'benchmarks', 'results', 'toolchain');
+fs.mkdirSync(outDir, { recursive: true });
+fs.writeFileSync(path.join(outDir, 'agent-e2e.json'), `${JSON.stringify(report, null, 2)}\n`);
+console.log(JSON.stringify(report, null, 2));
+process.exitCode = applyExitCode(summary, process.stdout);

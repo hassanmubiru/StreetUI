@@ -8,8 +8,8 @@
  *
  * This lives in its own tiny module — rather than re-exporting `defineConfig`
  * from the CLI barrel — so that importing `streetui` for application code does
- * **not** drag the CLI's build machinery (and its `esbuild` dependency) into the
- * client runtime bundle. The CLI's own `loadConfig` reads the default export of
+ * **not** drag the CLI's server/build machinery into the client runtime bundle.
+ * The CLI's own `loadConfig` reads the default export of
  * `streetui.config.ts` regardless of which identity helper wrapped it, so the
  * behaviour is identical to configuring via the CLI directly.
  */

@@ -38,22 +38,60 @@ keyboard-focus styles, and `prefers-reduced-motion` handling.
 src/
   app.ts         Universal UI definition (routes + shell + pages)
   state.ts       Signals, resources, forms, snapshots, navigation
-  data.ts        Demo data + async data access (clearly labeled)
+  data.ts        Demo data + the DataSource contract (clearly labeled)
+  http-data.ts   Real HTTP DataSource via createClient({ baseUrl })
+  http-patterns.ts  Server-only auth client, read retry, CRUD, multipart upload
   components.ts  Reusable typed components (MetricCard, StatusBadge, …)
   server.ts      SSR entry: render(url) → HTML + state island + styles
   main.ts        Hydration entry + theme effect + popstate handling
   app.test.ts    Data-layer, route-mapping, SSR, and form tests
+  http-data.test.ts  HTTP source + resource reliability (abort/race/retry)
+  http-patterns.test.ts  Retry/auth/CRUD/upload helper unit tests
+  http-e2e.test.ts   Live socket → auth/retry/CRUD/upload/SSR end-to-end
 ```
 
-`data.ts` is **demonstration data only**, not a real backend. To integrate a
-real service, replace `fetchOverview`, `fetchUsers`, and `fetchProjects` with
-calls through `createClient({ baseUrl })` against your API — the UI consumes
-only the returned shapes.
+`data.ts` is **demonstration data only**, not a real backend. It defines the
+`DataSource` contract the UI consumes and a mock implementation.
 
-**Authentication integration point:** `createAuthSession` (from `streetui`)
-provides the session lifecycle (`user`, `authenticated`, `loadUser`, `logout`).
-Wire it to your identity provider and gate routes in `buildApp` — no auth flow
-is faked in this example.
+## Real HTTP integration
+
+`http-data.ts` implements the same contract over a real HTTP/JSON API through
+`createClient({ baseUrl })`. Set one public environment variable to switch the
+whole app — SSR and the browser bundle both read it — from the mock to the API:
+
+```bash
+STREETUI_PUBLIC_DASHBOARD_API_URL=https://api.example.com npm run dev
+STREETUI_PUBLIC_DASHBOARD_API_URL=https://api.example.com npm run build
+```
+
+Expected endpoints (all `GET`, JSON):
+
+| Endpoint | Response |
+|----------|----------|
+| `{base}/overview` | `{ metrics: [...], activity: [...] }` |
+| `{base}/users?query=&role=&page=&pageSize=` | `{ items, total, page, pageSize, pageCount }` |
+| `{base}/projects?status=` | `Project[]` |
+
+The variable carries the `STREETUI_PUBLIC_` prefix because a base URL is not a
+secret and the browser needs it too. Credentials never belong in a public
+variable — pass them as headers to `createClient` from a server-only
+integration point. Non-2xx responses surface as `HttpError`, and payloads that
+do not match the expected shapes are rejected with a descriptive error instead
+of a `TypeError` in the renderer. Unset the variable and the mock source is
+used, so `npm test` and the demo run with no backend.
+
+**Authentication integration point:** the server injects a server-only data
+source into `createState` (`src/http-patterns.ts` → `createServerDataSource`).
+When `STREETUI_DASHBOARD_API_TOKEN` is set it is sent as a Bearer header on the
+server's own requests only — it never reaches HTML, the hydration island, or the
+browser bundle. `createAuthSession` (from `streetui`) provides the session
+lifecycle (`user`, `authenticated`, `loadUser`, `logout`); wire it to your
+identity provider and gate routes in `buildApp` — no auth flow is faked here.
+Prefer an `HttpOnly` session cookie when the API is same-origin.
+
+Read [`docs/toolchain/http-integration.md`](../../docs/toolchain/http-integration.md)
+for retry/`Retry-After`, cancellation limits (abort is not server rollback), and
+multipart upload.
 
 ## Docker
 

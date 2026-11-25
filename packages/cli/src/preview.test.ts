@@ -36,4 +36,48 @@ describe('preview server', () => {
     const missing = await fetch(`${running.url}/nope.txt`);
     expect(missing.status).toBe(404);
   });
+
+  it('serves index.html for a client-only build that also wrote a manifest', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'streetui-preview-manifest-'));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
+    await writeFile(join(dir, 'index.html'), '<!doctype html><body>client-only app</body>', 'utf8');
+    await writeFile(
+      join(dir, 'manifest.json'),
+      JSON.stringify({
+        schemaVersion: 1,
+        framework: 'streetui',
+        entry: { js: '/assets/app-abadf777.js' },
+        modules: {},
+        assets: {},
+        dynamicImports: {},
+      }),
+      'utf8',
+    );
+    await mkdir(join(dir, 'assets'), { recursive: true });
+    await writeFile(join(dir, 'assets', 'app-abadf777.js'), 'console.log(1)', 'utf8');
+
+    const running = await startPreview({ clientDir: dir, logger: noopLogger });
+    cleanups.push(() => running.stop());
+
+    const root = await fetch(`${running.url}/`);
+    expect(root.status).toBe(200);
+    expect(await root.text()).toContain('client-only app');
+
+    const deep = await fetch(`${running.url}/deep/route`);
+    expect(deep.status).toBe(200);
+
+    const asset = await fetch(`${running.url}/assets/app-abadf777.js`);
+    expect(asset.status).toBe(200);
+  });
+
+  it('can disable the SPA fallback explicitly', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'streetui-preview-no-spa-'));
+    cleanups.push(() => rm(dir, { recursive: true, force: true }));
+    await writeFile(join(dir, 'index.html'), '<!doctype html><body>no spa</body>', 'utf8');
+
+    const running = await startPreview({ clientDir: dir, logger: noopLogger, spaFallback: false });
+    cleanups.push(() => running.stop());
+
+    expect((await fetch(`${running.url}/`)).status).toBe(404);
+  });
 });
