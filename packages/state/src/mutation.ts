@@ -28,8 +28,16 @@ import type { ResourceStatus } from './resource.js';
 /** A mutation shares the resource status vocabulary (idle/loading/success/error). */
 export type MutationStatus = ResourceStatus;
 
-/** The async action a mutation runs. Receives the caller's argument. */
-export type Mutator<TArgs, TResult> = (args: TArgs) => Promise<TResult> | TResult;
+/** Context for one mutation run; carries its cancellation signal. */
+export interface MutationRunContext {
+  readonly signal: AbortSignal;
+}
+
+/**
+ * The async action a mutation runs. Receives the caller's argument and an
+ * abort-aware run context. Existing one-argument mutators remain valid.
+ */
+export type Mutator<TArgs, TResult> = (args: TArgs, ctx: MutationRunContext) => Promise<TResult> | TResult;
 
 export interface MutationOptions<TArgs, TResult> {
   /**
@@ -90,20 +98,28 @@ export function mutation<TArgs, TResult>(
   let disposed = false;
   /** Monotonic run id — only the newest mutate() may write state. */
   let runId = 0;
+  let controller: AbortController | null = null;
 
   const mutate = async (args: TArgs): Promise<TResult> => {
     if (disposed) {
-      // Inert: run the action for its side effect but never touch state.
-      return (await mutator(args)) as TResult;
+      // Inert: run the action for its side effect but never touch state. Keep a
+      // fresh context per invocation for backward-compatible mutator semantics.
+      return (await mutator(args, { signal: new AbortController().signal })) as TResult;
     }
+
+    // Supersede any in-flight run: abort it and retain the run-id race guard for
+    // transports that do not honor AbortSignal (or settle after aborting).
+    controller?.abort();
     const myRun = ++runId;
+    const myController = new AbortController();
+    controller = myController;
     batch(() => {
       error.set(undefined);
       status.set('loading');
     });
 
     try {
-      const result = await mutator(args);
+      const result = await mutator(args, { signal: myController.signal });
       if (!disposed && myRun === runId) {
         batch(() => {
           data.set(result);
@@ -139,7 +155,10 @@ export function mutation<TArgs, TResult>(
   };
 
   const dispose = (): void => {
+    if (disposed) return;
     disposed = true;
+    controller?.abort();
+    controller = null;
   };
 
   if (options.onCleanup !== undefined) options.onCleanup(dispose);

@@ -25,6 +25,7 @@ export default defineConfig({
     index: 'src/index.ts',
     server: 'src/server.ts',
     testing: 'src/testing.ts',
+    diagnostics: 'src/diagnostics.ts',
     bin: 'src/bin.ts',
     'create-bin': 'src/create-bin.ts',
   },

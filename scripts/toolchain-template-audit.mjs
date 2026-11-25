@@ -18,6 +18,10 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const cli = await import(path.join(repo, 'packages', 'cli', 'dist', 'index.js'));
 const logger = { info() {}, success() {}, warn() {}, error() {}, plain() {} };
+// The framework version comes from the workspace, never a literal.
+const frameworkVersion = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 
 const templates = ['basic', 'ssr', 'counter', 'todo', 'form', 'routing', 'signals', 'components', 'data-fetching', 'interactive'];
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-template-audit-'));
@@ -40,7 +44,7 @@ for (const template of templates) {
   const app = path.join(base, template);
   const result = { created: false, typecheck: false, build: false, notes: [] };
   try {
-    await cli.createProject({ targetDir: app, template, frameworkVersion: '3.2.1', logger });
+    await cli.createProject({ targetDir: app, template, frameworkVersion, logger });
     result.created = true;
     await wireDependencies(app);
     const tsc = path.join(repo, 'node_modules', 'typescript', 'bin', 'tsc');

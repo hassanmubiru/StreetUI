@@ -3,6 +3,9 @@
  * M8.2.1 — Registry reconciliation (v2).
  * Queries the LIVE npm registry. `versions` is an array of manifests; the
  * top-level `dist`/`time` reflect the latest. Emits repo-vs-registry.json.
+ *
+ * The package set comes from the shared release list, so this cannot drift from
+ * what is actually packed and published.
  */
 
 import { existsSync } from 'node:fs';
@@ -10,19 +13,14 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { PUBLIC_DIRS, packageName } from './lib/public-packages.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PKGS = join(ROOT, 'packages');
-const PUBLIC = [
-  '@streetui/core', '@streetui/state', '@streetui/graph', '@streetui/dsl',
-  '@streetui/compiler', '@streetui/runtime', '@streetui/events', '@streetui/scheduler',
-  '@streetui/dom', '@streetui/renderer', '@streetui/router', '@streetui/forms',
-  '@streetui/i18n', '@streetui/context', '@streetui/devtools', '@streetui/testing',
-  '@streetui/cli', 'streetui', 'create-streetui',
-];
+const PUBLIC = PUBLIC_DIRS.map(packageName);
 
 const repoVersions = new Map();
-for (const dir of ['core','state','graph','dsl','compiler','runtime','events','scheduler','dom','renderer','router','forms','i18n','context','devtools','testing','cli','streetui','create-streetui']) {
+for (const dir of PUBLIC_DIRS) {
   const p = join(PKGS, dir, 'package.json');
   if (existsSync(p)) {
     const j = JSON.parse(readFileSync(p, 'utf8'));
@@ -50,8 +48,6 @@ for (const pkg of PUBLIC) {
     published: true,
     latestDistTag: latest,
     publishedVersions: versions,
-    has31_0: versions.includes('3.1.0'),
-    has31_1: versions.includes('3.1.1'),
     tarball,
     integrity,
     publishedAt,

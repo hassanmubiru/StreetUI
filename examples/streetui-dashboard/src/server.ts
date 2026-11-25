@@ -6,6 +6,7 @@
 import { renderToString, serializeState } from 'streetui/server';
 import { renderStyles } from 'streetui';
 import { createState, compileApp, snapshot, viewForPath, STATE_KEY } from './app.js';
+import { createServerDataSource } from './http-patterns.js';
 
 export interface RenderRequest {
   readonly url: string;
@@ -16,7 +17,11 @@ export interface RenderResult {
 }
 
 export async function render(request: RenderRequest): Promise<RenderResult> {
-  const state = createState({ view: viewForPath(request.url) });
+  // Server-only data source: when a public API base URL is configured this
+  // injects the server-side Bearer token (never serialized into HTML or the
+  // hydration island). Without a base URL it is the in-process mock.
+  const source = createServerDataSource();
+  const state = createState({ view: viewForPath(request.url) }, source);
   // Resolve the demo data before serializing so SSR contains real content
   // (loading states are still exercised on the client when refetching).
   await Promise.all([state.overview.refetch(), state.users.refetch(), state.projects.refetch()]);

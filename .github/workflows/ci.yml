@@ -4,17 +4,18 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-workflow-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   checks:
-    name: Node ${{ matrix.node }}
+    timeout-minutes: 40
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -32,12 +33,21 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run typecheck
       - run: pnpm run lint
-      - run: pnpm test
+      - run: pnpm run test:ci
+      - name: Upload unit-test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests-node-${{ matrix.node }}
+          path: |
+            packages/*/ci-artifacts/**
+            examples/*/ci-artifacts/**
+            apps/*/ci-artifacts/**
+          if-no-files-found: warn
 
   build:
-    name: Build and release gates
+    timeout-minutes: 45
     runs-on: ubuntu-latest
-    needs: checks
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -48,11 +58,58 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run audit:workflow
       - run: pnpm build
       - run: pnpm run check:bundle
-      - run: node scripts/release-check.mjs --release-version "$(node -p \"require('./package.json').version\")" --channel stable --manifest /tmp/release-manifest.json
+      - run: pnpm run release:meta:check
+      - run: node scripts/release-check.mjs --channel stable --manifest ci-artifacts/release-manifest.json
+      - run: pnpm run test:scripts
+      - run: pnpm run audit:dependencies
+      - run: pnpm run audit:api
       - run: pnpm run release:pack
+      - run: pnpm run release:verify
       - run: pnpm run release:smoke
-      - run: pnpm --filter @streetui/renderer exec vitest run src/a11y.test.ts
-      - run: pnpm --filter @streetui/testing exec vitest run src/a11y-regression.test.ts
-      - run: pnpm exec eslint packages apps examples
+      - run: node scripts/toolchain-template-audit.mjs
+      - name: Upload release and audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gates
+          path: |
+            ci-artifacts/**
+            dist-tarballs/release-manifest.json
+            dist-tarballs/tarballs.json
+            dist-tarballs/api-inventory.json
+            benchmarks/results/toolchain/template-audit.json
+            benchmarks/results/toolchain/dependency-audit.json
+          if-no-files-found: warn
+
+  node-matrix:
+    name: Packed artifacts on Node ${{ matrix.node }}
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    needs: checks
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm run release:pack
+      - run: node scripts/toolchain-node-matrix.mjs --target packed --versions ${{ matrix.node }}
+      - name: Upload Node matrix evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-matrix-${{ matrix.node }}
+          path: benchmarks/results/toolchain/node-matrix*.json
+          if-no-files-found: warn

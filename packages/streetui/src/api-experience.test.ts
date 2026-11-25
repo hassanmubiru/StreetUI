@@ -80,7 +80,7 @@ describe('public API experience (M12.5)', () => {
         email: [required(), email()],
         password: [required(), minLength(8)],
       },
-      onSubmit: async (values) => values,
+      onSubmit: async () => {},
     });
     await form.submit();
     expect(form.errors.get().email).toBeDefined();

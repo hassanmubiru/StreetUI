@@ -10,7 +10,6 @@ import { createServer, type Server } from 'node:http';
 import { existsSync } from 'node:fs';
 import { extname, join } from 'node:path';
 import { serveStaticFile } from './toolchain/server/static.js';
-import { readManifest } from './toolchain/build/manifest.js';
 import type { Logger } from './logger.js';
 import type { EventLogger } from './toolchain/json/events.js';
 import { makeEventId } from './toolchain/json/events.js';
@@ -25,6 +24,12 @@ export interface PreviewOptions {
   readonly strictPort?: boolean;
   /** Installed framework/CLI version. */
   readonly version?: string;
+  /**
+   * Serve `index.html` for extensionless routes. Defaults to true when the
+   * build contains an `index.html` (client-only builds always do, and they also
+   * write a manifest — so the manifest must not disable the fallback).
+   */
+  readonly spaFallback?: boolean;
 }
 
 export interface RunningPreview {
@@ -37,9 +42,8 @@ export async function startPreview(options: PreviewOptions): Promise<RunningPrev
   const { clientDir, logger, events } = options;
   const sessionId = options.sessionId ?? makeEventId();
   const host = options.host ?? 'localhost';
-  const manifest = await readManifest(clientDir);
   const hasIndex = existsSync(join(clientDir, 'index.html'));
-  const spaFallback = manifest === undefined && hasIndex;
+  const spaFallback = options.spaFallback ?? hasIndex;
 
   const server: Server = createServer(async (req, res) => {
     const url = req.url ?? '/';

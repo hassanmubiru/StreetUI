@@ -55,6 +55,25 @@ describe('createClient — requests', () => {
     expect(init!.body).toBe(JSON.stringify({ name: 'Ada' }));
   });
 
+  it('merges Content-Type case-insensitively with the per-request value winning', async () => {
+    const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => jsonResponse({ ok: true }));
+    const api = createClient({
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      fetch: fetchMock,
+    });
+
+    await api.post('/users', { name: 'Ada' }, {
+      headers: { 'content-type': 'application/vnd.dashboard+json' },
+    });
+
+    const headers = fetchMock.mock.calls[0]?.[1]?.headers as Record<string, string>;
+    expect(Object.keys(headers).filter((name) => name.toLowerCase() === 'content-type')).toEqual(['content-type']);
+    expect(headers['Content-Type']).toBeUndefined();
+    expect(headers['content-type']).toBe('application/vnd.dashboard+json');
+    expect(headers['Accept']).toBe('application/json');
+    expect(new Headers(headers).get('content-type')).toBe('application/vnd.dashboard+json');
+  });
+
   it('appends query params and forwards the abort signal', async () => {
     const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) => jsonResponse([{ id: 1 }]));
     const api = createClient({ baseUrl: 'https://x/api', fetch: fetchMock });
@@ -111,5 +130,39 @@ describe('createClient — resource/mutation composition', () => {
     });
     await add.mutate({ item: 'apple' });
     expect(list.data.get()).toEqual(['apple']);
+  });
+
+  it('mutation() forwards each run signal to HTTP and aborts a superseded request', async () => {
+    interface PendingRequest {
+      readonly init: RequestInit | undefined;
+      readonly resolve: (response: Response) => void;
+      readonly reject: (error: unknown) => void;
+    }
+    const requests: PendingRequest[] = [];
+    const fetchMock = vi.fn((_url: string, init?: RequestInit): Promise<Response> => {
+      return new Promise<Response>((resolve, reject) => {
+        requests.push({ init, resolve, reject });
+        init?.signal?.addEventListener('abort', () => {
+          reject(new DOMException('The operation was aborted.', 'AbortError'));
+        }, { once: true });
+      });
+    });
+    const api = createClient({ fetch: fetchMock });
+    const save = api.mutation<{ item: string }, { item: string }>('POST', '/items');
+
+    const first = save.mutate({ item: 'first' });
+    const firstRejection = expect(first).rejects.toMatchObject({ name: 'AbortError' });
+    const second = save.mutate({ item: 'second' });
+    expect(requests).toHaveLength(2);
+    expect(requests[0]?.init?.signal?.aborted).toBe(true);
+    expect(requests[1]?.init?.signal?.aborted).toBe(false);
+    expect(requests[0]?.init?.signal).not.toBe(requests[1]?.init?.signal);
+    await firstRejection;
+
+    requests[1]?.resolve(jsonResponse({ item: 'second' }));
+    await expect(second).resolves.toEqual({ item: 'second' });
+    expect(save.data.get()).toEqual({ item: 'second' });
+    expect(requests[0]?.init?.method).toBe('POST');
+    expect(requests[0]?.init?.body).toBe(JSON.stringify({ item: 'first' }));
   });
 });

@@ -5,10 +5,22 @@
  */
 import { signal, derived, resource, type Signal, type Resource } from 'streetui';
 import { createForm, required, email, minLength, type Form } from 'streetui';
-import { fetchOverview, fetchUsers, fetchProjects, type OverviewData, type Page, type User, type Project } from './data.js';
+import { createMockDataSource, type DataSource, type OverviewData, type Page, type User, type Project } from './data.js';
+import { configuredApiUrl, createHttpDataSource } from './http-data.js';
 
 export type View = 'overview' | 'users' | 'projects' | 'settings' | 'not-found';
 export const STATE_KEY = 'streetui-dashboard';
+
+/**
+ * The data source for this process: the real HTTP API when
+ * `STREETUI_PUBLIC_DASHBOARD_API_URL` is set, otherwise the in-process mock.
+ * Server and client resolve the same variable, so SSR and hydration read the
+ * same shapes.
+ */
+export function createDataSource(): DataSource {
+  const baseUrl = configuredApiUrl();
+  return baseUrl === undefined ? createMockDataSource() : createHttpDataSource({ baseUrl });
+}
 
 export interface AppSnapshot {
   readonly view: View;
@@ -57,7 +69,7 @@ export function navigate(state: AppState, view: View): void {
   }
 }
 
-export function createState(seed?: Partial<AppSnapshot>): AppState {
+export function createState(seed?: Partial<AppSnapshot>, source: DataSource = createDataSource()): AppState {
   const view = signal<View>(seed?.view ?? 'overview');
   const userQuery = signal(seed?.userQuery ?? '');
   const userRole = signal(seed?.userRole ?? 'all');
@@ -68,11 +80,13 @@ export function createState(seed?: Partial<AppSnapshot>): AppState {
   const workspaceSaved = signal(seed?.workspaceSaved ?? '');
   const passwordSaved = signal(seed?.passwordSaved ?? '');
 
-  const overview = resource<OverviewData>(({ signal: abort }) => fetchOverviewWithAbort(abort));
+  const overview = resource<OverviewData>(({ signal: abort }) => source.fetchOverview({ signal: abort }));
   const users = resource<Page<User>>(({ signal: abort }) =>
-    fetchUsersWithAbort(abort, userQuery.peek(), userRole.peek(), userPage.peek()),
+    source.fetchUsers({ query: userQuery.peek(), role: userRole.peek(), page: userPage.peek(), pageSize: 8 }, { signal: abort }),
   );
-  const projects = resource<readonly Project[]>(({ signal: abort }) => fetchProjectsWithAbort(abort, projectStatus.peek()));
+  const projects = resource<readonly Project[]>(({ signal: abort }) =>
+    source.fetchProjects(projectStatus.peek(), { signal: abort }),
+  );
 
   const profileForm = createForm<{ name: string; email: string }>({
     initialValues: { name: '', email: '' },
@@ -127,16 +141,6 @@ export function snapshot(state: AppState): AppSnapshot {
     workspaceSaved: state.workspaceSaved.peek(),
     passwordSaved: state.passwordSaved.peek(),
   };
-}
-
-function fetchOverviewWithAbort(_abort: AbortSignal): Promise<OverviewData> {
-  return fetchOverview();
-}
-function fetchUsersWithAbort(_abort: AbortSignal, query: string, role: string, page: number): Promise<Page<User>> {
-  return fetchUsers({ query, role, page, pageSize: 8 });
-}
-function fetchProjectsWithAbort(_abort: AbortSignal, status: string): Promise<readonly Project[]> {
-  return fetchProjects(status);
 }
 
 /** Refetch helpers used by filters (debouncing is left to the view layer). */

@@ -1,7 +1,7 @@
 {
   "name": "@streetui/playground-app",
   "version": "0.1.0",
-  "description": "StreetUI browser playground",
+  "description": "StreetUI browser playground — early pipeline demo (superseded by @streetui/playground)",
   "type": "module",
   "private": true,
   "scripts": {

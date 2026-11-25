@@ -22,9 +22,10 @@
  * Output: benchmarks/results/v2.4/streetui-firefox.json
  */
 import fs from 'node:fs';
-import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { startDevFixture } from './lib/dev-server-fixture.mjs';
+import { cachedEngineExecutable, launchBrowser } from './lib/browser-engines.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -84,6 +85,7 @@ if (playwright === null) {
 
 let firefoxBin = null;
 try { firefoxBin = playwright.firefox.executablePath(); } catch { /* older API */ }
+if (firefoxBin === null || !fs.existsSync(firefoxBin)) firefoxBin = cachedEngineExecutable('firefox') ?? null;
 if (firefoxBin === null || !fs.existsSync(firefoxBin)) {
   write({
     schema: 'streetui-firefox/v2.4',
@@ -105,31 +107,13 @@ if (firefoxBin === null || !fs.existsSync(firefoxBin)) {
 }
 
 // ── Real Firefox path (executes only when Playwright + Firefox are present) ──
-let server = null;
+let fixture = null;
 let browser = null;
 try {
-  const esbuild = await import(path.join(repo, 'packages', 'cli', 'node_modules', 'esbuild', 'lib', 'main.js'));
-  const build = await esbuild.build({
-    entryPoints: [path.join(appDir, 'src', 'bench-browser.ts')],
-    bundle: true, format: 'esm', write: false, sourcemap: false, target: 'es2020',
-    absWorkingDir: appDir,
-    define: { 'Buffer.byteLength': '__bufferByteLength' },
-    banner: { js: 'const __bufferByteLength = (s, enc) => new TextEncoder().encode(s).length;' },
-  });
-  const js = build.outputFiles[0].text;
-  const htmlPage =
-    '<!doctype html><html><head><meta charset="utf-8"><title>streetui bench (firefox)</title></head>' +
-    '<body><div id="app"></div><script type="module">' + js + '</script></body></html>';
+  fixture = await startDevFixture(repo, appDir);
+  const url = `${fixture.url}/`;
 
-  server = http.createServer((req, res) => {
-    res.setHeader('content-type', 'text/html; charset=utf-8');
-    res.end(htmlPage);
-  });
-  await new Promise((r) => server.listen(0, '127.0.0.1', r));
-  const { port } = server.address();
-  const url = `http://127.0.0.1:${port}/`;
-
-  browser = await playwright.firefox.launch();
+  browser = await launchBrowser(playwright, 'firefox', { executablePath: firefoxBin });
   const version = browser.version?.() ?? 'unknown';
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'load' });
@@ -162,6 +146,6 @@ try {
   process.stdout.write('browser-harness-firefox: ERROR during run — recorded, no numbers fabricated.\n');
 } finally {
   try { await browser?.close(); } catch { /* ignore */ }
-  try { server?.close(); } catch { /* ignore */ }
+  try { await fixture?.stop(); } catch { /* ignore */ }
 }
 process.exit(0);
