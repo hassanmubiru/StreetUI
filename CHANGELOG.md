@@ -5,10 +5,9 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
-## Unreleased — M15 CI/ecosystem reliability
+## 3.3.0 — 2026-11-26
 
-Not published. `3.2.2` remains the current release; nothing below changes a
-public API or a published artifact.
+Published. `3.3.0` is the current release.
 
 ### Fixed
 
