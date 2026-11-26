@@ -1,12 +1,13 @@
 # @streetui/state
 
 StreetUI's reactive core: signals, derived values, effects, batching, stores —
-and `resource()`, the framework-native primitive for async data.
+plus `resource()` and `mutation()`, the framework-native primitives for async
+reads and writes.
 
-This document focuses on `resource()` and its error-handling companion,
-`errorBoundary` (which lives in `@streetui/dsl` because it is a DSL block). For
-the signal primitives (`signal`, `derived`, `effect`, `batch`) see the inline
-docs in `src/signal.ts`.
+This document focuses on `resource()`, `mutation()`, and `resource`'s
+error-handling companion `errorBoundary` (which lives in `@streetui/dsl` because
+it is a DSL block). For the signal primitives (`signal`, `derived`, `effect`,
+`batch`) see the inline docs in `src/signal.ts`.
 
 ## Why a resource primitive
 
@@ -107,6 +108,83 @@ const results = resource(
   resolution or rejection is ignored. Wire `dispose` to the owner's cleanup and
   the resource can never update detached DOM.
 
+## `mutation(mutator, options?)`
+
+`resource()` models a read. `mutation()` is its write-side counterpart: an
+explicit, argument-taking async action (create / update / delete, a form submit)
+whose lifecycle is exposed as ordinary signals — again, no second reactive
+system.
+
+```ts
+import { mutation } from '@streetui/state';
+
+const save = mutation<{ name: string }, User>(
+  async (args, { signal }) => {
+    const res = await fetch('/api/users', {
+      method: 'POST',
+      body: JSON.stringify(args),
+      signal,                                   // forward it for cancellation
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json() as Promise<User>;
+  },
+  {
+    onSuccess: () => users.refetch(),           // explicit, local invalidation
+    onCleanup: ctx.onCleanup,                   // auto-register dispose
+  },
+);
+
+await save.mutate({ name: 'Ada' });             // rejects on failure
+```
+
+A mutation never runs on its own — it advances only on an explicit `mutate()`:
+`idle → loading → success | error`. The state surface is `status`, `data`,
+`error`, and `pending` (`status === 'loading'`).
+
+### Mutator and context
+
+```ts
+type Mutator<TArgs, TResult> = (
+  args: TArgs,
+  ctx: { signal: AbortSignal },
+) => Promise<TResult> | TResult;
+```
+
+The second parameter is optional to use: an existing one-argument mutator such
+as `({ n }) => n * 2` keeps working unchanged. Forward `ctx.signal` to `fetch`
+(or any signal-aware operation) to cancel the transport.
+
+### Options
+
+- **`onSuccess(result, args)`** — runs after a successful run, before
+  `mutate()` resolves; awaited, so `await mutate()` means dependent reads are
+  already refreshed.
+- **`onError(error, args)`** — runs after a failed run.
+- **`onSettled(args)`** — runs after success *or* error, once settled.
+- **`onCleanup(register)`** — registers `dispose` with an owner's cleanup.
+
+### Cancellation contract
+
+- **Last run wins.** Overlapping `mutate()` calls on the *same* instance are not
+  serialized: a new run supersedes the in-flight one, which is aborted. The
+  superseded run still settles (resolving or rejecting) for its own caller, but
+  it never writes state and never fires `onSuccess`/`onError`/`onSettled`.
+- **Independent instances stay concurrent.** Two separate mutations never abort
+  or supersede each other; each keeps its own run id and controller.
+- **Fresh signal per run.** Every run gets a new `AbortController`; the previous
+  one is aborted. A run that settles after being aborted is ignored (this is the
+  race guard for transports that ignore `AbortSignal`).
+- **Abort is never a false success.** A cancelled run cannot resolve the
+  mutation into `success`; it does not set `data`, and a self-triggered
+  `AbortError` is not reported as `error`.
+- **Abort is transport-only.** Aborting cancels the in-flight request on the
+  client. It does **not** roll back anything the server already did — there is
+  no distributed transaction and no compensating request. If a write must be
+  undone, model that explicitly (e.g. a second mutation that reverses it) or
+  make the endpoint idempotent.
+- **Dispose is final.** After `dispose()` (idempotent) the mutation stops writing
+  state entirely; a late resolution or rejection is ignored.
+
 ## Error boundaries (`errorBoundary`, from `@streetui/dsl`)
 
 `errorBoundary` contains failures to a region of the tree instead of letting one
@@ -162,6 +240,8 @@ hydration. Read the seed out of the SSR island with `readState` from
 
 ## What this is *not*
 
-`resource()` is deliberately small. It is not a caching layer, query library,
-mutation framework, global store, suspense integration, or devtools. Those are
-separate concerns that can be composed on top if and when they are needed.
+`resource()` and `mutation()` are deliberately small. They are not a caching
+layer, query library, global store, suspense integration, or devtools. There is
+no global cache and no automatic invalidation registry: `mutation()` invalidates
+by explicitly calling `refetch()` on the reads it affected. Those larger
+concerns can be composed on top if and when they are needed.

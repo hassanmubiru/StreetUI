@@ -4,6 +4,7 @@
   "compilerOptions": {
     "rootDir": null,
     "paths": {
+      "@streetui/compiler/diagnostics": ["../compiler/src/diagnostics.ts"],
       "@streetui/*": ["../*/src/index.ts"]
     }
   },

@@ -49,7 +49,7 @@ const flush = () => new Promise<void>((r) => setTimeout(r, 0));
 
 describe('streetui — single import surface', () => {
   it('exposes the framework version', () => {
-    expect(VERSION).toBe('3.2.1');
+    expect(VERSION).toBe('3.2.2');
   });
 
   it('exposes every headline API from one import (no @streetui/* needed)', () => {
@@ -273,6 +273,16 @@ describe('streetui/testing — compiler diagnostics (v1.2 §14)', () => {
     // analyzeGraph is the lower-level primitive, also exposed for diagnostics.
     const analysis = analyzeGraph(graph);
     expect(analysis.summary.totalNodes).toBe(insp.nodes.length);
+  });
+
+  it('exposes the documented example through streetui/diagnostics', async () => {
+    const { inspectCompilation, formatInspection } = await import('streetui/diagnostics');
+    const app = streetui.app({ name: 'diagnostics-example' });
+    app.page('home', (page) => page.heading('Diagnostics'));
+    const { graph } = compile(app);
+    const report = formatInspection(inspectCompilation(graph));
+    expect(report).toContain('compiler inspection — diagnostics-example');
+    expect(report).toContain('heading');
   });
 
   it('keeps diagnostics OFF the runtime barrel (tree-shakeable)', async () => {

@@ -23,6 +23,7 @@ import os from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { COORDINATED_DIRS, packageName } from './lib/public-packages.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -30,10 +31,19 @@ const requireFromRepo = createRequire(path.join(repo, 'package.json'));
 
 const TARBALLS = path.join(repo, 'dist-tarballs');
 const consumer = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-ext-'));
-const STREETUI_DEPS = [
-  'compiler', 'context', 'core', 'devtools', 'dom', 'dsl', 'events', 'forms',
-  'graph', 'i18n', 'renderer', 'router', 'runtime', 'scheduler', 'state', 'testing',
-];
+
+// The framework sub-packages a generated app installs directly. `streetui` and
+// `create-streetui` are installed separately below.
+const STREETUI_DEPS = COORDINATED_DIRS.map(packageName)
+  .filter((name) => name !== 'streetui')
+  .map((name) => name.replace(/^@streetui\//, ''));
+
+/**
+ * The installed CLI entry point. Never `node_modules/.bin/streetui`: the unified
+ * `streetui` package ships a bin with the same name, so `.bin` would resolve to
+ * the wrong artifact and the CLI would go untested.
+ */
+const cliBin = (cwd) => path.join(cwd, 'node_modules', '@streetui', 'cli', 'dist', 'bin.js');
 
 function run(args, cwd) {
   console.log(`\n$ ${args.join(' ')}  (cwd=${cwd})`);
@@ -54,10 +64,10 @@ function stageTypeScript(target) {
 }
 
 function tgz(pkgName) {
-  const prefix = pkgName.replace(/^@/, '').replace('/', '-');
-  const matches = fs.readdirSync(TARBALLS).filter((f) => f.startsWith(`${prefix}-`) && f.endsWith('.tgz'));
-  if (matches.length === 0) throw new Error(`No tarball for ${pkgName} (${prefix})`);
-  return path.join(TARBALLS, matches[0]);
+  const index = JSON.parse(fs.readFileSync(path.join(TARBALLS, 'tarballs.json'), 'utf8'));
+  const entry = index.find((item) => item.name === pkgName);
+  if (entry === undefined) throw new Error(`No tarball for ${pkgName} in tarballs.json`);
+  return path.join(TARBALLS, entry.tarball);
 }
 
 function writePackage(target, pkg) {
@@ -72,6 +82,7 @@ function installConsumer() {
   const deps = {};
   for (const dep of STREETUI_DEPS) deps[`@streetui/${dep}`] = `file:${tgz(`@streetui/${dep}`)}`;
   deps['@streetui/cli'] = `file:${tgz('@streetui/cli')}`;
+  deps.streetui = `file:${tgz('streetui')}`;
   deps.typescript = stageTypeScript(consumer);
   writePackage(consumer, {
     name: 'streetui-ext-consumer',
@@ -100,7 +111,7 @@ function verifyConsumer(consumer) {
 
 async function withServer(cwd, binArgs, checkUrl, onReady) {
   return new Promise((resolve, reject) => {
-    const child = spawn(path.join(cwd, 'node_modules', '.bin', 'streetui'), binArgs, {
+    const child = spawn(process.execPath, [cliBin(cwd), ...binArgs], {
       cwd,
       env: { ...process.env, NO_COLOR: '1' },
       stdio: ['ignore', 'pipe', 'inherit'],
@@ -160,7 +171,7 @@ async function verifyTemplate(template, index) {
   const app = path.join(consumer, `app-${template}`);
   console.log(`\n=== external template: ${template} ===`);
 
-  run([path.join(consumer, 'node_modules', '.bin', 'streetui'), 'create', `app-${template}`, '--template', template], consumer);
+  run([process.execPath, cliBin(consumer), 'create', `app-${template}`, '--template', template], consumer);
 
   // Rewrite the generated app's @streetui deps to local tarballs (offline) so
   // every direct AND transitive framework dependency installs from the packed
@@ -169,8 +180,9 @@ async function verifyTemplate(template, index) {
   const appPkg = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'utf8'));
   const deps = {};
   for (const dep of STREETUI_DEPS) deps[`@streetui/${dep}`] = `file:${tgz(`@streetui/${dep}`)}`;
+  deps.streetui = `file:${tgz('streetui')}`;
   for (const [key, value] of Object.entries(appPkg.dependencies ?? {})) {
-    if (!key.startsWith('@streetui/') && deps[key] === undefined) deps[key] = value;
+    if (!key.startsWith('@streetui/') && key !== 'streetui' && deps[key] === undefined) deps[key] = value;
   }
   appPkg.devDependencies = appPkg.devDependencies ?? {};
   if (appPkg.devDependencies['@streetui/cli']) {
@@ -183,7 +195,7 @@ async function verifyTemplate(template, index) {
   run(['npm', 'install', '--offline', '--no-audit', '--no-fund', '--loglevel=error'], app);
 
   // Doctor must pass on a real generated app (client entry present).
-  run([path.join(app, 'node_modules', '.bin', 'streetui'), 'doctor'], app);
+  run([process.execPath, cliBin(app), 'doctor'], app);
 
   // No Vite/Vite config anywhere in the generated project.
   const viteFiles = [];
@@ -199,7 +211,7 @@ async function verifyTemplate(template, index) {
   if (viteFiles.length > 0) throw new Error(`Vite configuration found in generated project: ${viteFiles.join(', ')}`);
 
   // Production build.
-  run([path.join(app, 'node_modules', '.bin', 'streetui'), 'build'], app);
+  run([process.execPath, cliBin(app), 'build'], app);
   const manifestPath = path.join(app, 'dist', 'client', 'manifest.json');
   if (!fs.existsSync(manifestPath)) throw new Error('manifest.json missing after build');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));

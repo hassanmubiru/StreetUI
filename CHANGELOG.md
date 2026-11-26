@@ -5,6 +5,246 @@ All notable changes to StreetUI are recorded here. The project follows
 package is a single coordinated number, and from 1.0.0 onward the public API is
 governed by the stability policy in [`docs/api-v1.0.md`](./docs/api-v1.0.md).
 
+## Unreleased — M15 CI/ecosystem reliability
+
+Not published. `3.2.2` remains the current release; nothing below changes a
+public API or a published artifact.
+
+### Fixed
+
+- **`streetui/testing` referenced an undeclared `streetui/diagnostics`.** The
+  declaration bundler emitted `export * from 'streetui/diagnostics'` while the
+  manifest declared no such subpath, so an external consumer importing
+  `streetui/testing` failed to typecheck. `streetui/diagnostics` is now a real
+  entry point (source, tsup entry, declaration inlining, manifest subpath, and a
+  `REQUIRED_SUBPATHS` pin); `scripts/consumer-smoke.mjs` compiles a strict
+  NodeNext consumer to keep it fixed.
+- **`api-inventory.mjs` covered 17 packages and no subpaths.** It now derives its
+  package list from the release-set SSOT, walks every declared `exports` subpath,
+  classifies bin-only packages, and fails on a missing declaration target or a
+  package-name mismatch.
+- **Harness exit codes could be green without a verified scenario.** Every
+  maintained Playwright harness now decides its exit code through
+  `scripts/lib/harness-status.mjs`: `FAIL`/`ERROR`/unknown/mismatch → 1, a
+  requested engine/mode with no record → 1, and `BLOCKED`-only coverage → 0
+  locally but 1 under CI or `--require`.
+- **Preview SPA fallback 404'd client-only builds.** `startPreview` fell back to
+  `index.html` only when no manifest existed; a client-only build writes both, so
+  `/` returned 404. The fallback is now `options.spaFallback ?? hasIndex`, with a
+  regression test.
+- **The Playground could never launch WebKit.** `AutomationManager.connect()`
+  passed `args: ['--no-sandbox']` to every engine, but that is a Chromium flag:
+  WebKit exited during startup (`Target page, context or browser has been
+  closed`), so every WebKit agent session was BLOCKED while WebKit worked through
+  the shared launcher. Launch args are now engine-specific, and
+  `toolchain-agent-visual-e2e.mjs` verifies WebKit end to end.
+- **The dashboard documented the wrong environment variable.** `data.ts` named
+  `STREETUI_DASHBOARD_API_URL` while the implementation used
+  `STREETUI_PUBLIC_DASHBOARD_API_URL`.
+
+### Harness and evidence fixes (not published code)
+
+- **`--engines` was silently ignored.** Harnesses that parsed only `--engine`
+  dropped `--engines` and still exited 0, so an engine the caller requested
+  produced no record and no failure. One shared parser
+  (`enginesFromArgv`/`modesFromArgv`/`assertNoUnknownSelectionFlags` in
+  `scripts/lib/browser-engines.mjs`) now accepts both spellings and rejects
+  unknown selection flags; `ci-workflow-audit.mjs` forbids inline argv parsing.
+- **Evidence artifacts now declare their own evidence target**
+  (`local-workspace`, `local-packed`, `npm-registry`) instead of relying on a
+  reader to infer it.
+- **Registry network outages are BLOCKED, not product failures.** The registry
+  smoke harness preserves npm timeout/reset/DNS diagnostics and classifies them
+  through `isNetworkError`; a real assertion or lifecycle failure remains FAIL.
+- **The diagnostics consumer example is executed, not merely imported.** The
+  packed-consumer gate runs it through ESM, CJS, and strict TypeScript, and the
+  public API suite imports it from `streetui/diagnostics`.
+- **A relative `--tarballs` path was passed to `npm install` in a temp project**,
+  which npm read as a GitHub SSH spec. It is now resolved against the caller's
+  working directory and validated up front.
+
+### Added
+
+- `scripts/lib/harness-status.mjs`, `scripts/lib/perf-stats.mjs` and their unit
+  tests; `scripts/dependency-audit.mjs`; a `test:scripts` script.
+- Sampled performance measurement (`--warmup` default 5, `--samples` default 20)
+  with raw observations and cold/warm phases kept separate.
+- The dashboard's server-only Bearer client (`createServerDataSource`), read
+  retry with `Retry-After`, CRUD-and-refetch, multipart upload, real-socket tests
+  (`http-e2e.test.ts`, `http-patterns.test.ts`), and
+  `docs/toolchain/http-integration.md`.
+
+### Changed (documented behaviour, not a silent change)
+
+- **`mutation` cancellation contract.** A newer `mutate()` on the same instance
+  supersedes and aborts the in-flight run (last-run-wins for state and
+  callbacks); independent instances stay concurrent; each live run receives a
+  fresh `MutationRunContext { signal }`; a cancelled run never resolves into a
+  false `success`. HTTP abort cancels client waiting only — it is **not**
+  server-side rollback. Documented in `packages/state/README.md`.
+
+## 3.2.2 — Node 18 SSR fix and release-integrity hardening (2026-11-24)
+
+**Published to npm: all 19 packages at `latest: 3.2.2`.** Verified from the real
+registry on Node 18, 20, 22 and 24.
+
+The `3.2.1` release shipped a release pipeline with no working gates, which is
+why a Node 18 SSR defect reached consumers while `engines.node` was `>=18.0.0`.
+
+### Fixed
+
+- **Release pipeline could not have shipped a correct release.** Nine defects in
+  the release scripts are fixed; each one was verified by running the real
+  script, not by inspection:
+  - The CI release gate passed `--release-version "$(node -p require('./package.json').version)"`
+    while the root manifest was `3.1.0` and the packages were `3.2.1`, so the
+    gate failed on every run for a reason unrelated to the code. The gate no
+    longer derives the version from the root manifest, and `release-check.mjs`
+    now fails when the root manifest disagrees with the coordinated release.
+  - `apply-publish-metadata.mjs` replaced `exports` wholesale, dropping
+    `streetui` `./server`, `./testing`, `./package.json` and `@streetui/compiler`
+    `./diagnostics`, and dropped `templates` from `files`. It is now additive and
+    refuses to remove a declared subpath.
+  - Five scripts each carried their own public-package list (18/19/17/18/18).
+    `scripts/lib/public-packages.mjs` is now the single source of truth.
+  - `create-streetui` was packed but never published: the tarball regex could not
+    match its name and it was absent from the publish order. It is now in the
+    release set, ordered last, with `license: Apache-2.0` and a concrete CLI
+    dependency.
+  - `pack-tarballs.mjs` never built, so stale `dist/` could ship (this is exactly
+    how 3.2.0 shipped declaration-less tarballs). Packing now fails when `dist/`
+    is older than `src/`, and `release-build.mjs` asserts every declared
+    `.d.ts`/`.d.cts` exists.
+  - `release-check.mjs` never verified that declared targets exist on disk. It
+    now checks `main`, `module`, `types`, every `exports` condition target, every
+    `bin` entry, and required subpaths and `files` entries.
+  - `consumer-smoke.mjs` excluded the CLI, so the Node 18 defect was structurally
+    undetectable. It now installs all 19 tarballs offline and drives the
+    installed CLI through `create` → `build` → `dev`.
+  - The SSR runner ignored `ResolvedImport.format`, emitting CommonJS
+    dependencies as ES modules into a `type: module` cache. It now reports a
+    build problem naming the package instead of producing an unloadable cache.
+- **`turbo` could not build the workspace.** `apps/playground` (a first-commit
+  pipeline demo) and `packages/playground` (the real Playground the CLI resolves)
+  both declared `@streetui/playground`, so every `pnpm build|test|typecheck` died
+  with `Failed to add workspace ... it already exists`. The demo is renamed
+  `@streetui/playground-demo`.
+- **`pnpm install --frozen-lockfile` could not succeed.** The lockfile was
+  missing the `examples/streetui-dashboard` importer, missing the
+  `packages/playground` importer, and stale after the version bump.
+  `packages/playground` also declared `@codemirror/lang-typescript`, which does
+  not exist on npm, while importing `@codemirror/lang-javascript`, which was
+  undeclared.
+- `packages/streetui/src/api-experience.test.ts` had a latent typecheck error
+  (an `onSubmit` callback returning a value the signature forbids).
+
+### Added
+
+- `scripts/release-build.mjs` — builds every public package and asserts the
+  declarations it advertises exist.
+- `scripts/verify-tarballs.mjs` — extracts all 19 packed tarballs and verifies
+  declared targets, absent `workspace:`/`file:` protocols, required subpaths,
+  license policy, and lockstep versions.
+- `scripts/toolchain-node-matrix.mjs` rewritten (`streetui-node-matrix/v2`):
+  parameterised `--versions`, `--target npm|packed`, `--version`; records the
+  artifact version, and adds SSR regeneration after a source edit and production
+  `start` coverage. An unavailable Node version is BLOCKED, never PASS.
+- CI now runs `release:meta:check`, `release:pack`, `release:verify`,
+  `release:smoke`, and a packed-artifact matrix job on Node 18/20/22/24.
+- `pnpm run release:build`, `release:meta:check`, `release:verify`.
+
+### Verified
+
+- Packed artifacts: 19 tarballs at `3.2.2` pass `verify-tarballs.mjs`.
+- Node matrix on packed artifacts: Node 18.20.8, 20.20.2, 22.23.5, 24.18.0 all
+  pass install → `--version` → scaffold → build → doctor → dev SSR → SSR
+  regeneration after an edit → production `start`.
+- Consumer smoke: all 19 tarballs installed offline (no workspace symlinks), ESM
+  SSR, CJS SSR, and the installed CLI's `create` → `build` → `dev` flow.
+- Workspace: `pnpm install --frozen-lockfile` succeeds; monorepo typecheck 52/52
+  tasks; eslint clean; CLI typecheck + 111 tests.
+- **WebKit 26.6 is now verified** (previously BLOCKED on host libraries): dev and
+  prod browser scenarios, axe-core 0 violations across 7 routes, and
+  SSR/hydration with dev regeneration all pass. The missing system libraries were
+  extracted into the Playwright bundle's own `sys/lib`, so no system packages and
+  no sudo were needed. `browser-validation.yml` gained a WebKit job.
+
+### Fixed (harnesses)
+
+- `toolchain-browser-tests.mjs` documented `--mode both` but silently ran prod
+  only; it now expands to `dev` and `prod`.
+- `toolchain-a11y-axe.mjs` mapped every non-Firefox engine to Chromium, so
+  `--engines webkit` would have audited the wrong browser.
+
+### Known limitations
+
+- CI status is unverifiable from this environment: `gh run view` reports "The job
+  was not started because your account is locked due to a billing issue". The
+  workflow changes are verified locally only.
+
+
+## Unreleased — M13 Production Hardening (2026-11-23)
+
+**Milestone — code complete, verified locally; no packages published by this milestone.**
+
+### Added
+
+- `examples/streetui-dashboard/src/http-data.ts` — a real HTTP data source
+  implementing the new `DataSource` contract through `createClient({ baseUrl })`.
+  Selected by `STREETUI_PUBLIC_DASHBOARD_API_URL`; unset keeps the mock source.
+  Non-2xx responses surface as `HttpError`, and payloads that do not match the
+  expected shapes are rejected with a descriptive error instead of a `TypeError`
+  in the renderer.
+- Dashboard tests: `src/http-data.test.ts` (14 tests: request mapping, abort
+  propagation, `HttpError`, malformed payloads, loading/error/retry,
+  refetch-keeps-data, stale-response race, dispose-aborts) and
+  `src/http-e2e.test.ts` (5 tests: a live `node:http` API driving real SSR).
+- `scripts/toolchain-a11y-axe.mjs` — axe-core audit of the dashboard on
+  Chromium and Firefox across 7 routes.
+- `scripts/toolchain-node-matrix.mjs` — Node 18/20/22/24 matrix (install,
+  scaffold, build, doctor, dev server) against a packed worktree CLI.
+- `scripts/toolchain-ssr-hydration.mjs` — SSR markup, DOM adoption during
+  hydration, interactivity, state island, and dev SSR cache regeneration.
+- `docs/toolchain/m13-report.md` — full findings, evidence, and limitations.
+
+### Fixed
+
+- **Node 18 SSR dev server.** The SSR runner copied dependency `.js` files but
+  not their `package.json`, so Node 18 (no ESM syntax detection) treated them as
+  CommonJS and failed with `Named export 'compile' not found`. Dependency
+  package manifests are now emitted at their mirrored paths, using the relative
+  path rather than the module-output helper that rewrites extensions (which had
+  turned `package.json` into `package.js`). Regression test added.
+- **SSR rebuild diagnostics.** A module that fails to transform previously
+  surfaced as `Cannot find module '<cache>/src/app.js'`; the runner now reports
+  the first real diagnostic (file + syntax problem).
+- `scripts/toolchain-browser-tests.mjs` — a missing OS library is now recorded
+  as BLOCKED (with the library named) instead of ERROR.
+
+### Verified
+
+- Accessibility: 0 axe-core violations on Chromium and Firefox across 7 routes.
+- Node: 18, 20, 22, 24 all pass install → scaffold → build → doctor → dev server.
+- SSR + hydration: server content present with JavaScript disabled; all probed
+  server nodes adopted (no duplicated tree) and interactive after hydration on
+  Chromium and Firefox; dev SSR regeneration verified.
+- Docker: production image builds, reports `healthy`, serves every route, and
+  stops gracefully (exit 0, no OOM).
+- Preservation: CLI typecheck + 109 tests, dashboard typecheck + 32 tests,
+  eslint clean, browser harness (Chromium/Firefox × dev/prod), HMR harness,
+  security suite 7/7.
+- Performance baseline recorded: 601 ms dev cold start, ~61 ms HMR broadcast
+  (60 ms watcher debounce floor), 393 ms production build.
+
+### Known limitations
+
+- WebKit was BLOCKED at the time of this milestone: the host lacked
+  `libevent-2.1.so.7` and other system libraries. **Resolved in M14** — the
+  libraries are extracted into the Playwright bundle and WebKit 26.6 now passes
+  browser, a11y and SSR/hydration verification.
+- The Node 18 fix is in the worktree only; npm `@streetui/cli@3.2.1` still fails
+  Node 18 SSR until a new release is published.
+
 ## Unreleased — M12 Developer Adoption, Ecosystem and Production Readiness (2026-11-22)
 
 **Milestone — code complete, verified locally; no packages published by this milestone.**

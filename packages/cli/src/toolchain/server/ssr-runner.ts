@@ -8,12 +8,13 @@
  * imports still resolve against the project's dependencies.
  */
 
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { BuildProblem } from '../../diagnostics.js';
 import { crawl } from '../graph/crawl.js';
-import { createResolver, type ResolverOptions } from '../resolve/resolver.js';
+import { createResolver, type ModuleFormat, type ResolverOptions } from '../resolve/resolver.js';
 import { transformModule, serverOutputPath, relativeOutputSpecifier, type ResolveTarget } from '../transform/typescript.js';
 
 export interface RenderRequest {
@@ -52,6 +53,11 @@ interface BuiltServer {
   readonly render: RenderFn;
 }
 
+/** True when `file` lives inside a `node_modules` directory. */
+function isDependencyFile(file: string): boolean {
+  return file.split(/[/\\]/).includes('node_modules');
+}
+
 export function createSsrRunner(options: SsrRunnerOptions): SsrRunner {
   const resolver = createResolver({ root: options.root, ...(options.resolver ?? {}) });
   let built: BuiltServer | undefined;
@@ -79,6 +85,8 @@ export function createSsrRunner(options: SsrRunnerOptions): SsrRunner {
   };
 
   const build = async (): Promise<BuiltServer> => {
+    const packageDirs = new Set<string>();
+    const formats = new Map<string, ModuleFormat>();
     const { graph, diagnostics: crawlDiagnostics } = crawl({
       entry: options.serverEntry,
       root: options.root,
@@ -87,6 +95,8 @@ export function createSsrRunner(options: SsrRunnerOptions): SsrRunner {
       resolveSpecifier: (specifier, importerFile) => {
         const resolved = resolver.resolveNode(specifier, importerFile);
         if (resolved === undefined || resolved.kind === 'builtin') return undefined;
+        if (resolved.pkgDir !== undefined) packageDirs.add(resolved.pkgDir);
+        if (resolved.format !== undefined) formats.set(resolved.file, resolved.format);
         return { file: resolved.file, kind: resolved.kind };
       },
     });
@@ -102,6 +112,24 @@ export function createSsrRunner(options: SsrRunnerOptions): SsrRunner {
       const node = graph.get(id);
       if (node === undefined) continue;
       if (node.kind !== 'ts' && node.kind !== 'js') continue;
+
+      // The cache is emitted as one ESM tree. A CommonJS dependency cannot be
+      // represented there: its `require()` calls are not part of the ESM graph
+      // crawl, so a rewritten copy would ship with unresolved dependencies and
+      // Node would treat it as ESM. Report it instead of failing later with a
+      // confusing "Named export not found".
+      if (isDependencyFile(node.file) && formats.get(node.file) === 'cjs') {
+        diagnostics = [
+          ...diagnostics,
+          {
+            message:
+              `Cannot server-render CommonJS dependency "${relative(options.root, node.file)}": ` +
+              'the SSR cache is an ES module tree. Use an ESM build of this package.',
+            file: node.file,
+          },
+        ];
+        continue;
+      }
 
       const outputPath = serverOutputPath(options.root, node.file, options.serverEntry);
       const importerOutput = join(outDir, outputPath);
@@ -128,6 +156,40 @@ export function createSsrRunner(options: SsrRunnerOptions): SsrRunner {
       const target = join(outDir, outputPath);
       await mkdir(dirname(target), { recursive: true });
       await writeFile(target, transform.code, 'utf8');
+    }
+
+    // Node 18 has no ESM syntax detection for ambiguous .js files. Preserve
+    // dependency package boundaries so copied ESM keeps its "type":"module".
+    for (const pkgDir of packageDirs) {
+      const source = join(pkgDir, 'package.json');
+      if (!existsSync(source)) continue;
+      const target = join(outDir, relative(options.root, source));
+      await mkdir(dirname(target), { recursive: true });
+      await copyFile(source, target);
+    }
+
+    // A skipped module leaves a hole in the emitted graph, and importing it
+    // would fail later with a confusing "Cannot find module". Report the real
+    // problem (syntax error, unresolvable import) instead.
+    if (diagnostics.length > 0) {
+      const first = diagnostics[0];
+      const where = first?.file !== undefined ? ` in ${relative(options.root, first.file)}` : '';
+      throw new Error(`SSR build failed${where}: ${first?.message ?? 'unknown error'}`);
+    }
+
+    // Every dependency package that contributed modules must keep its manifest,
+    // otherwise Node 18 misreads its ESM files as CommonJS.
+    const missingManifests = [...packageDirs].filter((pkgDir) => {
+      const source = join(pkgDir, 'package.json');
+      if (!existsSync(source)) return false;
+      return !existsSync(join(outDir, relative(options.root, source)));
+    });
+    if (missingManifests.length > 0) {
+      throw new Error(
+        `SSR cache is missing package manifests for: ${missingManifests
+          .map((dir) => relative(options.root, dir))
+          .join(', ')}`,
+      );
     }
 
     const entryOutput = join(outDir, serverOutputPath(options.root, options.serverEntry, options.serverEntry));

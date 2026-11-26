@@ -11,7 +11,7 @@
  *
  * Engines that cannot launch are recorded as BLOCKED, never as passed.
  *
- * Usage:  node scripts/toolchain-agent-visual-e2e.mjs [--engines chromium,firefox]
+ * Usage:  node scripts/toolchain-agent-visual-e2e.mjs [--engines chromium,firefox,webkit]
  */
 
 import fs from 'node:fs';
@@ -20,19 +20,23 @@ import os from 'node:os';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { assertNoUnknownSelectionFlags, enginesFromArgv } from './lib/browser-engines.mjs';
+import { applyExitCode, summarizeReports, summaryForArtifact } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 const cli = await import(path.join(repo, 'packages', 'cli', 'dist', 'index.js'));
 const BIN = path.join(repo, 'packages', 'cli', 'dist', 'bin.js');
 const logger = { info() {}, success() {}, warn() {}, error() {}, plain() {} };
 
-const enginesArg = process.argv.includes('--engines')
-  ? process.argv[process.argv.indexOf('--engines') + 1].split(',')
-  : ['chromium', 'firefox'];
+assertNoUnknownSelectionFlags();
+const enginesArg = enginesFromArgv();
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-visual-e2e-'));
-const report = { schema: 'streetui-agent-visual-e2e/v1', created: new Date().toISOString(), engines: {}, ok: false };
+const report = { schema: 'streetui-agent-visual-e2e/v1', created: new Date().toISOString(), target: 'local-workspace', engines: {}, ok: false };
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -105,7 +109,7 @@ async function until(fn, timeoutMs = 25000, intervalMs = 250) {
 async function runEngine(engine) {
   const app = path.join(base, `app-${engine}`);
   const steps = {};
-  await cli.createProject({ targetDir: app, template: 'counter', frameworkVersion: '3.1.0', logger });
+  await cli.createProject({ targetDir: app, template: 'counter', frameworkVersion: WORKSPACE_VERSION, logger });
   await wireDependencies(app);
   const port = await freePort();
   const origin = `http://localhost:${port}`;
@@ -153,7 +157,9 @@ async function runEngine(engine) {
 
     const conn = await api('POST', '/api/browser/automation/connect', { engine, viewport: { width: 900, height: 600 } });
     assert(conn.json.ok === true && conn.json.connected === true, `automation connect failed: ${JSON.stringify(conn.json)}`);
-    steps.connect = { engine: conn.json.engine, url: conn.json.url };
+    assert(conn.json.engine === engine, `requested ${engine} but automation connected ${conn.json.engine}`);
+    const userAgent = await interact('evaluate', { expression: 'navigator.userAgent' });
+    steps.connect = { engine: conn.json.engine, url: conn.json.url, userAgent: userAgent.json.value };
 
     await until(async () => {
       const ev = await events();
@@ -316,7 +322,20 @@ async function runEngine(engine) {
     await until(() => !fs.existsSync(shotsDir), 15000);
     steps.shutdown = { sessionStopped: true, revoked: true, screenshotsCleaned: true };
 
-    return { engine, ok: true, steps };
+    return {
+      engine,
+      status: 'VERIFIED',
+      ok: true,
+      requestedEngine: engine,
+      actualEngine: steps.connect.engine,
+      // The Playground automation provider reports the launched engine but not
+      // its version; the real user agent is recorded instead of guessing one.
+      browserVersion: null,
+      browserUserAgent: steps.connect.userAgent,
+      requestedMode: 'dev',
+      actualMode: 'dev',
+      steps,
+    };
   } finally {
     if (!child.killed) child.kill('SIGTERM');
     await new Promise((r) => setTimeout(r, 300));
@@ -330,21 +349,33 @@ for (const engine of enginesArg) {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     const blocked = /E_AUTOMATION_UNAVAILABLE|Failed to launch|browserType\.launch|Executable doesn't exist/i.test(message);
-    report.engines[engine] = { engine, ok: false, status: blocked ? 'BLOCKED' : 'FAIL', error: message };
+    report.engines[engine] = {
+      engine,
+      status: blocked ? 'BLOCKED' : 'FAIL',
+      ok: false,
+      requestedEngine: engine,
+      actualEngine: null,
+      browserVersion: null,
+      requestedMode: 'dev',
+      actualMode: null,
+      error: message,
+      reason: message.split('\n')[0],
+    };
     console.log(`${engine}: ${blocked ? 'BLOCKED' : 'FAIL'} — ${message.split('\n')[0]}`);
-    if (!blocked) process.exitCode = 1;
   }
 }
+
+const summary = summarizeReports(Object.values(report.engines), {
+  requestedEngines: enginesArg,
+  requestedModes: ['dev'],
+});
+report.ok = summary.exitCode === 0;
+report.summary = summaryForArtifact(summary);
 
 const outDir = path.join(repo, 'benchmarks', 'results', 'toolchain');
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'agent-visual-e2e.json'), `${JSON.stringify(report, null, 2)}\n`);
-report.ok = process.exitCode !== 1 && Object.values(report.engines).some((r) => r.ok === true);
-fs.writeFileSync(path.join(outDir, 'agent-visual-e2e.json'), `${JSON.stringify(report, null, 2)}\n`);
 console.log(JSON.stringify(report, null, 2));
-if (!report.ok && process.exitCode !== 1) {
-  console.error('no engine was verified');
-  process.exitCode = 1;
-}
+process.exitCode = applyExitCode(summary, process.stdout);
 if (report.ok) fs.rmSync(base, { recursive: true, force: true });
 else console.error(`artifacts kept at ${base}`);

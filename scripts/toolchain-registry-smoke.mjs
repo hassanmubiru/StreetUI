@@ -13,7 +13,7 @@
  *     benchmarks/results/toolchain/registry-smoke.json.
  *
  * No file: aliases, no workspace links, no monorepo source at runtime.
- * Usage:  node scripts/toolchain-registry-smoke.mjs [--engines chromium,firefox]
+ * Usage:  node scripts/toolchain-registry-smoke.mjs [--engines chromium,firefox,webkit]
  */
 
 import fs from 'node:fs';
@@ -21,10 +21,17 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { assertNoUnknownSelectionFlags, enginesFromArgv, launchBrowser } from './lib/browser-engines.mjs';
+import { applyExitCode, isNetworkError, summarizeReports } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const REGISTRY = 'https://registry.npmjs.org/';
+
+/** Expected published version is the workspace version — never a stale pin. */
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 
 const PUBLISHED = [
   '@streetui/core', '@streetui/state', '@streetui/graph', '@streetui/dsl',
@@ -36,9 +43,8 @@ const PUBLISHED = [
 
 const GENERATOR_PACKAGE = 'create-streetui';
 
-const enginesArg = process.argv.includes('--engines')
-  ? process.argv[process.argv.indexOf('--engines') + 1].split(',')
-  : ['chromium', 'firefox'];
+assertNoUnknownSelectionFlags();
+const enginesArg = enginesFromArgv();
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-smoke-'));
 const cache = path.join(base, 'npm-cache');
@@ -205,22 +211,39 @@ function makeScenarios(page) {
 }
 
 async function runBrowser(engine, url, scenariosToRun) {
-  const pw = await import('playwright');
-  const browser = await pw[engine].launch();
+  const playwright = await import('playwright');
+  const browser = await launchBrowser(playwright, engine, { timeout: 45000 });
+  const evidence = {
+    requestedEngine: engine,
+    actualEngine: browser.browserType().name(),
+    browserVersion: browser.version(),
+  };
   try {
     const page = await browser.newPage();
     const scenarios = makeScenarios(page);
     const results = {};
-    for (const name of scenariosToRun) {
-      results[name] = await scenarios[name](url);
-    }
-    return results;
+    for (const name of scenariosToRun) results[name] = await scenarios[name](url);
+    return { ...evidence, status: Object.values(results).every((r) => r.ok) ? 'PASS' : 'FAIL', results };
   } finally {
     await browser.close();
   }
 }
 
 let generatorBin;
+
+/** Preserve npm's network evidence and distinguish it from a product failure. */
+function recordAttemptError(result, error, field = 'error') {
+  const text = [error?.message, error?.stderr, error?.stdout]
+    .filter((value) => value !== undefined && value !== null && String(value).length > 0)
+    .map(String)
+    .join('\n');
+  const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
+  const networkLine = lines.find((line) => /npm error (?:code|network)|ETIMEDOUT|ECONNRESET|EAI_AGAIN/i.test(line));
+  result[field] = networkLine ?? lines[0] ?? String(error);
+  if (isNetworkError(error)) {
+    result.infrastructureError = `Registry/network unavailable: ${result[field]}`;
+  }
+}
 
 function ensureGenerator() {
   if (generatorBin) return generatorBin;
@@ -242,12 +265,12 @@ async function verifyTemplate(template, index) {
     }
   }
 
-  // 1. Generate. The canonical `npm create streetui@latest` requires the
-  //     `create-streetui` initializer package to be published (npm maps `npm
-  //     create <x>` to `create-<x>`). It is not on the registry, so we report
-  //     that blocker and generate with the *published* `@streetui/cli` binary.
+  // 1. Generate with the canonical `npm create streetui@latest` entry point when
+  //     the `create-streetui` initializer is published; otherwise use the
+  //     published `@streetui/cli` binary and record the fallback explicitly.
   const generatorState = view(GENERATOR_PACKAGE);
   report.generatorAvailable = generatorState.ok;
+  report.generatorSource = generatorState.ok ? 'npm create streetui@latest' : '@streetui/cli binary (initializer unpublished)';
   try {
     const bin = ensureGenerator();
     if (generatorState.ok) {
@@ -257,7 +280,7 @@ async function verifyTemplate(template, index) {
     }
     result.generated = fs.existsSync(path.join(app, 'package.json'));
   } catch (error) {
-    result.error = String(error.message).split('\n')[0];
+    recordAttemptError(result, error);
     return result;
   }
 
@@ -266,23 +289,24 @@ async function verifyTemplate(template, index) {
     run(['npm', 'install', '--no-audit', '--no-fund'], app);
     const installedVersion = (JSON.parse(fs.readFileSync(path.join(app, 'node_modules', '@streetui', 'renderer', 'package.json'), 'utf8'))).version;
     result.installedVersion = installedVersion;
-    result.installed = installedVersion === '3.1.0';
+    result.expectedVersion = WORKSPACE_VERSION;
+    result.installed = installedVersion === WORKSPACE_VERSION;
     const cliPkg = JSON.parse(fs.readFileSync(path.join(app, 'node_modules', '@streetui', 'cli', 'package.json'), 'utf8'));
     result.publishedMatchesRepo = cliPkg.dependencies?.esbuild === undefined;
     result.publishedCliHasEsbuild = cliPkg.dependencies?.esbuild !== undefined;
     const cli = fs.readFileSync(path.join(app, 'package.json'), 'utf8');
     if (/vite/i.test(cli) || /workspace:/.test(cli)) throw new Error('generated project references vite or workspace:');
   } catch (error) {
-    result.installError = String(error.message).split('\n')[0];
+    recordAttemptError(result, error, 'installError');
     return result;
   }
 
-  // The published packages are the older, esbuild-based toolchain, not the
-  // current independent toolchain. Full lifecycle/browser verification against
-  // them would not validate this repo, so record the mismatch and stop.
+  // The published packages may still be the older, esbuild-based toolchain. If
+  // so, full lifecycle verification against them would not validate this repo:
+  // record the mismatch instead of pretending the lifecycle ran.
   if (!result.publishedMatchesRepo) {
     result.stalePublished = true;
-    result.note = 'Published @streetui/*@3.0.2 still depend on esbuild (stale toolchain); current repo toolchain is not yet published. Full lifecycle skipped.';
+    result.note = `Published ${WORKSPACE_VERSION} packages still depend on esbuild (stale toolchain); lifecycle verification skipped.`;
     return result;
   }
 
@@ -298,7 +322,7 @@ async function verifyTemplate(template, index) {
   const devPort = 3600 + index * 20;
   try {
     const { child, ready } = await withDevServer(app, devPort);
-    result.dev = ready.event === 'preview_ready' && ready.version === '3.1.0';
+    result.dev = ready.event === 'preview_ready' && ready.version === WORKSPACE_VERSION;
     result.devUrl = ready.url;
 
     const fullScenarios = ['initialRender', 'interact', 'form', 'navigate', 'refreshNested', 'consoleClean'];
@@ -307,7 +331,14 @@ async function verifyTemplate(template, index) {
       try {
         result.browser[engine] = await runBrowser(engine, `${ready.url}`, template === 'ssr' ? fullScenarios : lightScenarios);
       } catch (error) {
-        result.browser[engine] = { fatal: String(error.message) };
+        const message = String(error && error.message || error);
+        const blocked = /Executable doesn't exist|Failed to launch|error while loading shared libraries|Host system is missing dependencies/i.test(message);
+        result.browser[engine] = {
+          requestedEngine: engine,
+          actualEngine: null,
+          status: blocked ? 'BLOCKED' : 'ERROR',
+          fatal: message.split('\n')[0],
+        };
       }
     }
 
@@ -409,6 +440,9 @@ const report = {
   schema: 'streetui-toolchain-registry-smoke/v1',
   created: new Date().toISOString(),
   registry: REGISTRY,
+  evidenceTarget: 'npm-registry',
+  workspaceVersion: WORKSPACE_VERSION,
+  requestedEngines: enginesArg,
   packageAvailability: {},
   templates: {},
   thirdParty: {},
@@ -430,8 +464,11 @@ try {
       /* ignore */
     }
   }
-  const anyUnpublished = Object.values(report.packageAvailability).some((v) => !v.ok || v.version !== '3.1.0');
-  if (anyUnpublished) report.status = 'PARTIAL';
+  const mismatchedVersions = Object.entries(report.packageAvailability)
+    .filter(([, v]) => v.ok && v.version !== WORKSPACE_VERSION)
+    .map(([name, v]) => ({ package: name, published: v.version, expected: WORKSPACE_VERSION }));
+  report.versionMismatches = mismatchedVersions;
+  if (Object.values(report.packageAvailability).some((v) => !v.ok || v.version !== WORKSPACE_VERSION)) report.status = 'PARTIAL';
 
   report.templates.basic = await verifyTemplate('basic', 0);
   report.templates.ssr = await verifyTemplate('ssr', 1);
@@ -442,10 +479,10 @@ try {
     report.thirdParty = await verifyThirdParty();
   }
 
-  const allPass =
-    report.generatorAvailable &&
-    report.templates.basic.installed && report.templates.basic.dev && report.templates.basic.build && report.templates.basic.preview &&
-    report.templates.ssr.installed && report.templates.ssr.dev && report.templates.ssr.build && report.templates.ssr.preview;
+  const templatePass = (template) =>
+    template.installed && template.dev && template.build && template.preview && template.hmr === true &&
+    enginesArg.every((engine) => template.browser[engine]?.status === 'PASS');
+  const allPass = templatePass(report.templates.basic) && templatePass(report.templates.ssr);
   if (!allPass && report.status === 'PASS') report.status = 'PARTIAL';
   if (!allPass && Object.values(report.packageAvailability).some((v) => !v.ok)) report.status = 'BLOCKED';
 } catch (error) {
@@ -458,9 +495,30 @@ fs.mkdirSync(resultsDir, { recursive: true });
 fs.writeFileSync(path.join(resultsDir, 'registry-smoke.json'), `${JSON.stringify(report, null, 2)}\n`);
 
 console.log('StreetUI Registry Smoke Test');
+console.log('Workspace version: ' + WORKSPACE_VERSION);
 console.log('Package availability: ' + (Object.values(report.packageAvailability).every((v) => v.ok) ? 'PASS' : 'FAIL'));
-console.log('Basic template: ' + (report.templates.basic.dev ? 'PASS' : 'FAIL'));
-console.log('SSR template: ' + (report.templates.ssr.dev ? 'PASS' : 'FAIL'));
+const printableTemplateStatus = (template) =>
+  template.infrastructureError !== undefined || template.stalePublished === true
+    ? 'BLOCKED'
+    : template.dev
+      ? 'PASS'
+      : 'FAIL';
+console.log('Basic template: ' + printableTemplateStatus(report.templates.basic));
+console.log('SSR template: ' + printableTemplateStatus(report.templates.ssr));
 console.log('Final status: ' + report.status);
 
 fs.rmSync(base, { recursive: true, force: true });
+
+const rows = Object.values(report.templates).map((template) => ({
+  engine: template.template,
+  mode: 'lifecycle',
+  status:
+    report.status === 'BLOCKED' || template.stalePublished === true || template.infrastructureError !== undefined
+      ? 'BLOCKED'
+      : template.installed && template.dev && template.build && template.preview && template.hmr === true &&
+          enginesArg.every((engine) => template.browser[engine]?.status === 'PASS')
+        ? 'PASS'
+        : 'FAIL',
+  reason: template.infrastructureError ?? template.note ?? template.devError ?? template.installError ?? template.error,
+}));
+process.exitCode = applyExitCode(summarizeReports(rows), process.stdout);

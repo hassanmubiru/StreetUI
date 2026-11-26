@@ -8,7 +8,7 @@
  * in real Chromium and Firefox with interactions, screenshots, and error
  * checks. No workspace aliases or local source shortcuts.
  *
- * Usage: node scripts/toolchain-external-developer-e2e.mjs [--engines chromium,firefox]
+ * Usage: node scripts/toolchain-external-developer-e2e.mjs [--engines chromium,firefox,webkit]
  */
 
 import fs from 'node:fs';
@@ -17,51 +17,50 @@ import os from 'node:os';
 import net from 'node:net';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { chromium, firefox } from 'playwright';
+import { chromium, firefox, webkit } from 'playwright';
+import { assertNoUnknownSelectionFlags, enginesFromArgv, launchBrowser } from './lib/browser-engines.mjs';
+import { applyExitCode, summarizeReports, summaryForArtifact } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const dashboard = path.join(repo, 'examples', 'streetui-dashboard');
-const enginesArg = process.argv.includes('--engines')
-  ? process.argv[process.argv.indexOf('--engines') + 1].split(',')
-  : ['chromium', 'firefox'];
+assertNoUnknownSelectionFlags();
+const enginesArg = enginesFromArgv();
 
-const report = { schema: 'streetui-external-developer-e2e/v1', created: new Date().toISOString(), engines: {}, ok: false };
+function argValue(name) {
+  const i = process.argv.indexOf(name);
+  return i >= 0 ? process.argv[i + 1] : undefined;
+}
+
+/** Version under test: the workspace's coordinated version unless overridden. */
+const targetVersion =
+  argValue('--version') ??
+  JSON.parse(fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8')).version;
+/** Optional local tarball directory: accept an unreleased candidate (no registry). */
+const tarballArg = argValue('--tarballs');
+// Resolve against the caller's cwd immediately: the install runs in a temp
+// project, where a relative path would be reinterpreted as a git/registry spec.
+const tarballDir = tarballArg === undefined ? undefined : path.resolve(process.cwd(), tarballArg);
+if (tarballDir !== undefined && !fs.existsSync(tarballDir)) {
+  throw new Error(`--tarballs directory does not exist: ${tarballDir}`);
+}
+
+const report = {
+  schema: 'streetui-external-developer-e2e/v2',
+  created: new Date().toISOString(),
+  targetVersion,
+  // Evidence targets are never conflated: a tarball install is `local-packed`,
+  // a registry install is `npm-registry`. Neither is GitHub CI evidence.
+  target: tarballDir === undefined ? 'npm-registry' : 'local-packed',
+  engines: {},
+  ok: false,
+};
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-developer-e2e-'));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-/** Locate a real browser binary in the Playwright cache when the pinned
- * version is absent. Only real executables are used; otherwise BLOCKED. */
-function cachedEngineExecutable(engine) {
-  const cacheRoot = path.join(os.homedir(), '.cache', 'ms-playwright');
-  if (!fs.existsSync(cacheRoot)) return undefined;
-  const prefix = engine === 'firefox' ? 'firefox-' : 'chromium-';
-  const dirs = fs.readdirSync(cacheRoot).filter((d) => d.startsWith(prefix)).sort().reverse();
-  for (const dir of dirs) {
-    const candidates =
-      engine === 'firefox'
-        ? [path.join(cacheRoot, dir, 'firefox', 'firefox')]
-        : [path.join(cacheRoot, dir, 'chrome-linux', 'chrome'), path.join(cacheRoot, dir, 'chrome-linux64', 'chrome')];
-    for (const candidate of candidates) {
-      if (fs.existsSync(candidate)) return candidate;
-    }
-  }
-  return undefined;
-}
-
-async function launchBrowser(engine) {
-  const browserType = engine === 'firefox' ? firefox : chromium;
-  try {
-    return await browserType.launch({ args: ['--no-sandbox'] });
-  } catch (error) {
-    const fallback = cachedEngineExecutable(engine);
-    if (fallback === undefined) throw error;
-    return browserType.launch({ args: ['--no-sandbox'], executablePath: fallback });
-  }
-}
 function run(cmd, args, cwd) {
   return execFileSync(cmd, args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 240000 });
 }
@@ -93,10 +92,24 @@ async function prepareConsumer() {
   const app = path.join(base, 'consumer');
   fs.mkdirSync(app, { recursive: true });
   run('npm', ['init', '-y'], app);
-  run('npm', ['install', 'streetui@3.2.1', '@streetui/cli@3.2.1', '--no-audit', '--no-fund', '--loglevel=error'], app);
+  if (tarballDir !== undefined) {
+    // Offline install of the packed release candidate: no registry, no
+    // workspace symlinks. This is the only honest pre-publish proof.
+    const tarballs = fs.readdirSync(tarballDir)
+      .filter((f) => f.endsWith('.tgz'))
+      .map((f) => path.join(tarballDir, f));
+    assert(tarballs.length > 0, `no tarballs in ${tarballDir}`);
+    run('npm', ['install', '--offline', '--no-audit', '--no-fund', '--no-package-lock', ...tarballs], app);
+  } else {
+    run('npm', ['install', `streetui@${targetVersion}`, `@streetui/cli@${targetVersion}`, '--no-audit', '--no-fund', '--loglevel=error'], app);
+  }
   const cliVersion = JSON.parse(fs.readFileSync(path.join(app, 'node_modules', '@streetui', 'cli', 'package.json'), 'utf8')).version;
   const frameworkVersion = JSON.parse(fs.readFileSync(path.join(app, 'node_modules', 'streetui', 'package.json'), 'utf8')).version;
-  assert(cliVersion === '3.2.1' && frameworkVersion === '3.2.1', `unexpected installed versions: cli=${cliVersion}, streetui=${frameworkVersion}`);
+  assert(
+    cliVersion === targetVersion && frameworkVersion === targetVersion,
+    `unexpected installed versions: cli=${cliVersion}, streetui=${frameworkVersion} (expected ${targetVersion})`,
+  );
+  assert(fs.existsSync(path.join(app, 'node_modules', 'create-streetui')), 'create-streetui was not installed');
   for (const entry of ['src', 'public', 'streetui.config.ts', 'tsconfig.json']) {
     fs.cpSync(path.join(dashboard, entry), path.join(app, entry), { recursive: true });
   }
@@ -105,7 +118,9 @@ async function prepareConsumer() {
 
 async function verifyEngine(engine, app, origin) {
   const steps = {};
-  const browser = await launchBrowser(engine);
+  const browser = await launchBrowser({ chromium, firefox, webkit }, engine);
+  const actualEngine = browser.browserType().name();
+  const browserVersion = browser.version();
   const consoleErrors = [];
   const pageErrors = [];
   try {
@@ -194,7 +209,16 @@ async function verifyEngine(engine, app, origin) {
     assert(consoleErrors.length === 0, `console errors: ${consoleErrors.join(' | ')}`);
     assert(pageErrors.length === 0, `runtime errors: ${pageErrors.join(' | ')}`);
     steps.console = { errors: 0, runtimeErrors: 0 };
-    return { ok: true, steps };
+    return {
+      ok: true,
+      status: 'PASS',
+      requestedEngine: engine,
+      actualEngine,
+      browserVersion,
+      requestedMode: 'prod',
+      actualMode: 'prod',
+      steps,
+    };
   } finally {
     await browser.close();
   }
@@ -203,14 +227,17 @@ async function verifyEngine(engine, app, origin) {
 try {
   const { app, cliVersion, frameworkVersion } = await prepareConsumer();
   report.installed = { cli: cliVersion, streetui: frameworkVersion };
-  const bin = path.join(app, 'node_modules', '.bin', 'streetui');
-  run(bin, ['build'], app);
+  // The unified `streetui` package ships a same-named bin, so `.bin/streetui`
+  // does not reliably resolve to the CLI. Invoke the CLI entry point directly.
+  const bin = path.join(app, 'node_modules', '@streetui', 'cli', 'dist', 'bin.js');
+  assert(fs.existsSync(bin), `CLI bin missing at ${bin}`);
+  run(process.execPath, [bin, 'build'], app);
   assert(fs.existsSync(path.join(app, 'dist', 'client', 'manifest.json')), 'production manifest missing');
   report.build = { manifest: true };
 
   const port = await freePort();
   const origin = `http://localhost:${port}`;
-  const server = spawn(bin, ['start', '--port', String(port)], { cwd: app, stdio: ['ignore', 'pipe', 'pipe'] });
+  const server = spawn(process.execPath, [bin, 'start', '--port', String(port)], { cwd: app, stdio: ['ignore', 'pipe', 'pipe'] });
   try {
     await waitForServer(origin);
     for (const engine of enginesArg) {
@@ -220,25 +247,49 @@ try {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         const blocked = /Executable doesn't exist|Failed to launch|browserType\.launch/i.test(message);
-        report.engines[engine] = { ok: false, status: blocked ? 'BLOCKED' : 'FAIL', error: message };
+        report.engines[engine] = {
+          ok: false,
+          status: blocked ? 'BLOCKED' : 'FAIL',
+          requestedEngine: engine,
+          actualEngine: null,
+          browserVersion: null,
+          requestedMode: 'prod',
+          actualMode: null,
+          reason: message.split('\n')[0],
+          error: message,
+        };
         console.log(`${engine}: ${blocked ? 'BLOCKED' : 'FAIL'} — ${message.split('\n')[0]}`);
-        if (!blocked) process.exitCode = 1;
       }
     }
   } finally {
     server.kill('SIGTERM');
   }
-  report.ok = process.exitCode !== 1 && Object.values(report.engines).some((r) => r.ok === true);
 } catch (error) {
-  report.ok = false;
   report.error = error instanceof Error ? error.message : String(error);
   console.error(report.error);
-  process.exitCode = 1;
 }
+
+const rows = Object.values(report.engines);
+if (report.engines === undefined || rows.length === 0) {
+  // A fixture failure before any engine ran is a blocked run, not a green one.
+  rows.push({
+    status: 'BLOCKED',
+    requestedEngine: enginesArg[0],
+    requestedMode: 'prod',
+    reason: report.error ?? 'no engine was run',
+  });
+}
+const summary = summarizeReports(rows, {
+  requestedEngines: enginesArg,
+  requestedModes: ['prod'],
+});
+report.ok = summary.exitCode === 0;
+report.summary = summaryForArtifact(summary);
 
 const outDir = path.join(repo, 'benchmarks', 'results', 'toolchain');
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, 'external-developer-e2e.json'), `${JSON.stringify(report, null, 2)}\n`);
 console.log(JSON.stringify(report, null, 2));
+process.exitCode = applyExitCode(summary, process.stdout);
 if (!report.ok) console.error(`artifacts kept at ${base}`);
 else fs.rmSync(base, { recursive: true, force: true });

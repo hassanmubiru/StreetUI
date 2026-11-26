@@ -1,13 +1,13 @@
 /**
  * StreetUI toolchain browser verification harness.
  *
- *   node scripts/toolchain-browser-tests.mjs [--engine chromium|firefox|all]
+ *   node scripts/toolchain-browser-tests.mjs [--engine|--engines chromium,firefox,webkit|all]
  *                                             [--mode dev|prod|both]
  *
- * Drives real Chromium and Firefox (via the installed Playwright) against a
- * freshly scaffolded StreetUI app. Each engine/mode combination runs the same
- * shared scenarios and writes a JSON report. If a browser binary is missing,
- * that engine/mode is recorded as BLOCKED, never as passed.
+ * Drives real browsers (via the installed Playwright) against a freshly
+ * scaffolded StreetUI app. Each engine/mode combination runs the same shared
+ * scenarios and writes a JSON report. If a browser binary is missing, that
+ * engine/mode is recorded as BLOCKED, never as passed.
  *
  * No happy-dom is ever substituted for a real browser.
  */
@@ -16,25 +16,38 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import {
+  assertNoUnknownSelectionFlags,
+  cachedEngineExecutable,
+  enginesFromArgv,
+  launchBrowser,
+  modesFromArgv,
+  resolveBrowserType,
+} from './lib/browser-engines.mjs';
+import { applyExitCode, summarizeReports } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
+// Detect a mistyped engine/mode flag before anything is launched, so a requested
+// engine can never be silently dropped and reported green.
+assertNoUnknownSelectionFlags();
+const engines = enginesFromArgv(undefined, ['chromium', 'firefox']);
+const modes = modesFromArgv();
+
 // The built CLI finds its templates relative to the working directory.
 process.chdir(path.join(repo, 'packages', 'cli'));
 const cliEntry = path.join(repo, 'packages', 'cli', 'dist', 'index.js');
 const { createProject, resolveProject, buildProject, createDevServer, startPreview, runStart } = await import(cliEntry);
 
-const engines = process.argv.includes('--engine')
-  ? process.argv[process.argv.indexOf('--engine') + 1].split(',')
-  : ['chromium', 'firefox'];
-const modes = process.argv.includes('--mode')
-  ? process.argv[process.argv.indexOf('--mode') + 1].split(',')
-  : ['dev', 'prod'];
-
 const resultsDir = path.join(repo, 'benchmarks', 'results', 'toolchain');
 fs.mkdirSync(resultsDir, { recursive: true });
 
 const noopLogger = () => ({ info() {}, success() {}, warn() {}, error() {}, plain() {} });
+
+/** Scaffold version must match the workspace, not a pinned release. */
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 
 async function wireDependencies(projectRoot) {
   const { mkdir, symlink } = await import('node:fs/promises');
@@ -123,54 +136,36 @@ function makeScenarios(page) {
 async function runServer(mode, project, logger) {
   if (mode === 'dev') {
     const server = await createDevServer({ project, logger });
-    return { url: server.url, stop: server.stop };
+    return { url: server.url, actualMode: 'dev', stop: server.stop };
   }
   const server = await runStart({ project, logger });
-  return { url: server.url, stop: server.close };
-}
-
-function findBrowserBin(engine) {
-  const cache = path.join(os.homedir(), '.cache', 'ms-playwright');
-  if (!fs.existsSync(cache)) return undefined;
-  let prefix;
-  if (engine === 'firefox') prefix = 'firefox-';
-  else if (engine === 'webkit') prefix = 'webkit-';
-  else prefix = 'chromium-';
-  let names = [];
-  try {
-    names = fs.readdirSync(cache).filter((n) => n.startsWith(prefix));
-  } catch {
-    return undefined;
-  }
-  names.sort((a, b) => {
-    const va = Number.parseInt(a.slice(prefix.length), 10);
-    const vb = Number.parseInt(b.slice(prefix.length), 10);
-    return vb - va;
-  });
-  for (const name of names) {
-    const rootPath = path.join(cache, name);
-    let candidate;
-    if (engine === 'firefox') candidate = path.join(rootPath, 'firefox', 'firefox');
-    else if (engine === 'webkit') candidate = path.join(rootPath, 'pw_run.sh') ?? path.join(rootPath, 'MiniBrowser');
-    else candidate = path.join(rootPath, 'chrome-linux', 'chrome');
-    if (typeof candidate === 'string' && fs.existsSync(candidate)) return candidate;
-  }
-  return undefined;
+  return { url: server.url, actualMode: 'prod', stop: server.close };
 }
 
 async function runEngineMode(engine, mode, playwright) {
   const report = {
     schema: 'streetui-toolchain-browser/v1',
+    target: 'local-workspace',
+    requestedEngine: engine,
+    actualEngine: null,
     engine,
+    requestedMode: mode,
+    actualMode: null,
     mode,
+    browserVersion: null,
     status: 'BLOCKED',
     reason: '',
     scenarios: {},
   };
-  const browsers = playwright[engine];
-  let binary = browsers?.executablePath?.();
-  if (!binary || !fs.existsSync(binary)) binary = findBrowserBin(engine);
-  if (!binary || !fs.existsSync(binary)) {
+  const browsers = resolveBrowserType(playwright, engine);
+  let binary;
+  try {
+    binary = browsers.executablePath();
+  } catch {
+    binary = undefined;
+  }
+  if (binary === undefined || !fs.existsSync(binary)) binary = cachedEngineExecutable(engine);
+  if (binary === undefined || !fs.existsSync(binary)) {
     report.reason = `No launchable ${engine} binary is available.`;
     return report;
   }
@@ -181,22 +176,32 @@ async function runEngineMode(engine, mode, playwright) {
     const { mkdir, symlink } = await import('node:fs/promises');
     const projectRoot = path.join(base, 'app');
     const logger = noopLogger();
-    await createProject({ targetDir: projectRoot, template: 'ssr', frameworkVersion: '3.1.0', logger });
+    await createProject({ targetDir: projectRoot, template: 'ssr', frameworkVersion: WORKSPACE_VERSION, logger });
     await wireDependencies(projectRoot);
     const project = await resolveProject(projectRoot, { requireEntry: true });
 
     const server = await runServer(mode, project, logger);
-    process.stderr.write(`[harness] ${engine}/${mode}: server ${server.url}\n`);
+    report.actualMode = server.actualMode;
+    process.stderr.write(`[harness] ${engine}/${mode}: server ${server.url} (${server.actualMode})\n`);
     try {
       let browser;
       process.stderr.write(`[harness] ${engine}/${mode}: launching\n`);
       try {
-        browser = await browsers.launch();
+        browser = await launchBrowser(playwright, engine, { executablePath: binary });
       } catch (error) {
-        if (!binary || !fs.existsSync(binary)) throw error;
-        browser = await browsers.launch({ executablePath: binary });
+        // A missing OS library (not a missing browser) is not a harness
+        // failure — the engine simply cannot run on this host.
+        const message = String(error && error.message || error);
+        if (/error while loading shared libraries|Host system is missing dependencies/i.test(message)) {
+          report.status = 'BLOCKED';
+          report.reason = `Host system is missing dependencies for ${engine}: ${message.split('\n').find((l) => l.includes('error while loading')) ?? message.split('\n')[0]}`;
+          return report;
+        }
+        throw error;
       }
-      process.stderr.write(`[harness] ${engine}/${mode}: launched\n`);
+      report.actualEngine = browser.browserType().name();
+      report.browserVersion = browser.version();
+      process.stderr.write(`[harness] ${engine}/${mode}: launched ${report.browserVersion}\n`);
       try {
         const page = await Promise.race([
           browser.newPage(),
@@ -236,7 +241,19 @@ const all = [];
 if (!playwright) {
   for (const engine of engines) {
     for (const mode of modes) {
-      all.push({ schema: 'streetui-toolchain-browser/v1', engine, mode, status: 'BLOCKED', reason: 'Playwright is not installed.', scenarios: {} });
+      all.push({
+        schema: 'streetui-toolchain-browser/v1',
+        requestedEngine: engine,
+        actualEngine: null,
+        engine,
+        requestedMode: mode,
+        actualMode: null,
+        mode,
+        browserVersion: null,
+        status: 'BLOCKED',
+        reason: 'Playwright is not installed.',
+        scenarios: {},
+      });
     }
   }
 } else {
@@ -252,3 +269,8 @@ for (const report of all) {
   fs.writeFileSync(file, `${JSON.stringify(report, null, 2)}\n`);
   process.stdout.write(`toolchain-browser: ${report.engine}/${report.mode} → ${report.status} (${file})\n`);
 }
+
+process.exitCode = applyExitCode(
+  summarizeReports(all, { requestedEngines: engines, requestedModes: modes }),
+  process.stdout,
+);

@@ -10,7 +10,7 @@
  * command surface), every lifecycle step is recorded as BLOCKED with the reason
  * — never fabricated as passed.
  *
- * Usage:  node scripts/toolchain-registry-e2e.mjs [--engines chromium,firefox]
+ * Usage:  node scripts/toolchain-registry-e2e.mjs [--engines chromium,firefox,webkit]
  */
 
 import fs from 'node:fs';
@@ -18,18 +18,28 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import {
+  assertNoUnknownSelectionFlags,
+  enginesFromArgv,
+  launchBrowser,
+} from './lib/browser-engines.mjs';
+import { applyExitCode, summarizeReports } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
 const REGISTRY = 'https://registry.npmjs.org/';
 const PUBLISHED_CLI = '@streetui/cli';
 
-const enginesArg = process.argv.includes('--engines')
-  ? process.argv[process.argv.indexOf('--engines') + 1].split(',')
-  : ['chromium', 'firefox'];
+/** The version under test is the workspace version, never a hardcoded pin. */
+const WORKSPACE_VERSION = JSON.parse(
+  fs.readFileSync(path.join(repo, 'packages', 'streetui', 'package.json'), 'utf8'),
+).version;
 
-const CLI_SPEC = '@streetui/cli@3.1.6';
-const EXPECTED_CLI_VERSION = '3.1.6';
+assertNoUnknownSelectionFlags();
+const enginesArg = enginesFromArgv();
+
+const CLI_SPEC = `@streetui/cli@${WORKSPACE_VERSION}`;
+const EXPECTED_CLI_VERSION = WORKSPACE_VERSION;
 
 const base = fs.mkdtempSync(path.join(os.tmpdir(), 'streetui-e2e-'));
 const cache = path.join(base, 'npm-cache');
@@ -169,37 +179,19 @@ function makeScenarios(page) {
 }
 
 async function runBrowser(engine, url, scenarioSet) {
-  const pw = await import('playwright');
-  let browser;
-  try {
-    browser = await pw[engine].launch();
-  } catch (error) {
-    // Playwright's default executable path may be stale; fall back to a cached
-    // browser dir (chromium-*/chrome-linux/chrome, firefox-*/firefox/firefox).
-    const cacheRoot = path.join(os.homedir(), '.cache', 'ms-playwright');
-    if (fs.existsSync(cacheRoot)) {
-      const prefix = engine === 'firefox' ? 'firefox-' : 'chromium-';
-      const dirs = fs.readdirSync(cacheRoot).filter((d) => d.startsWith(prefix)).sort().reverse();
-      for (const d of dirs) {
-        const bin = engine === 'firefox'
-          ? path.join(cacheRoot, d, 'firefox', 'firefox')
-          : path.join(cacheRoot, d, 'chrome-linux', 'chrome');
-        if (fs.existsSync(bin)) {
-          browser = await pw[engine].launch({ executablePath: bin });
-          break;
-        }
-      }
-      if (!browser) throw error;
-    } else {
-      throw error;
-    }
-  }
+  const playwright = await import('playwright');
+  const browser = await launchBrowser(playwright, engine, { timeout: 45000 });
+  const evidence = {
+    requestedEngine: engine,
+    actualEngine: browser.browserType().name(),
+    browserVersion: browser.version(),
+  };
   try {
     const page = await browser.newPage();
     const scenarios = makeScenarios(page);
     const results = {};
     for (const name of scenarioSet) results[name] = await scenarios[name](url);
-    return results;
+    return { ...evidence, status: Object.values(results).every((r) => r.ok) ? 'PASS' : 'FAIL', results };
   } finally {
     await browser.close();
   }
@@ -225,7 +217,7 @@ async function verifyTemplate(template, index) {
     return r;
   }
   if (r.identity !== 'independent') {
-    r.note = 'Published CLI is stale (esbuild). Full lifecycle BLOCKED against the published packages; the independent toolchain is validated from the 3.1.1 candidates offline.';
+    r.note = `Published CLI still depends on esbuild. Full lifecycle is BLOCKED against the published packages; source work is validated by the local/packed harnesses instead.`;
     return r;
   }
   // Independent published CLI → run full lifecycle.
@@ -239,7 +231,14 @@ async function verifyTemplate(template, index) {
       try {
         r.browser[engine] = await runBrowser(engine, `${ready.url}`, template === 'ssr' ? scenarios : ['initialRender', 'interact', 'consoleClean']);
       } catch (error) {
-        r.browser[engine] = { fatal: String(error.message) };
+        const message = String(error && error.message || error);
+        const blocked = /Executable doesn't exist|Failed to launch|error while loading shared libraries|Host system is missing dependencies/i.test(message);
+        r.browser[engine] = {
+          requestedEngine: engine,
+          actualEngine: null,
+          status: blocked ? 'BLOCKED' : 'ERROR',
+          fatal: message.split('\n')[0],
+        };
       }
     }
     const appTs = path.join(app, 'src', 'app.ts');
@@ -282,10 +281,19 @@ const report = {
   schema: 'streetui-toolchain-registry-e2e/v1',
   created: new Date().toISOString(),
   registry: REGISTRY,
+  evidenceTarget: 'npm-registry',
+  workspaceVersion: WORKSPACE_VERSION,
+  requestedEngines: enginesArg,
   publishedIdentity: {},
   templates: {},
   status: 'BLOCKED',
 };
+
+/** A lifecycle passes only when the browser AND HMR work, not just dev/build. */
+function lifecyclePasses(template) {
+  const enginesVerified = enginesArg.every((engine) => template.browser[engine]?.status === 'PASS');
+  return Boolean(template.dev && template.build && template.preview && template.hmr && enginesVerified);
+}
 
 try {
   const cli = view(PUBLISHED_CLI, ['version', 'dependencies']);
@@ -297,8 +305,7 @@ try {
   report.templates.ssr = await verifyTemplate('ssr', 1);
 
   const stale = report.publishedIdentity[PUBLISHED_CLI].esbuild || report.publishedIdentity.streetui.esbuild;
-  const lifecyclesPass = report.templates.basic.dev && report.templates.basic.build && report.templates.basic.preview &&
-    report.templates.ssr.dev && report.templates.ssr.build && report.templates.ssr.preview;
+  const lifecyclesPass = lifecyclePasses(report.templates.basic) && lifecyclePasses(report.templates.ssr);
   if (!stale && lifecyclesPass) report.status = 'PASS';
   else if (!stale) report.status = 'PARTIAL';
   else report.status = 'BLOCKED';
@@ -311,9 +318,20 @@ fs.mkdirSync(resultsDir, { recursive: true });
 fs.writeFileSync(path.join(resultsDir, 'registry-e2e.json'), `${JSON.stringify(report, null, 2)}\n`);
 
 console.log('StreetUI Registry E2E');
-console.log('Published cli esbuild: ' + (report.publishedIdentity[PUBLISHED_CLI].esbuild || 'none'));
-console.log('Basic: ' + (report.templates.basic.identity));
-console.log('SSR: ' + (report.templates.ssr.identity));
+console.log('Workspace version: ' + WORKSPACE_VERSION);
+console.log('Published cli esbuild: ' + (report.publishedIdentity[PUBLISHED_CLI]?.esbuild || 'none'));
+console.log('Basic: ' + report.templates.basic.identity);
+console.log('SSR: ' + report.templates.ssr.identity);
 console.log('Final status: ' + report.status);
 
 fs.rmSync(base, { recursive: true, force: true });
+
+// One row per template so an unverified engine or a blocked publish is fatal
+// under CI/--require rather than silently green.
+const rows = Object.values(report.templates).map((template) => ({
+  engine: template.template,
+  mode: 'lifecycle',
+  status: report.status === 'BLOCKED' ? 'BLOCKED' : template.identity === 'independent' && lifecyclePasses(template) ? 'PASS' : 'FAIL',
+  reason: report.status === 'BLOCKED' ? 'published packages are not the independent toolchain' : template.note,
+}));
+process.exitCode = applyExitCode(summarizeReports(rows), process.stdout);

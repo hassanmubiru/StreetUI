@@ -141,6 +141,28 @@ importers:
         specifier: '*'
         version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
 
+  examples/streetui-dashboard:
+    dependencies:
+      streetui:
+        specifier: workspace:*
+        version: link:../../packages/streetui
+    devDependencies:
+      '@streetui/cli':
+        specifier: workspace:*
+        version: link:../../packages/cli
+      '@types/node':
+        specifier: '*'
+        version: 26.6.2
+      happy-dom:
+        specifier: '*'
+        version: 20.14.5
+      typescript:
+        specifier: '*'
+        version: 5.6.3
+      vitest:
+        specifier: '*'
+        version: 2.1.4(@types/node@26.6.2)(happy-dom@20.14.5)
+
   examples/streetui-data:
     dependencies:
       streetui:

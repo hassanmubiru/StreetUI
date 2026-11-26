@@ -48,7 +48,7 @@ export function buildApp(page: PageDSL, state: AppState): void {
       class: filterButton,
       onClick: () => state.theme.set(state.theme.peek() === 'light' ? 'dark' : 'light'),
     });
-  }, { class: style({ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }) });
+  }, { class: style({ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }), role: 'banner' });
 
   page.section('nav', (nav) => {
     const items: readonly { readonly view: View; readonly label: string }[] = [
@@ -66,14 +66,16 @@ export function buildApp(page: PageDSL, state: AppState): void {
     }
   }, { role: 'navigation', ariaLabel: 'Primary', class: style({ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }) });
 
-  page.when(derived(() => state.view.get() === 'overview'), (p) => overviewPage(p, state));
-  page.when(derived(() => state.view.get() === 'users'), (p) => usersPage(p, state));
-  page.when(derived(() => state.view.get() === 'projects'), (p) => projectsPage(p, state));
-  page.when(derived(() => state.view.get() === 'settings'), (p) => settingsPage(p, state));
-  page.when(derived(() => state.view.get() === 'not-found'), (p) => {
-    p.component('page-header', PageHeader, { title: signal('Page not found'), subtitle: signal('The route you requested does not exist.') });
-    p.button('Back to overview', { id: 'not-found-home', class: primaryButton, onClick: () => navigate(state, 'overview') });
-  });
+  page.section('main', (main) => {
+    main.when(derived(() => state.view.get() === 'overview'), (p) => overviewPage(p, state));
+    main.when(derived(() => state.view.get() === 'users'), (p) => usersPage(p, state));
+    main.when(derived(() => state.view.get() === 'projects'), (p) => projectsPage(p, state));
+    main.when(derived(() => state.view.get() === 'settings'), (p) => settingsPage(p, state));
+    main.when(derived(() => state.view.get() === 'not-found'), (p) => {
+      p.component('page-header', PageHeader, { title: signal('Page not found'), subtitle: signal('The route you requested does not exist.') });
+      p.button('Back to overview', { id: 'not-found-home', class: primaryButton, onClick: () => navigate(state, 'overview') });
+    });
+  }, { role: 'main' });
 }
 
 function overviewPage(page: PageDSL, state: AppState): void {

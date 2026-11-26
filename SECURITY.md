@@ -13,7 +13,7 @@ fix before public disclosure.
 ## Supported versions
 
 The latest coordinated release line is supported for security fixes. Check
-`CHANGELOG.md` for the current version (3.2.1 at the time of writing).
+`CHANGELOG.md` for the current version (3.2.2 on npm).
 
 ## Scope and security model
 
@@ -29,3 +29,23 @@ The latest coordinated release line is supported for security fixes. Check
 - Playwright is an optional, development-only automation provider. It is not a
   runtime dependency of StreetUI, the CLI, or generated applications.
 - No telemetry or network sends from the framework itself.
+
+## Client/server data boundary
+
+- Only `STREETUI_PUBLIC_*` environment variables are inlined into client
+  bundles. Any other `process.env.X` member access in code reachable from the
+  browser module graph is compiled to `undefined` — treat that as a hard rule,
+  not a convention.
+- Server credentials (API tokens, bearer secrets) must be read only in server
+  entry points or modules the browser graph never imports. The reference
+  implementation is `createServerDataSource()` in
+  `examples/streetui-dashboard/src/http-patterns.ts`, which reads
+  `STREETUI_DASHBOARD_API_TOKEN` (deliberately not `STREETUI_PUBLIC_*`) and
+  injects `Authorization: Bearer …` server-side.
+- For user sessions, prefer an `HttpOnly` cookie over a token readable from
+  JavaScript, so a script-injection bug cannot exfiltrate the credential.
+- Aborting a mutation cancels client-side waiting only; it is **not** a
+  server-side rollback. Do not build a "cancel the delete" guarantee on it.
+- Never serialize server credentials into SSR output, JSON state, or HTML. The
+  dashboard's real-socket SSR test asserts the token never appears in the
+  rendered document.

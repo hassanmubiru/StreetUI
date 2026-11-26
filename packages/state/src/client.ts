@@ -178,6 +178,22 @@ function withQuery(url: string, query: RequestConfig['query']): string {
   return url.includes('?') ? `${url}&${qs}` : `${url}?${qs}`;
 }
 
+/** Merge HTTP headers case-insensitively, with per-request values winning. */
+function mergeHeaders(
+  defaults: Readonly<Record<string, string>> | undefined,
+  overrides: Readonly<Record<string, string>> | undefined,
+): Record<string, string> {
+  const merged: Record<string, string> = { ...defaults };
+  for (const [name, value] of Object.entries(overrides ?? {})) {
+    const lowerName = name.toLowerCase();
+    for (const existing of Object.keys(merged)) {
+      if (existing.toLowerCase() === lowerName) delete merged[existing];
+    }
+    merged[name] = value;
+  }
+  return merged;
+}
+
 /** Create an optional HTTP data client. Uses global `fetch` unless one is injected. */
 export function createClient(config: ClientConfig = {}): Client {
   const doFetch: FetchLike =
@@ -196,11 +212,13 @@ export function createClient(config: ClientConfig = {}): Client {
     reqConfig: RequestConfig = {},
   ): Promise<T> {
     const url = withQuery(joinUrl(config.baseUrl, path), reqConfig.query);
-    const headers: Record<string, string> = { ...config.headers, ...reqConfig.headers };
+    const headers = mergeHeaders(config.headers, reqConfig.headers);
     const init: RequestInit = { method, headers };
     if (reqConfig.signal !== undefined) init.signal = reqConfig.signal;
     if (body !== undefined) {
-      if (headers['Content-Type'] === undefined) headers['Content-Type'] = 'application/json';
+      if (!Object.keys(headers).some((name) => name.toLowerCase() === 'content-type')) {
+        headers['Content-Type'] = 'application/json';
+      }
       init.body = JSON.stringify(body);
     }
 
@@ -227,7 +245,10 @@ export function createClient(config: ClientConfig = {}): Client {
       );
     },
     mutation: <TArgs, TResult>(method: HttpMethod, path: string, options?: MutationOptions<TArgs, TResult>) =>
-      mutation<TArgs, TResult>((args) => request<TResult>(method, path, args), options ?? {}),
+      mutation<TArgs, TResult>(
+        (args, ctx) => request<TResult>(method, path, args, { signal: ctx.signal }),
+        options ?? {},
+      ),
   };
 }
 
