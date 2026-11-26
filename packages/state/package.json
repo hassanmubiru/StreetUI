@@ -1,6 +1,6 @@
 {
   "name": "@streetui/state",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "description": "StreetUI reactive state — signals, subscriptions, derived state",
   "type": "module",
   "main": "./dist/index.cjs",
