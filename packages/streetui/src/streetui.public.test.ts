@@ -275,6 +275,16 @@ describe('streetui/testing — compiler diagnostics (v1.2 §14)', () => {
     expect(analysis.summary.totalNodes).toBe(insp.nodes.length);
   });
 
+  it('exposes the documented example through streetui/diagnostics', async () => {
+    const { inspectCompilation, formatInspection } = await import('streetui/diagnostics');
+    const app = streetui.app({ name: 'diagnostics-example' });
+    app.page('home', (page) => page.heading('Diagnostics'));
+    const { graph } = compile(app);
+    const report = formatInspection(inspectCompilation(graph));
+    expect(report).toContain('compiler inspection — diagnostics-example');
+    expect(report).toContain('heading');
+  });
+
   it('keeps diagnostics OFF the runtime barrel (tree-shakeable)', async () => {
     const runtime = await import('streetui');
     expect('inspectCompilation' in runtime).toBe(false);

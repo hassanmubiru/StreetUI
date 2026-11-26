@@ -10,9 +10,10 @@ produced by `scripts/api-inventory.mjs` directly from the built `.d.ts` files.
 ## The promise
 
 As of 1.0.0 the public API is **frozen and governed by semantic versioning**.
-The public API is exactly what each package re-exports from its public entry
-point (`exports["."]`, i.e. `dist/index.js` and its `.d.ts`). Anything not
-exported from that barrel is internal and may change at any time.
+The public API is exactly what each package re-exports from its declared public
+entry points (`exports["."]` and documented `exports` subpaths, with their
+JavaScript and declaration targets). Anything not exported from those entries is
+internal and may change at any time.
 
 - **Major** (`2.0.0`) — any breaking change to a stable public export: removal,
   rename, signature change, or a behavioral change that could break a correct

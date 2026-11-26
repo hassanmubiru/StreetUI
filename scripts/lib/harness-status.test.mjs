@@ -7,9 +7,21 @@ import {
   formatSummary,
   hasRequireFlag,
   isCiEnvironment,
+  isNetworkError,
   summarizeReports,
   summaryForArtifact,
 } from './harness-status.mjs';
+
+test('network outages are identified without classifying product errors as infrastructure', () => {
+  assert.equal(isNetworkError('npm error code ETIMEDOUT'), true);
+  assert.equal(isNetworkError('npm error network request to https://registry.npmjs.org/typescript failed'), true);
+  assert.equal(isNetworkError('Error: getaddrinfo EAI_AGAIN registry.npmjs.org'), true);
+  assert.equal(isNetworkError('Error: read ECONNRESET'), true);
+  assert.equal(isNetworkError({ message: 'Command failed: npm install', stderr: 'npm error code ETIMEDOUT' }), true);
+  assert.equal(isNetworkError({ message: 'npm install failed', cause: { code: 'ECONNRESET' } }), true);
+  assert.equal(isNetworkError('AssertionError: expected true to be false'), false);
+  assert.equal(isNetworkError('ENOENT: no such file or directory'), false);
+});
 
 test('verified statuses are the only non-fatal success statuses', () => {
   assert.equal(classifyStatus('OK'), 'verified');

@@ -10,7 +10,10 @@ code change in views.
 
 ## What ships
 
-Everything here is already part of `streetui`:
+The following framework primitives are part of the published `streetui` API.
+The dashboard's `http-patterns.ts` helpers described later in this document are
+**unreleased example code**; they are not new exports from `streetui` and are
+not included in npm 3.2.2.
 
 | Primitive | Import from | Role |
 |---|---|---|

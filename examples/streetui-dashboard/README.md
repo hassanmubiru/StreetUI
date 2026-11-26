@@ -55,6 +55,11 @@ src/
 
 ## Real HTTP integration
 
+The framework primitives (`createClient`, `resource`, `mutation`) are published
+in npm 3.2.2. The additional helpers in `http-patterns.ts` and their real-socket
+tests are **unreleased example code**, not APIs published by the `streetui`
+package.
+
 `http-data.ts` implements the same contract over a real HTTP/JSON API through
 `createClient({ baseUrl })`. Set one public environment variable to switch the
 whole app — SSR and the browser bundle both read it — from the mock to the API:

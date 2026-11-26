@@ -53,6 +53,12 @@ public API or a published artifact.
 - **Evidence artifacts now declare their own evidence target**
   (`local-workspace`, `local-packed`, `npm-registry`) instead of relying on a
   reader to infer it.
+- **Registry network outages are BLOCKED, not product failures.** The registry
+  smoke harness preserves npm timeout/reset/DNS diagnostics and classifies them
+  through `isNetworkError`; a real assertion or lifecycle failure remains FAIL.
+- **The diagnostics consumer example is executed, not merely imported.** The
+  packed-consumer gate runs it through ESM, CJS, and strict TypeScript, and the
+  public API suite imports it from `streetui/diagnostics`.
 - **A relative `--tarballs` path was passed to `npm install` in a temp project**,
   which npm read as a GitHub SSH spec. It is now resolved against the caller's
   working directory and validated up front.

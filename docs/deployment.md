@@ -49,9 +49,10 @@ import { createRenderer, BrowserDOMAdapter, compile } from 'streetui';
 ```
 
 The public subpaths are `streetui` (client + shared), `streetui/server`
-(SSR: `renderToString`, `renderHead`, `serializeState`, `ServerDOMAdapter`),
-`streetui/testing`, and `streetui/diagnostics` (opt-in compiler diagnostics,
-kept off the runtime barrel on purpose). Nothing else is public.
+(SSR: `renderToString`, `renderHead`, `serializeState`, `ServerDOMAdapter`) and
+`streetui/testing`. This checkout also adds `streetui/diagnostics` (opt-in
+compiler diagnostics, kept off the runtime barrel on purpose); that subpath is
+**unreleased and is not in npm 3.2.2**. Nothing else is public.
 
 ## What must not reach the browser
 

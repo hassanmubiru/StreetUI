@@ -3,10 +3,12 @@
 Public API inventory and consumer-verification results for the StreetUI release
 set. Companion to [`m15-report.md`](./m15-report.md).
 
-Published release under test: **3.2.2** (18 coordinated packages plus the
-`create-streetui` initializer, 19 total). `@streetui/playground` is private and
-outside the release set. Nothing was published, and no version was bumped, while
-producing this report.
+Published registry baseline: **3.2.2** (18 coordinated packages plus the
+`create-streetui` initializer, 19 total). The local candidate deliberately keeps
+that same workspace version for dry-run verification; it is **not** the published
+3.2.2 artifact and includes unreleased M15 changes. `@streetui/playground` is
+private and outside the release set. Nothing was published, and no version was
+bumped, while producing this report.
 
 ## Method
 
@@ -26,9 +28,11 @@ Two independent checks, both non-mutating against sources:
    under `module: NodeNext`, `moduleResolution: NodeNext`, `strict: true`,
    `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `skipLibCheck:
    false`. The file imports **every** package and every declared subpath, plus
-   named imports of the documented subpath surfaces (`streetui/server`,
-   `@streetui/compiler`, `@streetui/compiler/diagnostics`). `create-streetui` is
-   verified through its declared `bin` target instead of an invented root export.
+    named imports of the documented subpath surfaces (`streetui/server`,
+    `streetui/diagnostics`, `@streetui/compiler`,
+    `@streetui/compiler/diagnostics`). `create-streetui` is verified through its
+    declared `bin` target instead of an invented root export. The ESM and CJS
+    phases also execute the documented diagnostics example against a real graph.
 
 Both are run by the M15 acceptance sequence; the consumer smoke is the gate that
 fails if a declaration entry is missing, mis-declared, or unloadable.
@@ -133,7 +137,9 @@ renames or removals.
 
 ```
 ESM-SSR-OK
+ESM-DIAGNOSTICS-OK
 CJS-SSR-OK
+CJS-DIAGNOSTICS-OK
 CLI version: 3.2.2
 dev SSR OK — 1053 bytes, <div id="app"> present
 strict TS consumer OK — every declared package/subpath resolves under NodeNext + strict

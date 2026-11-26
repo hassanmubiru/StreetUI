@@ -143,8 +143,24 @@ renderer.hydrate(compiled, document.getElementById('app')!); // reuses server DO
 | `streetui` | The full framework: reactivity, DSL, compiler, graph, runtime, renderer, router, forms, context, i18n, components, overlays, transitions, a11y, data, devtools, SSR + hydration. |
 | `streetui/server` | Server-rendering subset: `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`, `renderDevToolsReport`. |
 | `streetui/testing` | Testing utilities: `render`, `findByRole`, `waitFor`, `renderComponent`, `findComponent`, `trigger`, `openOverlay`, `waitForTransition`. |
-| `streetui/diagnostics` | Opt-in compiler diagnostics: `analyzeGraph`, `inspectCompilation`, `formatInspection`. Deliberately kept out of the runtime barrel so it never enters a production client bundle. |
+| `streetui/diagnostics` | **Unreleased — not in npm 3.2.2.** Opt-in compiler diagnostics: `analyzeGraph`, `inspectCompilation`, `formatInspection`. Deliberately kept out of the runtime barrel so it never enters a production client bundle. |
 | `streetui/package.json` | Package metadata, for tools that need to read the installed version. |
+
+### Unreleased diagnostics example
+
+This example is verified by `streetui.public.test.ts` and by the ESM/CJS and
+strict-TypeScript phases of `scripts/consumer-smoke.mjs`. It requires a release
+containing `streetui/diagnostics`; npm 3.2.2 does not contain that subpath.
+
+```ts
+import { streetui, compile } from 'streetui';
+import { inspectCompilation, formatInspection } from 'streetui/diagnostics';
+
+const app = streetui.app({ name: 'diagnostics-example' });
+app.page('home', (page) => page.heading('Diagnostics'));
+const { graph } = compile(app);
+console.log(formatInspection(inspectCompilation(graph)));
+```
 
 ## What's inside (and why you don't have to think about it)
 

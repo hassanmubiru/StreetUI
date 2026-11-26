@@ -17,6 +17,31 @@ export const VERIFIED_STATUSES = Object.freeze(['OK', 'PASS', 'VERIFIED']);
 export const FAILURE_STATUSES = Object.freeze(['FAIL', 'ERROR']);
 export const BLOCKED_STATUSES = Object.freeze(['BLOCKED']);
 
+const NETWORK_ERROR_PATTERN = /(?:\bETIMEDOUT\b|\bECONNRESET\b|\bECONNREFUSED\b|\bECONNABORTED\b|\bEAI_AGAIN\b|\bENETUNREACH\b|network request to .+ failed|socket hang up|getaddrinfo (?:EAI_AGAIN|ENOTFOUND)|fetch failed)/i;
+
+/**
+ * True when an error came from unavailable network infrastructure rather than
+ * the artifact under test. Registry harnesses use this to report BLOCKED instead
+ * of turning an npm timeout/reset/DNS outage into a product FAIL.
+ *
+ * Both Error objects (including npm's stderr/stdout) and plain strings are
+ * accepted so callers do not have to lose the underlying network evidence.
+ */
+export function isNetworkError(error) {
+  if (typeof error === 'string') return NETWORK_ERROR_PATTERN.test(error);
+  if (error === null || typeof error !== 'object') return false;
+  const parts = [];
+  for (const key of ['message', 'code', 'stderr', 'stdout']) {
+    const value = error[key];
+    if (value !== undefined && value !== null) parts.push(String(value));
+  }
+  if (error.cause !== undefined) {
+    parts.push(String(error.cause?.message ?? error.cause));
+    if (error.cause?.code !== undefined) parts.push(String(error.cause.code));
+  }
+  return NETWORK_ERROR_PATTERN.test(parts.join('\n'));
+}
+
 /** `--require` may be passed bare or as `--require=true|false`. */
 export function hasRequireFlag(argv = process.argv.slice(2)) {
   for (const arg of argv) {
