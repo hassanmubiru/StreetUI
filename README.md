@@ -42,7 +42,7 @@ Curated subpaths (still just `npm install streetui`):
 
 - `streetui/server` — `renderToString`, `renderHead`, `ServerDOMAdapter`, `inspectComponents`, `inspectInteractions`, `renderDevToolsReport`
 - `streetui/testing` — `render`, `findByRole`, `waitFor`, `renderServerThenHydrate`, `renderComponent`, `findComponent`, `trigger`
-- `streetui/diagnostics` — opt-in compiler diagnostics: `analyzeGraph`, `inspectCompilation`, `formatInspection` (kept out of the runtime barrel)
+- `streetui/diagnostics` — **unreleased in this checkout; not in npm 3.2.2**. Opt-in compiler diagnostics: `analyzeGraph`, `inspectCompilation`, `formatInspection` (kept out of the runtime barrel). A verified example is in [`packages/streetui/README.md`](packages/streetui/README.md#unreleased-diagnostics-example).
 
 ---
 

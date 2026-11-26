@@ -100,6 +100,8 @@ import { streetui } from '@streetui/dsl';
 import { signal } from '@streetui/state';
 import { compile } from '@streetui/compiler';
 import { renderToString } from '@streetui/renderer';
+import { streetui as unified, compile as compileUnified } from 'streetui';
+import { inspectCompilation, formatInspection } from 'streetui/diagnostics';
 
 const count = signal(41);
 const app = streetui.app({ name: 'consumer' });
@@ -110,7 +112,13 @@ app.page('home', (page) => {
 const html = renderToString(compile(app));
 if (!html.includes('Consumer OK')) throw new Error('SSR missing heading');
 if (!html.includes('41')) throw new Error('SSR missing signal value');
+const diagnosticsApp = unified.app({ name: 'diagnostics-example' });
+diagnosticsApp.page('home', (page) => page.heading('Diagnostics'));
+const { graph } = compileUnified(diagnosticsApp);
+const report = formatInspection(inspectCompilation(graph));
+if (!report.includes('diagnostics-example')) throw new Error('diagnostics subpath did not inspect the graph');
 console.log('ESM-SSR-OK len=' + html.length);
+console.log('ESM-DIAGNOSTICS-OK');
 `;
 
 const cjsApp = `
@@ -118,13 +126,21 @@ const { streetui } = require('@streetui/dsl');
 const { signal } = require('@streetui/state');
 const { compile } = require('@streetui/compiler');
 const { renderToString } = require('@streetui/renderer');
+const { streetui: unified, compile: compileUnified } = require('streetui');
+const { inspectCompilation, formatInspection } = require('streetui/diagnostics');
 
 const count = signal(7);
 const app = streetui.app({ name: 'consumer-cjs' });
 app.page('home', (page) => { page.heading('CJS OK'); page.text(count); });
 const html = renderToString(compile(app));
 if (!html.includes('CJS OK') || !html.includes('7')) throw new Error('CJS SSR failed');
+const diagnosticsApp = unified.app({ name: 'diagnostics-example-cjs' });
+diagnosticsApp.page('home', (page) => page.heading('Diagnostics'));
+const { graph } = compileUnified(diagnosticsApp);
+const report = formatInspection(inspectCompilation(graph));
+if (!report.includes('diagnostics-example-cjs')) throw new Error('CJS diagnostics subpath did not inspect the graph');
 console.log('CJS-SSR-OK len=' + html.length);
+console.log('CJS-DIAGNOSTICS-OK');
 `;
 
 writeFileSync(join(consumer, 'app.mjs'), esmApp);
@@ -247,11 +263,14 @@ writeFileSync(
     "import { renderToString, serializeState, readState } from 'streetui/server';",
     "import { compile } from '@streetui/compiler';",
     "import { renderStyles } from 'streetui';",
+    "import { inspectCompilation, formatInspection } from 'streetui/diagnostics';",
     'void renderToString;',
     'void serializeState;',
     'void readState;',
     'void compile;',
     'void renderStyles;',
+    'void inspectCompilation;',
+    'void formatInspection;',
     '',
   ].join('\n'),
 );

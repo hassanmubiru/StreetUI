@@ -22,7 +22,7 @@ import os from 'node:os';
 import { spawn, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { assertNoUnknownSelectionFlags, enginesFromArgv, launchBrowser } from './lib/browser-engines.mjs';
-import { applyExitCode, summarizeReports } from './lib/harness-status.mjs';
+import { applyExitCode, isNetworkError, summarizeReports } from './lib/harness-status.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..');
@@ -231,6 +231,20 @@ async function runBrowser(engine, url, scenariosToRun) {
 
 let generatorBin;
 
+/** Preserve npm's network evidence and distinguish it from a product failure. */
+function recordAttemptError(result, error, field = 'error') {
+  const text = [error?.message, error?.stderr, error?.stdout]
+    .filter((value) => value !== undefined && value !== null && String(value).length > 0)
+    .map(String)
+    .join('\n');
+  const lines = text.split('\n').map((line) => line.trim()).filter(Boolean);
+  const networkLine = lines.find((line) => /npm error (?:code|network)|ETIMEDOUT|ECONNRESET|EAI_AGAIN/i.test(line));
+  result[field] = networkLine ?? lines[0] ?? String(error);
+  if (isNetworkError(error)) {
+    result.infrastructureError = `Registry/network unavailable: ${result[field]}`;
+  }
+}
+
 function ensureGenerator() {
   if (generatorBin) return generatorBin;
   run(['npm', 'install', '--no-save', '@streetui/cli'], base);
@@ -266,7 +280,7 @@ async function verifyTemplate(template, index) {
     }
     result.generated = fs.existsSync(path.join(app, 'package.json'));
   } catch (error) {
-    result.error = String(error.message).split('\n')[0];
+    recordAttemptError(result, error);
     return result;
   }
 
@@ -283,7 +297,7 @@ async function verifyTemplate(template, index) {
     const cli = fs.readFileSync(path.join(app, 'package.json'), 'utf8');
     if (/vite/i.test(cli) || /workspace:/.test(cli)) throw new Error('generated project references vite or workspace:');
   } catch (error) {
-    result.installError = String(error.message).split('\n')[0];
+    recordAttemptError(result, error, 'installError');
     return result;
   }
 
@@ -483,8 +497,14 @@ fs.writeFileSync(path.join(resultsDir, 'registry-smoke.json'), `${JSON.stringify
 console.log('StreetUI Registry Smoke Test');
 console.log('Workspace version: ' + WORKSPACE_VERSION);
 console.log('Package availability: ' + (Object.values(report.packageAvailability).every((v) => v.ok) ? 'PASS' : 'FAIL'));
-console.log('Basic template: ' + (report.templates.basic.dev ? 'PASS' : 'FAIL'));
-console.log('SSR template: ' + (report.templates.ssr.dev ? 'PASS' : 'FAIL'));
+const printableTemplateStatus = (template) =>
+  template.infrastructureError !== undefined || template.stalePublished === true
+    ? 'BLOCKED'
+    : template.dev
+      ? 'PASS'
+      : 'FAIL';
+console.log('Basic template: ' + printableTemplateStatus(report.templates.basic));
+console.log('SSR template: ' + printableTemplateStatus(report.templates.ssr));
 console.log('Final status: ' + report.status);
 
 fs.rmSync(base, { recursive: true, force: true });
@@ -493,12 +513,12 @@ const rows = Object.values(report.templates).map((template) => ({
   engine: template.template,
   mode: 'lifecycle',
   status:
-    report.status === 'BLOCKED' || template.stalePublished === true
+    report.status === 'BLOCKED' || template.stalePublished === true || template.infrastructureError !== undefined
       ? 'BLOCKED'
       : template.installed && template.dev && template.build && template.preview && template.hmr === true &&
           enginesArg.every((engine) => template.browser[engine]?.status === 'PASS')
         ? 'PASS'
         : 'FAIL',
-  reason: template.note ?? template.devError ?? template.installError,
+  reason: template.infrastructureError ?? template.note ?? template.devError ?? template.installError ?? template.error,
 }));
 process.exitCode = applyExitCode(summarizeReports(rows), process.stdout);

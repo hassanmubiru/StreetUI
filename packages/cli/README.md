@@ -16,7 +16,10 @@ streetui doctor         Diagnose the project and toolchain
 ```
 
 The toolchain is independent: no Vite, Rollup, Webpack, Parcel, Rspack, or
-Turbopack. `typescript` is the only runtime dependency.
+Turbopack. `typescript` is the only runtime dependency. Consumers that typecheck
+against `@streetui/cli` also need `@types/node` in their own development
+dependencies: the public declarations intentionally reference `node:http` and
+the `NodeJS` namespace.
 
 ---
 

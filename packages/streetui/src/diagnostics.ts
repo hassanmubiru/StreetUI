@@ -6,7 +6,13 @@
  * (`streetui`) and only load when a consumer asks for them.
  *
  * ```ts
- * import { inspectApplication, formatDiagnostic } from 'streetui/diagnostics';
+ * import { streetui, compile } from 'streetui';
+ * import { inspectCompilation, formatInspection } from 'streetui/diagnostics';
+ *
+ * const app = streetui.app({ name: 'diagnostics-example' });
+ * app.page('home', (page) => page.heading('Diagnostics'));
+ * const { graph } = compile(app);
+ * console.log(formatInspection(inspectCompilation(graph)));
  * ```
  */
 export * from '@streetui/compiler/diagnostics';

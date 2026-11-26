@@ -5,6 +5,11 @@ framework with its own DSL, compiler, reactive runtime, direct DOM renderer,
 SSR, and agent-native development toolchain. Every example in these docs is
 checked against the actual implementation (no hypothetical APIs).
 
+The published npm release is **3.2.2**. Features explicitly marked **Unreleased**
+(including `streetui/diagnostics` and the dashboard's server-only HTTP helpers)
+exist only in this source checkout until a later coordinated release is approved
+and published.
+
 ## Getting started
 
 - **Installation** — `npm install streetui`
@@ -94,7 +99,8 @@ checked against the actual implementation (no hypothetical APIs).
   cache-directory fallback can be missing host libraries, in which case the run
   is `BLOCKED`, never passed
 - **CI / ecosystem reliability** — `docs/toolchain/m15-report.md`; public API
-  inventory and the strict consumer: `docs/toolchain/m15-api-consistency.md`
+  inventory and the strict consumer: `docs/toolchain/m15-api-consistency.md`;
+  controlled integration and release preparation: `docs/toolchain/m15-12-report.md`
 - **Releasing** — `node scripts/release-build.mjs` → `release-check.mjs` →
   `pack-tarballs.mjs` → `verify-tarballs.mjs` → `consumer-smoke.mjs` →
   `publish-packages.mjs --dry-run`. The public package set lives in one place,

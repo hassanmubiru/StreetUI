@@ -30,7 +30,8 @@ The release set is defined once in `scripts/lib/public-packages.mjs`:
   `apps/` (incl. `apps/playground`), `benchmarks/`, `browser/`, `scripts/`.
 
 `streetui` subpaths: `.`, `./server`, `./testing`, `./diagnostics`,
-`./package.json`. `@streetui/compiler` also exposes `./diagnostics`. Every
+`./package.json`. `@streetui/compiler` also exposes `./diagnostics`. The unified
+`streetui/diagnostics` entry is unreleased source and is not in npm 3.2.2. Every
 declared subpath must resolve for an external strict-TypeScript consumer; this is
 enforced by `scripts/consumer-smoke.mjs`.
 
@@ -219,5 +220,6 @@ strict NodeNext consumer against the packed tarballs. `packages/state` documents
 the `mutation` cancellation contract (last-run-wins, per-run signal, transport
 abort ≠ server rollback). The dashboard example gained real-socket HTTP tests,
 server-only Bearer injection, read retry/`Retry-After`, and multipart upload.
-Docs: `docs/toolchain/http-integration.md`, `m15-api-consistency.md`, and
-`m15-report.md`.
+Docs: `docs/toolchain/http-integration.md`, `m15-api-consistency.md`,
+`m15-report.md`, and the controlled integration/release-preparation record in
+`m15-12-report.md`.
