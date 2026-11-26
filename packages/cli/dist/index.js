@@ -1,5 +1,5 @@
 // src/index.ts
-import { existsSync as existsSync11 } from "node:fs";
+import { existsSync as existsSync12 } from "node:fs";
 import { readdirSync as readdirSync2 } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { join as join18 } from "node:path";
@@ -1466,7 +1466,7 @@ async function buildProject2(project, mode = "production", options = {}) {
 
 // src/toolchain/server/dev-server.ts
 import { createServer } from "node:http";
-import { readFileSync as readFileSync4, statSync as statSync4, existsSync as existsSync5 } from "node:fs";
+import { readFileSync as readFileSync4, statSync as statSync4, existsSync as existsSync6 } from "node:fs";
 import { extname as extname5, join as join10, relative as relative5, sep as sep5 } from "node:path";
 
 // src/toolchain/cache/transform-cache.ts
@@ -1523,9 +1523,13 @@ function assetUrl(url) {
 }
 
 // src/toolchain/server/ssr-runner.ts
-import { mkdir as mkdir2, rm as rm3, writeFile as writeFile4 } from "node:fs/promises";
+import { existsSync as existsSync5 } from "node:fs";
+import { copyFile as copyFile2, mkdir as mkdir2, rm as rm3, writeFile as writeFile4 } from "node:fs/promises";
 import { dirname as dirname5, join as join7, relative as relative3 } from "node:path";
 import { pathToFileURL as pathToFileURL2 } from "node:url";
+function isDependencyFile(file) {
+  return file.split(/[/\\]/).includes("node_modules");
+}
 function createSsrRunner(options) {
   const resolver = createResolver({ root: options.root, ...options.resolver ?? {} });
   let built;
@@ -1545,6 +1549,8 @@ function createSsrRunner(options) {
     };
   };
   const build = async () => {
+    const packageDirs = /* @__PURE__ */ new Set();
+    const formats = /* @__PURE__ */ new Map();
     const { graph, diagnostics: crawlDiagnostics } = crawl({
       entry: options.serverEntry,
       root: options.root,
@@ -1553,6 +1559,8 @@ function createSsrRunner(options) {
       resolveSpecifier: (specifier, importerFile) => {
         const resolved = resolver.resolveNode(specifier, importerFile);
         if (resolved === void 0 || resolved.kind === "builtin") return void 0;
+        if (resolved.pkgDir !== void 0) packageDirs.add(resolved.pkgDir);
+        if (resolved.format !== void 0) formats.set(resolved.file, resolved.format);
         return { file: resolved.file, kind: resolved.kind };
       }
     });
@@ -1566,6 +1574,16 @@ function createSsrRunner(options) {
       const node = graph.get(id);
       if (node === void 0) continue;
       if (node.kind !== "ts" && node.kind !== "js") continue;
+      if (isDependencyFile(node.file) && formats.get(node.file) === "cjs") {
+        diagnostics = [
+          ...diagnostics,
+          {
+            message: `Cannot server-render CommonJS dependency "${relative3(options.root, node.file)}": the SSR cache is an ES module tree. Use an ESM build of this package.`,
+            file: node.file
+          }
+        ];
+        continue;
+      }
       const outputPath = serverOutputPath(options.root, node.file, options.serverEntry);
       const importerOutput = join7(outDir, outputPath);
       const transform = transformModule(node.source, {
@@ -1588,6 +1606,28 @@ function createSsrRunner(options) {
       const target = join7(outDir, outputPath);
       await mkdir2(dirname5(target), { recursive: true });
       await writeFile4(target, transform.code, "utf8");
+    }
+    for (const pkgDir of packageDirs) {
+      const source = join7(pkgDir, "package.json");
+      if (!existsSync5(source)) continue;
+      const target = join7(outDir, relative3(options.root, source));
+      await mkdir2(dirname5(target), { recursive: true });
+      await copyFile2(source, target);
+    }
+    if (diagnostics.length > 0) {
+      const first = diagnostics[0];
+      const where = first?.file !== void 0 ? ` in ${relative3(options.root, first.file)}` : "";
+      throw new Error(`SSR build failed${where}: ${first?.message ?? "unknown error"}`);
+    }
+    const missingManifests = [...packageDirs].filter((pkgDir) => {
+      const source = join7(pkgDir, "package.json");
+      if (!existsSync5(source)) return false;
+      return !existsSync5(join7(outDir, relative3(options.root, source)));
+    });
+    if (missingManifests.length > 0) {
+      throw new Error(
+        `SSR cache is missing package manifests for: ${missingManifests.map((dir) => relative3(options.root, dir)).join(", ")}`
+      );
     }
     const entryOutput = join7(outDir, serverOutputPath(options.root, options.serverEntry, options.serverEntry));
     const mod = await import(pathToFileURL2(entryOutput).href);
@@ -2336,7 +2376,7 @@ async function createDevServer(options) {
   const root = config.root;
   const env = publicEnv2();
   const frameworkVersion = project.packageJson.devDependencies?.["@streetui/cli"] ?? project.packageJson.devDependencies?.["streetui"] ?? project.packageJson.dependencies?.["streetui"] ?? project.packageJson.version;
-  if (!existsSync5(config.clientEntry)) {
+  if (!existsSync6(config.clientEntry)) {
     throw new CliError(`Client entry not found: ${config.clientEntry}`, {
       suggestion: 'Create the entry file or set "clientEntry" in streetui.config.ts.'
     });
@@ -2347,7 +2387,7 @@ async function createDevServer(options) {
     ...config.aliases !== void 0 ? { aliases: config.aliases } : {}
   });
   const cacheDir = join10(root, ".streetui-cache");
-  const ssr = existsSync5(config.serverEntry) ? createSsrRunner({ root, serverEntry: config.serverEntry, cacheDir, env }) : void 0;
+  const ssr = existsSync6(config.serverEntry) ? createSsrRunner({ root, serverEntry: config.serverEntry, cacheDir, env }) : void 0;
   const clientEntryUrl = fileToUrl(config.clientEntry, root);
   if (clientEntryUrl === void 0) {
     throw new CliError(`Client entry is outside the project root: ${config.clientEntry}`);
@@ -2615,7 +2655,7 @@ ${message}`);
       }
     } else {
       const indexPath = join10(root, "index.html");
-      if (existsSync5(indexPath)) {
+      if (existsSync6(indexPath)) {
         html = readFileSync4(indexPath, "utf8");
       } else {
         html = [
@@ -2651,7 +2691,7 @@ ${message}`);
         if (handled) return;
       }
       const file = urlToFile(url2, root);
-      if (file !== void 0 && isInside(root, file) && existsSync5(file)) {
+      if (file !== void 0 && isInside(root, file) && existsSync6(file)) {
         try {
           if (statSync4(file).isFile()) {
             await serveModule(file, url2, res);
@@ -2660,7 +2700,7 @@ ${message}`);
         } catch {
         }
       }
-      if (existsSync5(config.publicDir)) {
+      if (existsSync6(config.publicDir)) {
         const served = await serveStaticFile(config.publicDir, path, res, { devMode: true });
         if (served) return;
       }
@@ -2878,7 +2918,7 @@ async function runDev(options) {
 }
 
 // src/start.ts
-import { existsSync as existsSync6 } from "node:fs";
+import { existsSync as existsSync7 } from "node:fs";
 import { join as join12 } from "node:path";
 
 // src/serve.ts
@@ -3051,7 +3091,7 @@ async function runStart(options) {
   const { config } = project;
   const clientDir = join12(config.outDir, "client");
   let serverBundle = join12(config.outDir, "server", "server.js");
-  if (!existsSync6(serverBundle)) {
+  if (!existsSync7(serverBundle)) {
     logger.info("No production build found \u2014 building first\u2026");
     await buildProject2(project, "production", {
       logger,
@@ -3059,7 +3099,7 @@ async function runStart(options) {
       ...events !== void 0 ? { events } : {}
     });
   }
-  if (!existsSync6(serverBundle)) {
+  if (!existsSync7(serverBundle)) {
     throw new CliError("Production build did not produce a server bundle.", {
       suggestion: "Ensure your project has a server entry (default src/server.ts) that exports render()."
     });
@@ -3101,11 +3141,11 @@ async function runStart(options) {
 
 // src/create.ts
 import { mkdir as mkdir3, readdir as readdir2, readFile as readFile4, writeFile as writeFile5, stat as stat3 } from "node:fs/promises";
-import { existsSync as existsSync8 } from "node:fs";
+import { existsSync as existsSync9 } from "node:fs";
 import { join as join14, resolve as resolve7, basename as basename3 } from "node:path";
 
 // src/templates.ts
-import { existsSync as existsSync7 } from "node:fs";
+import { existsSync as existsSync8 } from "node:fs";
 import { dirname as dirname6, join as join13, resolve as resolve6 } from "node:path";
 import { fileURLToPath } from "node:url";
 var TEMPLATES = [
@@ -3144,7 +3184,7 @@ function templatesRoot() {
     resolve6(here, "..", "..", "templates")
   ]);
   for (const candidate of candidates) {
-    if (existsSync7(candidate)) return candidate;
+    if (existsSync8(candidate)) return candidate;
   }
   return candidates[0] ?? resolve6(process.cwd(), "templates");
 }
@@ -3184,7 +3224,7 @@ function isTextFile(fileName) {
 
 // src/create.ts
 async function isEmptyDir(dir) {
-  if (!existsSync8(dir)) return true;
+  if (!existsSync9(dir)) return true;
   const entries = await readdir2(dir);
   return entries.filter((e) => e !== ".git").length === 0;
 }
@@ -3225,7 +3265,7 @@ async function createProject(options) {
     });
   }
   const src = templateDir(template);
-  if (!existsSync8(src)) {
+  if (!existsSync9(src)) {
     throw new CliError(`Template "${template}" is missing from the CLI installation (${src}).`, {
       suggestion: "Reinstall @streetui/cli \u2014 the shipped templates appear to be absent."
     });
@@ -3248,15 +3288,14 @@ async function createProject(options) {
 
 // src/preview.ts
 import { createServer as createServer2 } from "node:http";
-import { existsSync as existsSync9 } from "node:fs";
+import { existsSync as existsSync10 } from "node:fs";
 import { extname as extname7, join as join15 } from "node:path";
 async function startPreview(options) {
   const { clientDir, logger, events } = options;
   const sessionId = options.sessionId ?? makeEventId();
   const host = options.host ?? "localhost";
-  const manifest = await readManifest(clientDir);
-  const hasIndex = existsSync9(join15(clientDir, "index.html"));
-  const spaFallback = manifest === void 0 && hasIndex;
+  const hasIndex = existsSync10(join15(clientDir, "index.html"));
+  const spaFallback = options.spaFallback ?? hasIndex;
   const server = createServer2(async (req, res) => {
     const url2 = req.url ?? "/";
     const path = url2.split("?")[0] ?? url2;
@@ -3436,7 +3475,7 @@ ${stdout}`));
 
 // src/toolchain/doctor/doctor.ts
 import { createServer as createServer3 } from "node:net";
-import { existsSync as existsSync10 } from "node:fs";
+import { existsSync as existsSync11 } from "node:fs";
 import { join as join17 } from "node:path";
 import { createRequire as createRequire2 } from "node:module";
 async function portAvailable(host, port) {
@@ -3456,7 +3495,7 @@ async function browserCheck() {
     const playwright = await import("playwright");
     const chromium = playwright.chromium?.executablePath?.();
     const firefox = playwright.firefox?.executablePath?.();
-    const present = [chromium, firefox].filter((path) => path !== void 0 && existsSync10(path));
+    const present = [chromium, firefox].filter((path) => path !== void 0 && existsSync11(path));
     if (present.length === 0) {
       return { name: "browsers", ok: false, skipped: true, detail: 'Playwright is installed but no browser binary was found; run "npx playwright install".' };
     }
@@ -3497,20 +3536,20 @@ async function runDoctor(project) {
   });
   checks.push({
     name: "client entry",
-    ok: existsSync10(config.clientEntry),
+    ok: existsSync11(config.clientEntry),
     detail: config.clientEntry
   });
   checks.push({
     name: "server entry",
-    ok: existsSync10(config.serverEntry),
-    detail: existsSync10(config.serverEntry) ? config.serverEntry : `${config.serverEntry} (absent: client-only build)`,
-    skipped: !existsSync10(config.serverEntry)
+    ok: existsSync11(config.serverEntry),
+    detail: existsSync11(config.serverEntry) ? config.serverEntry : `${config.serverEntry} (absent: client-only build)`,
+    skipped: !existsSync11(config.serverEntry)
   });
   checks.push({
     name: "public dir",
-    ok: existsSync10(config.publicDir),
+    ok: existsSync11(config.publicDir),
     detail: config.publicDir,
-    skipped: !existsSync10(config.publicDir)
+    skipped: !existsSync11(config.publicDir)
   });
   try {
     const require2 = createRequire2(join17(root, "package.json"));
@@ -3560,8 +3599,8 @@ function publicEnvNames(env = process.env) {
 }
 
 // src/index.ts
-var CLI_VERSION = "3.2.1";
-var FRAMEWORK_VERSION = "3.2.1";
+var CLI_VERSION = "3.2.2";
+var FRAMEWORK_VERSION = "3.2.2";
 var HELP = `streetui \u2014 the StreetUI application CLI
 
 Usage:
@@ -3771,7 +3810,7 @@ async function dispatch(args, cwd, logger, returnServer, events, sessionId) {
     case "playground": {
       const pgDir = args.positionals[0] ?? args.dir ?? projectCwd;
       if (args.template !== void 0) {
-        const missing = !existsSync11(pgDir) || readdirSync2(pgDir).length === 0;
+        const missing = !existsSync12(pgDir) || readdirSync2(pgDir).length === 0;
         if (missing) {
           await createProject({
             targetDir: pgDir,

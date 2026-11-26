@@ -1,6 +1,6 @@
 {
   "name": "streetui",
-  "version": "3.2.2",
+  "version": "3.3.0",
   "private": true,
   "description": "StreetUI — TypeScript-first semantic application framework with its own renderer",
   "scripts": {

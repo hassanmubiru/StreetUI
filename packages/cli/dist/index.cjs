@@ -60,8 +60,8 @@ __export(index_exports, {
   startServer: () => startServer
 });
 module.exports = __toCommonJS(index_exports);
-var import_node_fs16 = require("fs");
 var import_node_fs17 = require("fs");
+var import_node_fs18 = require("fs");
 var import_node_child_process2 = require("child_process");
 var import_node_path19 = require("path");
 
@@ -1528,7 +1528,7 @@ async function buildProject2(project, mode = "production", options = {}) {
 
 // src/toolchain/server/dev-server.ts
 var import_node_http = require("http");
-var import_node_fs10 = require("fs");
+var import_node_fs11 = require("fs");
 var import_node_path11 = require("path");
 
 // src/toolchain/cache/transform-cache.ts
@@ -1585,9 +1585,13 @@ function assetUrl(url) {
 }
 
 // src/toolchain/server/ssr-runner.ts
+var import_node_fs7 = require("fs");
 var import_promises4 = require("fs/promises");
 var import_node_path8 = require("path");
 var import_node_url2 = require("url");
+function isDependencyFile(file) {
+  return file.split(/[/\\]/).includes("node_modules");
+}
 function createSsrRunner(options) {
   const resolver = createResolver({ root: options.root, ...options.resolver ?? {} });
   let built;
@@ -1607,6 +1611,8 @@ function createSsrRunner(options) {
     };
   };
   const build = async () => {
+    const packageDirs = /* @__PURE__ */ new Set();
+    const formats = /* @__PURE__ */ new Map();
     const { graph, diagnostics: crawlDiagnostics } = crawl({
       entry: options.serverEntry,
       root: options.root,
@@ -1615,6 +1621,8 @@ function createSsrRunner(options) {
       resolveSpecifier: (specifier, importerFile) => {
         const resolved = resolver.resolveNode(specifier, importerFile);
         if (resolved === void 0 || resolved.kind === "builtin") return void 0;
+        if (resolved.pkgDir !== void 0) packageDirs.add(resolved.pkgDir);
+        if (resolved.format !== void 0) formats.set(resolved.file, resolved.format);
         return { file: resolved.file, kind: resolved.kind };
       }
     });
@@ -1628,6 +1636,16 @@ function createSsrRunner(options) {
       const node = graph.get(id);
       if (node === void 0) continue;
       if (node.kind !== "ts" && node.kind !== "js") continue;
+      if (isDependencyFile(node.file) && formats.get(node.file) === "cjs") {
+        diagnostics = [
+          ...diagnostics,
+          {
+            message: `Cannot server-render CommonJS dependency "${(0, import_node_path8.relative)(options.root, node.file)}": the SSR cache is an ES module tree. Use an ESM build of this package.`,
+            file: node.file
+          }
+        ];
+        continue;
+      }
       const outputPath = serverOutputPath(options.root, node.file, options.serverEntry);
       const importerOutput = (0, import_node_path8.join)(outDir, outputPath);
       const transform = transformModule(node.source, {
@@ -1650,6 +1668,28 @@ function createSsrRunner(options) {
       const target = (0, import_node_path8.join)(outDir, outputPath);
       await (0, import_promises4.mkdir)((0, import_node_path8.dirname)(target), { recursive: true });
       await (0, import_promises4.writeFile)(target, transform.code, "utf8");
+    }
+    for (const pkgDir of packageDirs) {
+      const source = (0, import_node_path8.join)(pkgDir, "package.json");
+      if (!(0, import_node_fs7.existsSync)(source)) continue;
+      const target = (0, import_node_path8.join)(outDir, (0, import_node_path8.relative)(options.root, source));
+      await (0, import_promises4.mkdir)((0, import_node_path8.dirname)(target), { recursive: true });
+      await (0, import_promises4.copyFile)(source, target);
+    }
+    if (diagnostics.length > 0) {
+      const first = diagnostics[0];
+      const where = first?.file !== void 0 ? ` in ${(0, import_node_path8.relative)(options.root, first.file)}` : "";
+      throw new Error(`SSR build failed${where}: ${first?.message ?? "unknown error"}`);
+    }
+    const missingManifests = [...packageDirs].filter((pkgDir) => {
+      const source = (0, import_node_path8.join)(pkgDir, "package.json");
+      if (!(0, import_node_fs7.existsSync)(source)) return false;
+      return !(0, import_node_fs7.existsSync)((0, import_node_path8.join)(outDir, (0, import_node_path8.relative)(options.root, source)));
+    });
+    if (missingManifests.length > 0) {
+      throw new Error(
+        `SSR cache is missing package manifests for: ${missingManifests.map((dir) => (0, import_node_path8.relative)(options.root, dir)).join(", ")}`
+      );
     }
     const entryOutput = (0, import_node_path8.join)(outDir, serverOutputPath(options.root, options.serverEntry, options.serverEntry));
     const mod = await import((0, import_node_url2.pathToFileURL)(entryOutput).href);
@@ -1999,7 +2039,7 @@ var WebSocketHub = class {
 };
 
 // src/toolchain/server/static.ts
-var import_node_fs7 = require("fs");
+var import_node_fs8 = require("fs");
 var import_promises5 = require("fs/promises");
 var import_node_path9 = require("path");
 var MIME = {
@@ -2050,7 +2090,7 @@ async function serveStaticFile(rootDir, urlPath, res, options = {}) {
       "Cache-Control": options.immutable === true ? "public, max-age=31536000, immutable" : options.devMode === true ? "no-cache" : `public, max-age=${options.maxAge ?? 3600}`
     });
     await new Promise((resolve8, reject) => {
-      const stream = (0, import_node_fs7.createReadStream)(full);
+      const stream = (0, import_node_fs8.createReadStream)(full);
       stream.on("error", reject);
       stream.on("end", resolve8);
       stream.pipe(res);
@@ -2271,8 +2311,8 @@ var HMR_CLIENT_PATH = "/@streetui/client/hmr.js";
 var HMR_RUNTIME_PATH = "/@streetui/client/hmr-runtime.js";
 
 // src/toolchain/watch/watcher.ts
-var import_node_fs8 = require("fs");
 var import_node_fs9 = require("fs");
+var import_node_fs10 = require("fs");
 var import_node_path10 = require("path");
 var DEFAULT_IGNORED = [
   /(^|[/\\])node_modules([/\\]|$)/,
@@ -2298,7 +2338,7 @@ function watchRecursive(options) {
         timers.delete(file);
         if (closed) return;
         try {
-          if ((0, import_node_fs9.statSync)(file).isFile()) options.onChange(file);
+          if ((0, import_node_fs10.statSync)(file).isFile()) options.onChange(file);
         } catch {
         }
       }, debounceMs)
@@ -2308,11 +2348,11 @@ function watchRecursive(options) {
     if (closed || watchers.has(dir) || ignored(dir)) return;
     let watcher;
     try {
-      watcher = (0, import_node_fs8.watch)(dir, { persistent: true }, (_event, filename) => {
+      watcher = (0, import_node_fs9.watch)(dir, { persistent: true }, (_event, filename) => {
         const target = filename == null ? dir : (0, import_node_path10.join)(dir, filename.toString());
         if (ignored(target)) return;
         try {
-          if ((0, import_node_fs9.statSync)(target).isDirectory()) {
+          if ((0, import_node_fs10.statSync)(target).isDirectory()) {
             addDirectory(target);
           } else {
             emit(target);
@@ -2330,7 +2370,7 @@ function watchRecursive(options) {
     watchers.set(dir, watcher);
     let entries;
     try {
-      entries = (0, import_node_fs9.readdirSync)(dir);
+      entries = (0, import_node_fs10.readdirSync)(dir);
     } catch {
       return;
     }
@@ -2338,7 +2378,7 @@ function watchRecursive(options) {
       const full = (0, import_node_path10.join)(dir, entry);
       if (ignored(full)) continue;
       try {
-        if ((0, import_node_fs9.statSync)(full).isDirectory()) addDirectory(full);
+        if ((0, import_node_fs10.statSync)(full).isDirectory()) addDirectory(full);
       } catch {
       }
     }
@@ -2398,7 +2438,7 @@ async function createDevServer(options) {
   const root = config.root;
   const env = publicEnv2();
   const frameworkVersion = project.packageJson.devDependencies?.["@streetui/cli"] ?? project.packageJson.devDependencies?.["streetui"] ?? project.packageJson.dependencies?.["streetui"] ?? project.packageJson.version;
-  if (!(0, import_node_fs10.existsSync)(config.clientEntry)) {
+  if (!(0, import_node_fs11.existsSync)(config.clientEntry)) {
     throw new CliError(`Client entry not found: ${config.clientEntry}`, {
       suggestion: 'Create the entry file or set "clientEntry" in streetui.config.ts.'
     });
@@ -2409,7 +2449,7 @@ async function createDevServer(options) {
     ...config.aliases !== void 0 ? { aliases: config.aliases } : {}
   });
   const cacheDir = (0, import_node_path11.join)(root, ".streetui-cache");
-  const ssr = (0, import_node_fs10.existsSync)(config.serverEntry) ? createSsrRunner({ root, serverEntry: config.serverEntry, cacheDir, env }) : void 0;
+  const ssr = (0, import_node_fs11.existsSync)(config.serverEntry) ? createSsrRunner({ root, serverEntry: config.serverEntry, cacheDir, env }) : void 0;
   const clientEntryUrl = fileToUrl(config.clientEntry, root);
   if (clientEntryUrl === void 0) {
     throw new CliError(`Client entry is outside the project root: ${config.clientEntry}`);
@@ -2576,7 +2616,7 @@ ${detail}`)});`,
   const serveModule = async (file, url2, res) => {
     const kind = kindForFile(file);
     if (kind === "css") {
-      const css = (0, import_node_fs10.readFileSync)(file, "utf8");
+      const css = (0, import_node_fs11.readFileSync)(file, "utf8");
       if (hasQuery(url2, "streetui", "js")) {
         sendJs(res, cssToDevModule(css, file));
       } else {
@@ -2589,12 +2629,12 @@ ${detail}`)});`,
         sendJs(res, assetToDevModule(pathnameOf(url2)));
         return;
       }
-      const body = (0, import_node_fs10.readFileSync)(file);
+      const body = (0, import_node_fs11.readFileSync)(file);
       send(res, 200, MIME[(0, import_node_path11.extname)(file).toLowerCase()] ?? "application/octet-stream", body);
       return;
     }
     if (kind === "json") {
-      const json = (0, import_node_fs10.readFileSync)(file, "utf8");
+      const json = (0, import_node_fs11.readFileSync)(file, "utf8");
       sendJs(res, `export default ${json};
 `);
       return;
@@ -2619,7 +2659,7 @@ What to do: pick an ESM entry of the package (e.g. an "import"/"module" conditio
     }
     let source;
     try {
-      source = (0, import_node_fs10.readFileSync)(file, "utf8");
+      source = (0, import_node_fs11.readFileSync)(file, "utf8");
     } catch (error) {
       send(res, 500, "text/plain; charset=utf-8", `Could not read ${file}: ${error.message}`);
       return;
@@ -2677,8 +2717,8 @@ ${message}`);
       }
     } else {
       const indexPath = (0, import_node_path11.join)(root, "index.html");
-      if ((0, import_node_fs10.existsSync)(indexPath)) {
-        html = (0, import_node_fs10.readFileSync)(indexPath, "utf8");
+      if ((0, import_node_fs11.existsSync)(indexPath)) {
+        html = (0, import_node_fs11.readFileSync)(indexPath, "utf8");
       } else {
         html = [
           "<!doctype html>",
@@ -2713,16 +2753,16 @@ ${message}`);
         if (handled) return;
       }
       const file = urlToFile(url2, root);
-      if (file !== void 0 && isInside(root, file) && (0, import_node_fs10.existsSync)(file)) {
+      if (file !== void 0 && isInside(root, file) && (0, import_node_fs11.existsSync)(file)) {
         try {
-          if ((0, import_node_fs10.statSync)(file).isFile()) {
+          if ((0, import_node_fs11.statSync)(file).isFile()) {
             await serveModule(file, url2, res);
             return;
           }
         } catch {
         }
       }
-      if ((0, import_node_fs10.existsSync)(config.publicDir)) {
+      if ((0, import_node_fs11.existsSync)(config.publicDir)) {
         const served = await serveStaticFile(config.publicDir, path, res, { devMode: true });
         if (served) return;
       }
@@ -2782,7 +2822,7 @@ ${message}`);
     if (kind === "ts" || kind === "js") {
       let source;
       try {
-        source = (0, import_node_fs10.readFileSync)(file, "utf8");
+        source = (0, import_node_fs11.readFileSync)(file, "utf8");
       } catch (error) {
         broadcast({ type: "error", diagnostics: [{ message: error.message }], fatal: false });
         return;
@@ -2940,7 +2980,7 @@ async function runDev(options) {
 }
 
 // src/start.ts
-var import_node_fs11 = require("fs");
+var import_node_fs12 = require("fs");
 var import_node_path13 = require("path");
 
 // src/serve.ts
@@ -3113,7 +3153,7 @@ async function runStart(options) {
   const { config } = project;
   const clientDir = (0, import_node_path13.join)(config.outDir, "client");
   let serverBundle = (0, import_node_path13.join)(config.outDir, "server", "server.js");
-  if (!(0, import_node_fs11.existsSync)(serverBundle)) {
+  if (!(0, import_node_fs12.existsSync)(serverBundle)) {
     logger.info("No production build found \u2014 building first\u2026");
     await buildProject2(project, "production", {
       logger,
@@ -3121,7 +3161,7 @@ async function runStart(options) {
       ...events !== void 0 ? { events } : {}
     });
   }
-  if (!(0, import_node_fs11.existsSync)(serverBundle)) {
+  if (!(0, import_node_fs12.existsSync)(serverBundle)) {
     throw new CliError("Production build did not produce a server bundle.", {
       suggestion: "Ensure your project has a server entry (default src/server.ts) that exports render()."
     });
@@ -3163,11 +3203,11 @@ async function runStart(options) {
 
 // src/create.ts
 var import_promises7 = require("fs/promises");
-var import_node_fs13 = require("fs");
+var import_node_fs14 = require("fs");
 var import_node_path15 = require("path");
 
 // src/templates.ts
-var import_node_fs12 = require("fs");
+var import_node_fs13 = require("fs");
 var import_node_path14 = require("path");
 var import_node_url4 = require("url");
 var import_meta = {};
@@ -3207,7 +3247,7 @@ function templatesRoot() {
     (0, import_node_path14.resolve)(here, "..", "..", "templates")
   ]);
   for (const candidate of candidates) {
-    if ((0, import_node_fs12.existsSync)(candidate)) return candidate;
+    if ((0, import_node_fs13.existsSync)(candidate)) return candidate;
   }
   return candidates[0] ?? (0, import_node_path14.resolve)(process.cwd(), "templates");
 }
@@ -3247,7 +3287,7 @@ function isTextFile(fileName) {
 
 // src/create.ts
 async function isEmptyDir(dir) {
-  if (!(0, import_node_fs13.existsSync)(dir)) return true;
+  if (!(0, import_node_fs14.existsSync)(dir)) return true;
   const entries = await (0, import_promises7.readdir)(dir);
   return entries.filter((e) => e !== ".git").length === 0;
 }
@@ -3288,7 +3328,7 @@ async function createProject(options) {
     });
   }
   const src = templateDir(template);
-  if (!(0, import_node_fs13.existsSync)(src)) {
+  if (!(0, import_node_fs14.existsSync)(src)) {
     throw new CliError(`Template "${template}" is missing from the CLI installation (${src}).`, {
       suggestion: "Reinstall @streetui/cli \u2014 the shipped templates appear to be absent."
     });
@@ -3311,15 +3351,14 @@ async function createProject(options) {
 
 // src/preview.ts
 var import_node_http3 = require("http");
-var import_node_fs14 = require("fs");
+var import_node_fs15 = require("fs");
 var import_node_path16 = require("path");
 async function startPreview(options) {
   const { clientDir, logger, events } = options;
   const sessionId = options.sessionId ?? makeEventId();
   const host = options.host ?? "localhost";
-  const manifest = await readManifest(clientDir);
-  const hasIndex = (0, import_node_fs14.existsSync)((0, import_node_path16.join)(clientDir, "index.html"));
-  const spaFallback = manifest === void 0 && hasIndex;
+  const hasIndex = (0, import_node_fs15.existsSync)((0, import_node_path16.join)(clientDir, "index.html"));
+  const spaFallback = options.spaFallback ?? hasIndex;
   const server = (0, import_node_http3.createServer)(async (req, res) => {
     const url2 = req.url ?? "/";
     const path = url2.split("?")[0] ?? url2;
@@ -3500,7 +3539,7 @@ ${stdout}`));
 
 // src/toolchain/doctor/doctor.ts
 var import_node_net = require("net");
-var import_node_fs15 = require("fs");
+var import_node_fs16 = require("fs");
 var import_node_path18 = require("path");
 var import_node_module2 = require("module");
 async function portAvailable(host, port) {
@@ -3520,7 +3559,7 @@ async function browserCheck() {
     const playwright = await import("playwright");
     const chromium = playwright.chromium?.executablePath?.();
     const firefox = playwright.firefox?.executablePath?.();
-    const present = [chromium, firefox].filter((path) => path !== void 0 && (0, import_node_fs15.existsSync)(path));
+    const present = [chromium, firefox].filter((path) => path !== void 0 && (0, import_node_fs16.existsSync)(path));
     if (present.length === 0) {
       return { name: "browsers", ok: false, skipped: true, detail: 'Playwright is installed but no browser binary was found; run "npx playwright install".' };
     }
@@ -3561,20 +3600,20 @@ async function runDoctor(project) {
   });
   checks.push({
     name: "client entry",
-    ok: (0, import_node_fs15.existsSync)(config.clientEntry),
+    ok: (0, import_node_fs16.existsSync)(config.clientEntry),
     detail: config.clientEntry
   });
   checks.push({
     name: "server entry",
-    ok: (0, import_node_fs15.existsSync)(config.serverEntry),
-    detail: (0, import_node_fs15.existsSync)(config.serverEntry) ? config.serverEntry : `${config.serverEntry} (absent: client-only build)`,
-    skipped: !(0, import_node_fs15.existsSync)(config.serverEntry)
+    ok: (0, import_node_fs16.existsSync)(config.serverEntry),
+    detail: (0, import_node_fs16.existsSync)(config.serverEntry) ? config.serverEntry : `${config.serverEntry} (absent: client-only build)`,
+    skipped: !(0, import_node_fs16.existsSync)(config.serverEntry)
   });
   checks.push({
     name: "public dir",
-    ok: (0, import_node_fs15.existsSync)(config.publicDir),
+    ok: (0, import_node_fs16.existsSync)(config.publicDir),
     detail: config.publicDir,
-    skipped: !(0, import_node_fs15.existsSync)(config.publicDir)
+    skipped: !(0, import_node_fs16.existsSync)(config.publicDir)
   });
   try {
     const require2 = (0, import_node_module2.createRequire)((0, import_node_path18.join)(root, "package.json"));
@@ -3624,8 +3663,8 @@ function publicEnvNames(env = process.env) {
 }
 
 // src/index.ts
-var CLI_VERSION = "3.2.1";
-var FRAMEWORK_VERSION = "3.2.1";
+var CLI_VERSION = "3.2.2";
+var FRAMEWORK_VERSION = "3.2.2";
 var HELP = `streetui \u2014 the StreetUI application CLI
 
 Usage:
@@ -3835,7 +3874,7 @@ async function dispatch(args, cwd, logger, returnServer, events, sessionId) {
     case "playground": {
       const pgDir = args.positionals[0] ?? args.dir ?? projectCwd;
       if (args.template !== void 0) {
-        const missing = !(0, import_node_fs16.existsSync)(pgDir) || (0, import_node_fs17.readdirSync)(pgDir).length === 0;
+        const missing = !(0, import_node_fs17.existsSync)(pgDir) || (0, import_node_fs18.readdirSync)(pgDir).length === 0;
         if (missing) {
           await createProject({
             targetDir: pgDir,

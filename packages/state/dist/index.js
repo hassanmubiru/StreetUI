@@ -344,17 +344,21 @@ function mutation(mutator, options = {}) {
   const pending = derived(() => status.get() === "loading");
   let disposed = false;
   let runId = 0;
+  let controller = null;
   const mutate = async (args) => {
     if (disposed) {
-      return await mutator(args);
+      return await mutator(args, { signal: new AbortController().signal });
     }
+    controller?.abort();
     const myRun = ++runId;
+    const myController = new AbortController();
+    controller = myController;
     batch(() => {
       error.set(void 0);
       status.set("loading");
     });
     try {
-      const result = await mutator(args);
+      const result = await mutator(args, { signal: myController.signal });
       if (!disposed && myRun === runId) {
         batch(() => {
           data.set(result);
@@ -387,7 +391,10 @@ function mutation(mutator, options = {}) {
     });
   };
   const dispose = () => {
+    if (disposed) return;
     disposed = true;
+    controller?.abort();
+    controller = null;
   };
   if (options.onCleanup !== void 0) options.onCleanup(dispose);
   return { status, data, error, pending, mutate, reset, dispose };
@@ -466,6 +473,17 @@ function withQuery(url, query) {
   if (qs === "") return url;
   return url.includes("?") ? `${url}&${qs}` : `${url}?${qs}`;
 }
+function mergeHeaders(defaults, overrides) {
+  const merged = { ...defaults };
+  for (const [name, value] of Object.entries(overrides ?? {})) {
+    const lowerName = name.toLowerCase();
+    for (const existing of Object.keys(merged)) {
+      if (existing.toLowerCase() === lowerName) delete merged[existing];
+    }
+    merged[name] = value;
+  }
+  return merged;
+}
 function createClient(config = {}) {
   const doFetch = config.fetch ?? ((input, init) => {
     if (typeof fetch === "undefined") {
@@ -475,11 +493,13 @@ function createClient(config = {}) {
   });
   async function request(method, path, body, reqConfig = {}) {
     const url = withQuery(joinUrl(config.baseUrl, path), reqConfig.query);
-    const headers = { ...config.headers, ...reqConfig.headers };
+    const headers = mergeHeaders(config.headers, reqConfig.headers);
     const init = { method, headers };
     if (reqConfig.signal !== void 0) init.signal = reqConfig.signal;
     if (body !== void 0) {
-      if (headers["Content-Type"] === void 0) headers["Content-Type"] = "application/json";
+      if (!Object.keys(headers).some((name) => name.toLowerCase() === "content-type")) {
+        headers["Content-Type"] = "application/json";
+      }
       init.body = JSON.stringify(body);
     }
     const response = await fetchWithSignal(doFetch, url, init, reqConfig.signal);
@@ -503,7 +523,10 @@ function createClient(config = {}) {
         resourceOptions
       );
     },
-    mutation: (method, path, options) => mutation((args) => request(method, path, args), options ?? {})
+    mutation: (method, path, options) => mutation(
+      (args, ctx) => request(method, path, args, { signal: ctx.signal }),
+      options ?? {}
+    )
   };
 }
 async function parseBody(response) {
