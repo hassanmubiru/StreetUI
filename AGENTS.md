@@ -129,3 +129,12 @@ inspection (`/api/browser/inspect`), and multi-client targeting
 `preview_inspected` are emitted for real events only. Docs:
 `docs/toolchain/m11-browser-automation.md`, `m11-visual-qa-workflow.md`, and
 `m11-report.md`.
+
+M12 (developer adoption): `examples/streetui-dashboard` is the production
+reference app (routes/components/resources/forms/theming/populated SSR + tests
++ Dockerfile). New harnesses: `scripts/toolchain-template-audit.mjs` (all 10
+templates) and `scripts/toolchain-external-developer-e2e.mjs` (published-package
+acceptance in Chromium and Firefox). Docs: `docs/README.md` task index,
+`docs/toolchain/m12-onboarding-audit.md`, `m12-deployment.md`,
+`m12-compatibility.md`, and `m12-report.md`. Contribution files:
+`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `docs/ROADMAP.md`.

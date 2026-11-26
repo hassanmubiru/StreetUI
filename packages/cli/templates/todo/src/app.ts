@@ -3,7 +3,7 @@
  */
 
 import { streetui, type PageDSL } from '@streetui/dsl';
-import { signal, type Signal } from '@streetui/state';
+import { signal, derived, type Signal } from '@streetui/state';
 import { compile, type CompiledApplication } from '@streetui/compiler';
 
 interface TodoItem {
